@@ -1,35 +1,16 @@
 <?php
 /*
  *	Made by Partydragen
+ *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
- *  Store module
+ *  License: MIT
+ *
+ *  Store module - panel packages page
  */
 
 // Can the user view the StaffCP?
-if($user->isLoggedIn()){
-	if(!$user->canViewACP()){
-		// No
-		Redirect::to('/');
-		die();
-	} else {
-		// Check the user has re-authenticated
-		if(!$user->isAdmLoggedIn()){
-			// They haven't, do so now
-			Redirect::to('/panel/auth');
-			die();
-		} else {
-			if(!$user->hasPermission('staffcp.store.packages')){
-				Redirect::to('/panel');
-				die();
-			}
-		}
-	}
-} else {
-	// Not logged in
-	Redirect::to('/login');
-	die();
-}
+$user->handlePanelPageLoad('staffcp.store.packages');
 
 define('PAGE', 'panel');
 define('PARENT_PAGE', 'store');

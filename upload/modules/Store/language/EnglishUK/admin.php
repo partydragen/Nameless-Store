@@ -38,6 +38,8 @@ $language = array(
     'viewing_payment' => 'Viewing payment {x}', // Don't replace {x}
 	'pending_commands' => 'Pending commands',
     'no_pending_commands' => 'No pending commands.',
+	'processed_commands' => 'Processed commands',
+    'no_processed_commands' => 'No processed commands.',
     'email' => 'Email',
     'must_enter_uuid' => 'You must enter a UUID!',
     'optional' => 'Optional',
@@ -61,6 +63,8 @@ $language = array(
     'one_off_purchases' => 'One-off purchases',
     'subscriptions' => 'Subscriptions',
     'id_x' => 'ID: {x}', // Don't replace {x}
+    'transaction' => 'Transaction ID',
+    'payment_method' => 'Payment Method ',
 	
 	// Category
 	'categories' => 'Categories',

@@ -1,9 +1,12 @@
 <?php
 /*
  *	Made by Partydragen
+ *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
- *  Store module
+ *  License: MIT
+ *
+ *  Store module - panel payments page
  */
 
 class Store_Module extends Module {
@@ -16,8 +19,8 @@ class Store_Module extends Module {
 
 		$name = 'Store';
 		$author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
-		$module_version = '1.0.0-pr1';
-		$nameless_version = '2.0.0-pr8';
+		$module_version = '1.0.0-pr2';
+		$nameless_version = '2.0.0-pr9';
 
 		parent::__construct($this, $name, $author, $module_version, $nameless_version);
 

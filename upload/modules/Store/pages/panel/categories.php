@@ -1,35 +1,16 @@
 <?php
 /*
  *	Made by Partydragen
+ *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
- *  Store module
+ *  License: MIT
+ *
+ *  Store module - panel categories page
  */
 
 // Can the user view the StaffCP?
-if($user->isLoggedIn()){
-	if(!$user->canViewACP()){
-		// No
-		Redirect::to(URL::build('/'));
-		die();
-	} else {
-		// Check the user has re-authenticated
-		if(!$user->isAdmLoggedIn()){
-			// They haven't, do so now
-			Redirect::to(URL::build('/panel/auth'));
-			die();
-		} else {
-			if(!$user->hasPermission('staffcp.store.packages')){
-				Redirect::to(URL::build('/panel'));
-				die();
-			}
-		}
-	}
-} else {
-	// Not logged in
-	Redirect::to(URL::build('/login'));
-	die();
-}
+$user->handlePanelPageLoad('staffcp.store.packages');
 
 define('PAGE', 'panel');
 define('PARENT_PAGE', 'store');
@@ -223,10 +204,12 @@ if(isset($errors) && count($errors))
 $smarty->assign(array(
 	'PARENT_PAGE' => PARENT_PAGE,
 	'DASHBOARD' => $language->get('admin', 'dashboard'),
-	'BUYCRAFT' => $store_language->get('general', 'store'),
+	'STORE' => $store_language->get('general', 'store'),
 	'PAGE' => PANEL_PAGE,
 	'TOKEN' => Token::get(),
 	'SUBMIT' => $language->get('general', 'submit'),
+    'STORE' => $store_language->get('general', 'store'),
+    'CATEGORIES' => $store_language->get('admin', 'categories'),
 	'PACKAGES' => $store_language->get('general', 'packages')
 ));
 

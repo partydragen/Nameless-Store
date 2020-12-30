@@ -1,35 +1,16 @@
 <?php
 /*
  *	Made by Partydragen
+ *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
- *  Store module
+ *  License: MIT
+ *
+ *  Store module - panel payments page
  */
 
 // Can the user view the StaffCP?
-if($user->isLoggedIn()){
-	if(!$user->canViewACP()){
-		// No
-		Redirect::to(URL::build('/'));
-		die();
-	} else {
-		// Check the user has re-authenticated
-		if(!$user->isAdmLoggedIn()){
-			// They haven't, do so now
-			Redirect::to(URL::build('/panel/auth'));
-			die();
-		} else {
-			if(!$user->hasPermission('staffcp.store.payments')){
-				Redirect::to(URL::build('/panel'));
-				die();
-			}
-		}
-	}
-} else {
-	// Not logged in
-	Redirect::to(URL::build('/login'));
-	die();
-}
+$user->handlePanelPageLoad('staffcp.store.payments');
 
 define('PAGE', 'panel');
 define('PARENT_PAGE', 'store');
@@ -179,10 +160,24 @@ if(isset($_GET['user'])){
         break;
     }
    
-	$commands = $queries->getWhere('store_pending_commands', array('payment_id', '=', $payment->id));
-
+    $pending_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_commands WHERE payment_id = ? AND status = 0', array($payment->id))->results();
+	$pending_commands_array = array();
+    foreach($pending_commands as $command){
+		$pending_commands_array[] = array(
+            'command' => Output::getClean($command->command)
+        );
+    }
+    
+    $processed_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_commands WHERE payment_id = ? AND status = 1', array($payment->id))->results();
+	$processed_commands_array = array();
+    foreach($processed_commands as $command){
+		$processed_commands_array[] = array(
+            'command' => Output::getClean($command->command)
+        );
+	}
+    
 	$smarty->assign(array(
-		'VIEWING_PAYMENT' => str_replace('{x}', Output::getClean($payment->id), $store_language->get('admin', 'viewing_payment')),
+		'VIEWING_PAYMENT' => str_replace('{x}', Output::getClean($payment->transaction), $store_language->get('admin', 'viewing_payment')),
 		'BACK' => $language->get('general', 'back'),
 		'BACK_LINK' => URL::build('/panel/store/payments'),
 		'IGN' => $store_language->get('admin', 'ign'),
@@ -190,28 +185,27 @@ if(isset($_GET['user'])){
 		'USER_LINK' => URL::build('/panel/store/payments/', 'user=' . Output::getClean($payment->username)),
 		'AVATAR' => $avatar,
 		'STYLE' => $style,
+        'TRANSACTION' => $store_language->get('admin', 'transaction'),
+		'TRANSACTION_VALUE' => Output::getClean($payment->transaction),
+        'PAYMENT_METHOD' => $store_language->get('admin', 'payment_method'),
+		'PAYMENT_METHOD_VALUE' => Output::getClean($payment->payment_method),
+        'STATUS' => $store_language->get('admin', 'status'),
+		'STATUS_VALUE' => $status,
 		'UUID' => $store_language->get('admin', 'uuid'),
 		'UUID_VALUE' => Output::getClean($payment->uuid),
 		'PRICE' => $store_language->get('general', 'price'),
 		'PRICE_VALUE' => Output::getClean($payment->amount),
-		'CURRENCY_SYMBOL' => Output::getClean($payment->currency),
-		'CURRENCY_ISO' => Output::getClean($payment->currency_iso),
+		'CURRENCY_SYMBOL' => Output::getClean('$'),
+		'CURRENCY_ISO' => Output::getClean($payment->currency),
 		'DATE' => $store_language->get('admin', 'date'),
 		'DATE_VALUE' => date('d M Y, H:i', $payment->created),
-		'PENDING_COMMANDS' => $store_language->get('admin', 'pending_commands')
+		'PENDING_COMMANDS' => $store_language->get('admin', 'pending_commands'),
+        'PROCESSED_COMMANDS' => $store_language->get('admin', 'processed_commands'),
+		'NO_PENDING_COMMANDS' => $store_language->get('admin', 'no_pending_commands'),
+        'NO_PROCESSED_COMMANDS' => $store_language->get('admin', 'no_processed_commands'),
+		'PENDING_COMMANDS_LIST' => $pending_commands_array,
+        'PROCESSED_COMMANDS_LIST' => $processed_commands_array,
 	));
-
-	if(count($commands)){
-		$pending_commands = array();
-
-		foreach($commands as $command){
-			$pending_commands[] = Output::getClean($command->command);
-		}
-
-		$smarty->assign('PENDING_COMMANDS_VALUE', $pending_commands);
-
-	} else
-		$smarty->assign('NO_PENDING_COMMANDS', $store_language->get('admin', 'no_pending_commands'));
 
 	$template_file = 'store/payments_view.tpl';
 
@@ -300,7 +294,7 @@ if(isset($_GET['user'])){
 				'uuid' => Output::getClean($payment->uuid),
                 'status_id' => $payment->status_id,
                 'status' => $status,
-				'currency_symbol' => Output::getPurified($payment->currency),
+				'currency_symbol' => '$',
 				'amount' => Output::getClean($payment->amount),
 				'date' => date('d M Y, H:i', $payment->created),
 				'date_unix' => Output::getClean($payment->created),
@@ -367,6 +361,7 @@ $smarty->assign(array(
 	'PAGE' => PANEL_PAGE,
 	'TOKEN' => Token::get(),
 	'SUBMIT' => $language->get('general', 'submit'),
+    'STORE' => $store_language->get('general', 'store'),
 	'PAYMENTS' => $store_language->get('admin', 'payments')
 ));
 

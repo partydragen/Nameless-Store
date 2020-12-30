@@ -174,7 +174,6 @@ if(isset($_GET['key']) && $_GET['key'] == $data){
             
             HookHandler::executeEvent('paypal_hook', array(
                 'event' => 'paypal_hook',
-                'webhook' => 'https://discordapp.com/api/webhooks/767420207882567720/KoksbsCA0jECaIM8S9zehPUcSc_ec2aXbp_Ic8Vcyzed99yi5YrKloDZWuZv57MnF1Rb',
                 'username' => 'Success',
                 'content' => 'Success',
                 'content_full' => $response->event_type,
