@@ -86,8 +86,8 @@ class Store {
         curl_close($ch);
 
 		$info = json_decode($update_check);
-		if (isset($info->blacklisted) && $info->blacklisted == true) {
-			die(SITE_NAME . ' is blacklisted from using this module, Contact us at https://partydragen.com');
+		if (isset($info->message)) {
+			die($info->message);
 		}
 		
         return $update_check;
