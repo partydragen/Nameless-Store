@@ -147,7 +147,7 @@ class Store_Module extends Module {
 					} else
 						$icon = $cache->retrieve('store_icon');
 
-					$navs[2]->add('store', $this->_store_language->get('general', 'store'), '/panel/store', 'top', null, ($order + 0.1), $icon);
+					$navs[2]->add('store', $this->_store_language->get('general', 'store'), URL::build('/panel/store'), 'top', null, ($order + 0.1), $icon);
 				}
 
 				if($user->hasPermission('staffcp.store.packages')){
@@ -157,7 +157,7 @@ class Store_Module extends Module {
 					} else
 						$icon = $cache->retrieve('store_packages_icon');
 
-					$navs[2]->add('store_packages', $this->_store_language->get('general', 'packages'), '/panel/store/packages', 'top', null, ($order + 0.6), $icon);
+					$navs[2]->add('store_packages', $this->_store_language->get('general', 'packages'), URL::build('/panel/store/packages'), 'top', null, ($order + 0.6), $icon);
 				}
 
 				if($user->hasPermission('staffcp.store.payments')){
@@ -167,7 +167,7 @@ class Store_Module extends Module {
 					} else
 						$icon = $cache->retrieve('store_payments_icon');
 
-					$navs[2]->add('store_payments', $this->_store_language->get('admin', 'payments'), '/panel/store/payments', 'top', null, ($order + 0.7), $icon);
+					$navs[2]->add('store_payments', $this->_store_language->get('admin', 'payments'), URL::build('/panel/store/payments'), 'top', null, ($order + 0.7), $icon);
 				}
 			}
 		}

@@ -130,7 +130,7 @@ if(!$packages->count()){
 			'real_price' => Output::getClean($package->price),
 			'description' => $content,
 			'image' => $image,
-			'link' => $store_url . '/checkout?add=' . Output::getClean($package->id)
+			'link' => URL::build($store_url . '/checkout', 'add=' . Output::getClean($package->id))
 		);
 	}
 
