@@ -181,9 +181,9 @@ if(isset($errors) && count($errors))
 
 $smarty->assign(array(
 	'STORE' => $store_language->get('general', 'store'),
-	'STORE_URL' => $store_url,
+	'STORE_URL' => URL::build($store_url),
 	'HOME' => $store_language->get('general', 'home'),
-	'HOME_URL' => $store_url,
+	'HOME_URL' => URL::build($store_url),
 	'CATEGORIES' => $categories,
 	'CONTENT' => $content,
 	'TOKEN' => Token::get(),

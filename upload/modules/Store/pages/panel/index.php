@@ -204,7 +204,7 @@ $smarty->assign(array(
 	'STORE_CHECKOUT_CONTENT' => $store_language->get('admin', 'store_checkout_content'),
 	'STORE_CHECKOUT_CONTENT_VALUE' => $store_checkout_content,
 	'STORE_PATH' => $store_language->get('admin', 'store_path'),
-	'STORE_PATH_VALUE' => $store_path
+	'STORE_PATH_VALUE' => URL::build($store_path)
 ));
 
 if(!defined('TEMPLATE_STORE_SUPPORT')){

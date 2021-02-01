@@ -38,8 +38,8 @@ if(!isset($_GET['action'])) {
 			$new_category = array(
 				'name' => Output::getClean(Output::getDecoded($category->name)),
 				'packages' => array(),
-				'edit_link' => '/panel/store/categories/?action=edit&id=' . Output::getClean($category->id),
-				'delete_link' => '/panel/store/categories/?action=delete&id=' . Output::getClean($category->id)
+				'edit_link' => URL::build('/panel/store/categories/', 'action=edit&id=' . Output::getClean($category->id)),
+				'delete_link' => URL::build('/panel/store/categories/', 'action=delete&id=' . Output::getClean($category->id))
 			);
 
 			$packages = DB::getInstance()->query('SELECT * FROM nl2_store_packages WHERE category_id = ? AND deleted = 0 ORDER BY `order` ASC', array(Output::getClean($category->id)));
@@ -53,8 +53,8 @@ if(!isset($_GET['action'])) {
 						'id_x' => str_replace('{x}', Output::getClean($package->id), $store_language->get('admin', 'id_x')),
 						'name' => Output::getClean($package->name),
 						'price' => $currency . Output::getClean($package->price) . ' USD',
-						'edit_link' => '/panel/store/packages/?action=edit&id=' . Output::getClean($package->id),
-						'delete_link' => '/panel/store/packages/?action=delete&id=' . Output::getClean($package->id)
+						'edit_link' => URL::build('/panel/store/packages/', 'action=edit&id=' . Output::getClean($package->id)),
+						'delete_link' => URL::build('/panel/store/packages/', 'action=delete&id=' . Output::getClean($package->id))
 					);
 
 					$new_category['packages'][] = $new_package;
@@ -137,7 +137,7 @@ if(!isset($_GET['action'])) {
 							$lastId = $queries->getLastId();
 							
 							Session::flash('packages_success', $store_language->get('admin', 'package_created_successfully'));
-							Redirect::to('/panel/store/packages/?action=edit&id=' . $lastId);
+							Redirect::to(URL::build('/panel/store/packages/', 'action=edit&id=' . $lastId));
 							die();
 						}
 					} else {
@@ -171,13 +171,13 @@ if(!isset($_GET['action'])) {
 		case 'edit';
 			// Edit package
 			if(!isset($_GET['id']) || !is_numeric($_GET['id'])){
-				Redirect::to('/panel/store/packages');
+				Redirect::to(URL::build('/panel/store/packages'));
 				die();
 			}
 			
 			$package = DB::getInstance()->query('SELECT * FROM nl2_store_packages WHERE id = ?', array($_GET['id']))->results();
 			if(!count($package)) {
-				Redirect::to('/panel/store/packages');
+				Redirect::to(URL::build('/panel/store/packages'));
 				die();
 			}
 			$package = $package[0];
@@ -223,7 +223,7 @@ if(!isset($_GET['action'])) {
 							));
 								
 							Session::flash('packages_success', $store_language->get('admin', 'package_updated_successfully'));
-							Redirect::to('/panel/store/packages');
+							Redirect::to(URL::build('/panel/store/packages'));
 							die();
 						}
 					} else {
@@ -294,13 +294,13 @@ if(!isset($_GET['action'])) {
 		case 'delete';
 			// Delete package
 			if(!isset($_GET['id']) || !is_numeric($_GET['id'])){
-				Redirect::to('/panel/store/packages');
+				Redirect::to(URL::build('/panel/store/packages'));
 				die();
 			}
 			
 			$package = DB::getInstance()->query('SELECT id FROM `nl2_store_packages` WHERE id = ?', array($_GET['id']))->results();
 			if(!count($package)) {
-				Redirect::to('/panel/store/packages');
+				Redirect::to(URL::build('/panel/store/packages'));
 				die();
 			}
 			$package = $package[0];
@@ -310,19 +310,19 @@ if(!isset($_GET['action'])) {
 			));
 			
 			Session::flash('packages_success', $store_language->get('admin', 'package_deleted_successfully'));
-			Redirect::to('/panel/store/packages');
+			Redirect::to(URL::build('/panel/store/packages'));
 			die();
 		break;
 		case 'new_command';
 			// New command for package
 			if(!isset($_GET['id']) || !is_numeric($_GET['id'])){
-				Redirect::to('/panel/store/packages');
+				Redirect::to(URL::build('/panel/store/packages'));
 				die();
 			}
 			
 			$package = DB::getInstance()->query('SELECT id, name FROM nl2_store_packages WHERE id = ?', array($_GET['id']))->results();
 			if(!count($package)) {
-				Redirect::to('/panel/store/packages');
+				Redirect::to(URL::build('/panel/store/packages'));
 				die();
 			}
 			$package = $package[0];
@@ -368,7 +368,7 @@ if(!isset($_GET['action'])) {
 							));
 							
 							Session::flash('packages_success', $store_language->get('admin', 'command_created_successfully'));
-							Redirect::to('/panel/store/packages/?action=edit&id=' . $package->id);
+							Redirect::to(URL::build('/panel/store/packages/', 'action=edit&id=' . $package->id));
 							die();
 						}
 					} else {
@@ -391,20 +391,20 @@ if(!isset($_GET['action'])) {
 		case 'edit_command';
 			// Editing command for package
 			if(!isset($_GET['id']) || !is_numeric($_GET['id']) || !isset($_GET['command']) || !is_numeric($_GET['command'])){
-				Redirect::to('/panel/store/packages');
+				Redirect::to(URL::build('/panel/store/packages'));
 				die();
 			}
 			
 			$package = DB::getInstance()->query('SELECT id, name FROM nl2_store_packages WHERE id = ?', array($_GET['id']))->results();
 			if(!count($package)) {
-				Redirect::to('/panel/store/packages');
+				Redirect::to(URL::build('/panel/store/packages'));
 				die();
 			}
 			$package = $package[0];
 			
 			$command = DB::getInstance()->query('SELECT * FROM nl2_store_packages_commands WHERE id = ?', array($_GET['command']))->results();
 			if(!count($command)) {
-				Redirect::to('/panel/store/packages');
+				Redirect::to(URL::build('/panel/store/packages'));
 				die();
 			}
 			$command = $command[0];
@@ -442,7 +442,7 @@ if(!isset($_GET['action'])) {
 							));
 							
 							Session::flash('packages_success', $store_language->get('admin', 'command_updated_successfully'));
-							Redirect::to('/panel/store/packages/?action=edit&id=' . $package->id);
+							Redirect::to(URL::build('/panel/store/packages/', 'action=edit&id=' . $package->id));
 							die();
 						}
 					} else {
@@ -468,18 +468,18 @@ if(!isset($_GET['action'])) {
 		case 'delete_command';
 			// Delete package
 			if(!isset($_GET['id']) || !is_numeric($_GET['id']) || !isset($_GET['command']) || !is_numeric($_GET['command'])){
-				Redirect::to('/panel/store/packages');
+				Redirect::to(URL::build('/panel/store/packages'));
 				die();
 			}
 			
 			$queries->delete('store_packages_commands', array('id', '=', $_GET['command']));
 
 			Session::flash('packages_success', $store_language->get('admin', 'command_deleted_successfully'));
-			Redirect::to('/panel/store/packages/?action=edit&id=' . $_GET['id']);
+			Redirect::to(URL::build('/panel/store/packages/', 'action=edit&id=' . $_GET['id']));
 			die();
 		break;
 		default:
-			Redirect::to('/panel/core/packages');
+			Redirect::to(URL::build('/panel/core/packages'));
 			die();
 		break;
 	}
