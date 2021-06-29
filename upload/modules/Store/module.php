@@ -193,7 +193,7 @@ class Store_Module extends Module {
                         'CURRENT_VERSION' => str_replace('{x}', $this->getVersion(), $this->_store_language->get('admin', 'current_version_x')),
                         'NEW_VERSION' => str_replace('{x}', Output::getClean($update_check->new_version), $this->_store_language->get('admin', 'new_version_x')),
                         'UPDATE' => $this->_store_language->get('admin', 'view_resource'),
-                        'UPDATE_LINK' => 'https://partydragen.com/resources/resource/5-store/'
+                        'UPDATE_LINK' => Output::getClean($update_check->link)
                     ));
 				}
             }
