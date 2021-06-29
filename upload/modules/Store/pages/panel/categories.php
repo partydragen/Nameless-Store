@@ -77,8 +77,8 @@ if(!isset($_GET['action'])) {
 			));
 			
 			$template->addJSFiles(array(
-				'https://cdn.namelesshosting.com/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array(),
-				'https://cdn.namelesshosting.com/assets/plugins/ckeditor/ckeditor.js' => array()
+				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array(),
+				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => array()
 			));
 
 			$template->addJSScript(Input::createEditor('inputDescription'));
@@ -143,8 +143,8 @@ if(!isset($_GET['action'])) {
 			));
 			
 			$template->addJSFiles(array(
-				'https://cdn.namelesshosting.com/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array(),
-				'https://cdn.namelesshosting.com/assets/plugins/ckeditor/ckeditor.js' => array()
+				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array(),
+				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => array()
 			));
 
 			$template->addJSScript(Input::createEditor('inputDescription'));

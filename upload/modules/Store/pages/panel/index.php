@@ -212,15 +212,14 @@ $smarty->assign(array(
 
 if(!defined('TEMPLATE_STORE_SUPPORT')){
 	$template->addCSSFiles(array(
-		'https://cdn.namelesshosting.com/assets/plugins/switchery/switchery.min.css' => array()
+		(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.css' => array()
 	));
 
 	$template->addJSFiles(array(
-		'https://cdn.namelesshosting.com/assets/plugins/switchery/switchery.min.js' => array(),
-		'https://cdn.namelesshosting.com/assets/plugins/emoji/js/emojione.min.js' => array(),
-		'https://cdn.namelesshosting.com/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array(),
-		'https://cdn.namelesshosting.com/assets/plugins/ckeditor/ckeditor.js' => array(),
-		'https://cdn.namelesshosting.com/assets/plugins/ckeditor/plugins/emojione/dialogs/emojione.json' => array()
+		(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.js' => array(),
+		(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/emoji/js/emojione.min.js' => array(),
+		(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array(),
+		(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => array()
 	));
 
 	$template->addJSScript(Input::createEditor('inputStoreContent', true));

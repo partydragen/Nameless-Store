@@ -85,12 +85,12 @@ if(isset($_GET['user'])){
 
 		if(!defined('TEMPLATE_STORE_SUPPORT')){
 			$template->addCSSFiles(array(
-				'https://cdn.namelesshosting.com/panel_templates/Default/assets/css/dataTables.bootstrap4.min.css' => array()
+				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/css/dataTables.bootstrap4.min.css' => array()
 			));
 
 			$template->addJSFiles(array(
-				'https://cdn.namelesshosting.com/assets/plugins/dataTables/jquery.dataTables.min.js' => array(),
-				'https://cdn.namelesshosting.com/panel_templates/Default/assets/js/dataTables.bootstrap4.min.js' => array()
+				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/dataTables/jquery.dataTables.min.js' => array(),
+				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/js/dataTables.bootstrap4.min.js' => array()
 			));
 
 			$template->addJSScript('
@@ -316,12 +316,12 @@ if(isset($_GET['user'])){
 
 		if(!defined('TEMPLATE_STORE_SUPPORT')){
 			$template->addCSSFiles(array(
-				'https://cdn.namelesshosting.com/panel_templates/Default/assets/css/dataTables.bootstrap4.min.css' => array()
+				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/css/dataTables.bootstrap4.min.css' => array()
 			));
 
 			$template->addJSFiles(array(
-				'https://cdn.namelesshosting.com/assets/plugins/dataTables/jquery.dataTables.min.js' => array(),
-				'https://cdn.namelesshosting.com/panel_templates/Default/assets/js/dataTables.bootstrap4.min.js' => array()
+				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/dataTables/jquery.dataTables.min.js' => array(),
+				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/js/dataTables.bootstrap4.min.js' => array()
 			));
 
 			$template->addJSScript('
