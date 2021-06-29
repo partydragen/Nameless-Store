@@ -10,7 +10,10 @@
  */
 
 // Can the user view the StaffCP?
-$user->handlePanelPageLoad('staffcp.store.settings');
+if(!$user->handlePanelPageLoad('staffcp.store.settings')) {
+    require_once(ROOT_PATH . '/403.php');
+    die();
+}
 
 define('PAGE', 'panel');
 define('PARENT_PAGE', 'store');
