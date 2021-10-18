@@ -1,10 +1,37 @@
 <?php
+/*
+ *	Made by Partydragen
+ *  https://partydragen.com/resources/resource/5-store-module/
+ *  https://partydragen.com/
+ *
+ *  License: MIT
+ *
+ *  Store module
+ */
+
 class Store {
-    private $_db;
+    private $_db,
+            $_cache,
+            $_store_language;
 
     // Constructor, connect to database
-    public function __construct() {
+    public function __construct($cache, $store_language) {
         $this->_db = DB::getInstance();
+        
+        $this->_cache = $cache;
+        $this->_store_language = $store_language;
+    }
+    
+    public function getStoreURL() {
+        // Get variables from cache
+        $this->_cache->setCache('store_settings');
+        if($this->_cache->isCached('store_url')){
+            $store_url = Output::getClean(rtrim($this->_cache->retrieve('store_url'), '/'));
+        } else {
+            $store_url = '/store';
+        }
+        
+        return $store_url;
     }
 	
 	// Get all payments
@@ -28,6 +55,48 @@ class Store {
 		
 		return $categories_array;
 	}
+    
+    // Get navbar menu
+    public function getNavbarMenu($active) {
+        $store_url = $this->getStoreURL();
+        $categories = array();
+        
+        $categories[] = array(
+            'url' => URL::build($store_url),
+            'title' => $this->_store_language->get('general', 'home'),
+            'active' => Output::getClean($active) == 'Home'
+        );
+        
+        $categories_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE parent_category IS NULL AND deleted = 0 ORDER BY `order` ASC')->results();
+        if(count($categories_query)){
+            foreach($categories_query as $item){
+                $subcategories_query = DB::getInstance()->query('SELECT id, `name` FROM nl2_store_categories WHERE parent_category = ? AND deleted = 0 ORDER BY `order` ASC', array($item->id))->results();
+
+                $subcategories = array();
+                $sub_active = false;
+                if(count($subcategories_query)){
+                    foreach($subcategories_query as $subcategory){
+                        $sub_active = Output::getClean($active) == Output::getClean($subcategory->name);
+
+                        $subcategories[] = array(
+                            'url' => URL::build($store_url . '/category/' . Output::getClean($subcategory->id)),
+                            'title' => Output::getClean($subcategory->name),
+                            'active' => $sub_active
+                        );
+                    }
+                }
+
+                $categories[$item->id] = array(
+                    'url' => URL::build($store_url . '/category/' . Output::getClean($item->id)),
+                    'title' => Output::getClean($item->name),
+                    'subcategories' => $subcategories,
+                    'active' => !$sub_active && Output::getClean($active) == Output::getClean($item->name)
+                );
+            }
+        }
+        
+        return $categories;
+    }
     
     // Add pending commands
     public function addPendingCommands($player_id, $payment_id, $type) {

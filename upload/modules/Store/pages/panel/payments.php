@@ -22,7 +22,7 @@ $page_title = $store_language->get('admin', 'payments');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
 
-$store = new Store();
+$store = new Store($cache, $store_language);
 
 // Load modules + template
 Module::loadPage($user, $pages, $cache, $smarty, array($navigation, $cc_nav, $mod_nav), $widgets);

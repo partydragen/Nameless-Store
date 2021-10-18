@@ -20,7 +20,7 @@ class Store_Module extends Module {
 		$name = 'Store';
 		$author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
 		$module_version = '1.0.0-pr3';
-		$nameless_version = '2.0.0-pr10';
+		$nameless_version = '2.0.0-pr12';
 
 		parent::__construct($this, $name, $author, $module_version, $nameless_version);
 
@@ -36,14 +36,17 @@ class Store_Module extends Module {
 		$pages->add('Store', $this->_store_url, 'pages/store/index.php', 'store', true);
 		$pages->add('Store', $this->_store_url . '/category', 'pages/store/category.php', 'package', true);
 		$pages->add('Store', $this->_store_url . '/checkout', 'pages/store/checkout.php');
-		$pages->add('Store', '/store/payment_listener', 'gateways/payment_listener.php');
 		$pages->add('Store', $this->_store_url . '/check', 'pages/store/check.php');
 		$pages->add('Store', $this->_store_url . '/cancel', 'pages/store/cancel.php');
 		$pages->add('Store', $this->_store_url . '/view', 'pages/store/view.php');
+        $pages->add('Store', '/store/process', 'pages/backend/process.php');
+        $pages->add('Store', '/store/listener', 'pages/backend/listener.php');
 		$pages->add('Store', '/panel/store', 'pages/panel/index.php');
+        $pages->add('Store', '/panel/store/gateways', 'pages/panel/gateways.php');
 		$pages->add('Store', '/panel/store/packages', 'pages/panel/packages.php');
 		$pages->add('Store', '/panel/store/categories', 'pages/panel/categories.php');
 		$pages->add('Store', '/panel/store/payments', 'pages/panel/payments.php');
+        
 		
 		//HookHandler::registerEvent('paypal_hook', 'paypal_hook');
 		//HookHandler::registerEvent('new_subscriber', 'new_subscriber');
@@ -125,6 +128,7 @@ class Store_Module extends Module {
 			PermissionHandler::registerPermissions('Store', array(
 				'staffcp.store' => $this->_store_language->get('admin', 'staffcp_store'),
 				'staffcp.store.settings' => $this->_store_language->get('admin', 'staffcp_store_settings'),
+                'staffcp.store.gateways' => $this->_store_language->get('admin', 'staffcp_store_gateways'),
 				'staffcp.store.packages' => $this->_store_language->get('admin', 'staffcp_store_packages'),
 				'staffcp.store.payments' => $this->_store_language->get('admin', 'staffcp_store_payments'),
 			));
@@ -148,6 +152,16 @@ class Store_Module extends Module {
 						$icon = $cache->retrieve('store_icon');
 
 					$navs[2]->add('store', $this->_store_language->get('general', 'store'), URL::build('/panel/store'), 'top', null, ($order + 0.1), $icon);
+				}
+                
+				if($user->hasPermission('staffcp.store.gateways')){
+					if(!$cache->isCached('store_gateways_icon')){
+						$icon = '<i class="nav-icon far fa-credit-card"></i>';
+						$cache->store('store_gateways_icon', $icon);
+					} else
+						$icon = $cache->retrieve('store_gateways_icon');
+
+					$navs[2]->add('store_gateways', $this->_store_language->get('admin', 'gateways'), URL::build('/panel/store/gateways'), 'top', null, ($order + 0.2), $icon);
 				}
 
 				if($user->hasPermission('staffcp.store.packages')){
@@ -174,7 +188,9 @@ class Store_Module extends Module {
         
 		// Check for module updates
         if(isset($_GET['route']) && $user->isLoggedIn() && $user->hasPermission('admincp.update')){
-            if(rtrim($_GET['route'], '/') == '/panel/store/payments' || rtrim($_GET['route'], '/') == '/panel/store/packages/' || rtrim($_GET['route'], '/') == $this->_store_url){
+            // Page belong to this module?
+            $page = $pages->getActivePage();
+            if($page['module'] == 'Store'){
 
                 $cache->setCache('store_module_cache');
                 if($cache->isCached('update_check')){
@@ -292,11 +308,15 @@ class Store_Module extends Module {
 		
 		if(!$queries->tableExists('store_gateways')) {
 			try {
-				$queries->createTable('store_gateways', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `client_id` varchar(128) DEFAULT NULL, `client_key` varchar(128) DEFAULT NULL, `hook_key` varchar(128) DEFAULT NULL, `enabled` tinyint(1) NOT NULL DEFAULT \'1\', PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+				$queries->createTable('store_gateways', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `enabled` tinyint(1) NOT NULL DEFAULT \'1\', PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
 			} catch(Exception $e){
 				// Error
 			}
 			
+			$queries->create('store_gateways', array(
+				'name' => 'PayPal'
+			));
+            
 			$queries->create('store_gateways', array(
 				'name' => 'PayPal'
 			));

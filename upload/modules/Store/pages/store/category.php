@@ -12,11 +12,14 @@
 // Always define page name
 define('PAGE', 'store');
 
+require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
+$store = new Store($cache, $store_language);
+
 // Get category ID
 $category_id = explode('/', $route);
 $category_id = $category_id[count($category_id) - 1];
 
-if(!isset($category_id[count($category_id) - 1])){
+if (!strlen($category_id)) {
 	require_once(ROOT_PATH . '404.php');
 	die();
 }
@@ -36,14 +39,7 @@ if(!$category->count()){
 }
 
 $category = $category->first();
-
-// Get variables from cache
-$cache->setCache('store_settings');
-if($cache->isCached('store_url')){
-	$store_url = Output::getClean(rtrim($cache->retrieve('store_url'), '/'));
-} else {
-	$store_url = '/store';
-}
+$store_url = $store->getStoreURL();
 
 $page_metadata = $queries->getWhere('page_descriptions', array('page', '=', $store_url . '/view'));
 if(count($page_metadata)){
@@ -62,6 +58,8 @@ $currency = Output::getPurified($currency[0]->value);
 
 if(Input::exists()){
 	if(Token::check(Input::get('token'))){
+        $errors = array();
+        
 		if(Input::get('type') == 'store_login') {
 			$validate = new Validate();
 			$validation = $validate->check($_POST, array(
@@ -145,37 +143,6 @@ $smarty->assign(array(
 	'SALE' => $store_language->get('general', 'sale')
 ));
 
-// Query categories
-$categories_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE parent_category IS NULL AND deleted = 0 ORDER BY `order` ASC')->results();
-$categories = array();
-
-if(count($categories_query)){
-	foreach($categories_query as $item){
-		$subcategories_query = DB::getInstance()->query('SELECT id, `name` FROM nl2_store_categories WHERE parent_category = ? AND deleted = 0 ORDER BY `order` ASC', array($item->id))->results();
-
-		$subcategories = array();
-		$active = false;
-		if(count($subcategories_query)){
-			foreach($subcategories_query as $subcategory){
-				$active = Output::getClean($category->name) == Output::getClean($subcategory->name);
-
-				$subcategories[] = array(
-					'url' => URL::build($store_url . '/category/' . Output::getClean($subcategory->id)),
-					'title' => Output::getClean($subcategory->name),
-					'active' => $active
-				);
-			}
-		}
-
-		$categories[$item->id] = array(
-			'url' => URL::build($store_url . '/category/' . Output::getClean($item->id)),
-			'title' => Output::getClean($item->name),
-			'subcategories' => $subcategories,
-			'active' => !$active && Output::getClean($category->name) == Output::getClean($item->name)
-		);
-	}
-}
-
 if(isset($errors) && count($errors))
 	$smarty->assign('ERRORS', $errors);
 
@@ -184,7 +151,7 @@ $smarty->assign(array(
 	'STORE_URL' => URL::build($store_url),
 	'HOME' => $store_language->get('general', 'home'),
 	'HOME_URL' => URL::build($store_url),
-	'CATEGORIES' => $categories,
+	'CATEGORIES' => $store->getNavbarMenu($category->name),
 	'CONTENT' => $content,
 	'TOKEN' => Token::get(),
 ));
@@ -201,12 +168,12 @@ if(!isset($_SESSION['store_player'])) {
 }
 
 $template->addCSSFiles(array(
-	'https://cdn.namelesshosting.com/assets/plugins/ckeditor/plugins/spoiler/css/spoiler.css' => array(),
-	'https://cdn.namelesshosting.com/assets/plugins/emoji/css/emojione.min.css' => array()
+	(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/css/spoiler.css' => array(),
+	(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/emoji/css/emojione.min.css' => array()
 ));
 
 $template->addJSFiles(array(
-	'https://cdn.namelesshosting.com/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array()
+	(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array()
 ));
 
 // Load modules + template
@@ -217,7 +184,8 @@ define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get
 
 $template->onPageLoad();
 
-$smarty->assign('WIDGETS', $widgets->getWidgets());
+$smarty->assign('WIDGETS_LEFT', $widgets->getWidgets('left'));
+$smarty->assign('WIDGETS_RIGHT', $widgets->getWidgets('right'));
 
 require(ROOT_PATH . '/core/templates/navbar.php');
 require(ROOT_PATH . '/core/templates/footer.php');

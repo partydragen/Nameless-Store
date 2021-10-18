@@ -22,6 +22,8 @@ $page_title = $store_language->get('admin', 'categories');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
 
+$store = new Store($cache, $store_language);
+
 if(!isset($_GET['action'])) {
 	Redirect::to(URL::build('/panel/core/packages'));
 	die();

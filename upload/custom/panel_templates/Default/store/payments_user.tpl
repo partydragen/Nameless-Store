@@ -48,7 +48,7 @@
                                 <p>{$NO_PAYMENTS}</p>
                             {else}
                                 <div class="table-responsive">
-                                    <table class="table table-striped dataTables-payments">
+                                    <table class="table table-striped dataTables-payments" style="width:100%">
                                         <thead>
                                         <tr>
                                             <th>{$USER}</th>

@@ -14,16 +14,10 @@ define('PAGE', 'store');
 $page_title = $store_language->get('general', 'store');
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 
+require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
 require(ROOT_PATH . '/core/includes/emojione/autoload.php'); // Emojione
 $emojione = new Emojione\Client(new Emojione\Ruleset());
-
-// Get variables from cache
-$cache->setCache('store_settings');
-if($cache->isCached('store_url')){
-	$store_url = Output::getClean(rtrim($cache->retrieve('store_url'), '/'));
-} else {
-	$store_url = '/store';
-}
+$store = new Store($cache, $store_language);
 
 $content = $queries->getWhere('store_settings', array('name', '=', 'store_content'));
 $content = Output::getDecoded($content[0]->value);
@@ -39,37 +33,10 @@ if(Input::exists()){
 	}
 }
 
-$categories_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE parent_category IS NULL AND deleted = 0 ORDER BY `order` ASC')->results();
-$categories = array();
-
-if(count($categories_query)){
-	foreach($categories_query as $item){
-		$subcategories_query = DB::getInstance()->query('SELECT id, `name` FROM nl2_store_categories WHERE parent_category = ? AND deleted = 0 ORDER BY `order` ASC', array($item->id))->results();
-		
-		$subcategories = array();
-		if(count($subcategories_query)){
-			foreach($subcategories_query as $subcategory){
-				$subcategories[] = array(
-					'url' => URL::build($store_url . '/category/' . Output::getClean($subcategory->id)),
-					'title' => Output::getClean($subcategory->name)
-				);
-			}
-		}
-
-		$categories[$item->id] = array(
-			'url' => URL::build($store_url . '/category/' . Output::getClean($item->id)),
-			'title' => Output::getClean($item->name),
-			'subcategories' => $subcategories
-		);
-	}
-}
-
 $smarty->assign(array(
 	'STORE' => $store_language->get('general', 'store'),
-	'STORE_URL' => URL::build($store_url),
-	'HOME' => $store_language->get('general', 'home'),
-	'HOME_URL' => URL::build($store_url),
-	'CATEGORIES' => $categories,
+	'STORE_URL' => URL::build($store->getStoreURL()),
+	'CATEGORIES' => $store->getNavbarMenu('Home'),
 	'CONTENT' => $content,
 	'TOKEN' => Token::get(),
 ));
@@ -81,12 +48,12 @@ if(isset($_SESSION['store_player'])) {
 }
 
 $template->addCSSFiles(array(
-	'https://cdn.namelesshosting.com/assets/plugins/ckeditor/plugins/spoiler/css/spoiler.css' => array(),
-	'https://cdn.namelesshosting.com/assets/plugins/emoji/css/emojione.min.css' => array()
+	(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/css/spoiler.css' => array(),
+	(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/emoji/css/emojione.min.css' => array()
 ));
 
 $template->addJSFiles(array(
-	'https://cdn.namelesshosting.com/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array()
+	(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array()
 ));
 
 // Load modules + template
@@ -97,7 +64,8 @@ define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get
 
 $template->onPageLoad();
 
-$smarty->assign('WIDGETS', $widgets->getWidgets());
+$smarty->assign('WIDGETS_LEFT', $widgets->getWidgets('left'));
+$smarty->assign('WIDGETS_RIGHT', $widgets->getWidgets('right'));
 
 require(ROOT_PATH . '/core/templates/navbar.php');
 require(ROOT_PATH . '/core/templates/footer.php');

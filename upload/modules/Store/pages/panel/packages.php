@@ -21,7 +21,8 @@ define('PANEL_PAGE', 'store_packages');
 $page_title = $store_language->get('general', 'packages');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
-$store = new Store();
+
+$store = new Store($cache, $store_language);
 
 if(!isset($_GET['action'])) {
 	// Get all packages and categories
@@ -84,7 +85,7 @@ if(!isset($_GET['action'])) {
 	));
 	
 	$template->addJSFiles(array(
-		'https://cdn.namelesshosting.com/assets/js/jquery-ui.min.js' => array()
+		(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/js/jquery-ui.min.js' => array()
 	));
 
 	$template_file = 'store/packages.tpl';
@@ -482,7 +483,7 @@ if(!isset($_GET['action'])) {
 			die();
 		break;
 		default:
-			Redirect::to(URL::build('/panel/core/packages'));
+			Redirect::to(URL::build('/panel/store/packages'));
 			die();
 		break;
 	}

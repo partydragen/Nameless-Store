@@ -28,10 +28,6 @@ if(isset($_POST) && !empty($_POST)){
 		$validate = new Validate();
 
 		$validation = $validate->check($_POST, array(
-			'server_key' => array(
-				'min' => 40,
-				'max' => 40
-			),
 			'store_content' => array(
 				'max' => 100000
 			)
@@ -125,17 +121,6 @@ if(isset($_POST) && !empty($_POST)){
 
 			} catch(Exception $e){
 				$errors[] = $e->getMessage();
-			}
-			
-			if(isset($_POST['client_id']) && isset($_POST['client_secret']) && strlen($_POST['client_secret']) && strlen($_POST['client_secret'])){
-				try {
-					$queries->update('store_gateways', 1, array(
-						'client_id' => $_POST['client_id'],
-						'client_key' => $_POST['client_secret']
-					));
-				} catch(Exception $e){
-					$errors[] = $e->getMessage();
-				}
 			}
 
 			if(!count($errors))

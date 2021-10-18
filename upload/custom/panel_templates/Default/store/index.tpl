@@ -58,22 +58,6 @@
                                     <label for="inputCheckoutContent">{$STORE_CHECKOUT_CONTENT}</label>
                                     <textarea id="inputCheckoutContent" name="store_checkout_content">{$STORE_CHECKOUT_CONTENT_VALUE}</textarea>
                                 </div>
-								
-								<h5>PayPal API Details</h5>
-								<div class="callout callout-info">
-                                    <h5><i class="icon fa fa-info-circle"></i> Info</h5>
-                                    The values of these fields are hidden for security reasons.<br />If you are updating these settings, please enter both the client ID and the client secret together.
-                                </div>
-								
-								<div class="form-group">
-                                    <label for="inputPaypalId">PayPal Client ID</label>
-                                    <input class="form-control" type="text" id="inputPaypalId" name="client_id">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="inputPaypalSecret">PayPal Client Secret</label>
-                                    <input class="form-control" type="text" id="inputPaypalSecret" name="client_secret">
-                                </div>
 
                                 <div class="form-group">
                                     <input type="hidden" name="token" value="{$TOKEN}">
