@@ -19,6 +19,7 @@ require_once(ROOT_PATH . '/modules/Store/classes/GatewayBase.php');
 require_once(ROOT_PATH . '/modules/Store/classes/StoreConfig.php');
 require_once(ROOT_PATH . '/modules/Store/config.php');
 require_once(ROOT_PATH . '/modules/Store/classes/ShoppingCart.php');
+require_once(ROOT_PATH . '/modules/Store/classes/Payment.php');
 $store = new Store($cache, $store_language);
 $gateways = new Gateways();
 $shopping_cart = new ShoppingCart();

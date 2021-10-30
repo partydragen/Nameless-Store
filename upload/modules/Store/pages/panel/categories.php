@@ -10,14 +10,14 @@
  */
 
 // Can the user view the StaffCP?
-if(!$user->handlePanelPageLoad('staffcp.store.packages')) {
+if(!$user->handlePanelPageLoad('staffcp.store.products')) {
     require_once(ROOT_PATH . '/403.php');
     die();
 }
 
 define('PAGE', 'panel');
 define('PARENT_PAGE', 'store');
-define('PANEL_PAGE', 'store_packages');
+define('PANEL_PAGE', 'store_products');
 $page_title = $store_language->get('admin', 'categories');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
@@ -25,7 +25,7 @@ require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
 $store = new Store($cache, $store_language);
 
 if(!isset($_GET['action'])) {
-	Redirect::to(URL::build('/panel/core/packages'));
+	Redirect::to(URL::build('/panel/core/products'));
 	die();
 } else {
 	switch($_GET['action']) {
@@ -59,8 +59,8 @@ if(!isset($_GET['action'])) {
 							'order' => $last_order + 1,
 						));
 						
-						Session::flash('packages_success', $store_language->get('admin', 'category_created_successfully'));
-						Redirect::to(URL::build('/panel/store/packages'));
+						Session::flash('products_success', $store_language->get('admin', 'category_created_successfully'));
+						Redirect::to(URL::build('/panel/store/products'));
 						die();
 					} else {
 						$errors[] = $store_language->get('admin', 'description_max_100000');
@@ -74,6 +74,7 @@ if(!isset($_GET['action'])) {
 			$smarty->assign(array(
 				'NEW_CATEGORY' => $store_language->get('admin', 'new_category'),
 				'BACK' => $language->get('general', 'back'),
+                'BACK_LINK' => URL::build('/panel/store/products'),
 				'CATEGORY_NAME' => $store_language->get('admin', 'category_name'),
 				'CATEGORY_DESCRIPTION' => $store_language->get('admin', 'category_description'),
 			));
@@ -90,13 +91,13 @@ if(!isset($_GET['action'])) {
 		case 'edit';
 			// Edit category
 			if(!isset($_GET['id']) || !is_numeric($_GET['id'])){
-				Redirect::to(URL::build('/panel/store/packages'));
+				Redirect::to(URL::build('/panel/store/products'));
 				die();
 			}
 			
 			$category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ?', array($_GET['id']))->results();
 			if(!count($category)) {
-				Redirect::to(URL::build('/panel/store/packages'));
+				Redirect::to(URL::build('/panel/store/products'));
 				die();
 			}
 			$category = $category[0];
@@ -123,8 +124,8 @@ if(!isset($_GET['action'])) {
 							'description' => Output::getClean(Input::get('description')),
 						));
 						
-						Session::flash('packages_success', $store_language->get('admin', 'category_updated_successfully'));
-						Redirect::to(URL::build('/panel/store/packages'));
+						Session::flash('products_success', $store_language->get('admin', 'category_updated_successfully'));
+						Redirect::to(URL::build('/panel/store/products'));
 						die();
 					} else {
 						$errors[] = $store_language->get('admin', 'description_max_100000');
@@ -138,6 +139,7 @@ if(!isset($_GET['action'])) {
 			$smarty->assign(array(
 				'EDITING_CATEGORY' => str_replace('{x}', Output::getClean($category->name), $store_language->get('admin', 'editing_category_x')),
 				'BACK' => $language->get('general', 'back'),
+                'BACK_LINK' => URL::build('/panel/store/products'),
 				'CATEGORY_NAME' => $store_language->get('admin', 'category_name'),
 				'CATEGORY_NAME_VALUE' => Output::getClean($category->name),
 				'CATEGORY_DESCRIPTION' => $store_language->get('admin', 'category_description'),
@@ -156,21 +158,21 @@ if(!isset($_GET['action'])) {
 		case 'delete';
 			// Delete category
 			if(!isset($_GET['id']) || !is_numeric($_GET['id'])){
-				Redirect::to(URL::build('/panel/store/packages'));
+				Redirect::to(URL::build('/panel/store/products'));
 				die();
 			}
 			
 			$category = DB::getInstance()->query('SELECT * FROM `nl2_store_categories` WHERE id = ?', array($_GET['id']))->results();
 			if(!count($category)) {
-				Redirect::to(URL::build('/panel/store/packages'));
+				Redirect::to(URL::build('/panel/store/products'));
 				die();
 			}
 			$category = $category[0];
 			
-			$packages = DB::getInstance()->query('SELECT id FROM `nl2_store_packages` WHERE category_id = ? AND deleted = 0', array($_GET['id']))->results();
-			if(count($packages)) {
-				foreach($packages as $package) {
-					$queries->update('store_packages', $package->id, array(
+			$products = DB::getInstance()->query('SELECT id FROM `nl2_store_products` WHERE category_id = ? AND deleted = 0', array($_GET['id']))->results();
+			if(count($products)) {
+				foreach($products as $product) {
+					$queries->update('store_products', $product->id, array(
 						'deleted' => date('U')
 					));
 				}
@@ -180,12 +182,12 @@ if(!isset($_GET['action'])) {
 				'deleted' => date('U')
 			));
 			
-			Session::flash('packages_success', $store_language->get('admin', 'category_deleted_successfully'));
-			Redirect::to(URL::build('/panel/store/packages'));
+			Session::flash('products_success', $store_language->get('admin', 'category_deleted_successfully'));
+			Redirect::to(URL::build('/panel/store/products'));
 			die();
 		break;
 		default:
-			Redirect::to(URL::build('/panel/core/packages'));
+			Redirect::to(URL::build('/panel/core/products'));
 			die();
 		break;
 	}
@@ -215,7 +217,7 @@ $smarty->assign(array(
 	'SUBMIT' => $language->get('general', 'submit'),
     'STORE' => $store_language->get('general', 'store'),
     'CATEGORIES' => $store_language->get('admin', 'categories'),
-	'PACKAGES' => $store_language->get('general', 'packages')
+	'PRODUCTS' => $store_language->get('general', 'products')
 ));
 
 $page_load = microtime(true) - $start;

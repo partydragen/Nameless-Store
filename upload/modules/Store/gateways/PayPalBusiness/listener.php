@@ -28,49 +28,27 @@ if(isset($_GET['key']) && $_GET['key'] == StoreConfig::get('paypal_business/key'
         $response = json_decode($bodyReceived);     
         if(isset($response->event_type)) {
             file_put_contents(ROOT_PATH . '/api_'.$response->event_type.'_'.date('U').'.txt', $bodyReceived);
-
-            $id = 'Unknown!';
+            
             // Handle event
             switch($response->event_type){
                 case 'PAYMENT.SALE.COMPLETED':
                     if(isset($response->resource->parent_payment)){
                         // Single payment
-                        $transaction = $queries->getWhere('store_payments', array('payment_id', '=', $response->resource->parent_payment));
-                        $transaction = $transaction[0];
-                        if(count($transaction)) {
-                            $queries->update('store_payments', $transaction->id, array(
+                        
+                        $payment = new Payment($response->resource->parent_payment, 'payment_id');
+                        if($payment->exists()) {
+                            // Payment exists
+                            $data = array(
                                 'transaction' => $response->resource->id,
-                                'status_id' => 1,
-                                'last_updated' => date('U'),
                                 'amount' => Output::getClean($response->resource->amount->total),
                                 'currency' => Output::getClean($response->resource->amount->currency),
-                            ));
+                            );
                             
-                            $store->addPendingCommands($transaction->player_id, $transaction->id, 1);
+                            $payment->handlePaymentEvent('COMPLETED', $data);
                         }
-                        
                     } else if(isset($response->resource->billing_agreement_id)){
                         // Agreement payment
-                        
-                        // Save payment to database
-                        $queries->create('store_payments', array(
-                            'agreement_id' => Output::getClean($response->resource->billing_agreement_id),
-                            'transaction' => Output::getClean($response->resource->id),
-                            'amount' => Output::getClean($response->resource->amount->total),
-                            'currency' => Output::getClean($response->resource->amount->currency),
-                            'payment_method' => $gateway->getId(),
-                            'status_id' => 1,
-                            'created' => date('U'),
-                            'last_updated' => date('U')
-                        ));
-                        
-                        $agreement = $queries->getWhere('store_agreements', array('agreement_id', '=', $response->resource->billing_agreement_id));
-                        if(count($agreement)) {
-                            $agreement = $agreement[0];
-                            
-                            $packages = json_decode($agreement->packages, true);
-                        }
-                        
+
                     } else {
                         /// Unknown payment
                         throw new Exception('Unknown payment type');
@@ -79,44 +57,29 @@ if(isset($_GET['key']) && $_GET['key'] == StoreConfig::get('paypal_business/key'
                     
                     break;
                 case 'PAYMENT.SALE.REFUNDED':
-                    $payment = $queries->getWhere('store_payments', array('transaction', '=', $response->resource->id));
-                    $payment = $payment[0];
-                    if(count($payment)) {
-                        DB::getInstance()->createQuery('UPDATE `nl2_store_payments` SET status = ?, updated = ? WHERE transaction = ?', array(
-                            2,
-                            date('U'),
-                            $response->resource->id
-                        ));
-                        
-                        $store->deletePendingCommands($payment->id);
-                        $store->addPendingCommands($payment->player_id, $payment->id, 2);
+                    // Payment refunded
+                    $payment = new Payment($response->resource->id, 'transaction');
+                    if($payment->exists()) {
+                        // Payment exists 
+                        $payment->handlePaymentEvent('REFUNDED', array());
                     }
                     
                     break;
                 case 'PAYMENT.SALE.REVERSED':
-                    $payment = $queries->getWhere('store_payments', array('transaction', '=', $response->resource->id));
-                    $payment = $payment[0];
-                    if(count($payment)) {        
-                        DB::getInstance()->createQuery('UPDATE `nl2_store_payments` SET status = ?, updated = ? WHERE transaction = ?', array(
-                            3,
-                            date('U'),
-                            $response->resource->id
-                        ));
-                        
-                        $store->deletePendingCommands($payment->id);
-                        $store->addPendingCommands($payment->player_id, $payment->id, 3);
+                    // Payment reversed
+                    $payment = new Payment($response->resource->id, 'transaction');
+                    if($payment->exists()) {
+                        // Payment exists 
+                        $payment->handlePaymentEvent('REVERSED', array());
                     }
                     
                     break;
                 case 'PAYMENT.SALE.DENIED':
-                    $payment = $queries->getWhere('store_payments', array('transaction', '=', $response->resource->id));
-                    $payment = $payment[0];
-                    if(count($payment)) {
-                        DB::getInstance()->createQuery('UPDATE `nl2_store_payments` SET status = ?, updated = ? WHERE transaction = ?', array(
-                            4,
-                            date('U'),
-                            $response->resource->id
-                        ));
+                    // Payment denied
+                    $payment = new Payment($response->resource->id, 'transaction');
+                    if($payment->exists()) {
+                        // Payment exists 
+                        $payment->handlePaymentEvent('DENIED', array());
                     }
                     
                     break;

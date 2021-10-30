@@ -20,62 +20,62 @@
                 
         <div class="ui bottom attached segment">
           {if isset($STORE_PLAYER)}
-            {if isset($NO_PACKAGES)}
+            {if isset($NO_PRODUCTS)}
               <div class="ui icon message">
                 <i class="info icon"></i>
                 <div class="content">
-                  <p>{$NO_PACKAGES}</p>
+                  <p>{$NO_PRODUCTS}</p>
                 </div>
               </div>
             {else}
               <div class="ui centered stackable grid">
-                {foreach from=$PACKAGES item=package}
+                {foreach from=$PRODUCTS item=product}
                   <div class="four wide column">
                     <div class="ui card" style="height: 100%">
-                      {if $package.image}
+                      {if $product.image}
                         <div class="image">
-                          {if $package.sale_active}
+                          {if $product.sale_active}
                             <span class="ui right ribbon red label">
                               {$SALE}
                             </span>
                           {/if}
-                          <img src="{$package.image}" alt="{$package.name}">
+                          <img src="{$product.image}" alt="{$product.name}">
                         </div>
                       {/if}
                       
                       <div class="center aligned content">
-                        <span class="header">{$package.name}</span>
+                        <span class="header">{$product.name}</span>
                         <div class="ui divider"></div>
-                        {if $package.sale_active}
-                          <span style="color: #dc3545;text-decoration:line-through;">{$CURRENCY}{$package.price}</span>
+                        {if $product.sale_active}
+                          <span style="color: #dc3545;text-decoration:line-through;">{$CURRENCY}{$product.price}</span>
                         {/if}
-                        {$CURRENCY}{$package.real_price}
+                        {$CURRENCY}{$product.real_price}
                       </div>
-                      <div class="ui bottom attached blue button" onClick="$('#modal{$package.id}').modal('show');">
+                      <div class="ui bottom attached blue button" onClick="$('#modal{$product.id}').modal('show');">
                         {$BUY} &raquo;
                       </div>
                     </div>
                   </div>
 
-                  <div class="ui small modal" id="modal{$package.id}">
+                  <div class="ui small modal" id="modal{$product.id}">
                     <div class="header">
-                      {$package.name} | {$CURRENCY}{$package.real_price}
+                      {$product.name} | {$CURRENCY}{$product.price}
                     </div>
-                    <div class="{if $package.image}image {/if}content">
-                      {if $package.image}
+                    <div class="{if $product.image}image {/if}content">
+                      {if $product.image}
                         <div class="ui small image">
-                          <img src="{$package.image}" alt="{$package.name}">
+                          <img src="{$product.image}" alt="{$product.name}">
                         </div>
                       {/if}
                       <div class="description forum_post">
-                        {$package.description}
+                        {$product.description}
                       </div>
                     </div>
                     <div class="actions">
                       <div class="ui red deny button">
                         {$CLOSE}
                       </div>
-                      <a class="ui positive right labeled icon button" href="{$package.link}">
+                      <a class="ui positive right labeled icon button" href="{$product.link}">
                         {$BUY}
                         <i class="shopping cart icon"></i>
                       </a>

@@ -13,7 +13,9 @@
 define('PAGE', 'store');
 
 require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
+require_once(ROOT_PATH . '/modules/Store/classes/Player.php');
 $store = new Store($cache, $store_language);
+$player = new Player();
 
 // Get category ID
 $category_id = explode('/', $route);
@@ -71,68 +73,48 @@ if(Input::exists()){
 			));
 			
 			if($validation->passed()){
-				$username = Output::getClean(Input::get('username'));
-				$uuid = '';
-				
-				require(ROOT_PATH . '/core/integration/uuid.php'); // For UUID stuff
-				
-				$profile = ProfileUtils::getProfile(str_replace(' ', '%20', Input::get('username')));
-				$mcname_result = $profile ? $profile->getProfileAsArray() : array();
-				if(isset($mcname_result['username']) && !empty($mcname_result['username']) && isset($mcname_result['uuid']) && !empty($mcname_result['uuid'])){
-					$username = Output::getClean($mcname_result['username']);
-					$uuid = ProfileUtils::formatUUID(Output::getClean($mcname_result['uuid']));
-				} else {
-					// Invalid Minecraft name
-					$errors[] = $language->get('user', 'invalid_mcname');
-				}
-
-				if(!count($errors)) {
-					// Save store player into session
-					$store_player = array(
-						'username' => Output::getClean($username),
-						'uuid' => Output::getClean($uuid)
-					);
-					
-					$_SESSION['store_player'] = $store_player;
-				}
+                // Attempt to load player
+                if(!$player->login(Output::getClean(Input::get('username')))) {
+                    $errors[] = $language->get('user', 'invalid_mcname');
+                }
 			} else {
 				$errors[] = 'Unable to find a player with that username';
 			}
 		} else if(Input::get('type') == 'store_logout') {
 			// Logout the store player
-			unset($_SESSION['store_player']);
+			$player->logout();
 		}
 	}
 }
 
-// Get packages
-$packages = DB::getInstance()->query('SELECT id, name, `order`, price, description, image FROM nl2_store_packages WHERE category_id = ? AND deleted = 0 ORDER BY `order` ASC', array($category_id));
+// Get products
+$products = DB::getInstance()->query('SELECT id, name, `order`, price, description, image FROM nl2_store_products WHERE category_id = ? AND deleted = 0 ORDER BY `order` ASC', array($category_id));
 
-if(!$packages->count()){
-	$smarty->assign('NO_PACKAGES', $store_language->get('general', 'no_packages'));
+if(!$products->count()){
+	$smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
 } else {
-	$packages = $packages->results();
-	$category_packages = array();
+	$products = $products->results();
+	$category_products = array();
 
-	foreach($packages as $package){
-		$content = Output::getDecoded($package->description);
+	foreach($products as $product){
+		$content = Output::getDecoded($product->description);
 		$content = $emojione->unicodeToImage($content);
 		$content = Output::getPurified($content);
 
-		$image = (isset($package->image) && !is_null($package->image) ? (defined('CONFIG_PATH') ? CONFIG_PATH . '/' : '/' . 'uploads/store/' . Output::getClean(Output::getDecoded($package->image))) : null);
+		$image = (isset($product->image) && !is_null($product->image) ? (defined('CONFIG_PATH') ? CONFIG_PATH . '/' : '/' . 'uploads/store/' . Output::getClean(Output::getDecoded($product->image))) : null);
 
-		$category_packages[] = array(
-			'id' => Output::getClean($package->id),
-			'name' => Output::getClean($package->name),
-			'price' => Output::getClean($package->price),
-			'real_price' => Output::getClean($package->price),
+		$category_products[] = array(
+			'id' => Output::getClean($product->id),
+			'name' => Output::getClean($product->name),
+			'price' => Output::getClean($product->price),
+			'real_price' => Output::getClean($product->price),
 			'description' => $content,
 			'image' => $image,
-			'link' => URL::build($store_url . '/checkout', 'add=' . Output::getClean($package->id))
+			'link' => URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->id))
 		);
 	}
 
-	$smarty->assign('PACKAGES', $category_packages);
+	$smarty->assign('PRODUCTS', $category_products);
 }
 
 $smarty->assign(array(
@@ -156,14 +138,14 @@ $smarty->assign(array(
 	'TOKEN' => Token::get(),
 ));
 
-if(!isset($_SESSION['store_player'])) {
+if(!$player->isLoggedIn()) {
 	$smarty->assign(array(
 		'PLEASE_ENTER_USERNAME' => $store_language->get('general', 'please_enter_username'),
 		'CONTINUE' => $store_language->get('general', 'continue'),
 	));
 } else {
 	$smarty->assign(array(
-		'STORE_PLAYER' => Output::getClean($_SESSION['store_player']['username'])
+		'STORE_PLAYER' => $player->getUsername()
 	));
 }
 

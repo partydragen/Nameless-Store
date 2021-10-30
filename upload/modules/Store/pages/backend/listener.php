@@ -17,6 +17,7 @@ require_once(ROOT_PATH . '/modules/Store/classes/Gateways.php');
 require_once(ROOT_PATH . '/modules/Store/classes/GatewayBase.php');
 require_once(ROOT_PATH . '/modules/Store/classes/StoreConfig.php');
 require_once(ROOT_PATH . '/modules/Store/config.php');
+require_once(ROOT_PATH . '/modules/Store/classes/Payment.php');
 
 // Load Store config
 if (isset($store_conf) && is_array($store_conf)) {

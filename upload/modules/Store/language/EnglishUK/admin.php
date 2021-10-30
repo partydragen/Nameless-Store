@@ -41,7 +41,7 @@ $language = array(
     'no_payments_for_user' => 'No payments were found for that user.',
     'ign' => 'Ingame Username',
     'uuid' => 'UUID',
-    'please_enter_valid_ign_package' => 'Please enter a valid ingame username and select a package.',
+    'please_enter_valid_ign_product' => 'Please enter a valid ingame username and select a product.',
     'price' => 'Price',
     'please_enter_valid_price' => 'Please enter a valid price.',
     'payment_created_successfully' => 'Payment created successfully.',
@@ -86,24 +86,24 @@ $language = array(
 	'category_created_successfully' => 'Category created successfully.',
 	'category_updated_successfully' => 'Category updated successfully.',
 	'category_deleted_successfully' => 'Category deleted successfully.',
-	'category_confirm_delete' => 'Are you sure you want to delete this category?</br>Warning: This will delete all packages in this category',
+	'category_confirm_delete' => 'Are you sure you want to delete this category?</br>Warning: This will delete all products in this category',
 	'editing_category_x' => 'Editing category {x}', // Don't replace {x}
 	'category_name' => 'Category Name',
     'category_description' => 'Category Description',
     'category_image' => 'Category Image',
 	
-	// Package
-	'packages' => 'Packages',
-	'new_package' => 'New Package',
-	'package' => 'Package',
-	'package_created_successfully' => 'Package created successfully.',
-	'package_updated_successfully' => 'Package updated successfully.',
-	'package_deleted_successfully' => 'Package deleted successfully.',
-	'package_confirm_delete' => 'Are you sure you want to delete this package?',
-	'editing_package_x' => 'Editing package {x}', // Don't replace {x}
-	'package_name' => 'Package Name',
-    'package_description' => 'Package Description',
-    'package_image' => 'Package Image',
+	// Product
+	'products' => 'Products',
+	'new_product' => 'New Product',
+	'product' => 'Product',
+	'product_created_successfully' => 'Product created successfully.',
+	'product_updated_successfully' => 'Product updated successfully.',
+	'product_deleted_successfully' => 'Product deleted successfully.',
+	'product_confirm_delete' => 'Are you sure you want to delete this product?',
+	'editing_product_x' => 'Editing product {x}', // Don't replace {x}
+	'product_name' => 'Product Name',
+    'product_description' => 'Product Description',
+    'product_image' => 'Product Image',
 	
 	// Commands
 	'commands' => 'Commands',

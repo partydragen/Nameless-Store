@@ -43,9 +43,9 @@ if(isset($errors) && count($errors))
 		'ERRORS_TITLE' => $language->get('general', 'error')
 	));
 
-if(isset($_GET['user'])){
+if(isset($_GET['player'])){
 	// Get payments for user
-	$payments = DB::getInstance()->query('SELECT nl2_store_payments.*, uuid, username FROM nl2_store_payments LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id WHERE nl2_store_players.username = ? ORDER BY created DESC', array($_GET['user']));
+	$payments = DB::getInstance()->query('SELECT nl2_store_payments.*, uuid, username FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id WHERE nl2_store_players.username = ? ORDER BY created DESC', array($_GET['player']));
 
 	if($payments->count()){
 		$payments = $payments->results();
@@ -63,7 +63,7 @@ if(isset($_GET['user'])){
 
 		foreach($payments as $payment){
 			$template_payments[] = array(
-				'user_link' => URL::build('/panel/store/payments/', 'user=' . Output::getClean($payment->username)),
+				'user_link' => URL::build('/panel/store/payments/', 'player=' . Output::getClean($payment->username)),
 				'user_style' => $style,
 				'user_avatar' => $avatar,
 				'username' => Output::getClean($payment->username),
@@ -119,7 +119,7 @@ if(isset($_GET['user'])){
 		$smarty->assign('NO_PAYMENTS', $store_language->get('admin', 'no_payments_for_user'));
 
 	$smarty->assign(array(
-		'VIEWING_PAYMENTS_FOR_USER' => str_replace('{x}', Output::getClean($_GET['user']), $store_language->get('admin', 'viewing_payments_for_user_x')),
+		'VIEWING_PAYMENTS_FOR_USER' => str_replace('{x}', Output::getClean($_GET['player']), $store_language->get('admin', 'viewing_payments_for_user_x')),
 		'BACK' => $language->get('general', 'back'),
 		'BACK_LINK' => URL::build('/panel/store/payments')
 	));
@@ -128,7 +128,7 @@ if(isset($_GET['user'])){
 
 } else if(isset($_GET['payment'])){
 	// View payment
-	$payment = DB::getInstance()->query('SELECT nl2_store_payments.*, uuid, username FROM nl2_store_payments LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id WHERE nl2_store_payments.id = ? ORDER BY created DESC', array($_GET['payment']))->results();
+	$payment = DB::getInstance()->query('SELECT nl2_store_payments.*, uuid, username FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id WHERE nl2_store_payments.id = ?', array($_GET['payment']))->results();
 	if(count($payment))
 		$payment = $payment[0];
 	else {
@@ -185,7 +185,7 @@ if(isset($_GET['user'])){
 		'BACK_LINK' => URL::build('/panel/store/payments'),
 		'IGN' => $store_language->get('admin', 'ign'),
 		'IGN_VALUE' => Output::getClean($payment->username),
-		'USER_LINK' => URL::build('/panel/store/payments/', 'user=' . Output::getClean($payment->username)),
+		'USER_LINK' => URL::build('/panel/store/payments/', 'player=' . Output::getClean($payment->username)),
 		'AVATAR' => $avatar,
 		'STYLE' => $style,
         'TRANSACTION' => $store_language->get('admin', 'transaction'),
@@ -229,27 +229,27 @@ if(isset($_GET['user'])){
 		if(isset($_GET['step'])){
 
 		} else {
-			// Choose package
-			$packages = $queries->orderAll('store_packages', '`order`', 'ASC');
+			// Choose product
+			$products = $queries->orderAll('store_products', '`order`', 'ASC');
 
-			if(count($packages)){
-				$template_packages = array();
+			if(count($products)){
+				$template_products = array();
 
-				foreach($packages as $package){
-					$template_packages[] = array(
-						'id' => Output::getClean($package->id),
-						'name' => Output::getClean($package->name)
+				foreach($products as $product){
+					$template_products[] = array(
+						'id' => Output::getClean($product->id),
+						'name' => Output::getClean($product->name)
 					);
 				}
 
 				$smarty->assign(array(
 					'IGN' => $store_language->get('admin', 'ign'),
-					'PACKAGE' => $store_language->get('general', 'package'),
-					'PACKAGES' => $template_packages
+					'PRODUCT' => $store_language->get('general', 'product'),
+					'PRODUCTS' => $template_products
 				));
 
 			} else
-				$smarty->assign('NO_PACKAGES', $store_language->get('general', 'no_packages'));
+				$smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
 
 			$template_file = 'store/payments_new_step_1.tpl';
 		}
@@ -290,7 +290,7 @@ if(isset($_GET['user'])){
             }
 
 			$template_payments[] = array(
-				'user_link' => 	URL::build('/panel/store/payments/', 'user=' . Output::getClean($payment->username)),
+				'user_link' => 	URL::build('/panel/store/payments/', 'player=' . Output::getClean($payment->username)),
 				'user_style' => $style,
 				'user_avatar' => $avatar,
 				'username' => Output::getClean($payment->username),

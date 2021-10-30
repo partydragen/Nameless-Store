@@ -15,10 +15,12 @@ $page_title = $store_language->get('general', 'store');
 
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
+require_once(ROOT_PATH . '/modules/Store/classes/Player.php');
 require_once(ROOT_PATH . '/modules/Store/classes/Gateways.php');
 require_once(ROOT_PATH . '/modules/Store/classes/GatewayBase.php');
 require_once(ROOT_PATH . '/modules/Store/classes/ShoppingCart.php');
 $store = new Store($cache, $store_language);
+$player = new Player();
 $gateways = new Gateways();
 $shopping_cart = new ShoppingCart();
 
@@ -28,7 +30,7 @@ if(Input::exists()){
 	if(Token::check(Input::get('token'))){
 		if(Input::get('type') == 'store_logout') {
 			// Logout the store player
-			unset($_SESSION['store_player']);
+			$player->logout();
 		}
 	}
 }
@@ -45,7 +47,7 @@ if(isset($_GET['do'])){
     // Add item to shopping cart
 	if(isset($_GET['add'])) {
 		if(!is_numeric($_GET['add'])){
-			die('Invalid package');
+			die('Invalid product');
 		}
         $shopping_cart->add($_GET['add']);
         
@@ -56,7 +58,7 @@ if(isset($_GET['do'])){
     // Remove item from shopping cart
 	if(isset($_GET['remove'])) {
 		if(!is_numeric($_GET['remove'])){
-			die('Invalid package');
+			die('Invalid product');
 		}
 		$shopping_cart->remove($_GET['remove']);
         
@@ -128,12 +130,12 @@ if(isset($_GET['do'])){
     
     // Load shopping list
     $shopping_cart_list = array();
-    foreach($shopping_cart->getPackages() as $package) {
+    foreach($shopping_cart->getProducts() as $product) {
         $shopping_cart_list[] = array(
-            'name' => Output::getClean($package->name),
+            'name' => Output::getClean($product->name),
             'quantity' => 1,
-            'price' => Output::getClean($package->price),
-            'remove_link' => URL::build($store_url . '/checkout/', 'remove=' . $package->id),
+            'price' => Output::getClean($product->price),
+            'remove_link' => URL::build($store_url . '/checkout/', 'remove=' . $product->id),
         );
     }
     
@@ -163,7 +165,7 @@ if(isset($_GET['do'])){
 }
 
 // Check if store player is required and isset
-if(!isset($_SESSION['store_player'])) {
+if(!$player->isLoggedIn()) {
 	Redirect::to(URL::build($store_url));
 	die();
 }
@@ -176,9 +178,9 @@ $smarty->assign(array(
     'TOKEN' => Token::get()
 ));
 
-if(isset($_SESSION['store_player'])) {
+if($player->isLoggedIn()) {
 	$smarty->assign(array(
-		'STORE_PLAYER' => Output::getClean($_SESSION['store_player']['username'])
+		'STORE_PLAYER' => $player->getUsername()
 	));
 }
 

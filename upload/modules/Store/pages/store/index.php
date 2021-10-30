@@ -15,9 +15,11 @@ $page_title = $store_language->get('general', 'store');
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 
 require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
+require_once(ROOT_PATH . '/modules/Store/classes/Player.php');
 require(ROOT_PATH . '/core/includes/emojione/autoload.php'); // Emojione
 $emojione = new Emojione\Client(new Emojione\Ruleset());
 $store = new Store($cache, $store_language);
+$player = new Player();
 
 $content = $queries->getWhere('store_settings', array('name', '=', 'store_content'));
 $content = Output::getDecoded($content[0]->value);
@@ -28,7 +30,7 @@ if(Input::exists()){
 	if(Token::check(Input::get('token'))){
 		if(Input::get('type') == 'store_logout') {
 			// Logout the store player
-			unset($_SESSION['store_player']);
+			$player->logout();
 		}
 	}
 }
@@ -41,9 +43,9 @@ $smarty->assign(array(
 	'TOKEN' => Token::get(),
 ));
 
-if(isset($_SESSION['store_player'])) {
+if($player->isLoggedIn()) {
 	$smarty->assign(array(
-		'STORE_PLAYER' => Output::getClean($_SESSION['store_player']['username'])
+		'STORE_PLAYER' => $player->getUsername()
 	));
 }
 

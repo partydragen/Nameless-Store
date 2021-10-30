@@ -44,8 +44,8 @@
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
 
-                        {if isset($NO_PACKAGES)}
-                            <p>{$NO_PACKAGES}</p>
+                        {if isset($NO_PRODUCTS)}
+                            <p>{$NO_PRODUCTS}</p>
                         {else}
                             <form action="" method="post">
                                 <div class="form-group">
@@ -53,9 +53,9 @@
                                     <input type="text" class="form-control" id="inputIGN" name="ign" placeholder="{$IGN}">
                                 </div>
                                 <div class="form-group">
-                                    <label for="inputPackage">{$PACKAGE}</label>
-                                    <select class="form-control" id="inputPackage" name="package">
-                                        {foreach from=$PACKAGES item=item}
+                                    <label for="inputProduct">{$PRODUCT}</label>
+                                    <select class="form-control" id="inputProduct" name="product">
+                                        {foreach from=$PRODUCTS item=item}
                                             <option value="{$item.id}">{$item.name}</option>
                                         {/foreach}
                                     </select>

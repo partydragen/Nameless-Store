@@ -22,11 +22,11 @@
 
                 <!-- Page Heading -->
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">{$CATEGORIES}</h1>
+                    <h1 class="h3 mb-0 text-gray-800">{$PRODUCTS}</h1>
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{$PANEL_INDEX}">{$DASHBOARD}</a></li>
                         <li class="breadcrumb-item active">{$STORE}</li>
-                        <li class="breadcrumb-item active">{$CATEGORIES}</li>
+                        <li class="breadcrumb-item active">{$PRODUCTS}</li>
                     </ol>
                 </div>
 
@@ -36,36 +36,56 @@
                 <div class="card shadow mb-4">
                     <div class="card-body">
                     
-                            <h5 style="display:inline">{$EDITING_CATEGORY}</h5>
+                            <h5 style="display:inline">{$NEW_PRODUCT}</h5>
                             <div class="float-md-right">
-                                <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
+                                <a href="/panel/store/packages" class="btn btn-primary">{$BACK}</a>
                             </div>
                             <hr />
-                            
+
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
-
+							
                             <form action="" method="post">
-                                <div class="form-group">
-									<label for="InputName">{$CATEGORY_NAME}</label>
-									<input type="text" name="name" class="form-control" id="InputName" value="{$CATEGORY_NAME_VALUE}" placeholder="{$CATEGORY_NAME}">
+								<div class="form-group">
+									<label for="InputName">{$PRODUCT_NAME}</label>
+									<input type="text" name="name" class="form-control" id="InputName" placeholder="{$PRODUCT_NAME}">
 								</div>
 								<div class="form-group">
-                                    <strong><label for="inputDescription">{$CATEGORY_DESCRIPTION}</label></strong>
-                                    <textarea id="inputDescription" name="description">{$CATEGORY_DESCRIPTION_VALUE}</textarea>
+                                    <strong><label for="inputDescription">{$PRODUCT_DESCRIPTION}</label></strong>
+                                    <textarea id="inputDescription" name="description">{$PRODUCT_DESCRIPTION_VALUE}</textarea>
                                 </div>
+								<div class="form-group">
+									<div class="row">
+                                        <div class="col-md-6">
+											<label for="inputPrice">{$PRICE}</label>
+											<div class="input-group">
+												<input type="number" name="price" class="form-control" id="inputPrice" step="0.01" min="0.01" placeholder="{$PRICE}">
+												<div class="input-group-append">
+													<span class="input-group-text">{$CURRENCY}</span>
+												</div>
+											</div>
+										</div>
+                                        <div class="col-md-6">
+											<label for="inputCategory">{$CATEGORY}</label>
+											<select name="category" class="form-control" id="inputCategory">
+												{foreach from=$CATEGORY_LIST item=category}
+													<option value="{$category.id}">{$category.name}</option>
+												{/foreach}
+											</select>
+										</div>
+                                    </div>
+								</div>
                                 <div class="form-group">
                                     <input type="hidden" name="token" value="{$TOKEN}">
                                     <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
                                 </div>
                             </form>
-							
 
-                            <!--<form action="" method="post" enctype="multipart/form-data">
+                            <!---<form action="" method="post" enctype="multipart/form-data">
                                 <div class="form-group">
-                                    <strong>{$CATEGORY_IMAGE}</strong><br />
-                                    {if $CATEGORY_IMAGE_VALUE}
-                                        <img src="{$CATEGORY_IMAGE_VALUE}" alt="{$CATEGORY_NAME}" style="max-height:200px;max-width:200px;"><br />
+                                    <strong>{$PRODUCT_IMAGE}</strong><br />
+                                    {if $PRODUCT_IMAGE_VALUE}
+                                        <img src="{$PRODUCT_IMAGE_VALUE}" alt="{$PRODUCT_NAME}" style="max-height:200px;max-width:200px;"><br />
                                     {/if}
                                     <strong>{$UPLOAD_NEW_IMAGE}</strong><br />
                                     <label class="btn btn-secondary">
@@ -77,7 +97,7 @@
                                     <input type="hidden" name="type" value="image">
                                     <input type="submit" value="{$SUBMIT}" class="btn btn-primary">
                                 </div>
-                            </form>-->
+                            </form>--->
 
                     </div>
                 </div>

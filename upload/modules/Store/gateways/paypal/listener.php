@@ -66,63 +66,57 @@ if (strcmp($res, "VERIFIED") == 0) {
 
     if ($paypal_email == $receiver_email) {
         
+        // Handle event
         switch($payment_status) {
             case 'Completed';
-                $status_id = 1;
+                // Payment complete
+                $payment = new Payment($transaction_id, 'transaction');
+                if($payment->exists()) {
+                    // Payment exists
+                    $data = array(
+                        'user_id' => $user_id,
+                        'player_id' => 0,
+                        'payment_id' => null,
+                        'payment_method' => $gateway->getId(),
+                        'transaction' => $transaction_id,
+                        'amount' => $payment_amount,
+                        'currency' => $payment_currency
+                    );
+                } else {
+                    // Payment exists
+                    $payment->create(array(
+                        'user_id' => $user_id,
+                        'player_id' => 0,
+                        'payment_id' => null,
+                        'payment_method' => $gateway->getId(),
+                        'transaction' => $transaction_id,
+                        'created' => date('U'),
+                        'last_updated' => date('U'),
+                        'status_id' => 1,
+                        'amount' => $payment_amount,
+                        'currency' => $payment_currency
+                    ));
+                    
+                    // Register packages
+                    $packages = explode(',', $item_number);
+                    foreach($packages as $item) {
+                        $queries->create('store_payments_packages', array(
+                            'payment_id' => $payment->data()->id,
+                            'package_id' => $item
+                        ));
+                    }
+                }
+                
+                $payment->handlePaymentEvent('COMPLETED', $data);
             break;
             default:
-                $status_id = 0;
+                // Payment refunded
+                $payment = new Payment($transaction_id, 'transaction');
+                if($payment->exists()) {
+                    // Payment exists
+                    $payment->handlePaymentEvent('REFUNDED', array());
+                }
             break;
-        }
-        
-        $transaction = $queries->getWhere('store_payments', array('transaction', '=', $transaction_id));
-        if(!count($transaction)) {
-            if($status_id == 1) {
-                // Save payment to database
-                $queries->create('store_payments', array(
-                    'user_id' => $user_id,
-                    'player_id' => 0,
-                    'payment_id' => null,
-                    'payment_method' => $gateway->getId(),
-                    'transaction' => $transaction_id,
-                    'created' => date('U'),
-                    'last_updated' => date('U'),
-                    'status_id' => 1,
-                    'amount' => $payment_amount,
-                    'currency' => $payment_currency,
-                ));
-                
-                $last_id = $queries->getLastId();
-                
-                $store->addPendingCommands($transaction->player_id, $last_id, 1);
-                
-                /*$target_user = new User($user_id);
-                if($user_id != 0 && $target_user->data()) {
-                    HookHandler::executeEvent('newDonation', array(
-                        'event' => 'newDonation',
-                        'username' => $target_user->getDisplayname(),
-                        'content_full' => 'Thanks to ' .$target_user->getDisplayname(). ' for your donation of $' . $payment_amount . ' ' . $payment_currency,
-                        'avatar_url' => $target_user->getAvatar(null, 128, true),
-                        'url' => Util::getSelfURL() . ltrim(URL::build('/profile/' . $target_user->getDisplayname()), '/')
-                    ));
-                } else {
-                    HookHandler::executeEvent('newDonation', array(
-                        'event' => 'newDonation',
-                        'username' => 'Anonymous',
-                        'content_full' => 'Thanks to Anonymous for your donation of $' . $payment_amount . ' ' . $payment_currency,
-                        'avatar_url' => 'https://battlefield2142.co/img/logo.png',
-                        'url' => null
-                    ));
-                }*/
-            }
-        } else {
-            if($status_id != 1) {
-                // Update existing payment
-                $queries->update('donate_payments', $transaction[0]->id, array(
-                    'status_id' => 2,
-                    'last_updated' => date('U')
-                ));
-            }
         }
         
         echo 'success';

@@ -16,26 +16,7 @@ if(isset($_GET['do'])){
 		if(!isset($_GET['paymentId']) && !isset($_GET['token'])){
 			die('Invalid id!');
 		}
-		
-		$player_id = 0;
-		$store_player = $_SESSION['store_player'];
-		$player = DB::getInstance()->query('SELECT * FROM nl2_store_players WHERE uuid = ?', array($store_player['uuid']))->results();
-		if(count($player)) {
-			$queries->update('store_players', $player[0]->id, array(
-				'username' => $store_player['username'],
-				'uuid' => $store_player['uuid']
-			));
-			
-			$player_id = $player[0]->id;
-		} else {
-			$queries->create('store_players', array(
-				'username' => $store_player['username'],
-				'uuid' => $store_player['uuid']
-			));
-			
-			$player_id = DB::getInstance()->lastId();
-		}
-			
+
 		if(isset($_GET['paymentId'])) {
 			// Single payment successfully made
 			$paymentId = $_GET['paymentId'];
@@ -51,18 +32,20 @@ if(isset($_GET['do'])){
 				ErrorHandler::logCustomError('Message: ' . $e->getMessage());
 				die('Unknown error');
 			}
-
-			// Save payment to database
-			$queries->create('store_payments', array(
-				'user_id' => ($user->isLoggedIn() ? $user->data()->id : null),
-				'player_id' => $player_id,
-				'payment_id' => $payment->getId(),
-				'payment_method' => $gateway->getId(),
-				'created' => date('U'),
-				'last_updated' => date('U')
-			));
             
-            $payment_id = $queries->getLastId();
+            $store_payment = new Payment($payment->getId(), 'payment_id');
+            if(!$store_payment->exists()) {
+                // Register pending payment
+                $payment_id = $store_payment->create(array(
+                    'user_id' => ($user->isLoggedIn() ? $user->data()->id : null),
+                    'player_id' => $player_id,
+                    'payment_id' => $payment->getId(),
+                    'payment_method' => $gateway->getId(),
+                    'created' => date('U'),
+                    'last_updated' => date('U')
+                ));
+            }
+
             foreach($shopping_cart->getItems() as $item) {
                 $queries->create('store_payments_packages', array(
                     'payment_id' => $payment_id,
@@ -71,7 +54,10 @@ if(isset($_GET['do'])){
             }
 			
 			$shopping_cart->clear();
-			Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
+			//Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
+            
+            print_r($_POST);
+            print_r($payment);
 			die();
 		} else if(isset($_GET['token'])) {
 			// Agreement successfully made
@@ -146,6 +132,16 @@ if(isset($_GET['do'])){
                     
     $payer = new \PayPal\Api\Payer();
     $payer->setPaymentMethod('paypal');
+    
+    $itemList = new PayPal\Api\ItemList();
+    $item = new PayPal\Api\Item();
+    $item->setName('GOD')
+    ->setCurrency('USD')
+    ->setSku("123123")
+    ->setQuantity(1)
+    ->setPrice(1);
+    
+    $itemList->setItems(array($item));
 
     $amount = new \PayPal\Api\Amount();
     $amount->setTotal($shopping_cart->getTotalPrice());
@@ -153,7 +149,9 @@ if(isset($_GET['do'])){
 
     $transaction = new \PayPal\Api\Transaction();
     $transaction->setAmount($amount);
+    $transaction->setItemList($itemList);
     $transaction->setDescription($packages_names);
+    $transaction->setInvoiceNumber(54);
 
     $redirectUrls = new \PayPal\Api\RedirectUrls();
     $redirectUrls->setReturnUrl(rtrim(Util::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=success'))

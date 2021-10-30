@@ -36,7 +36,7 @@ class Store {
 	
 	// Get all payments
 	public function getAllPayments() {
-		$payments = $this->_db->query('SELECT nl2_store_payments.*, uuid, username FROM nl2_store_payments LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id ORDER BY created DESC')->results();
+		$payments = $this->_db->query('SELECT nl2_store_payments.*, uuid, username FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id ORDER BY created DESC')->results();
 		
 		return $payments;
 	}
@@ -96,29 +96,6 @@ class Store {
         }
         
         return $categories;
-    }
-    
-    // Add pending commands
-    public function addPendingCommands($player_id, $payment_id, $type) {
-        $packages = $this->_db->query('SELECT * FROM nl2_store_payments_packages INNER JOIN nl2_store_packages ON nl2_store_packages.id=package_id WHERE payment_id = ?', array($payment_id))->results();
-        foreach($packages as $package) {
-            $commands = $this->_db->query('SELECT * FROM nl2_store_packages_commands WHERE package_id = ? AND type = ? ORDER BY `order`', array($package->id, $type))->results();
-            foreach($commands as $command) {
-                $this->_db->insert('store_pending_commands', array(
-                    'payment_id' => $payment_id,
-                    'player_id' => $player_id,
-                    'server_id' => $command->server_id,
-                    'type' => $command->type,
-                    'command' => $command->command,
-                    'require_online' => $command->require_online,
-                    'order' => $command->order,
-                ));
-            }
-        }
-    }
-    
-    public function deletePendingCommands($payment_id) {
-        $this->_db->createQuery('DELETE FROM nl2_store_pending_commands WHERE payment_id = ? AND status = 0', array($payment_id))->results();
     }
     
     /*

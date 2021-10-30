@@ -49,8 +49,8 @@
                                 <label for="inputPrice">{$PRICE}</label>
                                 <input id="inputPrice" name="bc_payment_price" class="form-control" type="number" step="0.01" min="0.01" value="{$PRICE}">
                             </div>
-                            {if count($PACKAGE_FIELDS)}
-                                {foreach from=$PACKAGE_FIELDS item=field}
+                            {if count($PRODUCT_FIELDS)}
+                                {foreach from=$PRODUCT_FIELDS item=field}
                                     <div class="form-group">
                                         <label for="input{$field.id}">{$field.name_title}</label><br />
                                         {if $field.description}{$field.description}{/if}

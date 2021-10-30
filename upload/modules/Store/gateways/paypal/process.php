@@ -11,40 +11,24 @@
 
 if(isset($_GET['do'])){
 	if($_GET['do'] == 'success'){
-        
-		$player_id = 0;
-		$store_player = $_SESSION['store_player'];
-		$player = DB::getInstance()->query('SELECT * FROM nl2_store_players WHERE uuid = ?', array($store_player['uuid']))->results();
-		if(count($player)) {
-			$queries->update('store_players', $player[0]->id, array(
-				'username' => $store_player['username'],
-				'uuid' => $store_player['uuid']
-			));
-			
-			$player_id = $player[0]->id;
-		} else {
-			$queries->create('store_players', array(
-				'username' => $store_player['username'],
-				'uuid' => $store_player['uuid']
-			));
-			
-			$player_id = DB::getInstance()->lastId();
-		}
-        
-                // Save payment to database
-                $queries->create('store_payments', array(
-                    'user_id' => ($user->isLoggedIn() ? $user->data()->id : null),
-                    'player_id' => $player_id,
-                    'payment_id' => null,
-                    'payment_method' => $gateway->getId(),
-                    'transaction' => $_POST['txn_id'],
-                    'created' => date('U'),
-                    'last_updated' => date('U'),
-                    'status_id' => 0,
-                    'amount' => $_POST['mc_gross'],
-                    'currency' => $_POST['mc_currency'],
-                ));
-                
+
+        $payment = new Payment($_POST['txn_id'], 'transaction');
+        if(!$payment->exists()) {
+            // Register pending payment
+            $payment->create(array(
+                'user_id' => ($user->isLoggedIn() ? $user->data()->id : null),
+                'player_id' => $player_id,
+                'payment_id' => null,
+                'payment_method' => $gateway->getId(),
+                'transaction' => $_POST['txn_id'],
+                'created' => date('U'),
+                'last_updated' => date('U'),
+                'status_id' => 0,
+                'amount' => $_POST['mc_gross'],
+                'currency' => $_POST['mc_currency']
+            ));
+        }
+
 		Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
 		die();
 	} else {
