@@ -36,21 +36,21 @@
                 <div class="card shadow mb-4">
                     <div class="card-body">
                     
-                            <h5 style="display:inline">{$NEW_CATEGORY}</h5>
-                            <div class="float-md-right">
-                                <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
-                            </div>
-                            <hr />
+                        <h5 style="display:inline">{$NEW_CATEGORY}</h5>
+                        <div class="float-md-right">
+                            <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
+                        </div>
+                        <hr />
 
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
 
                             <form action="" method="post">
-								<div class="form-group">
-									<label for="InputName">{$CATEGORY_NAME}</label>
-									<input type="text" name="name" class="form-control" id="InputName" placeholder="{$CATEGORY_NAME}">
-								</div>
-								<div class="form-group">
+                                <div class="form-group">
+                                    <label for="InputName">{$CATEGORY_NAME}</label>
+                                    <input type="text" name="name" class="form-control" id="InputName" placeholder="{$CATEGORY_NAME}">
+                                </div>
+                                <div class="form-group">
                                     <strong><label for="inputDescription">{$CATEGORY_DESCRIPTION}</label></strong>
                                     <textarea id="inputDescription" name="description">{$CATEGORY_DESCRIPTION_VALUE}</textarea>
                                 </div>

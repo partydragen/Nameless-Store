@@ -35,56 +35,56 @@
 
                 <div class="card shadow mb-4">
                     <div class="card-body">
-                    
-							<span class="float-md-right">
-								<a href="/panel/store/categories/?action=new" class="btn btn-primary"><i class="fa fa-plus-circle"></i> {$NEW_CATEGORY}</a>
-								<a href="/panel/store/packages/?action=new" class="btn btn-primary"><i class="fa fa-plus-circle"></i> {$NEW_PRODUCT}</a>
-							</span>
-							
-							</br>
-							</br>
-							
+
+                        <span class="float-md-right">
+                            <a href="{$NEW_CATEGORY_LINK}" class="btn btn-primary"><i class="fa fa-plus-circle"></i> {$NEW_CATEGORY}</a>
+                            <a href="{$NEW_PRODUCT_LINK}" class="btn btn-primary"><i class="fa fa-plus-circle"></i> {$NEW_PRODUCT}</a>
+                        </span>
+                            
+                        </br>
+                        </br>
+                            
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
 
-                            {if isset($NO_PRODUCTS)}
+                        {if isset($NO_PRODUCTS)}
                             <p>{$NO_PRODUCTS}</p>
-                            {else}
+                        {else}
                             {foreach from=$ALL_CATEGORIES item=category}
                             <div class="card card-default">
-								<div class="card-header">
-									<strong>{$category.name}</strong>
-									<span class="float-md-right">
+                                <div class="card-header">
+                                    <strong>{$category.name}</strong>
+                                    <span class="float-md-right">
                                         <a class="btn btn-warning btn-sm" href="{$category.edit_link}"><i class="fas fa-pencil-alt"></i></a>
                                         <button class="btn btn-danger btn-sm" type="button" onclick="showDeleteCategoryModal('{$category.delete_link}')"><i class="fas fa-trash fa-fw"></i></button>
                                     </span>
-								</div>
-								<div class="card-body">
-								{if count($category.products)}
+                                </div>
+                                <div class="card-body">
+                                {if count($category.products)}
                                 {foreach from=$category.products item=product name=product_loop}
-									<div class="row">
-										<div class="col-md-4">
-											{$product.name} <small>{$product.id_x}</small>
-										</div>
-										<div class="col-md-4">
-											<center>{$product.price}</center>
-										</div>
-										<div class="col-md-4">
-											{if isset($product.edit_link)}
-											<span class="float-md-right">
-												<a class="btn btn-warning btn-sm" href="{$product.edit_link}"><i class="fas fa-pencil-alt"></i></a>
-												<button class="btn btn-danger btn-sm" type="button" onclick="showDeleteProductModal('{$product.delete_link}')"><i class="fas fa-trash fa-fw"></i></button>
-											</span>
-											{/if}
-										</div>
-									</div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            {$product.name} <small>{$product.id_x}</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <center>{$product.price}</center>
+                                        </div>
+                                        <div class="col-md-4">
+                                            {if isset($product.edit_link)}
+                                            <span class="float-md-right">
+                                                <a class="btn btn-warning btn-sm" href="{$product.edit_link}"><i class="fas fa-pencil-alt"></i></a>
+                                                <button class="btn btn-danger btn-sm" type="button" onclick="showDeleteProductModal('{$product.delete_link}')"><i class="fas fa-trash fa-fw"></i></button>
+                                            </span>
+                                            {/if}
+                                        </div>
+                                    </div>
                                     {if !$smarty.foreach.product_loop.last}<hr />{/if}
                                 {/foreach}
-								{/if}
-								</div>
+                                {/if}
+                                </div>
                             </div>
                             {/foreach}
-                            {/if}
+                        {/if}
 
                     </div>
                 </div>
@@ -105,7 +105,7 @@
 
     <!-- End Wrapper -->
 </div>
-	
+    
     <div class="modal fade" id="deleteCategoryModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -125,7 +125,7 @@
             </div>
         </div>
     </div>
-	
+    
     <div class="modal fade" id="deleteProductModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">

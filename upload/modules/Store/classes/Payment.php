@@ -11,10 +11,9 @@
 
 class Payment {
     
-    /** @var DB */
-    private $_db;
-    
-    private $_data;
+    private $_db,
+            $_data,
+            $_order;
     
     public function __construct($value, $field = 'id') {
         $this->_db = DB::getInstance();
@@ -71,6 +70,14 @@ class Payment {
      */
     public function data() {
         return $this->_data;
+    }
+    
+    public function getOrder() {
+        if($this->_order == null) {
+            $this->_order = new Order($this->data()->order_id);
+        }
+        
+        return $this->_order;
     }
     
     /**
@@ -173,5 +180,29 @@ class Payment {
      */
     public function deletePendingCommands() {
         $this->_db->createQuery('DELETE FROM nl2_store_pending_commands WHERE order_id = ? AND status = 0', array($this->data()->order_id))->results();
+    }
+    
+    public function getStatusHtml() {
+        $status = '<span class="badge badge-danger">Unknown</span>';
+        
+        switch($this->data()->status_id) {
+            case 0;
+                $status = '<span class="badge badge-warning">Pending</span>';
+            break;
+            case 1;
+                $status = '<span class="badge badge-success">Complete</span>';
+            break;
+            case 2;
+                $status = '<span class="badge badge-primary">Refunded</span>';
+            break;
+            case 3;
+                $status = '<span class="badge badge-info">Changeback</span>';
+            break;
+            default:
+                $status = '<span class="badge badge-danger">Unknown</span>';
+            break;
+        }
+        
+        return $status;
     }
 }

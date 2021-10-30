@@ -35,41 +35,43 @@
 
                 <div class="card shadow mb-4">
                     <div class="card-body">
-                            <h5 style="display:inline">{$VIEWING_PAYMENTS_FOR_USER}</h5>
-                            <div class="float-md-right">
-                                <a class="btn btn-primary" href="{$BACK_LINK}">{$BACK}</a>
-                            </div>
-                            <hr />
+                        <h5 style="display:inline">{$VIEWING_PAYMENTS_FOR_USER}</h5>
+                        <div class="float-md-right">
+                             <a class="btn btn-primary" href="{$BACK_LINK}">{$BACK}</a>
+                        </div>
+                        <hr />
 
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
 
-                            {if isset($NO_PAYMENTS)}
-                                <p>{$NO_PAYMENTS}</p>
-                            {else}
-                                <div class="table-responsive">
-                                    <table class="table table-striped dataTables-payments" style="width:100%">
-                                        <thead>
+                        {if isset($NO_PAYMENTS)}
+                            <p>{$NO_PAYMENTS}</p>
+                        {else}
+                            <div class="table-responsive">
+                                <table class="table table-striped dataTables-payments" style="width:100%">
+                                    <thead>
                                         <tr>
                                             <th>{$USER}</th>
                                             <th>{$AMOUNT}</th>
+                                            <th>{$STATUS}</th>
                                             <th>{$DATE}</th>
                                             <th>{$VIEW}</th>
                                         </tr>
-                                        </thead>
-                                        <tbody>
+                                    </thead>
+                                    <tbody>
                                         {foreach from=$USER_PAYMENTS item=payment}
                                             <tr>
                                                 <td><a href="{$payment.user_link}" style="{$payment.user_style}"><img src="{$payment.user_avatar}" class="rounded" style="max-width:32px;max-height:32px;" alt="{$payment.username}" /> {$payment.username}</a></td>
                                                 <td>{$payment.currency_symbol}{$payment.amount}</td>
+                                                <td>{$payment.status}</td>
                                                 <td data-sort="{$payment.date_unix}">{$payment.date}</td>
                                                 <td><a href="{$payment.link}" class="btn btn-primary btn-sm">{$VIEW}</a></td>
                                             </tr>
                                         {/foreach}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {/if}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {/if}
 
                     </div>
                 </div>
