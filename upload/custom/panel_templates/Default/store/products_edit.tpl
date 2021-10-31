@@ -37,7 +37,7 @@
                     <div class="card-body">
                             <h5 style="display:inline">{$EDITING_PRODUCT}</h5>
                             <div class="float-md-right">
-                                <a href="/panel/store/products" class="btn btn-primary">{$BACK}</a>
+                                <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
                             </div>
                             <hr />
 
@@ -84,7 +84,7 @@
 							
 							<h5 style="display:inline">{$COMMANDS}</h5>
 							<div class="float-md-right">
-								<a href="/panel/store/packages/?action=new_command&id={$ID}" class="btn btn-primary">{$NEW_COMMAND}</a>
+								<a href="{$NEW_COMMAND_LINK}" class="btn btn-primary">{$NEW_COMMAND}</a>
 							</div>
 							
 							{if count($COMMAND_LIST)}
@@ -106,8 +106,8 @@
 											<td>{$command.command}</td>
 											<td>
 												<div class="float-md-right">
-													<a class="btn btn-warning btn-sm" href="/panel/store/packages/?action=edit_command&id={$ID}&command={$command.id}"><i class="fas fa-edit fa-fw"></i></a>
-													<a class="btn btn-danger btn-sm" href="/panel/store/packages/?action=delete_command&id={$ID}&command={$command.id}"><i class="fas fa-trash fa-fw"></i></a>
+													<a class="btn btn-warning btn-sm" href="{$command.edit_link}"><i class="fas fa-edit fa-fw"></i></a>
+													<a class="btn btn-danger btn-sm" href="{$command.delete_link}"><i class="fas fa-trash fa-fw"></i></a>
 												</div>
 											</td>
 										</tr>

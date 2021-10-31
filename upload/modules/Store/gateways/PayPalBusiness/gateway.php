@@ -11,11 +11,10 @@
 
 class PayPal_Business_Gateway extends GatewayBase {
     public function __construct(){
-        $id = 2;
         $name = 'PayPalBusiness';
         $settings = ROOT_PATH . '/modules/Store/gateways/PayPalBusiness/gateway_settings/settings.php';
             
-        parent::__construct($id, $name, $settings);
+        parent::__construct($name, $settings);
     }
 }
 

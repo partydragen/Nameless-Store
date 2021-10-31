@@ -26,7 +26,7 @@ if($client_id && $client_secret) {
 				'log.LogEnabled' => true,
 				'log.FileName' => ROOT_PATH . '/cache/logs/PayPal.log',
 				'log.LogLevel' => 'FINE',
-				'mode' => 'sandbox',
+				'mode' => 'live',
 			)
 		);
 

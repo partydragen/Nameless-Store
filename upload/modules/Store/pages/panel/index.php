@@ -39,24 +39,9 @@ if(isset($_POST) && !empty($_POST)){
 			else
 				$allow_guests = 0;
 
-			try {
-				$allow_guests_query = $queries->getWhere('store_settings', array('name', '=', 'allow_guests'));
-
-				if(count($allow_guests_query)){
-					$allow_guests_query = $allow_guests_query[0]->id;
-					$queries->update('store_settings', $allow_guests_query, array(
-						'value' => $allow_guests
-					));
-				} else {
-					$queries->create('store_settings', array(
-						'name' => 'allow_guests',
-						'value' => $allow_guests
-					));
-				}
-
-			} catch(Exception $e){
-				$errors[] = $e->getMessage();
-			}
+			$configuration->set('store', 'allow_guests', $allow_guests);
+            $configuration->set('store', 'currency', Output::getClean(Input::get('currency')));
+            $configuration->set('store', 'currency_symbol', Output::getClean(Input::get('currency_symbol')));
 
 			try {
 				$store_index_content = $queries->getWhere('store_settings', array('name', '=', 'store_content'));
@@ -78,17 +63,17 @@ if(isset($_POST) && !empty($_POST)){
 			}
 			
 			try {
-				$store_checkout_content = $queries->getWhere('store_settings', array('name', '=', 'store_checkout_content'));
+				$checkout_complete_content = $queries->getWhere('store_settings', array('name', '=', 'checkout_complete_content'));
 
-				if(count($store_checkout_content)){
-					$store_checkout_content = $store_checkout_content[0]->id;
-					$queries->update('store_settings', $store_checkout_content, array(
-						'value' => Output::getClean(Input::get('store_checkout_content'))
+				if(count($checkout_complete_content)){
+					$checkout_complete_content = $checkout_complete_content[0]->id;
+					$queries->update('store_settings', $checkout_complete_content, array(
+						'value' => Output::getClean(Input::get('checkout_complete_content'))
 					));
 				} else {
 					$queries->create('store_settings', array(
-						'name' => 'store_checkout_content',
-						'value' => Output::getClean(Input::get('store_checkout_content'))
+						'name' => 'checkout_complete_content',
+						'value' => Output::getClean(Input::get('checkout_complete_content'))
 					));
 				}
 
@@ -149,13 +134,10 @@ if(isset($errors) && count($errors))
 		'ERRORS_TITLE' => $language->get('general', 'error')
 	));
 
-$allow_guests = $queries->getWhere('store_settings', array('name', '=', 'allow_guests'));
+// Can guest make purchases
+$allow_guests = $configuration->get('store', 'allow_guests');
 
-if(count($allow_guests))
-	$allow_guests = $allow_guests[0]->value;
-else
-	$allow_guests = 0;
-
+// Store content
 $store_index_content = $queries->getWhere('store_settings', array('name', '=', 'store_content'));
 if(count($store_index_content)){
 	$store_index_content = Output::getClean(Output::getPurified(Output::getDecoded($store_index_content[0]->value)));
@@ -163,19 +145,28 @@ if(count($store_index_content)){
 	$store_index_content = '';
 }
 
-$store_checkout_content = $queries->getWhere('store_settings', array('name', '=', 'store_checkout_content'));
-if(count($store_checkout_content)){
-	$store_checkout_content = Output::getClean(Output::getPurified(Output::getDecoded($store_checkout_content[0]->value)));
+// Checkout complete content
+$checkout_complete_content = $queries->getWhere('store_settings', array('name', '=', 'checkout_complete_content'));
+if(count($checkout_complete_content)){
+	$checkout_complete_content = Output::getClean(Output::getPurified(Output::getDecoded($checkout_complete_content[0]->value)));
 } else {
-	$store_checkout_content = '';
+	$checkout_complete_content = '';
 }
 
+// Store Path
 $store_path = $queries->getWhere('store_settings', array('name', '=', 'store_path'));
 if(count($store_path)){
 	$store_path = Output::getClean($store_path[0]->value);
 } else {
 	$store_path = '/store';
 }
+
+// Currency
+$currency_list = array('USD', 'EUR', 'GBP', 'NOK', 'SEK', 'PLN', 'DKK', 'CAD', 'BRL', 'AUD');
+$currency = $configuration->get('store', 'currency');
+
+// Currency Symbol
+$currency_symbol = $configuration->get('store', 'currency_symbol');
 
 $smarty->assign(array(
 	'PARENT_PAGE' => PARENT_PAGE,
@@ -187,12 +178,17 @@ $smarty->assign(array(
 	'SETTINGS' => $store_language->get('admin', 'settings'),
 	'ALLOW_GUESTS' => $store_language->get('admin', 'allow_guests'),
 	'ALLOW_GUESTS_VALUE' => ($allow_guests == 1),
+	'STORE_PATH' => $store_language->get('admin', 'store_path'),
+	'STORE_PATH_VALUE' => URL::build($store_path),
+    'CURRENCY' => $store_language->get('admin', 'currency'),
+    'CURRENCY_LIST' => $currency_list,
+    'CURRENCY_VALUE' => Output::getClean($currency),
+    'CURRENCY_SYMBOL' => $store_language->get('admin', 'currency_symbol'),
+    'CURRENCY_SYMBOL_VALUE' => Output::getClean($currency_symbol),
 	'STORE_INDEX_CONTENT' => $store_language->get('admin', 'store_index_content'),
 	'STORE_INDEX_CONTENT_VALUE' => $store_index_content,
-	'STORE_CHECKOUT_CONTENT' => $store_language->get('admin', 'store_checkout_content'),
-	'STORE_CHECKOUT_CONTENT_VALUE' => $store_checkout_content,
-	'STORE_PATH' => $store_language->get('admin', 'store_path'),
-	'STORE_PATH_VALUE' => URL::build($store_path)
+	'CHECKOUT_COMPLETE_CONTENT' => $store_language->get('admin', 'checkout_complete_content'),
+	'CHECKOUT_COMPLETE_CONTENT_VALUE' => $checkout_complete_content
 ));
 
 if(!defined('TEMPLATE_STORE_SUPPORT')){
@@ -208,7 +204,7 @@ if(!defined('TEMPLATE_STORE_SUPPORT')){
 	));
 
 	$template->addJSScript(Input::createEditor('inputStoreContent', true));
-	$template->addJSScript(Input::createEditor('inputCheckoutContent', true));
+	$template->addJSScript(Input::createEditor('inputCheckoutCompleteContent', true));
 	$template->addJSScript('
 	var elems = Array.prototype.slice.call(document.querySelectorAll(\'.js-switch\'));
 

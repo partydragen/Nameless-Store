@@ -9,8 +9,8 @@ class CommandsExecuted extends EndpointBase {
 
     public function execute(Nameless2API $api) {
         $query = 'UPDATE `nl2_store_pending_commands` SET `status`=1';
-        $where = ' WHERE player_id = ?';
-        $params = array($_GET['player_id']);
+        $where = ' WHERE order_id = ?';
+        $params = array($_GET['order_id']);
 
         if (isset($_GET['online'])) {
             $where .= ' AND require_online = ?';

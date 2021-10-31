@@ -7,7 +7,16 @@
 				</div>
 				<input type="hidden" name="token" value="{$TOKEN}">
 				<input type="hidden" name="type" value="store_logout">
-				<input type="submit" class="ui red button" value="Logout">
+				<input type="submit" class="ui red button" value="{$LOGOUT}">
+                {if count($SHOPPING_CART_PRODUCTS)}
+                  <a href="{$CHECKOUT_LINK}" class="ui blue label">
+                    {$X_ITEMS_FOR_Y}
+				  </a>
+                {else}
+                  <a class="ui blue disabled label">
+                    {$X_ITEMS_FOR_Y}
+				  </a>
+                {/if}
 			  </div>
 			</form>
 		  </span>

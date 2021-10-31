@@ -48,6 +48,20 @@
                                     <label for="inputStorePath">{$STORE_PATH}</label>
                                     <input type="text" class="form-control" id="inputStorePath" name="store_path" placeholder="{$STORE_PATH}" value="{$STORE_PATH_VALUE}">
                                 </div>
+                                
+                                <div class="form-group">
+                                    <label for="link_location">{$CURRENCY}</label>
+                                    <select class="form-control" id="currency" name="currency">
+                                        {foreach from=$CURRENCY_LIST item=currency}
+                                            <option value="{$currency}"{if $CURRENCY_VALUE eq {$currency}} selected{/if}>{$currency}</option>
+                                        {/foreach}
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="inputCurrencySymbol">{$CURRENCY_SYMBOL}</label>
+                                    <input type="text" class="form-control" id="inputCurrencySymbol" name="currency_symbol" placeholder="$" value="{$CURRENCY_SYMBOL_VALUE}">
+                                </div>
 
                                 <div class="form-group">
                                     <label for="inputStoreContent">{$STORE_INDEX_CONTENT}</label>
@@ -55,8 +69,8 @@
                                 </div>
 								
                                 <div class="form-group">
-                                    <label for="inputCheckoutContent">{$STORE_CHECKOUT_CONTENT}</label>
-                                    <textarea id="inputCheckoutContent" name="store_checkout_content">{$STORE_CHECKOUT_CONTENT_VALUE}</textarea>
+                                    <label for="inputCheckoutCompleteContent">{$CHECKOUT_COMPLETE_CONTENT}</label>
+                                    <textarea id="inputCheckoutCompleteContent" name="checkout_complete_content">{$CHECKOUT_COMPLETE_CONTENT_VALUE}</textarea>
                                 </div>
 
                                 <div class="form-group">

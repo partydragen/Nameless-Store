@@ -38,7 +38,7 @@
                     
                             <h5 style="display:inline">{$NEW_PRODUCT}</h5>
                             <div class="float-md-right">
-                                <a href="/panel/store/packages" class="btn btn-primary">{$BACK}</a>
+                                <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
                             </div>
                             <hr />
 

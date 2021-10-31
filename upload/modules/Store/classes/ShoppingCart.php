@@ -59,7 +59,7 @@ class ShoppingCart {
     
     // Get the products from the shopping cart
     public function getProducts() {
-        return $this->_products;
+        return $this->_products ? $this->_products : array();
     }
     
     // Get total price to pay

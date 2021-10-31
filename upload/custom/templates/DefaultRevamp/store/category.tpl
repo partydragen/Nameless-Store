@@ -47,9 +47,9 @@
                         <span class="header">{$product.name}</span>
                         <div class="ui divider"></div>
                         {if $product.sale_active}
-                          <span style="color: #dc3545;text-decoration:line-through;">{$CURRENCY}{$product.price}</span>
+                          <span style="color: #dc3545;text-decoration:line-through;">{$CURRENCY_SYMBOL}{$product.price}{$CURRENCY}</span>
                         {/if}
-                        {$CURRENCY}{$product.real_price}
+                        {$CURRENCY_SYMBOL}{$product.real_price} {$CURRENCY}
                       </div>
                       <div class="ui bottom attached blue button" onClick="$('#modal{$product.id}').modal('show');">
                         {$BUY} &raquo;
@@ -59,7 +59,7 @@
 
                   <div class="ui small modal" id="modal{$product.id}">
                     <div class="header">
-                      {$product.name} | {$CURRENCY}{$product.price}
+                      {$product.name} | {$CURRENCY_SYMBOL}{$product.price} {$CURRENCY}
                     </div>
                     <div class="{if $product.image}image {/if}content">
                       {if $product.image}

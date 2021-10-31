@@ -158,6 +158,7 @@ if(!isset($_GET['action'])) {
 			$smarty->assign(array(
 				'NEW_PRODUCT' => $store_language->get('admin', 'new_product'),
 				'BACK' => $language->get('general', 'back'),
+                'BACK_LINK' => URL::build('/panel/store/products/'),
 				'PRODUCT_NAME' => $store_language->get('admin', 'product_name'),
 				'PRODUCT_DESCRIPTION' => $store_language->get('admin', 'product_description'),
 				'PRICE' => $store_language->get('admin', 'price'),
@@ -264,7 +265,9 @@ if(!isset($_GET['action'])) {
 						'id' => Output::getClean($command->id),
 						'command' => Output::getClean($command->command),
 						'type' => $type,
-						'requirePlayer' => ($command->require_online ? 'Yes' : 'No')
+						'requirePlayer' => ($command->require_online ? 'Yes' : 'No'),
+                        'edit_link' => URL::build('/panel/store/products', 'action=edit_command&id=' . $product->id . '&command=' . $command->id),
+                        'delete_link' => URL::build('/panel/store/products', 'action=delete_command&id=' . $product->id . '&command=' . $command->id),
 					);
 				}
 			}
@@ -274,6 +277,7 @@ if(!isset($_GET['action'])) {
 				'EDITING_PRODUCT' => str_replace('{x}', Output::getClean($product->name), $store_language->get('admin', 'editing_product_x')),
 				'ID' => Output::getClean($product->id),
 				'BACK' => $language->get('general', 'back'),
+                'BACK_LINK' => URL::build('/panel/store/products/'),
 				'PRODUCT_NAME' => $store_language->get('admin', 'product_name'),
 				'PRODUCT_NAME_VALUE' => Output::getClean($product->name),
 				'PRODUCT_DESCRIPTION' => $store_language->get('admin', 'product_description'),
@@ -285,6 +289,7 @@ if(!isset($_GET['action'])) {
 				'CATEGORY_LIST' => $store->getAllCategories(),
 				'COMMANDS' => $store_language->get('admin', 'commands'),
 				'NEW_COMMAND' => $store_language->get('admin', 'new_command'),
+                'NEW_COMMAND_LINK' => URL::build('/panel/store/products/' , 'action=new_command&id=' . $product->id),
 				'COMMAND_LIST' => $commands_array
 			));
 			
@@ -390,6 +395,7 @@ if(!isset($_GET['action'])) {
 				'ID' => Output::getClean($product->id),
 				'NEW_COMMAND' => str_replace('{x}', Output::getClean($product->name), $store_language->get('admin', 'new_command_for_x')),
 				'BACK' => $language->get('general', 'back'),
+                'BACK_LINK' => URL::build('/panel/store/products/' , 'action=edit&id=' . $product->id),
 			));
 			
 			$template_file = 'store/products_command_new.tpl';
@@ -464,6 +470,7 @@ if(!isset($_GET['action'])) {
 				'ID' => Output::getClean($product->id),
 				'EDITING_COMMAND' => str_replace('{x}', Output::getClean($product->name), $store_language->get('admin', 'editing_command_for_x')),
 				'BACK' => $language->get('general', 'back'),
+                'BACK_LINK' => URL::build('/panel/store/products/' , 'action=edit&id=' . $product->id),
 				'TRIGGER_VALUE' => Output::getClean($command->type),
 				'REQUIRE_PLAYER_VALUE' => Output::getClean($command->require_online),
 				'COMMAND_VALUE' => Output::getClean($command->command),

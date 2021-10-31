@@ -23,11 +23,15 @@ if(isset($_GET['key']) && $_GET['key'] == StoreConfig::get('paypal_business/key'
     $signatureVerification->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
     $signatureVerification->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
     $signatureVerification->setRequestBody($bodyReceived);
-
+    
     try {
         $response = json_decode($bodyReceived);     
         if(isset($response->event_type)) {
-            file_put_contents(ROOT_PATH . '/api_'.$response->event_type.'_'.date('U').'.txt', $bodyReceived);
+            
+            // Save response to log
+            if(is_dir(ROOT_PATH . '/cache/paypal_logs/')){
+                file_put_contents(ROOT_PATH . '/cache/paypal_logs/'. $gateway->getName() . '_' .$response->event_type.'_'.date('U').'.txt', $bodyReceived);
+            }
             
             // Handle event
             switch($response->event_type){
@@ -39,13 +43,26 @@ if(isset($_GET['key']) && $_GET['key'] == StoreConfig::get('paypal_business/key'
                         if($payment->exists()) {
                             // Payment exists
                             $data = array(
-                                'transaction' => $response->resource->id,
+                                'transaction' => Output::getClean($response->resource->id),
                                 'amount' => Output::getClean($response->resource->amount->total),
                                 'currency' => Output::getClean($response->resource->amount->currency),
+                                'fee' => Output::getClean($response->resource->transaction_fee->value)
                             );
-                            
-                            $payment->handlePaymentEvent('COMPLETED', $data);
+
+                        } else {
+                            // Register new payment
+                            $data = array(
+                                'order_id' => Output::getClean($response->resource->invoice_number),
+                                'payment_id' => Output::getClean($response->id),
+                                'gateway_id' => $gateway->getId(),
+                                'transaction' => Output::getClean($response->resource->id),
+                                'amount' => Output::getClean($response->resource->amount->total),
+                                'currency' => Output::getClean($response->resource->amount->currency),
+                                'fee' => Output::getClean($response->resource->transaction_fee->value)
+                            );
                         }
+                        
+                        $payment->handlePaymentEvent('COMPLETED', $data);
                     } else if(isset($response->resource->billing_agreement_id)){
                         // Agreement payment
 
@@ -58,7 +75,7 @@ if(isset($_GET['key']) && $_GET['key'] == StoreConfig::get('paypal_business/key'
                     break;
                 case 'PAYMENT.SALE.REFUNDED':
                     // Payment refunded
-                    $payment = new Payment($response->resource->id, 'transaction');
+                    $payment = new Payment($response->resource->sale_id, 'transaction');
                     if($payment->exists()) {
                         // Payment exists 
                         $payment->handlePaymentEvent('REFUNDED', array());
@@ -129,8 +146,10 @@ if(isset($_GET['key']) && $_GET['key'] == StoreConfig::get('paypal_business/key'
                     break;
             }
         } else {
-            // Event type not set!!!!
-            file_put_contents(ROOT_PATH . '/api_no_event_'.date('U').'.txt', $bodyReceived);
+            // Save response to log
+            if(is_dir(ROOT_PATH . '/cache/paypal_logs/')){
+                file_put_contents(ROOT_PATH . '/cache/paypal_logs/' . $gateway->getName() . '_no_event_'.date('U').'.txt', $bodyReceived);
+            }
         }
             
     } catch(\PayPal\Exception\PayPalInvalidCredentialException $e){

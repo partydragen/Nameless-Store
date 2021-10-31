@@ -146,8 +146,31 @@ class Payment {
                 break;
             }
         } else {
-            // TO-DO: Attempt to register missing payment???
-            throw new Exception('Unknown payment');
+            // Register payment
+            switch($event) {
+                case 'PENDING':
+                    // Payment pending
+                    $insert_array = array(
+                        'status_id' => 0,
+                        'created' => date('U'),
+                        'last_updated' => date('U')
+                    );
+                    
+                    $this->create(array_merge($insert_array, $extra_data));
+                break;
+                case 'COMPLETED':
+                    // Payment completed
+                    $insert_array = array(
+                        'status_id' => 1,
+                        'created' => date('U'),
+                        'last_updated' => date('U')
+                    );
+                    
+                    $this->create(array_merge($insert_array, $extra_data));
+                    
+                    $this->addPendingCommands(1);
+                break;
+            }
         }
     }
     
@@ -155,16 +178,15 @@ class Payment {
      * Add commands from products to pending commands
      */
     public function addPendingCommands($type) {
-        $products = $this->_db->query('SELECT * FROM nl2_store_orders_products INNER JOIN nl2_store_products ON nl2_store_products.id=product_id WHERE order_id = ?', array($this->data()->order_id))->results();
+        $products = $this->_db->query('SELECT product_id, player_id FROM nl2_store_orders_products INNER JOIN nl2_store_orders ON order_id=nl2_store_orders.id INNER JOIN nl2_store_products ON nl2_store_products.id=product_id WHERE order_id = ?', array($this->data()->order_id))->results();
         foreach($products as $product) {
-            $commands = $this->_db->query('SELECT * FROM nl2_store_products_commands WHERE product_id = ? AND type = ? ORDER BY `order`', array($product->id, $type))->results();
+            $commands = $this->_db->query('SELECT * FROM nl2_store_products_commands WHERE product_id = ? AND type = ? ORDER BY `order`', array($product->product_id, $type))->results();
             foreach($commands as $command) {
                 $this->_db->insert('store_pending_commands', array(
                     'order_id' => $this->data()->order_id,
                     'command_id' => $command->id,
                     'product_id' => $product->product_id,
-                    'payment_id' => $this->data()->id,
-                    'player_id' => $this->data()->player_id,
+                    'player_id' => $product->player_id,
                     'server_id' => $command->server_id,
                     'type' => $command->type,
                     'command' => $command->command,

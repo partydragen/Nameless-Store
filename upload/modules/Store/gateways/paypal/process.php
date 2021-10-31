@@ -16,16 +16,15 @@ if(isset($_GET['do'])){
         if(!$payment->exists()) {
             // Register pending payment
             $payment->create(array(
-                'user_id' => ($user->isLoggedIn() ? $user->data()->id : null),
-                'player_id' => $player_id,
-                'payment_id' => null,
-                'payment_method' => $gateway->getId(),
+                'order_id' => $_POST['custom'],
+                'gateway_id' => $gateway->getId(),
                 'transaction' => $_POST['txn_id'],
                 'created' => date('U'),
                 'last_updated' => date('U'),
                 'status_id' => 0,
                 'amount' => $_POST['mc_gross'],
-                'currency' => $_POST['mc_currency']
+                'currency' => $_POST['mc_currency'],
+                'fee' => $_POST['mc_fee']
             ));
         }
 
@@ -38,36 +37,32 @@ if(isset($_GET['do'])){
 	}
 
 } else {
-    // Build packages id string
-    $packages_ids = '';
-    foreach($shopping_cart->getPackages() as $package) {
-        $packages_ids .= (int) $package->id . ',';
+    // Build product names string
+    $product_names = '';
+    foreach($order->getProducts() as $product) {
+        $product_names .= $product->name . ', ';
     }
-    $packages_ids = rtrim($packages_ids, ',');
-
-    // Build package names string
-    $packages_names = '';
-    foreach($shopping_cart->getPackages() as $package) {
-        $packages_names .= $package->name . ', ';
-    }
-    $packages_names = rtrim($packages_names, ', ');
+    $product_names = rtrim($product_names, ', ');
 
     $return_url = rtrim(Util::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPal&do=success');
     $cancel_url = rtrim(Util::getSelfURL(), '/') . URL::build($store_url . '/checkout/', 'gateway=PayPal&do=cancel');
     $listener_url = rtrim(Util::getSelfURL(), '/') . URL::build('/store/listener/', 'gateway=PayPal');
 
     $paypal_email = StoreConfig::get('paypal/email');
+    
+    $currency = Output::getClean($configuration->get('store', 'currency'));
     //https://www.paypal.com/cgi-bin/webscr
+    //https://www.sandbox.paypal.com/cgi-bin/webscr
     ?>
     
-    <form name="pay" action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post" target="_top">
+    <form name="pay" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
       <input type="hidden" name="cmd" value="_xclick">
       <input type="hidden" name="business" value="<?php echo $paypal_email; ?>" />
-      <input type="hidden" name="currency_code" value="USD" />
+      <input type="hidden" name="currency_code" value="<?php echo $currency; ?>" />
       <input type="hidden" name="amount" value="<?php echo $shopping_cart->getTotalPrice(); ?>" />
-      <input type="hidden" name="item_name" value="<?php echo $packages_names; ?>">
-      <input type="hidden" name="item_number" value="<?php echo $packages_ids; ?>">
-      <input type="hidden" name="custom" value="<?php echo $user_id; ?>">
+      <input type="hidden" name="item_name" value="<?php echo $product_names; ?>">
+      <input type="hidden" name="item_number" value="<?php echo $order->data()->id; ?>">
+      <input type="hidden" name="custom" value="<?php echo $order->data()->id; ?>">
       <input type="hidden" name="return" value="<?php echo $return_url; ?>">
       <input type="hidden" name="cancel_return" value="<?php echo $cancel_url; ?>">
       <input type="hidden" name="rm" value="2">

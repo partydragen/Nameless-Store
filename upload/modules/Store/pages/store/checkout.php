@@ -1,6 +1,6 @@
 <?php
 /*
- *	Made by Partydragen
+ *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
@@ -13,64 +13,60 @@
 define('PAGE', 'store');
 $page_title = $store_language->get('general', 'store');
 
+if(!$configuration->get('store', 'allow_guests')) {
+    if(!$user->isLoggedIn()) {
+        Redirect::to(URL::build('/login/'));
+        die();
+    }
+}
+
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
-require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
-require_once(ROOT_PATH . '/modules/Store/classes/Player.php');
-require_once(ROOT_PATH . '/modules/Store/classes/Gateways.php');
-require_once(ROOT_PATH . '/modules/Store/classes/GatewayBase.php');
-require_once(ROOT_PATH . '/modules/Store/classes/ShoppingCart.php');
-$store = new Store($cache, $store_language);
-$player = new Player();
+require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
+
 $gateways = new Gateways();
-$shopping_cart = new ShoppingCart();
 
 $store_url = $store->getStoreURL();
 
-if(Input::exists()){
-	if(Token::check(Input::get('token'))){
-		if(Input::get('type') == 'store_logout') {
-			// Logout the store player
-			$player->logout();
-		}
-	}
-}
-
 if(isset($_GET['do'])){
-	if($_GET['do'] == 'complete'){
-		$template_file = 'store/checkout_complete.tpl';
-	} else {
+    if($_GET['do'] == 'complete'){
+        // Checkout complete page
+        $checkout_complete_content = $queries->getWhere('store_settings', array('name', '=', 'checkout_complete_content'));
+        $smarty->assign('CHECKOUT_COMPLETE_CONTENT', Output::getPurified(Output::getDecoded($checkout_complete_content[0]->value)));
+        
+        $template_file = 'store/checkout_complete.tpl';
+    } else {
         // Invalid
-		Redirect::to(URL::build($store_url . '/checkout/'));
-		die();
+        Redirect::to(URL::build($store_url . '/checkout/'));
+        die();
     }
 } else {
     // Add item to shopping cart
-	if(isset($_GET['add'])) {
-		if(!is_numeric($_GET['add'])){
-			die('Invalid product');
-		}
+    if(isset($_GET['add'])) {
+        if(!is_numeric($_GET['add'])){
+            die('Invalid product');
+        }
         $shopping_cart->add($_GET['add']);
         
-		Redirect::to(URL::build($store_url . '/checkout/'));
-		die();
-	}
+        Redirect::to(URL::build($store_url . '/checkout/'));
+        die();
+    }
 
     // Remove item from shopping cart
-	if(isset($_GET['remove'])) {
-		if(!is_numeric($_GET['remove'])){
-			die('Invalid product');
-		}
-		$shopping_cart->remove($_GET['remove']);
+    if(isset($_GET['remove'])) {
+        if(!is_numeric($_GET['remove'])){
+            die('Invalid product');
+        }
+        $shopping_cart->remove($_GET['remove']);
         
-		Redirect::to(URL::build($store_url . '/checkout/'));
-		die();
-	}
+        Redirect::to(URL::build($store_url . '/checkout/'));
+        die();
+    }
 
     // Make sure the shopping cart is not empty
-	if(!count($shopping_cart->getItems())) {
-		Redirect::to(URL::build($store_url));
-		die();
-	}
+    if(!count($shopping_cart->getItems())) {
+        Redirect::to(URL::build($store_url));
+        die();
+    }
     
     // Deal with any input
     if (Input::exists()) {
@@ -92,15 +88,16 @@ if(isset($_GET['do'])){
             // Valid, continue with validation
             $validation = $validate->check($_POST, $to_validation); // Execute validation
             if ($validation->passed()) {
-                require_once(ROOT_PATH . '/modules/Store/classes/Gateways.php');
-                require_once(ROOT_PATH . '/modules/Store/classes/GatewayBase.php');
-                require_once(ROOT_PATH . '/modules/Store/classes/StoreConfig.php');
                 require_once(ROOT_PATH . '/modules/Store/config.php');
 
                 // Load Store config
                 if (isset($store_conf) && is_array($store_conf)) {
                     $GLOBALS['store_config'] = $store_conf;
                 }
+                
+                // Register order
+                $order = new Order();
+                $order->create($user, $player, $shopping_cart->getItems());
 
                 $gateway = $gateways->get($_POST['payment_method']);
                 if($gateway) {
@@ -144,45 +141,42 @@ if(isset($_GET['do'])){
     foreach($gateways->getAll() as $gateway) {
         if($gateway->isEnabled()) {
             $payment_methods[] = array(
-                'displayname' => Output::getClean('PayPal'),
+                'displayname' => Output::getClean($gateway->getDisplayname()),
                 'name' => Output::getClean($gateway->getName())
             );
         }
     }
-	
-	$smarty->assign(array(
-		'TOKEN' => Token::get(),
-		'TOTAL_PRICE' => $shopping_cart->getTotalPrice(),
-		'CHECKOUT' => $store_language->get('general', 'checkout'),
-		'SUMMARY' => $store_language->get('general', 'summary'),
-		'PURCHASE' => $store_language->get('general', 'purchase'),
-        'PAYMENT_METHODS' => $payment_methods,
-        'SHOPPING_CART_LIST' => $shopping_cart_list,
-        'PROCESS_URL' => URL::build($store_url . '/process/'),
-	));
     
-	$template_file = 'store/checkout.tpl';
+    $smarty->assign(array(
+        'TOKEN' => Token::get(),
+        'CHECKOUT' => $store_language->get('general', 'checkout'),
+        'SHOPPING_CART' => $store_language->get('general', 'shopping_cart'),
+        'NAME' => $store_language->get('general', 'name'),
+        'QUANTITY' => $store_language->get('general', 'quantity'),
+        'PRICE' => $store_language->get('general', 'price'),
+        'TOTAL_PRICE' => $store_language->get('general', 'total_price'),
+        'TOTAL_PRICE_VALUE' => $shopping_cart->getTotalPrice(),
+        'PAYMENT_METHOD' => $store_language->get('general', 'payment_method'),
+        'PURCHASE' => $store_language->get('general', 'purchase'),
+        'AGREE_T_AND_C_PURCHASE' => str_replace('{x}', URL::build('/terms'), $store_language->get('general', 'agree_t_and_c_purchase')),
+        'PAYMENT_METHODS' => $payment_methods,
+        'SHOPPING_CART_LIST' => $shopping_cart_list
+    ));
+    
+    $template_file = 'store/checkout.tpl';
 }
 
 // Check if store player is required and isset
 if(!$player->isLoggedIn()) {
-	Redirect::to(URL::build($store_url));
-	die();
+    Redirect::to(URL::build($store_url));
+    die();
 }
 
 $smarty->assign(array(
-	'STORE' => $store_language->get('general', 'store'),
+    'STORE' => $store_language->get('general', 'store'),
     'CATEGORIES' => $store->getNavbarMenu(false),
-    'CURRENCY' => 'USD',
-    'CURRENCY_SYMBOL' => '$',
     'TOKEN' => Token::get()
 ));
-
-if($player->isLoggedIn()) {
-	$smarty->assign(array(
-		'STORE_PLAYER' => $player->getUsername()
-	));
-}
 
 // Load modules + template
 Module::loadPage($user, $pages, $cache, $smarty, array($navigation, $cc_nav, $mod_nav), $widgets, $template);

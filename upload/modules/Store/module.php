@@ -230,6 +230,7 @@ class Store_Module extends Module {
 			$charset = 'latin1';
 
         if($old_version == "100pr1" || $old_version == "100pr2" || $old_version == "100pr3") {
+            // Rename Tabels
             try {
                 DB::getInstance()->createQuery('RENAME TABLE nl2_store_packages TO nl2_store_products;');
                 DB::getInstance()->createQuery('RENAME TABLE nl2_store_packages_commands TO nl2_store_products_commands;');
@@ -241,14 +242,45 @@ class Store_Module extends Module {
             try {
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_products CHANGE required_packages required_products varchar(128);');
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_products_commands CHANGE package_id product_id int(11);');
-                
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+            
+            try {
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_payments ADD `order_id` int(11) NOT NULL');
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_payments ADD `fee` varchar(11) DEFAULT NULL');
                 
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_payments CHANGE payment_method gateway_id int(11);');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+            
+            // Update nl2_store_pending_commands table
+            try {
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_pending_commands ADD `order_id` int(11) NOT NULL');
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_pending_commands ADD `command_id` int(11) NOT NULL');
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_pending_commands ADD `product_id` int(11) NOT NULL');
-                DB::getInstance()->createQuery('ALTER TABLE nl2_store_payments CHANGE payment_method gateway_id int(11);');
+
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_pending_commands DROP COLUMN payment_id;');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+            
+            // Update nl2_store_gateways table
+            try {
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_gateways ADD `displayname` varchar(64) NOT NULL');
+                
+                $queries->update('store_gateways', 1, array(
+                    'name' => 'PayPal',
+                    'displayname' => 'PayPal'
+                ));
+                
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_gateways DROP COLUMN client_id;');
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_gateways DROP COLUMN client_key;');
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_gateways DROP COLUMN hook_key;');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -287,6 +319,7 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
             
+            // Update nl2_store_payments table
             try {
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_payments DROP COLUMN user_id;');
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_payments DROP COLUMN player_id;');
@@ -297,6 +330,34 @@ class Store_Module extends Module {
             
             try {
                 DB::getInstance()->createQuery('DROP TABLE nl2_store_payments_packages;');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+            
+            try {
+                $queries->create('store_settings', array(
+                    'name' => 'checkout_complete_content',
+                    'value' => 'Thanks for your payment, It can take up to 15 minutes for your payment to be processed'
+                ));
+                
+                $queries->create('store_settings', array(
+                    'name' => 'currency',
+                    'value' => 'USD'
+                ));
+                
+                $queries->create('store_settings', array(
+                    'name' => 'currency_symbol',
+                    'value' => '$'
+                ));
+                
+                $allow_guests_query = $queries->getWhere('store_settings', array('name', '=', 'allow_guests'));
+                if(!count($allow_guests_query)) {
+                    $queries->create('store_settings', array(
+                        'name' => 'allow_guests',
+                        'value' => 0
+                    ));
+                }
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -356,7 +417,7 @@ class Store_Module extends Module {
         
 		if(!$queries->tableExists('store_pending_commands')) {
 			try {
-				$queries->createTable('store_pending_commands', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `command_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `payment_id` int(11) NOT NULL, `player_id` int(11) NOT NULL, `server_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `status` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+				$queries->createTable('store_pending_commands', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `command_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `player_id` int(11) DEFAULT NULL, `server_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `status` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
 			} catch(Exception $e){
 				// Error
 			}
@@ -400,21 +461,43 @@ class Store_Module extends Module {
 			} catch(Exception $e){
 				// Error
 			}
+            
+            $queries->create('store_settings', array(
+                'name' => 'checkout_complete_content',
+                'value' => 'Thanks for your payment, It can take up to 15 minutes for your payment to be processed'
+            ));
+                
+            $queries->create('store_settings', array(
+                'name' => 'currency',
+                'value' => 'USD'
+            ));
+                
+            $queries->create('store_settings', array(
+                'name' => 'currency_symbol',
+                'value' => '$'
+            ));
+            
+            $queries->create('store_settings', array(
+				'name' => 'allow_guests',
+				'value' => 0
+			));
 		}
 		
 		if(!$queries->tableExists('store_gateways')) {
 			try {
-				$queries->createTable('store_gateways', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `enabled` tinyint(1) NOT NULL DEFAULT \'1\', PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+				$queries->createTable('store_gateways', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `displayname` varchar(64) NOT NULL, `enabled` tinyint(1) NOT NULL DEFAULT \'1\', PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
 			} catch(Exception $e){
 				// Error
 			}
 			
 			$queries->create('store_gateways', array(
-				'name' => 'PayPal'
+				'name' => 'PayPal',
+                'displayname' => 'PayPal'
 			));
             
 			$queries->create('store_gateways', array(
-				'name' => 'PayPal'
+				'name' => 'PayPalBusiness',
+                'displayname' => 'PayPal'
 			));
 		}
         

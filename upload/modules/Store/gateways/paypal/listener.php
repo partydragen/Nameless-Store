@@ -43,24 +43,28 @@ if (!($res = curl_exec($ch))) {
 }
 curl_close($ch);
 
-if(isset($_POST['payment_status'])) {
-    file_put_contents(ROOT_PATH . '/calls/payment_' . $_POST['payment_status'] . '_'.date('U').'.txt', $req);
-} else {
-    file_put_contents(ROOT_PATH . '/calls/payment_invalid_'.date('U').'.txt', $req);
+// Save response to log
+if(is_dir(ROOT_PATH . '/cache/paypal_logs/')){
+    if(isset($_POST['payment_status'])) {
+        file_put_contents(ROOT_PATH . '/cache/paypal_logs/'.$gateway->getName() . '_' . $_POST['payment_status'] .'_'.date('U').'.txt', $req);
+    } else {
+        file_put_contents(ROOT_PATH . '/cache/paypal_logs/'.$gateway->getName() . '_no_event_'.date('U').'.txt', $req);
+    }
 }
+
 
 if (strcmp($res, "VERIFIED") == 0) {
     $receiver_email = $_POST['receiver_email'];
     
-	$item_name = $_POST['item_name']; // product id
-	$item_number = $_POST['item_number']; // server id
+	$item_name = $_POST['item_name'];
+	$item_number = $_POST['item_number'];
 	$payment_status = $_POST['payment_status'];
 	$payment_amount = $_POST['mc_gross'];
 	$payment_currency = $_POST['mc_currency'];
     $payment_fee = $_POST['mc_fee'];
 	$transaction_id = $_POST['txn_id'];
 	$payer_email = $_POST['payer_email'];
-	$user_id = $_POST['custom'];
+	$order_id = $_POST['custom'];
     
     $paypal_email = StoreConfig::get('paypal/email');
 
@@ -74,40 +78,32 @@ if (strcmp($res, "VERIFIED") == 0) {
                 if($payment->exists()) {
                     // Payment exists
                     $data = array(
-                        'user_id' => $user_id,
-                        'player_id' => 0,
-                        'payment_id' => null,
-                        'payment_method' => $gateway->getId(),
                         'transaction' => $transaction_id,
                         'amount' => $payment_amount,
-                        'currency' => $payment_currency
+                        'currency' => $payment_currency,
+                        'fee' => $payment_fee
                     );
                 } else {
-                    // Payment exists
-                    $payment->create(array(
-                        'user_id' => $user_id,
-                        'player_id' => 0,
-                        'payment_id' => null,
-                        'payment_method' => $gateway->getId(),
+                    // Register new payment
+                    $data = array(
+                        'order_id' => $order_id,
+                        'gateway_id' => $gateway->getId(),
                         'transaction' => $transaction_id,
-                        'created' => date('U'),
-                        'last_updated' => date('U'),
-                        'status_id' => 1,
                         'amount' => $payment_amount,
-                        'currency' => $payment_currency
-                    ));
-                    
-                    // Register packages
-                    $packages = explode(',', $item_number);
-                    foreach($packages as $item) {
-                        $queries->create('store_payments_packages', array(
-                            'payment_id' => $payment->data()->id,
-                            'package_id' => $item
-                        ));
-                    }
+                        'currency' => $payment_currency,
+                        'fee' => $payment_fee
+                    );
                 }
                 
                 $payment->handlePaymentEvent('COMPLETED', $data);
+            break;
+            case 'Refunded';
+                // Payment refunded
+                $payment = new Payment($_POST['parent_txn_id'], 'transaction');
+                if($payment->exists()) {
+                    // Payment exists
+                    $payment->handlePaymentEvent('REFUNDED', array());
+                }
             break;
             default:
                 // Payment refunded

@@ -38,7 +38,7 @@
 
                             <h5 style="display:inline">{$EDITING_COMMAND}</h5>
                             <div class="float-md-right">
-                                <a href="/panel/store/packages/?action=edit&id={$ID}" class="btn btn-primary">{$BACK}</a>
+                                <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
                             </div>
                             <hr />
 

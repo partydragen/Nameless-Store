@@ -15,8 +15,8 @@
     <div class="ui {if count($WIDGETS_LEFT) && count($WIDGETS_RIGHT) }four wide tablet eight wide computer{elseif count($WIDGETS_LEFT) || count($WIDGETS_RIGHT)}ten wide tablet twelve wide computer{else}sixteen wide{/if} column">
       <div class="ui segment">
 
-		<h1 style="display:inline;">{$STORE} &raquo; {$CHECKOUT}</h1>
-		{include file='store/navbar.tpl'}
+        <h1 style="display:inline;">{$STORE} &raquo; {$CHECKOUT}</h1>
+        {include file='store/navbar.tpl'}
         
         </br>
         
@@ -41,13 +41,13 @@
         {/if}
         
         <form class="ui form" action="" method="post" id="forms">
-          <h3>Shopping Cart</h3>
+          <h3>{$SHOPPING_CART}</h3>
           <table class="ui fixed single line selectable unstackable small padded res table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Quantity</th>
-                <th>Price</th>
+                <th>{$NAME}</th>
+                <th>{$QUANTITY}</th>
+                <th>{$PRICE}</th>
                 <th></th>
               </tr>
             </thead>
@@ -63,11 +63,10 @@
             </tbody>
           </table>
         
-          <h4>Total Price: {$TOTAL_PRICE} {$CURRENCY}<h4>
+          <h4>{$TOTAL_PRICE} {$TOTAL_PRICE_VALUE} {$CURRENCY}<h4>
           
-          <h3>Payment method</h3>
+          <h3>{$PAYMENT_METHOD}</h3>
           <hr />
-          
           {foreach from=$PAYMENT_METHODS item=gateway}
             <div class="field">
               <div class="ui radio checkbox">
@@ -78,12 +77,12 @@
           {/foreach}
         
         
-          <h3>Purchase</h3>
+          <h3>{$PURCHASE}</h3>
           <hr />
           <div class="field">
             <div class="ui checkbox" style="display:inline;">
               <input type="hidden" name="token" value="{$TOKEN}">
-              <input type="checkbox" name="t_and_c" value="1" required> <label>I agree to the terms and conditions of this purchase. <span class="right floated"><input type="submit" class="ui green button right floated" value="Purchase &raquo;"></span></label>
+              <input type="checkbox" name="t_and_c" value="1" required> <label>{$AGREE_T_AND_C_PURCHASE} <span class="right floated"><input type="submit" class="ui green button right floated" value="{$PURCHASE} &raquo;"></span></label>
             </div>
           </div>
           </br>

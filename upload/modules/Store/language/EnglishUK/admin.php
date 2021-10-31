@@ -6,10 +6,10 @@
  *
  *  License: MIT
  *
- *  Store module
+ *  Store module - English Launguage
  */
 
-$language_version = '2.0.0-pr8';
+$language_version = '2.0.0-pr12';
 
 $language = array(
     /*
@@ -21,8 +21,8 @@ $language = array(
     'store_content_max' => 'The store index content must be a maximum of 1,000,000 characters.',
     'store_path' => 'Store Path',
     'store_index_content' => 'Store Index Content',
-	'store_checkout_content' => 'Store Checkout Content',
-    'allow_guests' => 'Allow guests to view the store?',
+	'checkout_complete_content' => 'Checkout Complete Content',
+    'allow_guests' => 'Allow guests to make purchases?',
     'updated_successfully' => 'Updated successfully.',
     'no_payments' => 'No payments have been found!',
     'no_subcategories' => 'No subcategories.',
@@ -75,6 +75,8 @@ $language = array(
     'id_x' => 'ID: {x}', // Don't replace {x}
     'transaction' => 'Transaction ID',
     'payment_method' => 'Payment Method ',
+    'currency' => 'Currency',
+    'currency_symbol' => 'Currency Symbol',
     
     // Gateways
     'gateways' => 'Gateways',

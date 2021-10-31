@@ -18,9 +18,7 @@
 		<h1 style="display:inline">{$STORE}</h1>
 		{include file='store/navbar.tpl'}
 		
-		Thanks for supporting me with a monthly amount</br>with this i will be able to priority my projects even more</br></br>
-		
-		It can take up to 15 mins before you revice your rewards and being displayed on recent supporters
+		{$CHECKOUT_COMPLETE_CONTENT}
       </div>
     </div>
     
