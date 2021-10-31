@@ -1,8 +1,7 @@
 # Nameless-Store
 
 ## Requirements
-- NamelessMC version 2 pre-release 10
-- Paypal business account
+- NamelessMC version 2 pre-release 12
 
 ## Installation:
 - Upload the contents of the **upload** directory straight into your NamelessMC installation's directory
@@ -10,7 +9,6 @@
 
 ## Notes:
 - If you are using a custom template, make sure you add the template file (in the **custom/templates/DefaultRevamp/store/** directory) to your custom template!
-- The store module is in early development and contain bugs and missing features
 - Only supporting PayPal as payment gateway
 
 ## Patreon
