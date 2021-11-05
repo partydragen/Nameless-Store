@@ -62,6 +62,16 @@ if(!isset($_GET['gateway'])) {
     
     $securityPolicy->secure_dir = array(ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates');
     
+    if (file_exists(ROOT_PATH . '/modules/Store/config.php')) {
+        // File exist, Make sure its writeable
+        if(!is_writable(ROOT_PATH . '/modules/Store/config.php')) {
+            $errors = array($store_language->get('admin', 'config_not_writable'));
+        }
+    } else if (!is_writable(ROOT_PATH . '/modules/Store')){
+        // File don't exist, make sure directory is writeable to be able to generate config.php
+        $errors = array($store_language->get('admin', 'config_not_writable'));
+    }
+    
     $smarty->assign(array(
         'EDITING_GATEWAY' => str_replace('{x}', Output::getClean($gateway->getName()), $store_language->get('admin', 'editing_gateway_x')),
         'BACK' => $language->get('general', 'back'),

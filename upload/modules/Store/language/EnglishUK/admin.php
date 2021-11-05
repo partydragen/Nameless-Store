@@ -81,6 +81,7 @@ $language = array(
     // Gateways
     'gateways' => 'Gateways',
     'editing_gateway_x' => 'Editing gateway {x}', // Don't replace {x}
+    'config_not_writable' => 'Your <strong>modules/Store/config.php</strong> file is not writable. Please check file permissions.',
 	
 	// Category
 	'categories' => 'Categories',
