@@ -8,9 +8,8 @@ class PendingCommands extends EndpointBase {
     }
 
     public function execute(Nameless2API $api) {
-        $query = 'SELECT nl2_store_pending_commands.*, nl2_store_players.id as pid, username, uuid FROM nl2_store_pending_commands INNER JOIN nl2_store_orders ON order_id=nl2_store_orders.id INNER JOIN nl2_store_players ON player_id=nl2_store_players.id';
-        
-        // $query = 'SELECT nl2_store_pending_commands.*, nl2_store_players.id as pid, username, uuid FROM nl2_store_pending_commands INNER JOIN nl2_store_players ON player_id=nl2_store_players.id';
+        $query = 'SELECT nl2_store_pending_actions.*, nl2_store_players.id as pid, username, uuid FROM nl2_store_pending_actions INNER JOIN nl2_store_orders ON order_id=nl2_store_orders.id INNER JOIN nl2_store_players ON nl2_store_pending_actions.player_id=nl2_store_players.id';
+
         $where = ' WHERE status = 0';
         $params = array();
 

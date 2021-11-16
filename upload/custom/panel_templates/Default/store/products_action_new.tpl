@@ -36,7 +36,7 @@
                 <div class="card shadow mb-4">
                     <div class="card-body">
                     
-                            <h5 style="display:inline">{$NEW_COMMAND}</h5>
+                            <h5 style="display:inline">{$NEW_ACTION}</h5>
                             <div class="float-md-right">
                                 <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
                             </div>
@@ -46,22 +46,32 @@
                         {include file='includes/alerts.tpl'}
 
 							<form action="" method="post">
-								<div class="row">
-									<div class="col-md-6">
-										<label for="inputTrigger">Trigger On</label>
-										<select name="trigger" class="form-control" id="inputTrigger">
-											<option value="1">Purchase</option>
-											<option value="2">Refund</option>
-											<option value="3">Changeback</option>
-										</select>
-									</div>
-									<div class="col-md-6">
-										<label for="inputRequirePlayer">Require the player to be online</label>
-										<select name="requirePlayer" class="form-control" id="inputRequirePlayer">
-											<option value="1">Yes</option>
-											<option value="0">No</option>
-										</select>
-									</div>
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="inputTrigger">Trigger On</label>
+                                            <select name="trigger" class="form-control" id="inputTrigger">
+                                                <option value="1">Purchase</option>
+                                                <option value="2">Refund</option>
+                                                <option value="3">Changeback</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="inputRequirePlayer">Require the player to be online</label>
+                                            <select name="requirePlayer" class="form-control" id="inputRequirePlayer">
+                                                <option value="1">Yes</option>
+                                                <option value="0">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+									<label for="inputConnections">{$CONNECTIONS}</label>
+									<select name="connections[]" id="label_connections" size="3" class="form-control" multiple style="overflow:auto;" required>
+										{foreach from=$CONNECTIONS_LIST item=connection}
+                                            <option value="{$connection.id}"{if $connection.selected} selected{/if}>{$connection.name}</option>
+										{/foreach}
+									</select>
 								</div>
 								<div class="form-group">
 									<label for="InputName">Command (Without /)</label></br>

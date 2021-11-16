@@ -19,7 +19,7 @@ class Store_Module extends Module {
 
 		$name = 'Store';
 		$author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
-		$module_version = '1.0.1';
+		$module_version = '1.1.0';
 		$nameless_version = '2.0.0-pr12';
 
 		parent::__construct($this, $name, $author, $module_version, $nameless_version);
@@ -46,6 +46,7 @@ class Store_Module extends Module {
 		$pages->add('Store', '/panel/store/products', 'pages/panel/products.php');
 		$pages->add('Store', '/panel/store/categories', 'pages/panel/categories.php');
 		$pages->add('Store', '/panel/store/payments', 'pages/panel/payments.php');
+        $pages->add('Store', '/panel/store/connections', 'pages/panel/connections.php');
         
 		
 		//HookHandler::registerEvent('paypal_hook', 'paypal_hook');
@@ -125,6 +126,7 @@ class Store_Module extends Module {
                 'staffcp.store.gateways' => $this->_store_language->get('admin', 'staffcp_store_gateways'),
 				'staffcp.store.products' => $this->_store_language->get('admin', 'staffcp_store_products'),
 				'staffcp.store.payments' => $this->_store_language->get('admin', 'staffcp_store_payments'),
+                'staffcp.store.manage' => $this->_store_language->get('admin', 'staffcp_store_manage'),
 			));
 		
 			if($user->hasPermission('staffcp.store')){
@@ -165,7 +167,7 @@ class Store_Module extends Module {
 					} else
 						$icon = $cache->retrieve('store_products_icon');
 
-					$navs[2]->add('store_products', $this->_store_language->get('general', 'products'), URL::build('/panel/store/products'), 'top', null, ($order + 0.6), $icon);
+					$navs[2]->add('store_products', $this->_store_language->get('general', 'products'), URL::build('/panel/store/products'), 'top', null, ($order + 0.3), $icon);
 				}
 
 				if($user->hasPermission('staffcp.store.payments')){
@@ -175,7 +177,17 @@ class Store_Module extends Module {
 					} else
 						$icon = $cache->retrieve('store_payments_icon');
 
-					$navs[2]->add('store_payments', $this->_store_language->get('admin', 'payments'), URL::build('/panel/store/payments'), 'top', null, ($order + 0.7), $icon);
+					$navs[2]->add('store_payments', $this->_store_language->get('admin', 'payments'), URL::build('/panel/store/payments'), 'top', null, ($order + 0.4), $icon);
+				}
+                
+                if($user->hasPermission('staffcp.store.manage')){
+					if(!$cache->isCached('store_connections_icon')){
+						$icon = '<i class="nav-icon fas fa-plug"></i>';
+						$cache->store('store_connections_icon', $icon);
+					} else
+						$icon = $cache->retrieve('store_connections_icon');
+
+					$navs[2]->add('store_connections', $this->_store_language->get('admin', 'connections'), URL::build('/panel/store/connections'), 'top', null, ($order + 0.5), $icon);
 				}
 			}
 		}
@@ -229,7 +241,8 @@ class Store_Module extends Module {
 		if(!$charset || is_array($charset))
 			$charset = 'latin1';
 
-        if($old_version == "100pr1" || $old_version == "100pr2" || $old_version == "100pr3") {
+        // Old converter from pre release
+        if(!$queries->tableExists('store_orders')) {
             // Rename Tabels
             try {
                 DB::getInstance()->createQuery('RENAME TABLE nl2_store_packages TO nl2_store_products;');
@@ -363,6 +376,66 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
+        
+        if($old_version < 110) {
+			try {
+				$queries->createTable('store_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `type` varchar(32) NOT NULL, `name` varchar(64) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+			} catch(Exception $e){
+				// Error
+			}
+            
+			try {
+				$queries->createTable('store_products_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `action_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+			} catch(Exception $e){
+				// Error
+			}
+            
+            try {
+                // Update main admin group permissions
+                $group = $queries->getWhere('groups', array('id', '=', 2));
+                $group = $group[0];
+                
+                $group_permissions = json_decode($group->permissions, TRUE);
+                $group_permissions['staffcp.store.gateways'] = 1;
+                $group_permissions['staffcp.store.manage'] = 1;
+                $group_permissions['staffcp.store.products'] = 1;
+                
+                $group_permissions = json_encode($group_permissions);
+                $queries->update('groups', 2, array('permissions' => $group_permissions));
+			} catch(Exception $e){
+				// Error
+			}
+            
+            try {
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_products_commands DROP COLUMN server_id;');
+            } catch(Exception $e){
+				// Error
+			}
+            
+            try {
+                DB::getInstance()->createQuery('RENAME TABLE nl2_store_products_commands TO nl2_store_products_actions;');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+            
+            try {
+                DB::getInstance()->createQuery('RENAME TABLE nl2_store_pending_commands TO nl2_store_pending_actions;');
+                
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_pending_actions CHANGE command_id action_id int(11);');
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_pending_actions CHANGE server_id connection_id int(11);');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+            
+            try {
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_products_actions ADD `own_connections` tinyint(1) NOT NULL DEFAULT \'0\'');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+        }
     }
 	
 	private function initialise(){
@@ -406,18 +479,26 @@ class Store_Module extends Module {
 				// Error
 			}
 		}
-		
-		if(!$queries->tableExists('store_products_commands')) {
+        
+		if(!$queries->tableExists('store_products_connections')) {
 			try {
-				$queries->createTable('store_products_commands', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `server_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+				$queries->createTable('store_products_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `action_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+			} catch(Exception $e){
+				// Error
+			}
+		}
+		
+		if(!$queries->tableExists('store_products_actions')) {
+			try {
+				$queries->createTable('store_products_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `own_connections` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
 			} catch(Exception $e){
 				// Error
 			}
 		}
         
-		if(!$queries->tableExists('store_pending_commands')) {
+		if(!$queries->tableExists('store_pending_actions')) {
 			try {
-				$queries->createTable('store_pending_commands', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `command_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `player_id` int(11) DEFAULT NULL, `server_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `status` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+				$queries->createTable('store_pending_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `action_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `player_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `status` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
 			} catch(Exception $e){
 				// Error
 			}
@@ -450,6 +531,14 @@ class Store_Module extends Module {
 		if(!$queries->tableExists('store_players')) {
 			try {
 				$queries->createTable('store_players', ' `id` int(11) NOT NULL AUTO_INCREMENT, `username` varchar(64) NOT NULL, `uuid` varchar(64) DEFAULT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+			} catch(Exception $e){
+				// Error
+			}
+		}
+        
+        if(!$queries->tableExists('store_connections')) {
+			try {
+				$queries->createTable('store_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `type` varchar(32) NOT NULL, `name` varchar(64) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
 			} catch(Exception $e){
 				// Error
 			}
@@ -511,6 +600,8 @@ class Store_Module extends Module {
             $group_permissions['staffcp.store.settings'] = 1;
             $group_permissions['staffcp.store.products'] = 1;
             $group_permissions['staffcp.store.payments'] = 1;
+            $group_permissions['staffcp.store.gateways'] = 1;
+            $group_permissions['staffcp.store.manage'] = 1;
 			
 			$group_permissions = json_encode($group_permissions);
 			$queries->update('groups', 2, array('permissions' => $group_permissions));

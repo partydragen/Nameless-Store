@@ -33,6 +33,9 @@ if(isset($_GET['do'])){
                 die('Unknown error');
             }
             
+            echo '<pre>', print_r($_POST), '</pre>';
+            echo '<pre>', print_r($payment), '</pre>';
+            
             $transactions = $payment->getTransactions();
             $related_resources = $transactions[0]->getRelatedResources();
             $sale = $related_resources[0]->getSale();
@@ -55,7 +58,7 @@ if(isset($_GET['do'])){
 
             $shopping_cart->clear();
 
-            Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
+            //Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
             die();
         } else if(isset($_GET['token'])) {
             // Agreement successfully made

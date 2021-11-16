@@ -36,7 +36,7 @@
                 <div class="card shadow mb-4">
                     <div class="card-body">
 
-                            <h5 style="display:inline">{$EDITING_COMMAND}</h5>
+                            <h5 style="display:inline">{$EDITING_ACTION}</h5>
                             <div class="float-md-right">
                                 <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
                             </div>
@@ -64,6 +64,14 @@
 											</select>
 										</div>
 									</div>
+								</div>
+                                <div class="form-group">
+									<label for="inputConnections">{$CONNECTIONS}</label>
+									<select name="connections[]" id="label_connections" size="3" class="form-control" multiple style="overflow:auto;" required>
+										{foreach from=$CONNECTIONS_LIST item=connection}
+                                            <option value="{$connection.id}"{if $connection.selected} selected{/if}>{$connection.name}</option>
+										{/foreach}
+									</select>
 								</div>
 								<div class="form-group">
 									<label for="InputName">Command (Without /)</label></br>

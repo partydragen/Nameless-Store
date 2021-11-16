@@ -108,20 +108,35 @@ $language = array(
     'product_description' => 'Product Description',
     'product_image' => 'Product Image',
 	
-	// Commands
-	'commands' => 'Commands',
-	'new_command' => 'New Command',
-	'new_command_for_x' => 'New command for {x}',
-	'editing_command_for_x' => 'Editing command for {x}',
-	'command_created_successfully' => 'Command created successfully.',
-	'command_updated_successfully' => 'Command updated successfully.',
-	'command_deleted_successfully' => 'Command deleted successfully.',
+	// Actions
+	'actions' => 'Actions',
+	'new_action' => 'New Action',
+	'new_action_for_x' => 'New action for {x}',
+	'editing_action_for_x' => 'Editing action for {x}',
+	'action_created_successfully' => 'Action created successfully.',
+	'action_updated_successfully' => 'Action updated successfully.',
+	'action_deleted_successfully' => 'Action deleted successfully.',
+    
+    // Connections
+    'connections' => 'Connections',
+    'connections_info' => 'Connect your servers to your store to execute specific actions',
+    'new_connection' => 'New Connection',
+    'connection_id' => 'Connection ID',
+    'no_connections' => 'No connections have been made yet.',
+    'creating_new_connection' => 'Creating new connection',
+    'editing_connection_x' => 'Editing connection {x}', // Don't replace {x}
+	'connection_created_successfully' => 'Connection created successfully.',
+	'connection_updated_successfully' => 'Connection updated successfully.',
+	'connection_deleted_successfully' => 'Connection deleted successfully.',
+    'confirm_delete_connection' => 'Are you sure you want to delete this connection?',
 	
     /*
      *  Admin Errors
      */
 	'invalid_price' => 'Invalid price.',
 	'invalid_category' => 'Invalid category.',
+    'name_maximum_x' => 'The name must be no more than {x} characters',
+    'name_required' => 'Please input a name.',
 
 	/*
 	 *  Hooks

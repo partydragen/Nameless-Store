@@ -64,9 +64,9 @@ class Payment {
     }
     
     /**
-     * Get the currently logged in payment's data.
+     * Get the payment data.
      *
-     * @return object This payment's data.
+     * @return object This payment data.
      */
     public function data() {
         return $this->_data;
@@ -105,7 +105,7 @@ class Payment {
                     
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
                     
-                    $this->addPendingCommands(1);
+                    $this->addPendingActions(1);
                 break;
                 case 'REFUNDED':
                     // Payment refunded
@@ -116,8 +116,8 @@ class Payment {
                     
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
                     
-                    $this->deletePendingCommands();
-                    $this->addPendingCommands(2);
+                    $this->deletePendingActions();
+                    $this->addPendingActions(2);
                 break;
                 case 'REVERSED':
                     // Payment reversed
@@ -128,8 +128,8 @@ class Payment {
                     
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
                     
-                    $this->deletePendingCommands();
-                    $this->addPendingCommands(3);
+                    $this->deletePendingActions();
+                    $this->addPendingActions(3);
                 break;
                 case 'DENIED':
                     // Payment denied
@@ -168,40 +168,54 @@ class Payment {
                     
                     $this->create(array_merge($insert_array, $extra_data));
                     
-                    $this->addPendingCommands(1);
+                    $this->addPendingActions(1);
                 break;
             }
         }
     }
     
     /**
-     * Add commands from products to pending commands
+     * Add actions from products to pending actions
      */
-    public function addPendingCommands($type) {
+    public function addPendingActions($type) {
+        
+        
         $products = $this->_db->query('SELECT product_id, player_id FROM nl2_store_orders_products INNER JOIN nl2_store_orders ON order_id=nl2_store_orders.id INNER JOIN nl2_store_products ON nl2_store_products.id=product_id WHERE order_id = ?', array($this->data()->order_id))->results();
         foreach($products as $product) {
-            $commands = $this->_db->query('SELECT * FROM nl2_store_products_commands WHERE product_id = ? AND type = ? ORDER BY `order`', array($product->product_id, $type))->results();
-            foreach($commands as $command) {
-                $this->_db->insert('store_pending_commands', array(
-                    'order_id' => $this->data()->order_id,
-                    'command_id' => $command->id,
-                    'product_id' => $product->product_id,
-                    'player_id' => $product->player_id,
-                    'server_id' => $command->server_id,
-                    'type' => $command->type,
-                    'command' => $command->command,
-                    'require_online' => $command->require_online,
-                    'order' => $command->order,
-                ));
+            
+            $product = new Product($product->product_id);
+            if($product->exists() && $product->data()->deleted == 0) {
+                
+                // Foreach all actions that belong to this product
+                foreach($product->getActions() as $action) {
+                    if($action->data()->type != $type) {
+                        continue;
+                    }
+                    
+                    $connections = ($action->data()->own_connections ? $action->getConnections() : $product->getConnections())
+                    foreach($connections as $connection) {
+                        $this->_db->insert('store_pending_actions', array(
+                            'order_id' => $this->data()->order_id,
+                            'action_id' => $action->data()->id,
+                            'product_id' => $product->data()->product_id,
+                            'player_id' => $product->data()->player_id,
+                            'connection_id' => $connection->id,
+                            'type' => $action->data()->type,
+                            'command' => $action->data()->command,
+                            'require_online' => $action->data()->require_online,
+                            'order' => $action->data()->order,
+                        ));
+                    }
+                }
             }
         }
     }
     
     /**
-     * Delete any pending commands
+     * Delete any pending actions
      */
-    public function deletePendingCommands() {
-        $this->_db->createQuery('DELETE FROM nl2_store_pending_commands WHERE order_id = ? AND status = 0', array($this->data()->order_id))->results();
+    public function deletePendingActions() {
+        $this->_db->createQuery('DELETE FROM nl2_store_pending_actions WHERE order_id = ? AND status = 0', array($this->data()->order_id))->results();
     }
     
     public function getStatusHtml() {

@@ -35,8 +35,7 @@
 
                 <div class="card shadow mb-4">
                     <div class="card-body">
-                    
-                            <h5 style="display:inline">{$NEW_PRODUCT}</h5>
+                            <h5 style="display:inline">{$PRODUCT_TITLE}</h5>
                             <div class="float-md-right">
                                 <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
                             </div>
@@ -48,7 +47,7 @@
                             <form action="" method="post">
 								<div class="form-group">
 									<label for="InputName">{$PRODUCT_NAME}</label>
-									<input type="text" name="name" class="form-control" id="InputName" placeholder="{$PRODUCT_NAME}">
+									<input type="text" name="name" class="form-control" id="InputName" value="{$PRODUCT_NAME_VALUE}" placeholder="{$PRODUCT_NAME}" required>
 								</div>
 								<div class="form-group">
                                     <strong><label for="inputDescription">{$PRODUCT_DESCRIPTION}</label></strong>
@@ -59,7 +58,7 @@
                                         <div class="col-md-6">
 											<label for="inputPrice">{$PRICE}</label>
 											<div class="input-group">
-												<input type="number" name="price" class="form-control" id="inputPrice" step="0.01" min="0.01" placeholder="{$PRICE}">
+												<input type="number" name="price" class="form-control" id="inputPrice" step="0.01" min="0.01" value="{$PRODUCT_PRICE_VALUE}" placeholder="{$PRICE}" required>
 												<div class="input-group-append">
 													<span class="input-group-text">{$CURRENCY}</span>
 												</div>
@@ -67,9 +66,21 @@
 										</div>
                                         <div class="col-md-6">
 											<label for="inputCategory">{$CATEGORY}</label>
-											<select name="category" class="form-control" id="inputCategory">
+											<select name="category" class="form-control" id="inputCategory" required>
 												{foreach from=$CATEGORY_LIST item=category}
-													<option value="{$category.id}">{$category.name}</option>
+												<option value="{$category.id}" {if $PRODUCT_CATEGORY_VALUE == {$category.id}} selected{/if}>{$category.name}</option>
+												{/foreach}
+											</select>
+										</div>
+                                    </div>
+								</div>
+                                <div class="form-group">
+									<div class="row">
+                                        <div class="col-md-6">
+											<label for="inputConnections">{$CONNECTIONS}</label>
+											<select name="connections[]" id="label_connections" size="3" class="form-control" multiple style="overflow:auto;">
+												{foreach from=$CONNECTIONS_LIST item=connection}
+                                                <option value="{$connection.id}"{if $connection.selected} selected{/if}>{$connection.name}</option>
 												{/foreach}
 											</select>
 										</div>
@@ -80,8 +91,51 @@
                                     <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
                                 </div>
                             </form>
-
-                            <!---<form action="" method="post" enctype="multipart/form-data">
+							
+							</br>
+							
+                            {if isset($ACTIONS)}
+                                <h5 style="display:inline">{$ACTIONS}</h5>
+                                <div class="float-md-right">
+                                    <a href="{$NEW_ACTION_LINK}" class="btn btn-primary">{$NEW_ACTION}</a>
+                                </div>
+                                
+                                {if count($ACTION_LIST)}
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Trigger On</th>
+                                                <th>Require the player to be online</th>
+                                                <th>Command (Without /)</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="sortable">
+                                        {foreach from=$ACTION_LIST item=action}
+                                            <tr data-id="{$command.id}">
+                                                <td>{$action.type}</td>
+                                                <td>{$action.requirePlayer}</td>
+                                                <td>{$action.command}</td>
+                                                <td>
+                                                    <div class="float-md-right">
+                                                        <a class="btn btn-warning btn-sm" href="{$action.edit_link}"><i class="fas fa-edit fa-fw"></i></a>
+                                                        <a class="btn btn-danger btn-sm" href="{$action.delete_link}"><i class="fas fa-trash fa-fw"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {/foreach}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {else}
+                                <hr>
+                                There are no actions yet.
+                                </br></br>
+                                {/if}
+                            {/if}
+                            
+                            <!--<form action="" method="post" enctype="multipart/form-data">
                                 <div class="form-group">
                                     <strong>{$PRODUCT_IMAGE}</strong><br />
                                     {if $PRODUCT_IMAGE_VALUE}
@@ -97,7 +151,7 @@
                                     <input type="hidden" name="type" value="image">
                                     <input type="submit" value="{$SUBMIT}" class="btn btn-primary">
                                 </div>
-                            </form>--->
+                            </form>-->
 
                     </div>
                 </div>

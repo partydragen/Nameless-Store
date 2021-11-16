@@ -56,6 +56,21 @@ class Store {
 		return $categories_array;
 	}
     
+	// Get all connections
+	public function getAllConnections() {
+		$connections = $this->_db->query('SELECT * FROM nl2_store_connections')->results();
+			
+		$connections_array = array();
+		foreach($connections as $connection){
+			$connections_array[] = array(
+				'id' => Output::getClean($connection->id),
+				'name' => Output::getClean($connection->name)
+			);
+		}
+		
+		return $connections_array;
+	}
+    
     // Get navbar menu
     public function getNavbarMenu($active) {
         $store_url = $this->getStoreURL();
