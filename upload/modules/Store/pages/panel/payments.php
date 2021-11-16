@@ -130,7 +130,7 @@ if(isset($_GET['player'])){
         $style = '';
     }
    
-    $pending_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_commands WHERE order_id = ? AND status = 0', array($payment->data()->order_id))->results();
+    $pending_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions WHERE order_id = ? AND status = 0', array($payment->data()->order_id))->results();
     $pending_commands_array = array();
     foreach($pending_commands as $command){
         $pending_commands_array[] = array(
@@ -138,7 +138,7 @@ if(isset($_GET['player'])){
         );
     }
     
-    $processed_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_commands WHERE order_id = ? AND status = 1', array($payment->data()->order_id))->results();
+    $processed_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions WHERE order_id = ? AND status = 1', array($payment->data()->order_id))->results();
     $processed_commands_array = array();
     foreach($processed_commands as $command){
         $processed_commands_array[] = array(
