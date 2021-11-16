@@ -194,6 +194,7 @@ if(!isset($_GET['action'])) {
                 if (Token::check(Input::get('token'))) {
                     if (isset($_POST['id'])) {
                         $queries->delete('store_connections', array('id', '=', $_POST['id']));
+                        $queries->delete('store_products_connections', array('connection_id', '=', $_POST['id']));
 
                         Session::flash('connections_success', $store_language->get('admin', 'connection_deleted_successfully'));
                     }
