@@ -67,7 +67,7 @@
                                     <label for="inputStoreContent">{$STORE_INDEX_CONTENT}</label>
                                     <textarea id="inputStoreContent" name="store_content">{$STORE_INDEX_CONTENT_VALUE}</textarea>
                                 </div>
-								
+                                
                                 <div class="form-group">
                                     <label for="inputCheckoutCompleteContent">{$CHECKOUT_COMPLETE_CONTENT}</label>
                                     <textarea id="inputCheckoutCompleteContent" name="checkout_complete_content">{$CHECKOUT_COMPLETE_CONTENT_VALUE}</textarea>

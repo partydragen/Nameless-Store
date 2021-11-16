@@ -1,6 +1,6 @@
 <?php
 /*
- *	Made by Partydragen
+ *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
@@ -25,199 +25,201 @@ require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
 $store = new Store($cache, $store_language);
 
 if(!isset($_GET['action'])) {
-	Redirect::to(URL::build('/panel/core/products'));
-	die();
+    Redirect::to(URL::build('/panel/core/products'));
+    die();
 } else {
-	switch($_GET['action']) {
-		case 'new';
-			// Create new category
-			if(Input::exists()){
-				$errors = array();
-				if(Token::check(Input::get('token'))){
-					$validate = new Validate();
-					$validation = $validate->check($_POST, array(
-						'name' => array(
-							'required' => true,
-							'min' => 1,
-							'max' => 128
-						),
-						'description' => array(
-							'max' => 100000
-						)
-					));
-					
-					if ($validation->passed()){
-						// Get last order
-						$last_order = DB::getInstance()->query('SELECT * FROM nl2_store_categories ORDER BY `order` DESC LIMIT 1')->results();
-						if(count($last_order)) $last_order = $last_order[0]->order;
-						else $last_order = 0;
-						
-						// Save to database
-						$queries->create('store_categories', array(
-							'name' => Output::getClean(Input::get('name')),
-							'description' => Output::getClean(Input::get('description')),
-							'order' => $last_order + 1,
-						));
-						
-						Session::flash('products_success', $store_language->get('admin', 'category_created_successfully'));
-						Redirect::to(URL::build('/panel/store/products'));
-						die();
-					} else {
-						$errors[] = $store_language->get('admin', 'description_max_100000');
-					}
-				} else {
-					// Invalid token
-					$errors[] = $language->get('general', 'invalid_token');
-				}
-			}
-			
-			$smarty->assign(array(
-				'NEW_CATEGORY' => $store_language->get('admin', 'new_category'),
-				'BACK' => $language->get('general', 'back'),
+    switch($_GET['action']) {
+        case 'new';
+            // Create new category
+            if(Input::exists()){
+                $errors = array();
+                if(Token::check(Input::get('token'))){
+                    $validate = new Validate();
+                    $validation = $validate->check($_POST, array(
+                        'name' => array(
+                            'required' => true,
+                            'min' => 1,
+                            'max' => 128
+                        ),
+                        'description' => array(
+                            'max' => 100000
+                        )
+                    ));
+                    
+                    if ($validation->passed()){
+                        // Get last order
+                        $last_order = DB::getInstance()->query('SELECT * FROM nl2_store_categories ORDER BY `order` DESC LIMIT 1')->results();
+                        if(count($last_order)) $last_order = $last_order[0]->order;
+                        else $last_order = 0;
+                        
+                        // Save to database
+                        $queries->create('store_categories', array(
+                            'name' => Output::getClean(Input::get('name')),
+                            'description' => Output::getClean(Input::get('description')),
+                            'order' => $last_order + 1,
+                        ));
+                        
+                        Session::flash('products_success', $store_language->get('admin', 'category_created_successfully'));
+                        Redirect::to(URL::build('/panel/store/products'));
+                        die();
+                    } else {
+                        $errors[] = $store_language->get('admin', 'description_max_100000');
+                    }
+                } else {
+                    // Invalid token
+                    $errors[] = $language->get('general', 'invalid_token');
+                }
+            }
+            
+            $smarty->assign(array(
+                'CATEGORY_TITLE' => $store_language->get('admin', 'new_category'),
+                'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/products'),
-				'CATEGORY_NAME' => $store_language->get('admin', 'category_name'),
-				'CATEGORY_DESCRIPTION' => $store_language->get('admin', 'category_description'),
-			));
-			
-			$template->addJSFiles(array(
-				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array(),
-				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => array()
-			));
+                'CATEGORY_NAME' => $store_language->get('admin', 'category_name'),
+                'CATEGORY_NAME_VALUE' => ((isset($_POST['name']) && $_POST['name']) ? Output::getClean(Input::get('name')) : ''),
+                'CATEGORY_DESCRIPTION' => $store_language->get('admin', 'category_description'),
+                'CATEGORY_DESCRIPTION_VALUE' => ((isset($_POST['description']) && $_POST['description']) ? Output::getClean(Input::get('description')) : '')
+            ));
+            
+            $template->addJSFiles(array(
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array(),
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => array()
+            ));
 
-			$template->addJSScript(Input::createEditor('inputDescription'));
-			
-			$template_file = 'store/categories_new.tpl';
-		break;
-		case 'edit';
-			// Edit category
-			if(!isset($_GET['id']) || !is_numeric($_GET['id'])){
-				Redirect::to(URL::build('/panel/store/products'));
-				die();
-			}
-			
-			$category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ?', array($_GET['id']))->results();
-			if(!count($category)) {
-				Redirect::to(URL::build('/panel/store/products'));
-				die();
-			}
-			$category = $category[0];
-			
-			if(Input::exists()){
-				$errors = array();
-				if(Token::check(Input::get('token'))){
-					$validate = new Validate();
-					$validation = $validate->check($_POST, array(
-						'name' => array(
-							'required' => true,
-							'min' => 1,
-							'max' => 128
-						),
-						'description' => array(
-							'max' => 100000
-						)
-					));
-					
-					if ($validation->passed()){
-						// Save to database
-						$queries->update('store_categories', $category->id, array(
-							'name' => Output::getClean(Input::get('name')),
-							'description' => Output::getClean(Input::get('description')),
-						));
-						
-						Session::flash('products_success', $store_language->get('admin', 'category_updated_successfully'));
-						Redirect::to(URL::build('/panel/store/products'));
-						die();
-					} else {
-						$errors[] = $store_language->get('admin', 'description_max_100000');
-					}
-				} else {
-					// Invalid token
-					$errors[] = $language->get('general', 'invalid_token');
-				}
-			}
-			
-			$smarty->assign(array(
-				'EDITING_CATEGORY' => str_replace('{x}', Output::getClean($category->name), $store_language->get('admin', 'editing_category_x')),
-				'BACK' => $language->get('general', 'back'),
+            $template->addJSScript(Input::createEditor('inputDescription'));
+            
+            $template_file = 'store/categories_form.tpl';
+        break;
+        case 'edit';
+            // Edit category
+            if(!isset($_GET['id']) || !is_numeric($_GET['id'])){
+                Redirect::to(URL::build('/panel/store/products'));
+                die();
+            }
+            
+            $category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ?', array($_GET['id']))->results();
+            if(!count($category)) {
+                Redirect::to(URL::build('/panel/store/products'));
+                die();
+            }
+            $category = $category[0];
+            
+            if(Input::exists()){
+                $errors = array();
+                if(Token::check(Input::get('token'))){
+                    $validate = new Validate();
+                    $validation = $validate->check($_POST, array(
+                        'name' => array(
+                            'required' => true,
+                            'min' => 1,
+                            'max' => 128
+                        ),
+                        'description' => array(
+                            'max' => 100000
+                        )
+                    ));
+                    
+                    if ($validation->passed()){
+                        // Save to database
+                        $queries->update('store_categories', $category->id, array(
+                            'name' => Output::getClean(Input::get('name')),
+                            'description' => Output::getClean(Input::get('description')),
+                        ));
+                        
+                        Session::flash('products_success', $store_language->get('admin', 'category_updated_successfully'));
+                        Redirect::to(URL::build('/panel/store/products'));
+                        die();
+                    } else {
+                        $errors[] = $store_language->get('admin', 'description_max_100000');
+                    }
+                } else {
+                    // Invalid token
+                    $errors[] = $language->get('general', 'invalid_token');
+                }
+            }
+            
+            $smarty->assign(array(
+                'CATEGORY_TITLE' => str_replace('{x}', Output::getClean($category->name), $store_language->get('admin', 'editing_category_x')),
+                'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/products'),
-				'CATEGORY_NAME' => $store_language->get('admin', 'category_name'),
-				'CATEGORY_NAME_VALUE' => Output::getClean($category->name),
-				'CATEGORY_DESCRIPTION' => $store_language->get('admin', 'category_description'),
-				'CATEGORY_DESCRIPTION_VALUE' => Output::getPurified(Output::getDecoded($category->description)),
-			));
-			
-			$template->addJSFiles(array(
-				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array(),
-				(defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => array()
-			));
+                'CATEGORY_NAME' => $store_language->get('admin', 'category_name'),
+                'CATEGORY_NAME_VALUE' => Output::getClean($category->name),
+                'CATEGORY_DESCRIPTION' => $store_language->get('admin', 'category_description'),
+                'CATEGORY_DESCRIPTION_VALUE' => Output::getPurified(Output::getDecoded($category->description)),
+            ));
+            
+            $template->addJSFiles(array(
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array(),
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => array()
+            ));
 
-			$template->addJSScript(Input::createEditor('inputDescription'));
-			
-			$template_file = 'store/categories_edit.tpl';
-		break;
-		case 'delete';
-			// Delete category
-			if(!isset($_GET['id']) || !is_numeric($_GET['id'])){
-				Redirect::to(URL::build('/panel/store/products'));
-				die();
-			}
-			
-			$category = DB::getInstance()->query('SELECT * FROM `nl2_store_categories` WHERE id = ?', array($_GET['id']))->results();
-			if(!count($category)) {
-				Redirect::to(URL::build('/panel/store/products'));
-				die();
-			}
-			$category = $category[0];
-			
-			$products = DB::getInstance()->query('SELECT id FROM `nl2_store_products` WHERE category_id = ? AND deleted = 0', array($_GET['id']))->results();
-			if(count($products)) {
-				foreach($products as $product) {
-					$queries->update('store_products', $product->id, array(
-						'deleted' => date('U')
-					));
-				}
-			}
-			
-			$queries->update('store_categories', $category->id, array(
-				'deleted' => date('U')
-			));
-			
-			Session::flash('products_success', $store_language->get('admin', 'category_deleted_successfully'));
-			Redirect::to(URL::build('/panel/store/products'));
-			die();
-		break;
-		default:
-			Redirect::to(URL::build('/panel/core/products'));
-			die();
-		break;
-	}
+            $template->addJSScript(Input::createEditor('inputDescription'));
+            
+            $template_file = 'store/categories_form.tpl';
+        break;
+        case 'delete';
+            // Delete category
+            if(!isset($_GET['id']) || !is_numeric($_GET['id'])){
+                Redirect::to(URL::build('/panel/store/products'));
+                die();
+            }
+            
+            $category = DB::getInstance()->query('SELECT * FROM `nl2_store_categories` WHERE id = ?', array($_GET['id']))->results();
+            if(!count($category)) {
+                Redirect::to(URL::build('/panel/store/products'));
+                die();
+            }
+            $category = $category[0];
+            
+            $products = DB::getInstance()->query('SELECT id FROM `nl2_store_products` WHERE category_id = ? AND deleted = 0', array($_GET['id']))->results();
+            if(count($products)) {
+                foreach($products as $product) {
+                    $queries->update('store_products', $product->id, array(
+                        'deleted' => date('U')
+                    ));
+                }
+            }
+            
+            $queries->update('store_categories', $category->id, array(
+                'deleted' => date('U')
+            ));
+            
+            Session::flash('products_success', $store_language->get('admin', 'category_deleted_successfully'));
+            Redirect::to(URL::build('/panel/store/products'));
+            die();
+        break;
+        default:
+            Redirect::to(URL::build('/panel/core/products'));
+            die();
+        break;
+    }
 }
 
 // Load modules + template
 Module::loadPage($user, $pages, $cache, $smarty, array($navigation, $cc_nav, $mod_nav), $widgets);
 
 if(isset($success))
-	$smarty->assign(array(
-		'SUCCESS' => $success,
-		'SUCCESS_TITLE' => $language->get('general', 'success')
-	));
+    $smarty->assign(array(
+        'SUCCESS' => $success,
+        'SUCCESS_TITLE' => $language->get('general', 'success')
+    ));
 
 if(isset($errors) && count($errors))
-	$smarty->assign(array(
-		'ERRORS' => $errors,
-		'ERRORS_TITLE' => $language->get('general', 'error')
-	));
+    $smarty->assign(array(
+        'ERRORS' => $errors,
+        'ERRORS_TITLE' => $language->get('general', 'error')
+    ));
 
 $smarty->assign(array(
-	'PARENT_PAGE' => PARENT_PAGE,
-	'DASHBOARD' => $language->get('admin', 'dashboard'),
-	'STORE' => $store_language->get('general', 'store'),
-	'PAGE' => PANEL_PAGE,
-	'TOKEN' => Token::get(),
-	'SUBMIT' => $language->get('general', 'submit'),
+    'PARENT_PAGE' => PARENT_PAGE,
+    'DASHBOARD' => $language->get('admin', 'dashboard'),
+    'STORE' => $store_language->get('general', 'store'),
+    'PAGE' => PANEL_PAGE,
+    'TOKEN' => Token::get(),
+    'SUBMIT' => $language->get('general', 'submit'),
     'STORE' => $store_language->get('general', 'store'),
     'CATEGORIES' => $store_language->get('admin', 'categories'),
-	'PRODUCTS' => $store_language->get('general', 'products')
+    'PRODUCTS' => $store_language->get('general', 'products')
 ));
 
 $page_load = microtime(true) - $start;

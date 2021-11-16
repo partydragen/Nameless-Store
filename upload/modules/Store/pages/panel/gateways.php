@@ -1,6 +1,6 @@
 <?php
 /*
- *	Made by Partydragen
+ *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
@@ -46,15 +46,15 @@ if(!isset($_GET['gateway'])) {
         );
     }
 
-	$smarty->assign(array(
-		'GATEWAYS_LIST' => $gateways_list,
+    $smarty->assign(array(
+        'GATEWAYS_LIST' => $gateways_list,
         'PAYMENT_METHOD' => $store_language->get('admin', 'payment_method'),
         'EDIT' => $language->get('general', 'edit'),
         'ENABLED' => $language->get('admin', 'enabled'),
         'DISABLED' => $language->get('admin', 'disabled'),
-	));
+    ));
 
-	$template_file = 'store/gateways.tpl';
+    $template_file = 'store/gateways.tpl';
 } else {
     $gateway = $gateways->get($_GET['gateway']);
     
@@ -101,28 +101,28 @@ if(!isset($_GET['gateway'])) {
 Module::loadPage($user, $pages, $cache, $smarty, array($navigation, $cc_nav, $mod_nav), $widgets);
 
 if(Session::exists('gateways_success'))
-	$success = Session::flash('gateways_success');
+    $success = Session::flash('gateways_success');
 
 if(isset($success))
-	$smarty->assign(array(
-		'SUCCESS' => $success,
-		'SUCCESS_TITLE' => $language->get('general', 'success')
-	));
+    $smarty->assign(array(
+        'SUCCESS' => $success,
+        'SUCCESS_TITLE' => $language->get('general', 'success')
+    ));
 
 if(isset($errors) && count($errors))
-	$smarty->assign(array(
-		'ERRORS' => $errors,
-		'ERRORS_TITLE' => $language->get('general', 'error')
-	));
+    $smarty->assign(array(
+        'ERRORS' => $errors,
+        'ERRORS_TITLE' => $language->get('general', 'error')
+    ));
 
 $smarty->assign(array(
-	'PARENT_PAGE' => PARENT_PAGE,
-	'DASHBOARD' => $language->get('admin', 'dashboard'),
-	'STORE' => $store_language->get('general', 'store'),
-	'PAGE' => PANEL_PAGE,
-	'TOKEN' => Token::get(),
-	'SUBMIT' => $language->get('general', 'submit'),
-	'GATEWAYS' => $store_language->get('admin', 'gateways')
+    'PARENT_PAGE' => PARENT_PAGE,
+    'DASHBOARD' => $language->get('admin', 'dashboard'),
+    'STORE' => $store_language->get('general', 'store'),
+    'PAGE' => PANEL_PAGE,
+    'TOKEN' => Token::get(),
+    'SUBMIT' => $language->get('general', 'submit'),
+    'GATEWAYS' => $store_language->get('admin', 'gateways')
 ));
 
 $page_load = microtime(true) - $start;
