@@ -15,12 +15,14 @@ class Payment {
             $_data,
             $_order;
     
-    public function __construct($value, $field = 'id') {
+    public function __construct($value = null, $field = 'id') {
         $this->_db = DB::getInstance();
         
-        $data = $this->_db->get('store_payments', array($field, '=', $value));
-        if ($data->count()) {
-            $this->_data = $data->first();
+        if($value != null) {
+            $data = $this->_db->get('store_payments', array($field, '=', $value));
+            if ($data->count()) {
+                $this->_data = $data->first();
+            }
         }
     }
     
@@ -192,12 +194,12 @@ class Payment {
                         continue;
                     }
                     
-                    $connections = ($action->data()->own_connections ? $action->getConnections() : $product->getConnections())
+                    $connections = ($action->data()->own_connections ? $action->getConnections() : $product->getConnections());
                     foreach($connections as $connection) {
                         $this->_db->insert('store_pending_actions', array(
                             'order_id' => $this->data()->order_id,
                             'action_id' => $action->data()->id,
-                            'product_id' => $product->data()->product_id,
+                            'product_id' => $product->data()->id,
                             'player_id' => $product->data()->player_id,
                             'connection_id' => $connection->id,
                             'type' => $action->data()->type,

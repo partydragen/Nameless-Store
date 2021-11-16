@@ -35,6 +35,14 @@
 
                 <div class="card shadow mb-4">
                     <div class="card-body">
+                        <span class="float-md-right">
+                            <a href="{$CREATE_PAYMENT_LINK}" class="btn btn-primary"><i class="fa fa-plus-circle"></i> {$CREATE_PAYMENT}</a>
+                        </span>
+                        
+                        </br>
+                        </br>
+                        <hr>
+                        
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
 

@@ -44,6 +44,7 @@ $language = array(
     'please_enter_valid_ign_product' => 'Please enter a valid ingame username and select a product.',
     'price' => 'Price',
     'please_enter_valid_price' => 'Please enter a valid price.',
+    'create_payment' => 'Create Payment',
     'payment_created_successfully' => 'Payment created successfully.',
     'viewing_payment' => 'Viewing payment {x}', // Don't replace {x}
 	'pending_commands' => 'Pending commands',

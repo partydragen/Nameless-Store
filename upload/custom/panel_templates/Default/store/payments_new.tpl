@@ -35,9 +35,9 @@
 
                 <div class="card shadow mb-4">
                     <div class="card-body">
-                        <h5 style="display:inline">{$NEW_PAYMENT}</h5>
+                        <h5 style="display:inline">{$CREATE_PAYMENT}</h5>
                         <div class="float-md-right">
-                            <button type="button" onclick="showCancelModal()" class="btn btn-warning">{$CANCEL}</button>
+                            <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
                         </div>
                         <hr />
 
@@ -49,13 +49,13 @@
                         {else}
                             <form action="" method="post">
                                 <div class="form-group">
-                                    <label for="inputIGN">{$IGN}</label>
-                                    <input type="text" class="form-control" id="inputIGN" name="ign" placeholder="{$IGN}">
+                                    <label for="inputUsername">{$USERNAME}</label>
+                                    <input type="text" class="form-control" id="inputUsername" name="username" placeholder="{$USERNAME}" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="inputProduct">{$PRODUCT}</label>
-                                    <select class="form-control" id="inputProduct" name="product">
-                                        {foreach from=$PRODUCTS item=item}
+                                    <label for="inputProduct">{$PRODUCTS}</label>
+                                    <select class="form-control" name="products[]" id="inputProducts" multiple required>
+                                        {foreach from=$PRODUCTS_LIST item=item}
                                             <option value="{$item.id}">{$item.name}</option>
                                         {/foreach}
                                     </select>
@@ -87,33 +87,7 @@
     <!-- End Wrapper -->
 </div>
 
-    <div class="modal fade" id="cancelModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{$ARE_YOU_SURE}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    {$CONFIRM_CANCEL}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{$NO}</button>
-                    <a href="{$CANCEL_LINK}" class="btn btn-primary">{$YES}</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
 {include file='scripts.tpl'}
-
-<script type="text/javascript">
-    function showCancelModal(){
-        $('#cancelModal').modal().show();
-    }
-</script>
 
 </body>
 </html>

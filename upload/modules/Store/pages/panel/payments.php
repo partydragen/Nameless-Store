@@ -180,47 +180,92 @@ if(isset($_GET['player'])){
 
 } else if(isset($_GET['action'])){
     if($_GET['action'] == 'create'){
-        die();
-        // New payment
+        // Create payment
+        if (Input::exists()) {
+            $errors = array();
+            
+            if (Token::check()) {
+                $validate = new Validate();
+                
+                $to_validation = array(
+                    'username' => array(
+                        Validate::REQUIRED => true
+                    )
+                );
+                
+                // Valid, continue with validation
+                $validation = $validate->check($_POST, $to_validation);
+                if ($validation->passed()) {
+                    // Attempt to load player
+                    $player = new Player();
+                    if(!$player->login(Output::getClean(Input::get('username')), false)) {
+                        $errors[] = $language->get('user', 'invalid_mcname');
+                    }
+                    
+                    $items = array();
+                    $selected_products = $_POST['products'];
+                    foreach($selected_products as $item) {
+                        $items[$item] = array(
+                            'id' => $item,
+                            'quantity' => 1
+                        );
+                    }
+
+                    if(!count($errors) && count($items)) {
+                        // Register order
+                        $order = new Order();
+                        $order->create($user, $player, $items);
+                        
+                        // Register payment
+                        $payment = new Payment();
+                        $payment->handlePaymentEvent('COMPLETED', array(
+                            'order_id' => $order->data()->id,
+                            'gateway_id' => 0,
+                            'amount' => 0,
+                            'currency' => Output::getClean($configuration->get('store', 'currency')),
+                            'fee' => 0
+                        ));
+                        
+                        Session::flash('store_payment_success', $store_language->get('admin', 'payment_created_successfully'));
+                        Redirect::to(URL::build('/panel/store/payments/', 'payment=' . $payment->data()->id));
+                        die();
+                    }
+                }
+            } else {
+                // Invalid token
+                $errors[] = $language->get('general', 'invalid_token');
+            }
+        }
+    
         $smarty->assign(array(
-            'NEW_PAYMENT' => $store_language->get('admin', 'new_payment'),
-            'CANCEL' => $language->get('general', 'cancel'),
-            'CANCEL_LINK' => URL::build('/panel/store/payments'),
-            'CONFIRM_CANCEL' => $language->get('general', 'confirm_cancel'),
-            'ARE_YOU_SURE' => $language->get('general', 'are_you_sure'),
-            'YES' => $language->get('general', 'yes'),
-            'NO' => $language->get('general', 'no')
+            'CREATE_PAYMENT' => $store_language->get('admin', 'create_payment'),
+            'BACK' => $language->get('general', 'back'),
+            'BACK_LINK' => URL::build('/panel/store/payments')
         ));
 
-        if(isset($_GET['step'])){
+        // Choose products
+        $products = $queries->orderAll('store_products', '`order`', 'ASC');
+        if(count($products)){
+            $template_products = array();
 
-        } else {
-            // Choose product
-            $products = $queries->orderAll('store_products', '`order`', 'ASC');
+            foreach($products as $product){
+                $template_products[] = array(
+                    'id' => Output::getClean($product->id),
+                    'name' => Output::getClean($product->name)
+                );
+            }
 
-            if(count($products)){
-                $template_products = array();
+            $smarty->assign(array(
+                'USERNAME' => $store_language->get('admin', 'ign'),
+                'PRODUCTS' => $store_language->get('general', 'products') . ' ' . $store_language->get('admin', 'select_multiple_with_ctrl'),
+                'PRODUCTS_LIST' => $template_products
+            ));
 
-                foreach($products as $product){
-                    $template_products[] = array(
-                        'id' => Output::getClean($product->id),
-                        'name' => Output::getClean($product->name)
-                    );
-                }
+        } else
+            $smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
 
-                $smarty->assign(array(
-                    'IGN' => $store_language->get('admin', 'ign'),
-                    'PRODUCT' => $store_language->get('general', 'product'),
-                    'PRODUCTS' => $template_products
-                ));
-
-            } else
-                $smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
-
-            $template_file = 'store/payments_new_step_1.tpl';
-        }
+        $template_file = 'store/payments_new.tpl';
     }
-
 } else {
     $payments = $store->getAllPayments();
 
@@ -296,8 +341,8 @@ if(isset($_GET['player'])){
         $smarty->assign('NO_PAYMENTS', $store_language->get('admin', 'no_payments'));
 
     $smarty->assign(array(
-        'NEW_PAYMENT' => $store_language->get('admin', 'new_payment'),
-        'NEW_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'action=create')
+        'CREATE_PAYMENT' => $store_language->get('admin', 'create_payment'),
+        'CREATE_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'action=create')
     ));
 
     $template_file = 'store/payments.tpl';

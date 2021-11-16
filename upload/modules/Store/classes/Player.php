@@ -42,7 +42,7 @@ class Player {
         return false;
     }
     
-    public function login($username) {
+    public function login($username, $save = true) {
         // Online mode or offline mode?
         $uuid_linking = $this->_db->get('settings', array('name', '=', 'uuid_linking'))->results();
         $uuid_linking = $uuid_linking[0]->value;
@@ -65,7 +65,9 @@ class Player {
                     ));
                     $this->_isLoggedIn = true;
                     
-                    Session::put('store_player', $this->data()->id);
+                    if($save)
+                        Session::put('store_player', $this->data()->id);
+                        
                     return true;
                 } else {
                     // Register new player
@@ -76,7 +78,9 @@ class Player {
                     $this->find($this->_db->lastId(), 'id');
                     $this->_isLoggedIn = true;
                 
-                    Session::put('store_player', $this->data()->id);
+                    if($save)
+                        Session::put('store_player', $this->data()->id);
+                    
                     return true;
                 }
 			} else {
@@ -89,7 +93,9 @@ class Player {
             if($this->find($username, 'username')) {
                 // Player already exist in database
                 $this->_isLoggedIn = true;
-                Session::put('store_player', $this->data()->id);
+                if($save)
+                    Session::put('store_player', $this->data()->id);
+                
                 return true;
             } else {
                 // Register new player
@@ -100,7 +106,9 @@ class Player {
                 $this->find($this->_db->lastId(), 'id');
                 $this->_isLoggedIn = true;
 
-                Session::put('store_player', $this->data()->id);
+                if($save)
+                    Session::put('store_player', $this->data()->id);
+                    
                 return true;
             }
         }
