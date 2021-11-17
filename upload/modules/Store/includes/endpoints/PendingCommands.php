@@ -13,9 +13,9 @@ class PendingCommands extends EndpointBase {
         $where = ' WHERE status = 0';
         $params = array();
 
-        if (isset($_GET['server_id'])) {
-            $where .= ' AND server_id = ?';
-            array_push($params, $_GET['server_id']);
+        if (isset($_GET['connection_id']) || isset($_GET['server_id'])) {
+            $where .= ' AND connection_id = ?';
+            array_push($params, (isset($_GET['connection_id']) ? $_GET['connection_id'] : $_GET['server_id']));
         }
 
         // Ensure the user exists
