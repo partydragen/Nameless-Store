@@ -33,97 +33,136 @@
                 <!-- Update Notification -->
                 {include file='includes/update.tpl'}
 
-                <div class="card shadow mb-4">
-                    <div class="card-body">
-                        <h5 style="display:inline">{$VIEWING_PAYMENT}</h5>
-                        <div class="float-md-right">
-                            <a class="btn btn-primary" href="{$BACK_LINK}">{$BACK}</a>
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="card shadow mb-4">
+                            <div class="card-body">
+                                <h5 style="display:inline">{$VIEWING_PAYMENT}</h5>
+                                <div class="float-md-right">
+                                    <a class="btn btn-primary" href="{$BACK_LINK}">{$BACK}</a>
+                                </div>
+                                
+                                <hr />
+
+                                <!-- Success and Error Alerts -->
+                                {include file='includes/alerts.tpl'}
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <colgroup>
+                                            <col span="1" style="width: 50%">
+                                            <col span="1" style="width: 50%">
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>{$IGN}</strong></td>
+                                                <td><img src="{$AVATAR}" class="rounded" style="max-height:32px;max-width:32px;" alt="{$IGN_VALUE}"> <a style="{$STYLE}" href="{$USER_LINK}">{$IGN_VALUE}</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>{$STATUS}</strong></td>
+                                                <td>{$STATUS_VALUE}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>{$TRANSACTION}</strong></td>
+                                                <td>{$TRANSACTION_VALUE}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>{$PAYMENT_METHOD}</strong></td>
+                                                <td>{$PAYMENT_METHOD_VALUE}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>{$UUID}</strong></td>
+                                                <td>{$UUID_VALUE}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>{$PRICE}</strong></td>
+                                                <td>{$CURRENCY_SYMBOL}{$PRICE_VALUE} ({$CURRENCY_ISO})</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>{$DATE}</strong></td>
+                                                <td>{$DATE_VALUE}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                </br>
+                                
+                                <hr />
+                                <h5 style="display:inline">{$PENDING_COMMANDS}</h5>
+                                {if count($PENDING_COMMANDS_LIST)}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>{$COMMAND}</th>
+                                                <th>{$CONNECTION}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {foreach from=$PENDING_COMMANDS_LIST item=command}
+                                            <tr>
+                                                <td>{$command.command}</td>
+                                                <td>{$command.connection_name}</td>
+                                            </tr>
+                                        {/foreach}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {else}
+                                    <p>{$NO_PENDING_COMMANDS}</p>
+                                {/if}
+                                
+                                </br>
+
+                                <hr />
+                                <h5 style="display:inline">{$PROCESSED_COMMANDS}</h5>
+                                {if count($PROCESSED_COMMANDS_LIST)}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>{$COMMAND}</th>
+                                                <th>{$CONNECTION}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {foreach from=$PROCESSED_COMMANDS_LIST item=command}
+                                            <tr>
+                                                <td>{$command.command}</td>
+                                                <td>{$command.connection_name}</td>
+                                            </tr>
+                                        {/foreach}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {else}
+                                    <p>{$NO_PROCESSED_COMMANDS}</p>
+                                {/if}
+
+                            </div>
                         </div>
-                        
-                        <hr />
-
-                        <!-- Success and Error Alerts -->
-                        {include file='includes/alerts.tpl'}
-
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <colgroup>
-                                    <col span="1" style="width: 50%">
-                                    <col span="1" style="width: 50%">
-                                </colgroup>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>{$IGN}</strong></td>
-                                        <td><img src="{$AVATAR}" class="rounded" style="max-height:32px;max-width:32px;" alt="{$IGN_VALUE}"> <a style="{$STYLE}" href="{$USER_LINK}">{$IGN_VALUE}</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>{$STATUS}</strong></td>
-                                        <td>{$STATUS_VALUE}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>{$TRANSACTION}</strong></td>
-                                        <td>{$TRANSACTION_VALUE}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>{$PAYMENT_METHOD}</strong></td>
-                                        <td>{$PAYMENT_METHOD_VALUE}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>{$UUID}</strong></td>
-                                        <td>{$UUID_VALUE}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>{$PRICE}</strong></td>
-                                        <td>{$CURRENCY_SYMBOL}{$PRICE_VALUE} ({$CURRENCY_ISO})</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>{$DATE}</strong></td>
-                                        <td>{$DATE_VALUE}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card shadow mb-4">
+                            <div class="card-body">
+                                <h5 style="display:inline">{$PRODUCTS}</h5>
+                                <hr>
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <tbody>
+                                            {foreach from=$PRODUCTS_LIST item=product}
+                                                <tr>
+                                                    <td>{$product.name}</td>
+                                                </tr>
+                                            {/foreach}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-                        
-                        </br>
-                        
-                        <hr />
-                        <h5 style="display:inline">{$PENDING_COMMANDS}</h5>
-                        {if count($PENDING_COMMANDS_LIST)}
-                        <div class="table-responsive">
-							<table class="table table-striped">
-								<tbody>
-								{foreach from=$PENDING_COMMANDS_LIST item=command}
-                                    <tr>
-                                        <td>{$command.command}</td>
-                                    </tr>
-								{/foreach}
-								</tbody>
-							</table>
-						</div>
-                        {else}
-                            <p>{$NO_PENDING_COMMANDS}</p>
-                        {/if}
-                        
-                        </br>
-
-                        <hr />
-                        <h5 style="display:inline">{$PROCESSED_COMMANDS}</h5>
-                        {if count($PROCESSED_COMMANDS_LIST)}
-                        <div class="table-responsive">
-							<table class="table table-striped">
-								<tbody>
-								{foreach from=$PROCESSED_COMMANDS_LIST item=command}
-                                    <tr>
-                                        <td>{$command.command}</td>
-                                    </tr>
-								{/foreach}
-								</tbody>
-							</table>
-						</div>
-                        {else}
-                            <p>{$NO_PROCESSED_COMMANDS}</p>
-                        {/if}
-
                     </div>
                 </div>
 

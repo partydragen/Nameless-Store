@@ -124,6 +124,7 @@ class Action {
         if($this->exists()) {
             $this->_db->createQuery('DELETE FROM `nl2_store_products_actions` WHERE `id` = ?', array($this->data()->id));
             $this->_db->createQuery('DELETE FROM `nl2_store_products_connections` WHERE `action_id` = ?', array($this->data()->id));
+            $this->_db->createQuery('DELETE FROM `nl2_store_pending_actions` WHERE `action_id` = ?', array($this->data()->id));
             
             return true;
         }

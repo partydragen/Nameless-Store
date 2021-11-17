@@ -183,9 +183,9 @@ class Payment {
         
         
         $products = $this->_db->query('SELECT product_id, player_id FROM nl2_store_orders_products INNER JOIN nl2_store_orders ON order_id=nl2_store_orders.id INNER JOIN nl2_store_products ON nl2_store_products.id=product_id WHERE order_id = ?', array($this->data()->order_id))->results();
-        foreach($products as $product) {
+        foreach($products as $item) {
             
-            $product = new Product($product->product_id);
+            $product = new Product($item->product_id);
             if($product->exists() && $product->data()->deleted == 0) {
                 
                 // Foreach all actions that belong to this product
@@ -200,7 +200,7 @@ class Payment {
                             'order_id' => $this->data()->order_id,
                             'action_id' => $action->data()->id,
                             'product_id' => $product->data()->id,
-                            'player_id' => $product->data()->player_id,
+                            'player_id' => $item->player_id,
                             'connection_id' => $connection->id,
                             'type' => $action->data()->type,
                             'command' => $action->data()->command,

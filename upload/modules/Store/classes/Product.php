@@ -16,12 +16,14 @@ class Product {
             $_connections,
             $_actions;
             
-    public function __construct($value, $field = 'id') {
+    public function __construct($value = null, $field = 'id') {
         $this->_db = DB::getInstance();
         
-        $data = $this->_db->get('store_products', array($field, '=', $value));
-        if ($data->count()) {
-            $this->_data = $data->first();
+        if($value != null) {
+            $data = $this->_db->get('store_products', array($field, '=', $value));
+            if ($data->count()) {
+                $this->_data = $data->first();
+            }
         }
     }
     
@@ -43,6 +45,13 @@ class Product {
      */
     public function exists() {
         return (!empty($this->_data));
+    }
+    
+    /**
+     * Set action data to load it as pre loaded
+     */
+    public function setData($data) {
+        $this->_data = $data;
     }
     
     /**
@@ -136,6 +145,8 @@ class Product {
             $this->update(array(
                 'deleted' => date('U')
             ));
+            
+            $this->_db->createQuery('DELETE FROM `nl2_store_pending_actions` WHERE `product_id` = ?', array($this->data()->id));
             
             return true;
         }

@@ -80,6 +80,15 @@
                             {/if}
                         </div>
                     </div>
+                    
+                    <div class="card shadow mb-4">
+                        <div class="card-body">
+                            <p style="margin-top: 7px; margin-bottom: 7px;">Downloads</p>
+                            <hr>
+                            
+                            Minecraft Plugin for Spigot or Bukkit - <a href="https://www.spigotmc.org/resources/nameless-store.87221/" target="_blank" class="btn btn-primary btn-sm">Go to Spigot</a>
+                        </div>
+                    </div>
 
                     <!-- Spacing -->
                     <div style="height:1rem;"></div>

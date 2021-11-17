@@ -33,6 +33,21 @@ class Store {
         
         return $store_url;
     }
+    
+    // Get all products
+    public function getProducts() {
+        $products_list = array();
+        
+        $products = $this->_db->query('SELECT * FROM nl2_store_products WHERE deleted = 0 ORDER BY `order` ASC')->results();
+        foreach($products as $data) {
+            $product = new Product();
+            $product->setData($data);
+            
+            $products_list[] = $product;
+        }
+        
+        return $products_list;
+    }
 	
 	// Get all payments
 	public function getAllPayments() {

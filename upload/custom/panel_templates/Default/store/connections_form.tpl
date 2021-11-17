@@ -55,6 +55,12 @@
                                     <input type="text" name="name" class="form-control" id="InputName" placeholder="{$NAME}" value="{$NAME_VALUE}">
                                 </div>
                                 <div class="form-group">
+                                    <label for="inputType">Connection Type</label>
+									<select name="category" class="form-control" id="inputType" required>
+										<option value="Minecraft">Minecraft Server</option>
+									</select>
+                                </div>
+                                <div class="form-group">
                                     <input type="hidden" name="token" value="{$TOKEN}">
                                     <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
                                 </div>
