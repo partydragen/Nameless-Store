@@ -78,6 +78,7 @@ $language = array(
     'payment_method' => 'Payment Method ',
     'currency' => 'Currency',
     'currency_symbol' => 'Currency Symbol',
+    'command' => 'Command',
     
     // Gateways
     'gateways' => 'Gateways',
@@ -121,6 +122,7 @@ $language = array(
     // Connections
     'connections' => 'Connections',
     'connections_info' => 'Connect your servers to your store to execute specific actions',
+    'connection' => 'Connection',
     'new_connection' => 'New Connection',
     'connection_id' => 'Connection ID',
     'no_connections' => 'No connections have been made yet.',

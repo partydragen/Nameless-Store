@@ -129,20 +129,30 @@ if(isset($_GET['player'])){
         $avatar = Util::getAvatarFromUUID(Output::getClean($player->getUUID()));
         $style = '';
     }
+    
+    // Get Products
+    $products_list = array();
+    foreach($order->getProducts() as $product) {
+        $products_list[] = array(
+            'name' => Output::getClean($product->name)
+        );
+    }
    
-    $pending_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions WHERE order_id = ? AND status = 0', array($payment->data()->order_id))->results();
+    $pending_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions INNER JOIN nl2_store_connections ON connection_id=nl2_store_connections.id WHERE order_id = ? AND status = 0', array($payment->data()->order_id))->results();
     $pending_commands_array = array();
     foreach($pending_commands as $command){
         $pending_commands_array[] = array(
-            'command' => Output::getClean($command->command)
+            'command' => Output::getClean($command->command),
+            'connection_name' => Output::getClean($command->name)
         );
     }
     
-    $processed_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions WHERE order_id = ? AND status = 1', array($payment->data()->order_id))->results();
+    $processed_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions INNER JOIN nl2_store_connections ON connection_id=nl2_store_connections.id WHERE order_id = ? AND status = 1', array($payment->data()->order_id))->results();
     $processed_commands_array = array();
     foreach($processed_commands as $command){
         $processed_commands_array[] = array(
-            'command' => Output::getClean($command->command)
+            'command' => Output::getClean($command->command),
+            'connection_name' => Output::getClean($command->name)
         );
     }
     
@@ -168,6 +178,10 @@ if(isset($_GET['player'])){
         'CURRENCY_SYMBOL' => Output::getClean('$'),
         'CURRENCY_ISO' => Output::getClean($payment->data()->currency),
         'DATE_VALUE' => date('d M Y, H:i', $payment->data()->created),
+        'PRODUCTS' => $store_language->get('admin', 'products'),
+        'PRODUCTS_LIST' => $products_list,
+        'CONNECTION' => $store_language->get('admin', 'connection'),
+        'COMMAND' => $store_language->get('admin', 'command'),
         'PENDING_COMMANDS' => $store_language->get('admin', 'pending_commands'),
         'PROCESSED_COMMANDS' => $store_language->get('admin', 'processed_commands'),
         'NO_PENDING_COMMANDS' => $store_language->get('admin', 'no_pending_commands'),
@@ -243,15 +257,16 @@ if(isset($_GET['player'])){
             'BACK_LINK' => URL::build('/panel/store/payments')
         ));
 
-        // Choose products
-        $products = $queries->orderAll('store_products', '`order`', 'ASC');
+        // Products to choose
+        $products = $store->getProducts();
+        
         if(count($products)){
             $template_products = array();
 
             foreach($products as $product){
                 $template_products[] = array(
-                    'id' => Output::getClean($product->id),
-                    'name' => Output::getClean($product->name)
+                    'id' => Output::getClean($product->data()->id),
+                    'name' => Output::getClean($product->data()->name)
                 );
             }
 
