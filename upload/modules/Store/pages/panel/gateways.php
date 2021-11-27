@@ -34,7 +34,11 @@ if(!isset($_GET['gateway'])) {
     // Make sure config exist
     $config_path = ROOT_PATH . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'Store' . DIRECTORY_SEPARATOR . 'config.php';
     if(!file_exists($config_path)){
-        StoreConfig::set(array('installed' => true));
+        if(is_writable(ROOT_PATH . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'Store')) {
+            StoreConfig::set(array('installed' => true));
+        } else {
+            $errors = array($store_language->get('admin', 'unavailable_generate_config'));
+        }
     }
 
     $gateways_list = array();
