@@ -62,6 +62,16 @@
                                     <label for="inputCurrencySymbol">{$CURRENCY_SYMBOL}</label>
                                     <input type="text" class="form-control" id="inputCurrencySymbol" name="currency_symbol" placeholder="$" value="{$CURRENCY_SYMBOL_VALUE}">
                                 </div>
+                                
+                                <div class="form-group">
+                                    <label for="link_location">{$LINK_LOCATION}</label>
+                                    <select class="form-control" id="link_location" name="link_location">
+                                        <option value="1"{if $LINK_LOCATION_VALUE eq 1} selected{/if}>{$LINK_NAVBAR}</option>
+                                        <option value="2"{if $LINK_LOCATION_VALUE eq 2} selected{/if}>{$LINK_MORE}</option>
+                                        <option value="3"{if $LINK_LOCATION_VALUE eq 3} selected{/if}>{$LINK_FOOTER}</option>
+                                        <option value="4"{if $LINK_LOCATION_VALUE eq 4} selected{/if}>{$LINK_NONE}</option>
+                                    </select>
+                                </div>
 
                                 <div class="form-group">
                                     <label for="inputStoreContent">{$STORE_INDEX_CONTENT}</label>

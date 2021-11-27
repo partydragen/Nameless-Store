@@ -34,6 +34,7 @@ if(isset($_POST) && !empty($_POST)){
 		));
 
 		if($validation->passed()){
+            // Update allow guests
 			if(isset($_POST['allow_guests']) && $_POST['allow_guests'] == 'on')
 				$allow_guests = 1;
 			else
@@ -42,7 +43,27 @@ if(isset($_POST) && !empty($_POST)){
 			$configuration->set('store', 'allow_guests', $allow_guests);
             $configuration->set('store', 'currency', Output::getClean(Input::get('currency')));
             $configuration->set('store', 'currency_symbol', Output::getClean(Input::get('currency_symbol')));
+            
+            // Update link location
+            if(isset($_POST['link_location'])){
+                switch($_POST['link_location']){
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                        $location = $_POST['link_location'];
+                    break;
+                    default:
+                        $location = 1;
+                }
+            } else
+                $location = 1;
+                                                
+            // Update Link location cache
+            $cache->setCache('nav_location');
+            $cache->store('store_location', $location);
 
+            // Update store content
 			try {
 				$store_index_content = $queries->getWhere('store_settings', array('name', '=', 'store_content'));
 
@@ -62,6 +83,7 @@ if(isset($_POST) && !empty($_POST)){
 				$errors[] = $e->getMessage();
 			}
 			
+            // Update checkout content
 			try {
 				$checkout_complete_content = $queries->getWhere('store_settings', array('name', '=', 'checkout_complete_content'));
 
@@ -81,6 +103,7 @@ if(isset($_POST) && !empty($_POST)){
 				$errors[] = $e->getMessage();
 			}
 
+            // Update store path
 			try {
 				$store_path = $queries->getWhere('store_settings', array('name', '=', 'store_path'));
 
@@ -168,6 +191,10 @@ $currency = $configuration->get('store', 'currency');
 // Currency Symbol
 $currency_symbol = $configuration->get('store', 'currency_symbol');
 
+// Retrieve Link Location from cache
+$cache->setCache('nav_location');
+$link_location = $cache->retrieve('store_location');
+
 $smarty->assign(array(
 	'PARENT_PAGE' => PARENT_PAGE,
 	'DASHBOARD' => $language->get('admin', 'dashboard'),
@@ -188,7 +215,13 @@ $smarty->assign(array(
 	'STORE_INDEX_CONTENT' => $store_language->get('admin', 'store_index_content'),
 	'STORE_INDEX_CONTENT_VALUE' => $store_index_content,
 	'CHECKOUT_COMPLETE_CONTENT' => $store_language->get('admin', 'checkout_complete_content'),
-	'CHECKOUT_COMPLETE_CONTENT_VALUE' => $checkout_complete_content
+	'CHECKOUT_COMPLETE_CONTENT_VALUE' => $checkout_complete_content,
+	'LINK_LOCATION' => $language->get('admin', 'page_link_location'),
+	'LINK_LOCATION_VALUE' => $link_location,
+	'LINK_NAVBAR' => $language->get('admin', 'page_link_navbar'),
+	'LINK_MORE' => $language->get('admin', 'page_link_more'),
+	'LINK_FOOTER' => $language->get('admin', 'page_link_footer'),
+	'LINK_NONE' => $language->get('admin', 'page_link_none'),
 ));
 
 if(!defined('TEMPLATE_STORE_SUPPORT')){

@@ -94,8 +94,16 @@ class Store_Module extends Module {
 	public function onPageLoad($user, $pages, $cache, $smarty, $navs, $widgets, $template){
 		// Classes
 		require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
-
+        
 		// Add link to navbar
+        $cache->setCache('nav_location');
+        if(!$cache->isCached('store_location')){
+            $link_location = 1;
+            $cache->store('store_location', 1);
+        } else {
+            $link_location = $cache->retrieve('store_location');
+        }
+
 		$cache->setCache('navbar_order');
 		if(!$cache->isCached('store_order')){
 			$store_order = 21;
@@ -116,7 +124,20 @@ class Store_Module extends Module {
 		else
 			$navbar_pos = 'top';
 
-		$navs[0]->add('store', $this->_store_language->get('general', 'store'), URL::build($this->_store_url), $navbar_pos, null, $store_order, $icon);
+        switch($link_location){
+            case 1:
+                // Navbar
+                $navs[0]->add('store', $this->_store_language->get('general', 'store'), URL::build($this->_store_url), 'top', null, $store_order, $icon);
+            break;
+            case 2:
+                // "More" dropdown
+                $navs[0]->addItemToDropdown('more_dropdown', 'forum', $this->_store_language->get('general', 'store'), URL::build($this->_store_url), 'top', null, $icon, $store_order);
+            break;
+            case 3:
+                // Footer
+                $navs[0]->add('store', $this->_store_language->get('general', 'store'), URL::build($this->_store_url), 'footer', null, $store_order, $icon);
+            break;
+        }
 
 		if(defined('BACK_END')){
 			// Define permissions which belong to this module
