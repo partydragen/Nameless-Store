@@ -595,7 +595,7 @@ class Store_Module extends Module {
 		
 		if(!$queries->tableExists('store_gateways')) {
 			try {
-				$queries->createTable('store_gateways', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `displayname` varchar(64) NOT NULL, `enabled` tinyint(1) NOT NULL DEFAULT \'1\', PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+				$queries->createTable('store_gateways', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `displayname` varchar(64) NOT NULL, `enabled` tinyint(1) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
 			} catch(Exception $e){
 				// Error
 			}
