@@ -41,17 +41,23 @@ if(!isset($_GET['gateway'])) {
         }
     }
 
-    $gateways_list = array();
-    foreach($gateways->getAll() as $gateway) {
-        $gateways_list[] = array(
-            'name' => Output::getClean($gateway->getName()),
-            'enabled' => $gateway->isEnabled(),
-            'edit_link' => URL::build('/panel/store/gateways/', 'gateway=' . Output::getClean($gateway->getName())),
-        );
+    if(!isset($errors)) {
+        $gateways_list = array();
+        foreach($gateways->getAll() as $gateway) {
+            $gateways_list[] = array(
+                'name' => Output::getClean($gateway->getName()),
+                'enabled' => $gateway->isEnabled(),
+                'edit_link' => URL::build('/panel/store/gateways/', 'gateway=' . Output::getClean($gateway->getName())),
+            );
+        }
+        
+        $smarty->assign(array(
+            'GATEWAYS_LIST' => $gateways_list
+        ));
     }
 
+
     $smarty->assign(array(
-        'GATEWAYS_LIST' => $gateways_list,
         'PAYMENT_METHOD' => $store_language->get('admin', 'payment_method'),
         'EDIT' => $language->get('general', 'edit'),
         'ENABLED' => $language->get('admin', 'enabled'),
@@ -62,8 +68,6 @@ if(!isset($_GET['gateway'])) {
 } else {
     $gateway = $gateways->get($_GET['gateway']);
     
-    require_once($gateway->getSettings());
-    
     $securityPolicy->secure_dir = array(ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates');
     
     if (file_exists(ROOT_PATH . '/modules/Store/config.php')) {
@@ -72,9 +76,12 @@ if(!isset($_GET['gateway'])) {
             $errors = array($store_language->get('admin', 'config_not_writable'));
         }
     } else if (!is_writable(ROOT_PATH . '/modules/Store')){
-        // File don't exist, make sure directory is writeable to be able to generate config.php
-        $errors = array($store_language->get('admin', 'config_not_writable'));
+        // File don't exist
+        Redirect::to(URL::build('/panel/store/gateways'));
+        die();
     }
+    
+    require_once($gateway->getSettings());
     
     $smarty->assign(array(
         'EDITING_GATEWAY' => str_replace('{x}', Output::getClean($gateway->getName()), $store_language->get('admin', 'editing_gateway_x')),

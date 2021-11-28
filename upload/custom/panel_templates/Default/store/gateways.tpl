@@ -39,6 +39,7 @@
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
 
+                        {if isset($GATEWAYS_LIST)}
                         <div class="table-responsive">
                             <table class="table table-striped dataTables-payments">
                                 <thead>
@@ -59,6 +60,8 @@
                                 </tbody>
                             </table>
                         </div>
+                        {/if}
+                        
                     </div>
                 </div>
 
