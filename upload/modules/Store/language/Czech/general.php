@@ -29,6 +29,7 @@ $language = array(
     'purchase' => 'Zakoupit',
     'summary' => 'Souhrn',
     'continue' => 'Pokračovat',
+    'options' => 'Options',
     'please_enter_username' => 'Zadejte vaše Minecraft jméno pro pokračování',
     'logout' => 'Odhlásit se',
     'shopping_cart' => 'Nákupní košík',
@@ -36,4 +37,7 @@ $language = array(
     'payment_method' => 'Způsob platby',
     'agree_t_and_c_purchase' => 'Souhlasím s <a href="{x}" target="_blank">pravidly a podmínkami</a> této platby.',
     'x_items_for_y' => '{x} položek za {y}',
+    
+    'x_field_minimum_y' => '{x} must be a minimum of {y} characters.',
+    'x_field_maximum_y' => '{x} must be a maximum of {y} characters.',
 );
