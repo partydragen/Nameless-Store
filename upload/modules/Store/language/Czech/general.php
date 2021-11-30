@@ -34,6 +34,6 @@ $language = array(
     'shopping_cart' => 'Nákupní košík',
     'total_price' => 'Celková cena:',
     'payment_method' => 'Způsob platby',
-    'agree_t_and_c_purchase' => 'I agree to the <a href="{x}" target="_blank">terms and conditions</a> of this purchase.',
-    'x_items_for_y' => '{x} item(s) for {y}',
+    'agree_t_and_c_purchase' => 'Souhlasím s <a href="{x}" target="_blank">pravidly a podmínkami</a> této platby.',
+    'x_items_for_y' => '{x} položek za {y}',
 );
