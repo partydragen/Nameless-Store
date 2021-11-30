@@ -39,29 +39,165 @@ if(isset($_GET['do'])){
         Redirect::to(URL::build($store_url . '/checkout/'));
         die();
     }
-} else {
+} else if(isset($_GET['add'])) {
     // Add item to shopping cart
-    if(isset($_GET['add'])) {
-        if(!is_numeric($_GET['add'])){
-            die('Invalid product');
+    if(!is_numeric($_GET['add'])){
+        die('Invalid product');
+    }
+    
+    $product = new Product($_GET['add']);
+    if(!$product->exists()) {
+        die('Invalid product');
+    }
+    
+    $fields = $product->getFields();
+    if(count($fields)) {
+        $force_continue = true;
+        
+        // Any fields to fill?
+        $product_fields = array();
+        foreach($fields as $field) {
+            $options = explode(',', Output::getClean($field->options));
+            
+            // Is value forced loaded?
+            $forced = isset($_GET[$field->identifier]);
+            
+            $product_fields[] = array(
+                'id' => Output::getClean($field->id),
+                'identifier' => Output::getClean($field->identifier),
+                'value' => $forced ? Output::getClean($_GET[$field->identifier]) : (isset($_POST[$field->id]) && !is_array($_POST[$field->id]) ? Output::getClean(Input::get($field->id)) : ''),
+                'description' => Output::getClean($field->description),
+                'type' => Output::getClean($field->type),
+                'required' => Output::getClean($field->required),
+                'options' => $options,
+                'forced' => $forced
+            );
+            
+            // Continue to next step if all fields are force loaded
+            if(!$forced)
+                $force_continue = false;
         }
+        
+        // Continue to next step if all fields are force loaded
+        if($force_continue) {
+            $shopping_cart->add($_GET['add'], 1, $product_fields);
+            Redirect::to(URL::build($store_url . '/checkout/'));
+            die();
+        }
+        
+        // Deal with any input
+        if (Input::exists()) {
+            $errors = array();
+            
+            if (Token::check()) {
+                // Validation
+                $validate = new Validate();
+                $to_validate = array();
+                
+                foreach($fields as $field){
+                    $field_validation = array();
+                    
+                    if($field->required == 1 /*&& $field->type != 9*/) {
+                        $field_validation['required'] = true;
+                    }
+                    
+                    if($field->min != 0) {
+                        $field_validation['min'] = $field->min;
+                    }
+                    
+                    if($field->max != 0) {
+                        $field_validation['max'] = $field->max;
+                    }
+                    
+                    if(count($field_validation)) {
+                        $to_validate[$field->id] = $field_validation;
+                    }
+                }
+                
+                // Modify post validation
+                $validate_post = array();
+                foreach($_POST as $key => $item){
+                    $validate_post[$key] = !is_array($item) ? $item : true ;
+                }
+                
+                $validation = $validate->check($validate_post, $to_validate);
+                if($validation->passed()){
+                    // Validation passed
+                    
+                    $product_fields = array();
+                    foreach($fields as $field) {
+                        // Post value exists?
+                        if(!isset($_POST[$field->id]))
+                            continue;
+                        
+                        $item = $_POST[$field->id];
+                        $value = (!is_array($item) ? nl2br($item) : implode(', ', $item));
+                            
+                        $product_fields[] = array(
+                            'id' => Output::getClean($field->id),
+                            'identifier' => Output::getClean($field->identifier),
+                            'value' => $value,
+                            'description' => Output::getClean($field->description),
+                            'type' => Output::getClean($field->type)
+                        );
+                    }
+                    
+                    $shopping_cart->add($_GET['add'], 1, $product_fields);
+                    Redirect::to(URL::build($store_url . '/checkout/'));
+                    die();
+                } else {
+                    // Validation errors
+                    foreach($validation->errors() as $item){
+                        // Get field name
+                        $id = explode(' ', $item);
+                        $id = $id[0];
+
+                        $fielderror = $queries->getWhere('store_fields', array('id', '=', $id));
+                        if (count($fielderror)) {
+                            $fielderror = $fielderror[0];
+
+                            if(strpos($item, 'is required') !== false){
+                                $errors[] = str_replace('{x}', Output::getClean($fielderror->name), $language->get('user', 'field_is_required'));
+                            } else if(strpos($item, 'minimum') !== false){
+                                $errors[] = str_replace(array('{x}', '{y}'), array(Output::getClean($fielderror->name), $fielderror->min), $store_language->get('general', 'x_field_minimum_y'));
+                            } else if(strpos($item, 'maximum') !== false){
+                                $errors[] = str_replace(array('{x}', '{y}'), array(Output::getClean($fielderror->name), $fielderror->max), $store_language->get('general', 'x_field_maximum_y'));
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Invalid token
+                $errors[] = $language->get('general', 'invalid_token');
+            }
+        }
+        
+        $smarty->assign(array(
+            'PRODUCT_NAME' => Output::getClean($product->data()->name),
+            'PRODUCT_FIELDS' => $product_fields,
+            'CONTINUE' => $store_language->get('general', 'continue'),
+            'TOKEN' => Token::get()
+        ));
+        
+        $template_file = 'store/checkout_add.tpl';
+
+    } else {
+        // No fields to fill, continue to next step
         $shopping_cart->add($_GET['add']);
-        
         Redirect::to(URL::build($store_url . '/checkout/'));
         die();
     }
-
-    // Remove item from shopping cart
-    if(isset($_GET['remove'])) {
-        if(!is_numeric($_GET['remove'])){
-            die('Invalid product');
-        }
-        $shopping_cart->remove($_GET['remove']);
-        
-        Redirect::to(URL::build($store_url . '/checkout/'));
-        die();
+    
+} else if(isset($_GET['remove'])) {
+    if(!is_numeric($_GET['remove'])){
+        die('Invalid product');
     }
-
+    $shopping_cart->remove($_GET['remove']);
+        
+    Redirect::to(URL::build($store_url . '/checkout/'));
+    die();
+    
+} else {
     // Make sure the shopping cart is not empty
     if(!count($shopping_cart->getItems())) {
         Redirect::to(URL::build($store_url));
@@ -132,6 +268,7 @@ if(isset($_GET['do'])){
             'name' => Output::getClean($product->name),
             'quantity' => 1,
             'price' => Output::getClean($product->price),
+            'fields' => $shopping_cart->getItems()[$product->id]['fields'],
             'remove_link' => URL::build($store_url . '/checkout/', 'remove=' . $product->id),
         );
     }
@@ -152,6 +289,7 @@ if(isset($_GET['do'])){
         'CHECKOUT' => $store_language->get('general', 'checkout'),
         'SHOPPING_CART' => $store_language->get('general', 'shopping_cart'),
         'NAME' => $store_language->get('general', 'name'),
+        'OPTIONS' => $store_language->get('general', 'options'),
         'QUANTITY' => $store_language->get('general', 'quantity'),
         'PRICE' => $store_language->get('general', 'price'),
         'TOTAL_PRICE' => $store_language->get('general', 'total_price'),

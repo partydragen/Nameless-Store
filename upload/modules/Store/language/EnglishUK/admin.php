@@ -133,6 +133,37 @@ $language = array(
 	'connection_updated_successfully' => 'Connection updated successfully.',
 	'connection_deleted_successfully' => 'Connection deleted successfully.',
     'confirm_delete_connection' => 'Are you sure you want to delete this connection?',
+    
+    // Fields
+    'fields' => 'Fields',
+    'field' => 'Field',
+    'new_field' => 'New Field',
+	'identifier' => 'Identifier',
+    'description' => 'Description',
+	'field_created_successfully' => 'Field created successfully',
+	'field_updated_successfully' => 'Field updated successfully',
+	'field_deleted_successfully' => 'Field deleted successfully',
+	'creating_field' => 'Creating new field',
+	'editing_field_x' => 'Editing field {x}',
+	'none_fields_defined' => 'There are no fields yet.',
+	'confirm_delete_field' => 'Are you sure you want to delete this field?',
+	'options' => 'Options',
+	'options_help' => 'Each option on a new line; can be left empty (options only)',
+	'field_order' => 'Field Order',
+	'delete_field' => 'Are you sure you want to delete this field?',
+    'number' => 'Number',
+    'radio' => 'Radio',
+    'checkbox' => 'Checkbox',
+    'minimum_characters' => 'Minimum Characters (0 to disable)',
+    'maximum_characters' => 'Maximum Characters (0 to disable)',
+    'fields_info' => 'Fields enable you to create customisable products such as allowing users to select the colour of their name upon purchase.',
+    
+	'field_identifier_required' => 'The identifier field is required.',
+    'field_description_required' => 'The description field is required.',
+	'field_identifier_minimum' => 'The field identifier must be a minimum of 2 characters.',
+	'field_identifier_maximum' => 'The field identifier must be a maximum of 32 characters.',
+	'field_description_minimum' => 'The field description must be a minimum of 2 characters.',
+	'field_description_maximum' => 'The field description must be a maximum of 255 characters.',
 	
     /*
      *  Admin Errors

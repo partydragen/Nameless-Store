@@ -47,7 +47,7 @@ class Store_Module extends Module {
 		$pages->add('Store', '/panel/store/categories', 'pages/panel/categories.php');
 		$pages->add('Store', '/panel/store/payments', 'pages/panel/payments.php');
         $pages->add('Store', '/panel/store/connections', 'pages/panel/connections.php');
-        
+        $pages->add('Store', '/panel/store/fields', 'pages/panel/fields.php');
 		
 		//HookHandler::registerEvent('paypal_hook', 'paypal_hook');
 		//HookHandler::registerEvent('new_subscriber', 'new_subscriber');
@@ -209,6 +209,16 @@ class Store_Module extends Module {
 						$icon = $cache->retrieve('store_connections_icon');
 
 					$navs[2]->add('store_connections', $this->_store_language->get('admin', 'connections'), URL::build('/panel/store/connections'), 'top', null, ($order + 0.5), $icon);
+				}
+                
+                if($user->hasPermission('staffcp.store.manage')){
+					if(!$cache->isCached('store_fields_icon')){
+						$icon = '<i class="nav-icon fas fa-id-card"></i>';
+						$cache->store('store_fields_icon', $icon);
+					} else
+						$icon = $cache->retrieve('store_fields_icon');
+
+					$navs[2]->add('store_fields', $this->_store_language->get('admin', 'fields'), URL::build('/panel/store/fields'), 'top', null, ($order + 0.5), $icon);
 				}
 			}
 		}
@@ -457,6 +467,30 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
+        
+        if($old_version < 120) {
+            if(!$queries->tableExists('store_fields')){
+                try {
+                    $queries->createTable("store_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `identifier` varchar(32) NOT NULL, `description` varchar(255) NOT NULL, `type` int(11) NOT NULL, `required` tinyint(1) NOT NULL DEFAULT '0', `min` int(11) NOT NULL DEFAULT '0', `max` int(11) NOT NULL DEFAULT '0', `options` text NULL, `deleted` int(11) NOT NULL DEFAULT '0', `order` int(11) NOT NULL DEFAULT '1', PRIMARY KEY (`id`)", "ENGINE=$engine DEFAULT CHARSET=$charset");
+                } catch(Exception $e){
+                    // Error
+                }
+            }
+        
+            try {
+                $queries->createTable("store_products_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `field_id` int(11) NOT NULL, PRIMARY KEY (`id`)", "ENGINE=$engine DEFAULT CHARSET=$charset");
+            } catch(Exception $e){
+                // Error
+            }
+            
+            if(!$queries->tableExists('store_orders_products_fields')){
+                try {
+                    $queries->createTable("store_orders_products_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `field_id` int(11) NOT NULL, `value` TEXT NOT NULL, PRIMARY KEY (`id`)", "ENGINE=$engine DEFAULT CHARSET=$charset");
+                } catch(Exception $e){
+                    // Error
+                }
+            }
+        }
     }
 	
 	private function initialise(){
@@ -508,6 +542,14 @@ class Store_Module extends Module {
 				// Error
 			}
 		}
+        
+        if(!$queries->tableExists('store_products_fields')){
+            try {
+                $queries->createTable("store_products_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `field_id` int(11) NOT NULL, PRIMARY KEY (`id`)", "ENGINE=$engine DEFAULT CHARSET=$charset");
+            } catch(Exception $e){
+                // Error
+            }
+        }
 		
 		if(!$queries->tableExists('store_products_actions')) {
 			try {
@@ -540,6 +582,14 @@ class Store_Module extends Module {
 				// Error
 			}
 		}
+        
+        if(!$queries->tableExists('store_orders_products_fields')){
+            try {
+                $queries->createTable("store_orders_products_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `field_id` int(11) NOT NULL, `value` TEXT NOT NULL, PRIMARY KEY (`id`)", "ENGINE=$engine DEFAULT CHARSET=$charset");
+            } catch(Exception $e){
+                // Error
+            }
+        }
 		
 		if(!$queries->tableExists('store_payments')) {
 			try {
@@ -610,6 +660,14 @@ class Store_Module extends Module {
                 'displayname' => 'PayPal'
 			));
 		}
+        
+        if(!$queries->tableExists('store_fields')){
+            try {
+                $queries->createTable("store_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `identifier` varchar(32) NOT NULL, `description` varchar(255) NOT NULL, `type` int(11) NOT NULL, `required` tinyint(1) NOT NULL DEFAULT '0', `min` int(11) NOT NULL DEFAULT '0', `max` int(11) NOT NULL DEFAULT '0', `options` text NULL, `deleted` int(11) NOT NULL DEFAULT '0', `order` int(11) NOT NULL DEFAULT '1', PRIMARY KEY (`id`)", "ENGINE=$engine DEFAULT CHARSET=$charset");
+            } catch(Exception $e){
+                // Error
+            }
+        }
         
 		try {
 			// Update main admin group permissions

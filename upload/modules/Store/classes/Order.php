@@ -55,12 +55,23 @@ class Order {
         ));
         $last_id = $this->_db->lastId();
         
-        // Register products to order
+        // Register products and fields to order
         foreach($items as $item) {
             $this->_db->insert('store_orders_products', array(
                 'order_id' => $last_id,
                 'product_id' => $item['id']
             ));
+            
+            if(isset($item['fields']) && count($item['fields'])) {
+                foreach($item['fields'] as $field) {
+                    $this->_db->insert('store_orders_products_fields', array(
+                        'order_id' => $last_id,
+                        'product_id' => $item['id'],
+                        'field_id' => $field['id'],
+                        'value' => $field['value']
+                    ));
+                }
+            }
         }
         
         // Load order

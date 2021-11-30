@@ -14,6 +14,7 @@ class Product {
     private $_db,
             $_data,
             $_connections,
+            $_fields,
             $_actions;
             
     public function __construct($value = null, $field = 'id') {
@@ -116,6 +117,63 @@ class Product {
             array(
                 $this->data()->id,
                 $connection_id
+            )
+        );
+    }
+    
+    /**
+     * Get the product fields.
+     *
+     * @return array Their fields.
+     */
+    public function getFields() {
+        if($this->_fields == null) {
+            $this->_fields = array();
+            
+            $fields_query = $this->_db->query('SELECT nl2_store_fields.* FROM nl2_store_products_fields INNER JOIN nl2_store_fields ON field_id = nl2_store_fields.id WHERE product_id = ?', array($this->data()->id));
+            if ($fields_query->count()) {
+                $fields_query = $fields_query->results();
+                foreach ($fields_query as $field) {
+                    $this->_fields[$field->id] = $field;
+                }
+            }
+        }
+        
+        return $this->_fields;
+    }
+
+    /**
+     * Add a field to this product.
+     *
+     * @return bool True on success, false if product already have it.
+     */
+    public function addField($field_id) {
+        if (array_key_exists($field_id, $this->getFields())) {
+            return false;
+        }
+        
+        $this->_db->createQuery('INSERT INTO `nl2_store_products_fields` (`product_id`, `field_id`) VALUES (?, ?)',
+            array(
+                $this->data()->id,
+                $field_id
+            )
+        );
+    }
+
+    /**
+     * Remove a field to this product.
+     *
+     * @return bool Returns false if they did not have this field
+     */
+    public function removeField($field_id) {
+        if (!array_key_exists($field_id, $this->getFields())) {
+            return false;
+        }
+        
+        $this->_db->createQuery('DELETE FROM `nl2_store_products_fields` WHERE `product_id` = ? AND `field_id` = ?',
+            array(
+                $this->data()->id,
+                $field_id
             )
         );
     }

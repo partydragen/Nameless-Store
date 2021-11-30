@@ -84,6 +84,14 @@
 												{/foreach}
 											</select>
 										</div>
+                                        <div class="col-md-6">
+											<label for="inputFields">{$FIELDS}</label>
+											<select name="fields[]" id="label_fields" size="3" class="form-control" multiple style="overflow:auto;">
+												{foreach from=$FIELDS_LIST item=field}
+                                                <option value="{$field.id}"{if $field.selected} selected{/if}>{$field.identifier}</option>
+												{/foreach}
+											</select>
+										</div>
                                     </div>
 								</div>
                                 <div class="form-group">

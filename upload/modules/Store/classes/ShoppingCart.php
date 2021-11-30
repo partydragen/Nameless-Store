@@ -31,12 +31,13 @@ class ShoppingCart {
     }
     
     // Add product to shopping cart
-    public function add($product_id, $quantity = 1) {
+    public function add($product_id, $quantity = 1, $fields = array()) {
         $shopping_cart = (isset($_SESSION['shopping_cart']) ? $_SESSION['shopping_cart'] : array());
         
         $shopping_cart[$product_id] = array(
             'id' => $product_id,
-            'quantity' => $quantity
+            'quantity' => $quantity,
+            'fields' => $fields
         );
         
         $_SESSION['shopping_cart'] = $shopping_cart;

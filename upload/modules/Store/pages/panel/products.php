@@ -140,14 +140,22 @@ if(!isset($_GET['action'])) {
                                 'order' => $last_order + 1,
                             ));
                             $lastId = $queries->getLastId();
+                            $product = new Product($lastId);
                             
                             // Add the selected connections, if isset
                             if(isset($_POST['connections']) && is_array($_POST['connections'])) {
-                                $product = new Product($lastId);
-                                
                                 foreach ($_POST['connections'] as $connection) {
                                     if (!array_key_exists($connection, $product->getConnections())) {
                                         $product->addConnection($connection);
+                                    }
+                                }
+                            }
+                            
+                            // Add the selected fields, if isset
+                            if(isset($_POST['fields']) && is_array($_POST['fields'])) {
+                                foreach ($_POST['fields'] as $field) {
+                                    if (!array_key_exists($field, $product->getFields())) {
+                                        $product->addField($field);
                                     }
                                 }
                             }
@@ -176,6 +184,17 @@ if(!isset($_GET['action'])) {
                 );
             }
             
+            // Fields
+            $fields_array = array();
+            $fields = DB::getInstance()->query('SELECT * FROM nl2_store_fields')->results();
+            foreach($fields as $field){
+                $fields_array[] = array(
+                    'id' => Output::getClean($field->id),
+                    'identifier' => Output::getClean($field->identifier),
+                    'selected' => ((isset($_POST['fields']) && is_array($_POST['fields'])) ? in_array($field->id, $_POST['fields']) : false)
+                );
+            }
+            
             $smarty->assign(array(
                 'PRODUCT_TITLE' => $store_language->get('admin', 'new_product'),
                 'BACK' => $language->get('general', 'back'),
@@ -190,6 +209,8 @@ if(!isset($_GET['action'])) {
                 'CATEGORY_LIST' => $store->getAllCategories(),
                 'CONNECTIONS' => $store_language->get('admin', 'connections') . ' ' . $store_language->get('admin', 'select_multiple_with_ctrl'),
                 'CONNECTIONS_LIST' => $connections_array,
+                'FIELDS' => $store_language->get('admin', 'fields') . ' ' . $store_language->get('admin', 'select_multiple_with_ctrl'),
+                'FIELDS_LIST' => $fields_array,
                 'CURRENCY' => Output::getClean($configuration->get('store', 'currency'))
             ));
             
@@ -270,6 +291,22 @@ if(!isset($_GET['action'])) {
                                     $product->removeConnection($connection->id);
                                 }
                             }
+                            
+                            $selected_fields = isset($_POST['fields']) && is_array($_POST['fields']) ? $_POST['fields'] : array();
+                            
+                            // Check for new fields to give product which they dont already have
+                            foreach ($selected_fields as $field) {
+                                if (!array_key_exists($field, $product->getFields())) {
+                                    $product->addField($field);
+                                }
+                            }
+
+                            // Check for fields they had, but werent in the $_POST fields
+                            foreach ($product->getFields() as $field) {
+                                if (!in_array($field->id, $selected_fields)) {
+                                    $product->removeField($field->id);
+                                }
+                            }
                                 
                             Session::flash('products_success', $store_language->get('admin', 'product_updated_successfully'));
                             Redirect::to(URL::build('/panel/store/products/', 'action=edit&id=' . $product->data()->id));
@@ -294,6 +331,19 @@ if(!isset($_GET['action'])) {
                     'id' => Output::getClean($connection->id),
                     'name' => Output::getClean($connection->name),
                     'selected' => (array_key_exists($connection->id, $selected_connections))
+                );
+            }
+            
+            // Fields
+            $fields_array = array();
+            $selected_fields = $product->getFields();
+
+            $fields = DB::getInstance()->query('SELECT * FROM nl2_store_fields')->results();
+            foreach($fields as $field){
+                $fields_array[] = array(
+                    'id' => Output::getClean($field->id),
+                    'identifier' => Output::getClean($field->identifier),
+                    'selected' => (array_key_exists($field->id, $selected_fields))
                 );
             }
             
@@ -342,6 +392,8 @@ if(!isset($_GET['action'])) {
                 'CATEGORY_LIST' => $store->getAllCategories(),
                 'CONNECTIONS' => $store_language->get('admin', 'connections') . ' ' . $store_language->get('admin', 'select_multiple_with_ctrl'),
                 'CONNECTIONS_LIST' => $connections_array,
+                'FIELDS' => $store_language->get('admin', 'fields') . ' ' . $store_language->get('admin', 'select_multiple_with_ctrl'),
+                'FIELDS_LIST' => $fields_array,
                 'ACTIONS' => $store_language->get('admin', 'actions'),
                 'NEW_ACTION' => $store_language->get('admin', 'new_action'),
                 'NEW_ACTION_LINK' => URL::build('/panel/store/products/' , 'action=new_action&id=' . $product->data()->id),
