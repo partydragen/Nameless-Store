@@ -52,10 +52,13 @@ if(!isset($_GET['action'])) {
                         if(count($last_order)) $last_order = $last_order[0]->order;
                         else $last_order = 0;
                         
+                        $parent_category = Input::get('parent_category');
+                        
                         // Save to database
                         $queries->create('store_categories', array(
                             'name' => Output::getClean(Input::get('name')),
                             'description' => Output::getClean(Input::get('description')),
+                            'parent_category' => $parent_category != 0 ? $parent_category : null,
                             'order' => $last_order + 1,
                         ));
                         
@@ -71,6 +74,15 @@ if(!isset($_GET['action'])) {
                 }
             }
             
+            $categories_list = array();
+            $categories = DB::getInstance()->query('SELECT id, name FROM nl2_store_categories WHERE deleted = 0')->results();
+            foreach($categories as $category) {
+                $categories_list[] = array(
+                    'id' => Output::getClean($category->id),
+                    'name' => Output::getClean($category->name),
+                );
+            }
+            
             $smarty->assign(array(
                 'CATEGORY_TITLE' => $store_language->get('admin', 'new_category'),
                 'BACK' => $language->get('general', 'back'),
@@ -78,7 +90,11 @@ if(!isset($_GET['action'])) {
                 'CATEGORY_NAME' => $store_language->get('admin', 'category_name'),
                 'CATEGORY_NAME_VALUE' => ((isset($_POST['name']) && $_POST['name']) ? Output::getClean(Input::get('name')) : ''),
                 'CATEGORY_DESCRIPTION' => $store_language->get('admin', 'category_description'),
-                'CATEGORY_DESCRIPTION_VALUE' => ((isset($_POST['description']) && $_POST['description']) ? Output::getClean(Input::get('description')) : '')
+                'CATEGORY_DESCRIPTION_VALUE' => ((isset($_POST['description']) && $_POST['description']) ? Output::getClean(Input::get('description')) : ''),
+                'PARENT_CATEGORY' => $store_language->get('admin', 'parent_category'),
+                'PARENT_CATEGORY_LIST' => $categories_list,
+                'PARENT_CATEGORY_VALUE' => ((isset($_POST['parent_category']) && $_POST['parent_category']) ? Output::getClean(Input::get('parent_category')) : 0),
+                'NO_PARENT' => $store_language->get('admin', 'no_parent'),
             ));
             
             $template->addJSFiles(array(
@@ -119,11 +135,14 @@ if(!isset($_GET['action'])) {
                         )
                     ));
                     
+                    $parent_category = Input::get('parent_category');
+                    
                     if ($validation->passed()){
                         // Save to database
                         $queries->update('store_categories', $category->id, array(
                             'name' => Output::getClean(Input::get('name')),
                             'description' => Output::getClean(Input::get('description')),
+                            'parent_category' => $parent_category != 0 ? $parent_category : null
                         ));
                         
                         Session::flash('products_success', $store_language->get('admin', 'category_updated_successfully'));
@@ -138,6 +157,15 @@ if(!isset($_GET['action'])) {
                 }
             }
             
+            $categories_list = array();
+            $categories = DB::getInstance()->query('SELECT id, name FROM nl2_store_categories WHERE id <> ? AND deleted = 0', array($category->id))->results();
+            foreach($categories as $item) {
+                $categories_list[] = array(
+                    'id' => Output::getClean($item->id),
+                    'name' => Output::getClean($item->name),
+                );
+            }
+            
             $smarty->assign(array(
                 'CATEGORY_TITLE' => str_replace('{x}', Output::getClean($category->name), $store_language->get('admin', 'editing_category_x')),
                 'BACK' => $language->get('general', 'back'),
@@ -146,6 +174,10 @@ if(!isset($_GET['action'])) {
                 'CATEGORY_NAME_VALUE' => Output::getClean($category->name),
                 'CATEGORY_DESCRIPTION' => $store_language->get('admin', 'category_description'),
                 'CATEGORY_DESCRIPTION_VALUE' => Output::getPurified(Output::getDecoded($category->description)),
+                'PARENT_CATEGORY' => $store_language->get('admin', 'parent_category'),
+                'PARENT_CATEGORY_LIST' => $categories_list,
+                'PARENT_CATEGORY_VALUE' => Output::getClean($category->parent_category),
+                'NO_PARENT' => $store_language->get('admin', 'no_parent'),
             ));
             
             $template->addJSFiles(array(

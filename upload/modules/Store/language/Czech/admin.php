@@ -97,6 +97,8 @@ $language = array(
     'category_name' => 'Název kategorie',
     'category_description' => 'Popis kategorie',
     'category_image' => 'Obrázek kategorie',
+    'parent_category' => 'Parent Category',
+    'no_parent' => 'No parent',
 	
     // Product
     'products' => 'Produkty',
