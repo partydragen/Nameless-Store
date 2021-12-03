@@ -116,6 +116,11 @@ if(!$products->count()){
     $smarty->assign('PRODUCTS', $category_products);
 }
 
+// Category description
+$content = Output::getDecoded($category->description);
+$content = $emojione->unicodeToImage($content);
+$content = Output::getPurified($content);
+
 $smarty->assign(array(
     'ACTIVE_CATEGORY' => Output::getClean($category->name),
     'BUY' => $store_language->get('general', 'buy'),
