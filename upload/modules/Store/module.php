@@ -49,8 +49,12 @@ class Store_Module extends Module {
         $pages->add('Store', '/panel/store/connections', 'pages/panel/connections.php');
         $pages->add('Store', '/panel/store/fields', 'pages/panel/fields.php');
 		
-		//HookHandler::registerEvent('paypal_hook', 'paypal_hook');
-		//HookHandler::registerEvent('new_subscriber', 'new_subscriber');
+        HookHandler::registerEvent('paymentPending',  $store_language->get('admin', 'payment_pending'));
+		HookHandler::registerEvent('paymentCompleted', $store_language->get('admin', 'payment_completed'));
+        HookHandler::registerEvent('paymentRefunded', $store_language->get('admin', 'payment_refunded'));
+        HookHandler::registerEvent('paymentReversed', $store_language->get('admin', 'payment_reversed'));
+        HookHandler::registerEvent('paymentDenied', $store_language->get('admin', 'payment_denied'));
+        
         
         // Autoload API Endpoints
         Util::loadEndpoints(join(DIRECTORY_SEPARATOR, array(ROOT_PATH, 'modules', 'Store', 'includes', 'endpoints')), $endpoints);

@@ -86,7 +86,21 @@ class Payment {
      * Handle payment event change
      */
     public function handlePaymentEvent($event, $extra_data) {
+        $store_language = new Language(ROOT_PATH . '/modules/Store/language', LANGUAGE);
+        
         if($this->exists()) {
+            // Temp solution
+            $username = 'Unknown';
+            if($this->getOrder()->data()->player_id != null) {
+                $player = new Player($this->getOrder()->data()->player_id);
+                        
+                $username = $player->getUsername();
+            } else if($this->getOrder()->data()->user_id != null) {
+                $user = new User($this->getOrder()->data()->user_id);
+                        
+                $username = $user->getDisplayname(true);
+            }
+                    
             // Payment exist, Continue with event handling
             switch($event) {
                 case 'PENDING':
@@ -97,6 +111,14 @@ class Payment {
                     );
                     
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
+                    
+                    HookHandler::executeEvent('paymentPending', array(
+                        'event' => 'paymentPending',
+                        'order_id' => $this->data()->order_id,
+                        'payment_id' => $this->data()->id,
+                        'username' => $username,
+                        'content_full' => str_replace(array('{x}'), array($username), $store_language->get('general', 'pending_payment_text')),
+                    ));
                 break;
                 case 'COMPLETED':
                     // Payment completed
@@ -108,6 +130,33 @@ class Payment {
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
                     
                     $this->addPendingActions(1);
+                    
+                    // Temp solution
+                    $username = 'Unknown';
+                    if($this->getOrder()->data()->player_id != null) {
+                        $player = new Player($this->getOrder()->data()->player_id);
+                        
+                        $username = $player->getUsername();
+                    } else if($this->getOrder()->data()->user_id != null) {
+                        $user = new User($this->getOrder()->data()->user_id);
+                        
+                        $username = $user->getDisplayname(true);
+                    }
+                    
+                    // Products bought description
+                    $products = '';
+                    foreach($this->getOrder()->getProducts() as $item){
+                        $products .= Output::getClean($item->name) . ', ';
+                    }
+                    $products = rtrim($products, ', ');
+                    
+                    HookHandler::executeEvent('paymentCompleted', array(
+                        'event' => 'paymentCompleted',
+                        'username' => $username,
+                        'content_full' => str_replace(array('{x}', '{y}'), array($username, $products), $store_language->get('general', 'completed_payment_text')),
+                        'order_id' => $this->data()->order_id,
+                        'payment_id' => $this->data()->id,
+                    ));
                 break;
                 case 'REFUNDED':
                     // Payment refunded
@@ -120,6 +169,14 @@ class Payment {
                     
                     $this->deletePendingActions();
                     $this->addPendingActions(2);
+                    
+                    HookHandler::executeEvent('paymentRefunded', array(
+                        'event' => 'paymentRefunded',
+                        'order_id' => $this->data()->order_id,
+                        'payment_id' => $this->data()->id,
+                        'username' => $username,
+                        'content_full' => str_replace(array('{x}'), array($username), $store_language->get('general', 'refunded_payment_text')),
+                    ));
                 break;
                 case 'REVERSED':
                     // Payment reversed
@@ -132,6 +189,14 @@ class Payment {
                     
                     $this->deletePendingActions();
                     $this->addPendingActions(3);
+                    
+                    HookHandler::executeEvent('paymentReversed', array(
+                        'event' => 'paymentReversed',
+                        'order_id' => $this->data()->order_id,
+                        'payment_id' => $this->data()->id,
+                        'username' => $username,
+                        'content_full' => str_replace(array('{x}'), array($username), $store_language->get('general', 'reversed_payment_text')),
+                    ));
                 break;
                 case 'DENIED':
                     // Payment denied
@@ -141,6 +206,14 @@ class Payment {
                     );
                     
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
+                    
+                    HookHandler::executeEvent('paymentDenied', array(
+                        'event' => 'paymentDenied',
+                        'order_id' => $this->data()->order_id,
+                        'payment_id' => $this->data()->id,
+                        'username' => $username,
+                        'content_full' => str_replace(array('{x}'), array($username), $store_language->get('general', 'denied_payment_text')),
+                    ));
                 break;
                 default:
                     // Invalid event type, Throw error
@@ -159,6 +232,26 @@ class Payment {
                     );
                     
                     $this->create(array_merge($insert_array, $extra_data));
+                    
+                    // Temp solution
+                    $username = 'Unknown';
+                    if($this->getOrder()->data()->player_id != null) {
+                        $player = new Player($this->getOrder()->data()->player_id);
+                        
+                        $username = $player->getUsername();
+                    } else if($this->getOrder()->data()->user_id != null) {
+                        $user = new User($this->getOrder()->data()->user_id);
+                        
+                        $username = $user->getDisplayname(true);
+                    }
+                    
+                    HookHandler::executeEvent('paymentPending', array(
+                        'event' => 'paymentPending',
+                        'order_id' => $this->data()->order_id,
+                        'payment_id' => $this->data()->id,
+                        'username' => $username,
+                        'content_full' => str_replace(array('{x}'), array($username), $store_language->get('general', 'pending_payment_text')),
+                    ));
                 break;
                 case 'COMPLETED':
                     // Payment completed
@@ -171,6 +264,33 @@ class Payment {
                     $this->create(array_merge($insert_array, $extra_data));
                     
                     $this->addPendingActions(1);
+                    
+                    // Temp solution
+                    $username = 'Unknown';
+                    if($this->getOrder()->data()->player_id != null) {
+                        $player = new Player($this->getOrder()->data()->player_id);
+                        
+                        $username = $player->getUsername();
+                    } else if($this->getOrder()->data()->user_id != null) {
+                        $user = new User($this->getOrder()->data()->user_id);
+                        
+                        $username = $user->getDisplayname(true);
+                    }
+                    
+                    // Products bought description
+                    $products = '';
+                    foreach($this->getOrder()->getProducts() as $item){
+                        $products .= Output::getClean($item->name) . ', ';
+                    }
+                    $products = rtrim($products, ', ');
+                    
+                    HookHandler::executeEvent('paymentCompleted', array(
+                        'event' => 'paymentCompleted',
+                        'order_id' => $this->data()->order_id,
+                        'payment_id' => $this->data()->id,
+                        'username' => $username,
+                        'content_full' => str_replace(array('{x}', '{y}'), array($username, $products), $store_language->get('general', 'completed_payment_text')),
+                    ));
                 break;
             }
         }

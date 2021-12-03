@@ -176,6 +176,11 @@ $language = array(
     // Payment
     'confirm_payment_deletion' => 'Are you sure you want to delete the payment?',
     'payment_deleted_successfully' => 'Payment deleted successfully',
+    'payment_pending' => 'Payment Pending',
+    'payment_completed' => 'Payment Completed',
+    'payment_refunded' => 'Payment Refunded',
+    'payment_reversed' => 'Payment Reversed',
+    'payment_denied' => 'Payment Denied',
 	
     /*
      *  Admin Errors

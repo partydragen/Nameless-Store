@@ -40,4 +40,10 @@ $language = array(
     
     'x_field_minimum_y' => '{x} must be a minimum of {y} characters.',
     'x_field_maximum_y' => '{x} must be a maximum of {y} characters.',
+    
+    'pending_payment_text' => 'Pending payment from {x}',
+    'completed_payment_text' => 'New payment from {x} who bought the following products {y}',
+    'refunded_payment_text' => 'Refunded payment from {x}',
+    'reversed_payment_text' => 'Reversed payment from {x}',
+    'denied_payment_text' => 'Denied payment from {x}',
 );
