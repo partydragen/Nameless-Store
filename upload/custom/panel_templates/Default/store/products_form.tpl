@@ -95,6 +95,14 @@
                                     </div>
 								</div>
                                 <div class="form-group">
+                                    <label for="inputHidden">{$HIDE_PRODUCT}</label>
+                                    <input id="inputHidden" name="hidden" type="checkbox" class="js-switch"{if $HIDE_PRODUCT_VALUE eq 1} checked{/if} />
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputDisabled">{$DISABLE_PRODUCT}</label>
+                                    <input id="inputDisabled" name="disabled" type="checkbox" class="js-switch"{if $DISABLE_PRODUCT_VALUE eq 1} checked{/if} />
+                                </div>
+                                <div class="form-group">
                                     <input type="hidden" name="token" value="{$TOKEN}">
                                     <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
                                 </div>

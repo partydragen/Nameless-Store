@@ -102,7 +102,7 @@ $language = array(
     'no_parent' => 'No parent',
     'hide_category_from_menu' => 'Do not display this category menu.',
     'hide_category_from_dropdown_menu' => 'Do not display this category in the subcategory drop down menu.',
-    'disable_category' => 'Disable this category and remove it from the webstore.',
+    'disable_category' => 'Disable this category and remove it from the store.',
 	
     // Product
     'products' => 'Produkty',
@@ -116,6 +116,8 @@ $language = array(
     'product_name' => 'Název produktu',
     'product_description' => 'Popis produktu',
     'product_image' => 'Obrázek produktu',
+    'hide_product_from_store' => 'Do not display this product on store.',
+    'disable_product' => 'Disable this product and remove it from the store.',
 	
     // Actions
     'actions' => 'Akce',
@@ -170,6 +172,9 @@ $language = array(
 	'field_identifier_maximum' => 'The field identifier must be a maximum of 32 characters.',
 	'field_description_minimum' => 'The field description must be a minimum of 2 characters.',
 	'field_description_maximum' => 'The field description must be a maximum of 255 characters.',
+    
+    // Payment
+    'confirm_payment_deletion' => 'Are you sure you want to delete the payment?',
 	
     /*
      *  Admin Errors

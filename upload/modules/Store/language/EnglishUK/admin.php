@@ -116,6 +116,8 @@ $language = array(
 	'product_name' => 'Product Name',
     'product_description' => 'Product Description',
     'product_image' => 'Product Image',
+    'hide_product_from_store' => 'Do not display this product on store.',
+    'disable_product' => 'Disable this product and remove it from the store.',
 	
 	// Actions
 	'actions' => 'Actions',
@@ -170,6 +172,10 @@ $language = array(
 	'field_identifier_maximum' => 'The field identifier must be a maximum of 32 characters.',
 	'field_description_minimum' => 'The field description must be a minimum of 2 characters.',
 	'field_description_maximum' => 'The field description must be a maximum of 255 characters.',
+    
+    // Payment
+    'confirm_payment_deletion' => 'Are you sure you want to delete the payment?',
+    'payment_deleted_successfully' => 'Payment deleted successfully',
 	
     /*
      *  Admin Errors

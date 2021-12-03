@@ -130,6 +130,14 @@ if(!isset($_GET['action'])) {
                             $last_order = DB::getInstance()->query('SELECT * FROM nl2_store_products ORDER BY `order` DESC LIMIT 1')->results();
                             if(count($last_order)) $last_order = $last_order[0]->order;
                             else $last_order = 0;
+                            
+                            // Hide category?
+                            if(isset($_POST['hidden']) && $_POST['hidden'] == 'on') $hidden = 1;
+                            else $hidden = 0;
+                            
+                            // Disable category?
+                            if(isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
+                            else $disabled = 0;
 
                             // Save to database
                             $queries->create('store_products', array(
@@ -137,6 +145,8 @@ if(!isset($_GET['action'])) {
                                 'description' => Output::getClean(Input::get('description')),
                                 'category_id' => $category[0]->id,
                                 'price' => $price,
+                                'hidden' => $hidden,
+                                'disabled' => $disabled,
                                 'order' => $last_order + 1,
                             ));
                             $lastId = $queries->getLastId();
@@ -211,7 +221,11 @@ if(!isset($_GET['action'])) {
                 'CONNECTIONS_LIST' => $connections_array,
                 'FIELDS' => $store_language->get('admin', 'fields') . ' ' . $store_language->get('admin', 'select_multiple_with_ctrl'),
                 'FIELDS_LIST' => $fields_array,
-                'CURRENCY' => Output::getClean($configuration->get('store', 'currency'))
+                'CURRENCY' => Output::getClean($configuration->get('store', 'currency')),
+                'HIDE_PRODUCT' => $store_language->get('admin', 'hide_product_from_store'),
+                'HIDE_PRODUCT_VALUE' => ((isset($_POST['hidden'])) ? 1 : 0),
+                'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),
+                'DISABLE_PRODUCT_VALUE' => ((isset($_POST['disabled'])) ? 1 : 0),
             ));
             
             $template->addJSFiles(array(
@@ -268,12 +282,22 @@ if(!isset($_GET['action'])) {
 
                         // insert into database if there is no errors
                         if(!count($errors)) {
+                            // Hide category?
+                            if(isset($_POST['hidden']) && $_POST['hidden'] == 'on') $hidden = 1;
+                            else $hidden = 0;
+                            
+                            // Disable category?
+                            if(isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
+                            else $disabled = 0;
+
                             // Save to database
                             $product->update(array(
                                 'name' => Output::getClean(Input::get('name')),
                                 'description' => Output::getClean(Input::get('description')),
                                 'category_id' => $category[0]->id,
-                                'price' => $price
+                                'price' => $price,
+                                'hidden' => $hidden,
+                                'disabled' => $disabled
                             ));
                             
                             $selected_connections = isset($_POST['connections']) && is_array($_POST['connections']) ? $_POST['connections'] : array();
@@ -398,7 +422,11 @@ if(!isset($_GET['action'])) {
                 'NEW_ACTION' => $store_language->get('admin', 'new_action'),
                 'NEW_ACTION_LINK' => URL::build('/panel/store/products/' , 'action=new_action&id=' . $product->data()->id),
                 'ACTION_LIST' => $actions_array,
-                'CURRENCY' => Output::getClean($configuration->get('store', 'currency'))
+                'CURRENCY' => Output::getClean($configuration->get('store', 'currency')),
+                'HIDE_PRODUCT' => $store_language->get('admin', 'hide_product_from_store'),
+                'HIDE_PRODUCT_VALUE' => $product->data()->hidden,
+                'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),
+                'DISABLE_PRODUCT_VALUE' => $product->data()->disabled
             ));
             
             $template->addJSFiles(array(
@@ -696,6 +724,21 @@ $smarty->assign(array(
     'SUBMIT' => $language->get('general', 'submit'),
     'PRODUCTS' => $store_language->get('general', 'products')
 ));
+
+$template->addCSSFiles(array(
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.css' => array()
+));
+
+$template->addJSFiles(array(
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.js' => array()
+));
+
+$template->addJSScript('
+    var elems = Array.prototype.slice.call(document.querySelectorAll(\'.js-switch\'));
+    elems.forEach(function(html) {
+        var switchery = new Switchery(html, {color: \'#23923d\', secondaryColor: \'#e56464\'});
+    });
+');
 
 $page_load = microtime(true) - $start;
 define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));

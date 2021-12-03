@@ -26,7 +26,7 @@ class ShoppingCart {
             $products_ids .= ')';
             
             // Get prodcuts
-            $this->_products = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE id in '.$products_ids.' AND deleted = 0 ')->results();
+            $this->_products = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE id in '.$products_ids.' AND disabled = 0 AND deleted = 0 ')->results();
         }
     }
     
