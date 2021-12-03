@@ -54,11 +54,26 @@ if(!isset($_GET['action'])) {
                         
                         $parent_category = Input::get('parent_category');
                         
+                        // Hide category?
+                        if(isset($_POST['hidden']) && $_POST['hidden'] == 'on') $hidden = 1;
+                        else $hidden = 0;
+                        
+                        // Hide category from dropdown?
+                        if(isset($_POST['only_subcategories']) && $_POST['only_subcategories'] == 'on') $only_subcategories = 1;
+                        else $only_subcategories = 0;
+                        
+                        // Disable category?
+                        if(isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
+                        else $disabled = 0;
+                        
                         // Save to database
                         $queries->create('store_categories', array(
                             'name' => Output::getClean(Input::get('name')),
                             'description' => Output::getClean(Input::get('description')),
                             'parent_category' => $parent_category != 0 ? $parent_category : null,
+                            'only_subcategories' => $only_subcategories,
+                            'hidden' => $hidden,
+                            'disabled' => $disabled,
                             'order' => $last_order + 1,
                         ));
                         
@@ -95,6 +110,12 @@ if(!isset($_GET['action'])) {
                 'PARENT_CATEGORY_LIST' => $categories_list,
                 'PARENT_CATEGORY_VALUE' => ((isset($_POST['parent_category']) && $_POST['parent_category']) ? Output::getClean(Input::get('parent_category')) : 0),
                 'NO_PARENT' => $store_language->get('admin', 'no_parent'),
+                'ONLY_SUBCATEGORIES' => $store_language->get('admin', 'hide_category_from_dropdown_menu'),
+                'ONLY_SUBCATEGORIES_VALUE' => ((isset($_POST['only_subcategories'])) ? 1 : 0),
+                'HIDE_CATEGORY' => $store_language->get('admin', 'hide_category_from_menu'),
+                'HIDE_CATEGORY_VALUE' => ((isset($_POST['hidden'])) ? 1 : 0),
+                'DISABLE_CATEGORY' => $store_language->get('admin', 'disable_category'),
+                'DISABLE_CATEGORY_VALUE' => ((isset($_POST['disabled'])) ? 1 : 0),
             ));
             
             $template->addJSFiles(array(
@@ -135,14 +156,29 @@ if(!isset($_GET['action'])) {
                         )
                     ));
                     
-                    $parent_category = Input::get('parent_category');
-                    
                     if ($validation->passed()){
+                        $parent_category = Input::get('parent_category');
+                        
+                        // Hide category?
+                        if(isset($_POST['hidden']) && $_POST['hidden'] == 'on') $hidden = 1;
+                        else $hidden = 0;
+                        
+                        // Hide category from dropdown?
+                        if(isset($_POST['only_subcategories']) && $_POST['only_subcategories'] == 'on') $only_subcategories = 1;
+                        else $only_subcategories = 0;
+                        
+                        // Disable category?
+                        if(isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
+                        else $disabled = 0;
+                        
                         // Save to database
                         $queries->update('store_categories', $category->id, array(
                             'name' => Output::getClean(Input::get('name')),
                             'description' => Output::getClean(Input::get('description')),
-                            'parent_category' => $parent_category != 0 ? $parent_category : null
+                            'parent_category' => $parent_category != 0 ? $parent_category : null,
+                            'only_subcategories' => $only_subcategories,
+                            'hidden' => $hidden,
+                            'disabled' => $disabled
                         ));
                         
                         Session::flash('products_success', $store_language->get('admin', 'category_updated_successfully'));
@@ -178,6 +214,12 @@ if(!isset($_GET['action'])) {
                 'PARENT_CATEGORY_LIST' => $categories_list,
                 'PARENT_CATEGORY_VALUE' => Output::getClean($category->parent_category),
                 'NO_PARENT' => $store_language->get('admin', 'no_parent'),
+                'ONLY_SUBCATEGORIES' => $store_language->get('admin', 'hide_category_from_dropdown_menu'),
+                'ONLY_SUBCATEGORIES_VALUE' => $category->only_subcategories,
+                'HIDE_CATEGORY' => $store_language->get('admin', 'hide_category_from_menu'),
+                'HIDE_CATEGORY_VALUE' => $category->hidden,
+                'DISABLE_CATEGORY' => $store_language->get('admin', 'disable_category'),
+                'DISABLE_CATEGORY_VALUE' => $category->disabled,
             ));
             
             $template->addJSFiles(array(
@@ -253,6 +295,21 @@ $smarty->assign(array(
     'CATEGORIES' => $store_language->get('admin', 'categories'),
     'PRODUCTS' => $store_language->get('general', 'products')
 ));
+
+$template->addCSSFiles(array(
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.css' => array()
+));
+
+$template->addJSFiles(array(
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.js' => array()
+));
+
+$template->addJSScript('
+    var elems = Array.prototype.slice.call(document.querySelectorAll(\'.js-switch\'));
+    elems.forEach(function(html) {
+        var switchery = new Switchery(html, {color: \'#23923d\', secondaryColor: \'#e56464\'});
+    });
+');
 
 $page_load = microtime(true) - $start;
 define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));

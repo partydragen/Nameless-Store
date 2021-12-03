@@ -63,6 +63,18 @@
 									{/foreach}
 								</select>
 							</div>
+							<div class="form-group">
+								<label for="inputOnlySubCategories">{$ONLY_SUBCATEGORIES}</label>
+								<input id="inputOnlySubCategories" name="only_subcategories" type="checkbox" class="js-switch"{if $ONLY_SUBCATEGORIES_VALUE eq 1} checked{/if} />
+							</div>
+                            <div class="form-group">
+								<label for="inputHidden">{$HIDE_CATEGORY}</label>
+								<input id="inputHidden" name="hidden" type="checkbox" class="js-switch"{if $HIDE_CATEGORY_VALUE eq 1} checked{/if} />
+							</div>
+                            <div class="form-group">
+								<label for="inputDisabled">{$DISABLE_CATEGORY}</label>
+								<input id="inputDisabled" name="disabled" type="checkbox" class="js-switch"{if $DISABLE_CATEGORY_VALUE eq 1} checked{/if} />
+							</div>
                             <div class="form-group">
                                 <input type="hidden" name="token" value="{$TOKEN}">
                                 <input type="submit" class="btn btn-primary" value="{$SUBMIT}">

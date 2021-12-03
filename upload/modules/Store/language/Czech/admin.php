@@ -99,6 +99,9 @@ $language = array(
     'category_image' => 'Obrázek kategorie',
     'parent_category' => 'Parent Category',
     'no_parent' => 'No parent',
+    'hide_category_from_menu' => 'Do not display this category menu.',
+    'hide_category_from_dropdown_menu' => 'Do not display this category in the subcategory drop down menu.',
+    'disable_category' => 'Disable this category and remove it from the webstore.',
 	
     // Product
     'products' => 'Produkty',

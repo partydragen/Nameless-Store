@@ -31,13 +31,18 @@ if(!is_numeric($category_id[0])){
 $category_id = $category_id[0];
 
 // Query category
-$category = DB::getInstance()->query('SELECT id, name, parent_category, description, image FROM nl2_store_categories WHERE id = ?', array($category_id));
+$category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ?', array($category_id));
 if(!$category->count()){
     require_once(ROOT_PATH . '/404.php');
     die();
 }
 
 $category = $category->first();
+if($category->disabled == 1){
+    require_once(ROOT_PATH . '/404.php');
+    die();
+}
+
 $store_url = $store->getStoreURL();
 
 $page_metadata = $queries->getWhere('page_descriptions', array('page', '=', $store_url . '/view'));
