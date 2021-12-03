@@ -155,7 +155,7 @@
                                         <tbody>
                                             {foreach from=$PRODUCTS_LIST item=product}
                                                 <tr>
-                                                    <td>{$product.name}</td>
+                                                    <td>{$product.name} <a class="float-right btn btn-primary btn-sm" href="" data-toggle="modal" data-target="#productModal{$product.id}">{$DETAILS}</a></td>
                                                 </tr>
                                             {/foreach}
                                         </tbody>
@@ -182,6 +182,40 @@
 
     <!-- End Wrapper -->
 </div>
+
+{foreach from=$PRODUCTS_LIST item=product}
+    <div class="modal fade" id="productModal{$product.id}" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{$product.name}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <tbody>
+                            {if count($product.fields)}
+                                <tr><td><strong>Fields:</strong></tr>
+                                {foreach from=$product.fields item=field}
+                                    <tr>
+                                        <td>{$field.identifier} <span class="float-right">{$field.value}</span></td>
+                                    </tr>
+                                {/foreach}
+                            {else}
+                                <tr><td>Fields: <span class="float-right">No fields selected for this product.</span></td></tr>
+                            {/if}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{/foreach}
 
 {include file='scripts.tpl'}
 

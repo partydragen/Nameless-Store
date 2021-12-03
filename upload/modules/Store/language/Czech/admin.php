@@ -79,6 +79,7 @@ $language = array(
     'currency' => 'Měna',
     'currency_symbol' => 'Symbol měny',
     'command' => 'Příkaz',
+    'details' => 'Details',
     
     // Gateways
     'gateways' => 'Platební brány',

@@ -133,8 +133,19 @@ if(isset($_GET['player'])){
     // Get Products
     $products_list = array();
     foreach($order->getProducts() as $product) {
+        $fields_array = array();
+        $fields = DB::getInstance()->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', array($payment->data()->order_id, $product->id))->results();
+        foreach($fields as $field) {
+            $fields_array[] = array(
+                'identifier' => Output::getClean($field->identifier),
+                'value' => Output::getClean($field->value)
+            );
+        }
+        
         $products_list[] = array(
-            'name' => Output::getClean($product->name)
+            'id' => Output::getClean($product->id),
+            'name' => Output::getClean($product->name),
+            'fields' => $fields_array
         );
     }
    
@@ -180,6 +191,7 @@ if(isset($_GET['player'])){
         'DATE_VALUE' => date('d M Y, H:i', $payment->data()->created),
         'PRODUCTS' => $store_language->get('admin', 'products'),
         'PRODUCTS_LIST' => $products_list,
+        'DETAILS' => $store_language->get('admin', 'details'),
         'CONNECTION' => $store_language->get('admin', 'connection'),
         'COMMAND' => $store_language->get('admin', 'command'),
         'PENDING_COMMANDS' => $store_language->get('admin', 'pending_commands'),

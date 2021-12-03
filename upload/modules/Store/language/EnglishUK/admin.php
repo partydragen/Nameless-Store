@@ -79,6 +79,7 @@ $language = array(
     'currency' => 'Currency',
     'currency_symbol' => 'Currency Symbol',
     'command' => 'Command',
+    'details' => 'Details',
     
     // Gateways
     'gateways' => 'Gateways',
