@@ -37,11 +37,17 @@
                     <div class="col-md-9">
                         <div class="card shadow mb-4">
                             <div class="card-body">
-                                <h5 style="display:inline">{$VIEWING_PAYMENT}</h5>
-                                <div class="float-md-right">
-                                    <a class="btn btn-primary" href="{$BACK_LINK}">{$BACK}</a>
+                                <div class="row">
+                                    <div class="col-md-9">
+                                        <h5 style="display:inline">{$VIEWING_PAYMENT}</h5>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <span class="float-md-right">
+                                            {if isset($DELETE_PAYMENT)}<a href="#" class="btn btn-danger" onclick="showDeletePaymentModal()">{$DELETE_PAYMENT}</a>{/if}
+                                            <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
+                                        </span>
+                                    </div>
                                 </div>
-                                
                                 <hr />
 
                                 <!-- Success and Error Alerts -->
@@ -179,6 +185,32 @@
 
         <!-- End Content Wrapper -->
     </div>
+    
+    {if isset($DELETE_PAYMENT)}
+        <div class="modal fade" id="deletePaymentModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{$ARE_YOU_SURE}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        {$CONFIRM_DELETE_PAYMENT}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{$NO}</button>
+                        <form action="" method="post">
+                            <input type="hidden" name="token" value="{$TOKEN}">
+                            <input type="hidden" name="action" value="delete_payment">
+                            <input type="submit" class="btn btn-primary" value="{$YES}">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {/if}
 
     <!-- End Wrapper -->
 </div>
@@ -218,6 +250,14 @@
 {/foreach}
 
 {include file='scripts.tpl'}
+
+<script type="text/javascript">
+    {if isset($DELETE_PAYMENT)}
+    function showDeletePaymentModal() {
+      $('#deletePaymentModal').modal().show();
+    }
+    {/if}
+</script>
 
 </body>
 </html>

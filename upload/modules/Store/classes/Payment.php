@@ -243,4 +243,17 @@ class Payment {
         
         return $status;
     }
+    
+    public function delete() {
+        if($this->exists()) {
+            $this->_db->createQuery('DELETE FROM `nl2_store_payments` WHERE `id` = ?', array($this->data()->id));
+            $this->_db->createQuery('DELETE FROM `nl2_store_orders` WHERE `id` = ?', array($this->data()->order_id));
+            $this->_db->createQuery('DELETE FROM `nl2_store_orders_products` WHERE `order_id` = ?', array($this->data()->order_id));
+            $this->_db->createQuery('DELETE FROM `nl2_store_orders_products_fields` WHERE `order_id` = ?', array($this->data()->order_id));
+            
+            return true;
+        }
+        
+        return false;
+    }
 }

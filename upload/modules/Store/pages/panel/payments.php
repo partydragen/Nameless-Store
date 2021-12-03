@@ -118,6 +118,28 @@ if(isset($_GET['player'])){
         die();
     }
     
+    // Handle input
+    if(Input::exists()){
+        $errors = array();
+        if(Token::check(Input::get('token'))){
+            if(Input::get('action') == 'delete_payment') {
+                // Delete payment only if payment is manual
+                if($payment->data()->gateway_id == 0) {
+                    $payment->delete();
+                    
+                    Session::flash('store_payment_success', $store_language->get('admin', 'payment_deleted_successfully'));
+                    Redirect::to(URL::build('/panel/store/payments'));
+                    die();
+                }
+            } else if(Input::get('action') == 'delete_command') {
+                // Delete pending command
+            }
+        } else {
+            // Invalid token
+            $errors[] = $language->get('general', 'invalid_token');
+        }
+    }
+    
     $order = $payment->getOrder();
     $player = new Player($order->data()->player_id);
     
@@ -167,6 +189,14 @@ if(isset($_GET['player'])){
         );
     }
     
+    // Allow manual payment deletion
+    if($payment->data()->gateway_id == 0) {
+        $smarty->assign(array(
+            'DELETE_PAYMENT' => $language->get('admin', 'delete'),
+            'CONFIRM_DELETE_PAYMENT' => $store_language->get('admin', 'confirm_payment_deletion'),
+        ));
+    }
+    
     $smarty->assign(array(
         'VIEWING_PAYMENT' => str_replace('{x}', Output::getClean($payment->data()->transaction), $store_language->get('admin', 'viewing_payment')),
         'BACK' => $language->get('general', 'back'),
@@ -200,6 +230,9 @@ if(isset($_GET['player'])){
         'NO_PROCESSED_COMMANDS' => $store_language->get('admin', 'no_processed_commands'),
         'PENDING_COMMANDS_LIST' => $pending_commands_array,
         'PROCESSED_COMMANDS_LIST' => $processed_commands_array,
+        'ARE_YOU_SURE' => $language->get('general', 'are_you_sure'),
+        'YES' => $language->get('general', 'yes'),
+        'NO' => $language->get('general', 'no')
     ));
 
     $template_file = 'store/payments_view.tpl';
