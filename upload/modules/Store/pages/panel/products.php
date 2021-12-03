@@ -186,7 +186,7 @@ if(!isset($_GET['action'])) {
             
             // Fields
             $fields_array = array();
-            $fields = DB::getInstance()->query('SELECT * FROM nl2_store_fields')->results();
+            $fields = DB::getInstance()->query('SELECT * FROM nl2_store_fields WHERE deleted = 0')->results();
             foreach($fields as $field){
                 $fields_array[] = array(
                     'id' => Output::getClean($field->id),
@@ -338,7 +338,7 @@ if(!isset($_GET['action'])) {
             $fields_array = array();
             $selected_fields = $product->getFields();
 
-            $fields = DB::getInstance()->query('SELECT * FROM nl2_store_fields')->results();
+            $fields = DB::getInstance()->query('SELECT * FROM nl2_store_fields WHERE deleted = 0')->results();
             foreach($fields as $field){
                 $fields_array[] = array(
                     'id' => Output::getClean($field->id),
