@@ -1,6 +1,6 @@
 <?php
 /*
- *	Made by Partydragen, Translated by Fjuro
+ *  Made by Partydragen, Translated by Fjuro
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
@@ -79,7 +79,7 @@ $language = array(
     'currency' => 'Měna',
     'currency_symbol' => 'Symbol měny',
     'command' => 'Příkaz',
-    'details' => 'Details',
+    'details' => 'Podrobnosti',
     
     // Gateways
     'gateways' => 'Platební brány',
@@ -98,11 +98,11 @@ $language = array(
     'category_name' => 'Název kategorie',
     'category_description' => 'Popis kategorie',
     'category_image' => 'Obrázek kategorie',
-    'parent_category' => 'Parent Category',
-    'no_parent' => 'No parent',
-    'hide_category_from_menu' => 'Do not display this category menu.',
-    'hide_category_from_dropdown_menu' => 'Do not display this category in the subcategory drop down menu.',
-    'disable_category' => 'Disable this category and remove it from the store.',
+    'parent_category' => 'Nadřazená kategorie',
+    'no_parent' => 'Žádná nadřazená',
+    'hide_category_from_menu' => 'Nezobrazovat tuto kategorii v menu.',
+    'hide_category_from_dropdown_menu' => 'Nezobrazovat tuto kategori v rozbalovací nabídce podkategorie.',
+    'disable_category' => 'Zakázat tuto kategorii a odebrat jí z obchodu.',
 	
     // Product
     'products' => 'Produkty',
@@ -116,8 +116,8 @@ $language = array(
     'product_name' => 'Název produktu',
     'product_description' => 'Popis produktu',
     'product_image' => 'Obrázek produktu',
-    'hide_product_from_store' => 'Do not display this product on store.',
-    'disable_product' => 'Disable this product and remove it from the store.',
+    'hide_product_from_store' => 'Nezobrazovat tento produkt v obchodě.',
+    'disable_product' => 'Zakázat tento produkt a odebrat jej z obchodu.',
 	
     // Actions
     'actions' => 'Akce',
@@ -143,38 +143,38 @@ $language = array(
     'confirm_delete_connection' => 'Opravdu chcete odstranit toto propojení?',
     
     // Fields
-    'fields' => 'Fields',
-    'field' => 'Field',
-    'new_field' => 'New Field',
-	'identifier' => 'Identifier',
-    'description' => 'Description',
-	'field_created_successfully' => 'Field created successfully',
-	'field_updated_successfully' => 'Field updated successfully',
-	'field_deleted_successfully' => 'Field deleted successfully',
-	'creating_field' => 'Creating new field',
-	'editing_field_x' => 'Editing field {x}',
-	'none_fields_defined' => 'There are no fields yet.',
-	'confirm_delete_field' => 'Are you sure you want to delete this field?',
-	'options' => 'Options',
-	'options_help' => 'Each option on a new line; can be left empty (options only)',
-	'field_order' => 'Field Order',
-	'delete_field' => 'Are you sure you want to delete this field?',
-    'number' => 'Number',
-    'radio' => 'Radio',
-    'checkbox' => 'Checkbox',
-    'minimum_characters' => 'Minimum Characters (0 to disable)',
-    'maximum_characters' => 'Maximum Characters (0 to disable)',
-    'fields_info' => 'Fields enable you to create customisable products such as allowing users to select the colour of their name upon purchase.',
+    'fields' => 'Pole',
+    'field' => 'Pole',
+    'new_field' => 'Nové pole',
+    'identifier' => 'Identifikátor',
+    'description' => 'Popis',
+    'field_created_successfully' => 'Pole úspěšně vytvořeno',
+    'field_updated_successfully' => 'Pole úspěšně aktualizováno',
+    'field_deleted_successfully' => 'Pole úspěšně odstraněno',
+    'creating_field' => 'Vytváření nového pole',
+    'editing_field_x' => 'Úprava pole {x}',
+    'none_fields_defined' => 'Zatím zde nejsou žádná pole.',
+    'confirm_delete_field' => 'Opravdu chcete odstranit toto pole?',
+    'options' => 'Možnosti',
+    'options_help' => 'Každá možnost na nový řádek; může být ponecháno prázdné (pouze možnosti)',
+    'field_order' => 'Pořadí pole',
+    'delete_field' => 'Opravdu chcete odstranit toto pole?',
+    'number' => 'Číslo',
+    'radio' => 'Výběr z možností',
+    'checkbox' => 'Zaškrtávací pole',
+    'minimum_characters' => 'Minimum znaků (0 pro zakázání)',
+    'maximum_characters' => 'Maximum znaků (0 pro zakázání)',
+    'fields_info' => 'Pole vám umožňují vytvářet přizpůsobitelné produkty, například umožnění uživatelům vybrat si barvu jejich jména po zakoupení.',
     
-	'field_identifier_required' => 'The identifier field is required.',
-    'field_description_required' => 'The description field is required.',
-	'field_identifier_minimum' => 'The field identifier must be a minimum of 2 characters.',
-	'field_identifier_maximum' => 'The field identifier must be a maximum of 32 characters.',
-	'field_description_minimum' => 'The field description must be a minimum of 2 characters.',
-	'field_description_maximum' => 'The field description must be a maximum of 255 characters.',
+    'field_identifier_required' => 'Je vyžadován identifikátor pole.',
+    'field_description_required' => 'Je vyžadován popis pole.',
+    'field_identifier_minimum' => 'Identifikátor pole musí obsahovat alespoň 2 znaky.',
+    'field_identifier_maximum' => 'Identifikátor pole může obsahovat maximálně 32 znaků.',
+    'field_description_minimum' => 'Popis pole musí obsahovat alespoň 2 znaky.',
+    'field_description_maximum' => 'Popis pole může obsahovat maximálně 255 znaků.',
     
     // Payment
-    'confirm_payment_deletion' => 'Are you sure you want to delete the payment?',
+    'confirm_payment_deletion' => 'Opravdu chcete odstranit platbu?',
 	
     /*
      *  Admin Errors
