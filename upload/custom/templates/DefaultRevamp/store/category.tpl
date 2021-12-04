@@ -19,10 +19,9 @@
 		{include file='store/navbar.tpl'}
                 
         <div class="ui bottom attached segment">
-          
-          {$CONTENT}
-          
           {if isset($STORE_PLAYER)}
+            {$CONTENT}
+            
             {if isset($NO_PRODUCTS)}
               <div class="ui icon message">
                 <i class="info icon"></i>
