@@ -356,6 +356,9 @@ class Payment {
             case 3;
                 $status = '<span class="badge badge-info">Changeback</span>';
             break;
+            case 4;
+                $status = '<span class="badge badge-danger">Denied</span>';
+            break;
             default:
                 $status = '<span class="badge badge-danger">Unknown</span>';
             break;
