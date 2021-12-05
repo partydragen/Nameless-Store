@@ -218,7 +218,7 @@ $smarty->assign(array(
 	'PLAYER_LOGIN' => $store_language->get('admin', 'enable_player_login'),
 	'PLAYER_LOGIN_VALUE' => ($player_login == 1),
 	'STORE_PATH' => $store_language->get('admin', 'store_path'),
-	'STORE_PATH_VALUE' => URL::build($store_path),
+	'STORE_PATH_VALUE' => $store_path,
     'CURRENCY' => $store_language->get('admin', 'currency'),
     'CURRENCY_LIST' => $currency_list,
     'CURRENCY_VALUE' => Output::getClean($currency),
