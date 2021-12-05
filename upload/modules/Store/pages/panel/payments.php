@@ -283,10 +283,22 @@ if(isset($_GET['player'])){
                 // Valid, continue with validation
                 $validation = $validate->check($_POST, $to_validation);
                 if ($validation->passed()) {
-                    // Attempt to load player
+                    
                     $player = new Player();
-                    if(!$player->login(Output::getClean(Input::get('username')), false)) {
-                        $errors[] = $language->get('user', 'invalid_mcname');
+                    if($store->isPlayerSystemEnabled()) {
+                        // Attempt to load player
+                        $player = new Player();
+                        if(!$player->login(Output::getClean(Input::get('username')), false)) {
+                            $errors[] = $language->get('user', 'invalid_mcname');
+                        }
+                        
+                        $target_user = new User(Output::getClean(Input::get('username')), 'username');
+                    } else {
+                        // User required
+                        $target_user = new User(Output::getClean(Input::get('username')), 'username');
+                        if(!$target_user->exists()) {
+                            $errors[] = $store_language->get('admin', 'user_dont_exist');
+                        }
                     }
                     
                     $items = array();
@@ -301,7 +313,7 @@ if(isset($_GET['player'])){
                     if(!count($errors) && count($items)) {
                         // Register order
                         $order = new Order();
-                        $order->create($user, $player, $items);
+                        $order->create($target_user, $player, $items);
                         
                         // Register payment
                         $payment = new Payment();
@@ -344,7 +356,7 @@ if(isset($_GET['player'])){
             }
 
             $smarty->assign(array(
-                'USERNAME' => $store_language->get('admin', 'ign'),
+                'USERNAME' => $store->isPlayerSystemEnabled() ? $store_language->get('admin', 'ign') : $language->get('user', 'username'),
                 'PRODUCTS' => $store_language->get('general', 'products') . ' ' . $store_language->get('admin', 'select_multiple_with_ctrl'),
                 'PRODUCTS_LIST' => $template_products
             ));

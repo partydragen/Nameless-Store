@@ -32,6 +32,7 @@ $language = array(
     'image_updated_successfully' => 'Image updated successfully.',
     'unable_to_upload_image' => 'Unable to upload image: {x}', // Don't replace {x} (error message)
     'enable_player_login' => 'Require customer to enter minecraft username when visiting store (Disabling will force user login)',
+    'user_dont_exist' => 'User does not exists',
 
     'user' => 'User',
     'amount' => 'Amount',
