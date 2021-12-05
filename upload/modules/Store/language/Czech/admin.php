@@ -31,6 +31,7 @@ $language = array(
     'description_updated_successfully' => 'Popis úspěšně aktualizován.',
     'image_updated_successfully' => 'Obrázek úspěšně aktualizován.',
     'unable_to_upload_image' => 'Nepodařilo se nahrát obrázek: {x}', // Don't replace {x} (error message)
+    'enable_player_login' => 'Require customer to enter minecraft username when visiting store (Disabling will force user login)',
 
     'user' => 'Uživatel',
     'amount' => 'Částka',

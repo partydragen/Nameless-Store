@@ -51,7 +51,7 @@ class Store {
 	
 	// Get all payments
 	public function getAllPayments() {
-		$payments = $this->_db->query('SELECT nl2_store_payments.*, uuid, username FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id ORDER BY created DESC')->results();
+		$payments = $this->_db->query('SELECT nl2_store_payments.*, uuid, username, order_id, user_id, player_id FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id ORDER BY created DESC')->results();
 		
 		return $payments;
 	}
@@ -127,6 +127,12 @@ class Store {
         }
         
         return $categories;
+    }
+    
+    public function isPlayerSystemEnabled() {
+        $configuration = new Configuration($this->_cache);
+        
+        return $configuration->get('store', 'player_login');
     }
     
     /*

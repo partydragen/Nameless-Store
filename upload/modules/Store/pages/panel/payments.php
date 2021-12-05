@@ -28,18 +28,30 @@ Module::loadPage($user, $pages, $cache, $smarty, array($navigation, $cc_nav, $mo
 
 if(isset($_GET['player'])){
     // Get payments for user
-    $payments = DB::getInstance()->query('SELECT nl2_store_payments.*, uuid, username FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id WHERE nl2_store_players.username = ? ORDER BY created DESC', array($_GET['player']));
+    $payments = DB::getInstance()->query('SELECT nl2_store_payments.*, uuid, username, order_id, user_id, player_id FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id WHERE nl2_store_players.username = ? ORDER BY created DESC', array($_GET['player']));
 
     if($payments->count()){
         $payments = $payments->results();
-    
-        $payment_user = new User(str_replace('-', '', $payments[0]->uuid), 'uuid');
-        if($payment_user->data()){
+        
+        if($payments[0]->player_id != null) {
+            // Custumer paid as a guest, attempt to load user by uuid
+            $payment_user = new User(str_replace('-', '', $payments[0]->uuid), 'uuid');
+            if($payment_user->data()){
+                $username = Output::getClean($payments[0]->username);
+                $avatar = $payment_user->getAvatar();
+                $style = $payment_user->getGroupClass();
+            } else {
+                $username = Output::getClean($payments[0]->username);
+                $avatar = Util::getAvatarFromUUID(Output::getClean($payments[0]->uuid));
+                $style = '';
+            }
+        } else if($payments[0]->user_id != null) {
+            // Custumer paid while being logged in
+            $payment_user = new User($payments[0]->user_id);
+                
+            $username = $payment_user->getDisplayname(true);
             $avatar = $payment_user->getAvatar();
             $style = $payment_user->getGroupClass();
-        } else {
-            $avatar = Util::getAvatarFromUUID(Output::getClean($payments[0]->uuid));
-            $style = '';
         }
 
         $template_payments = array();
@@ -51,7 +63,7 @@ if(isset($_GET['player'])){
                 'user_link' => URL::build('/panel/store/payments/', 'player=' . Output::getClean($paymentQuery->username)),
                 'user_style' => $style,
                 'user_avatar' => $avatar,
-                'username' => Output::getClean($paymentQuery->username),
+                'username' => $username,
                 'user_uuid' => Output::getClean($paymentQuery->uuid),
                 'status_id' => $paymentQuery->status_id,
                 'status' => $payment->getStatusHtml(),
@@ -141,17 +153,33 @@ if(isset($_GET['player'])){
     }
     
     $order = $payment->getOrder();
-    $player = new Player($order->data()->player_id);
     
-    $payment_user = new User(str_replace('-', '', $player->getUUID()), 'uuid');
-    if($payment_user->data()){
+    // Get user details
+    if($order->data()->player_id != null) {
+        $player = new Player($order->data()->player_id);
+        
+        $payment_user = new User(str_replace('-', '', $player->getUUID()), 'uuid');
+        if($payment_user->data()){
+            $username = Output::getClean($player->getUsername());
+            $avatar = $payment_user->getAvatar();
+            $style = $payment_user->getGroupClass();
+            $uuid = Output::getClean($player->getUUID());
+        } else {
+            $username = Output::getClean($player->getUsername());
+            $avatar = Util::getAvatarFromUUID(Output::getClean($player->getUUID()));
+            $style = '';
+            $uuid = Output::getClean($player->getUUID());
+        }
+    } else if($order->data()->user_id != null) {
+        // Custumer paid while being logged in
+        $payment_user = new User($order->data()->user_id);
+                
+        $username = $payment_user->getDisplayname(true);
         $avatar = $payment_user->getAvatar();
         $style = $payment_user->getGroupClass();
-    } else {
-        $avatar = Util::getAvatarFromUUID(Output::getClean($player->getUUID()));
-        $style = '';
+        $uuid = Output::getClean($payment_user->data()->uuid);
     }
-    
+
     // Get Products
     $products_list = array();
     foreach($order->getProducts() as $product) {
@@ -202,8 +230,8 @@ if(isset($_GET['player'])){
         'BACK' => $language->get('general', 'back'),
         'BACK_LINK' => URL::build('/panel/store/payments'),
         'IGN' => $store_language->get('admin', 'ign'),
-        'IGN_VALUE' => Output::getClean($player->getUsername()),
-        'USER_LINK' => URL::build('/panel/store/payments/', 'player=' . Output::getClean($player->getUsername())),
+        'IGN_VALUE' => $username,
+        'USER_LINK' => URL::build('/panel/store/payments/', 'player=' . $username),
         'AVATAR' => $avatar,
         'STYLE' => $style,
         'TRANSACTION' => $store_language->get('admin', 'transaction'),
@@ -213,7 +241,7 @@ if(isset($_GET['player'])){
         'STATUS' => $store_language->get('admin', 'status'),
         'STATUS_VALUE' => $payment->getStatusHtml(),
         'UUID' => $store_language->get('admin', 'uuid'),
-        'UUID_VALUE' => Output::getClean($player->getUUID()),
+        'UUID_VALUE' => $uuid,
         'PRICE' => $store_language->get('general', 'price'),
         'PRICE_VALUE' => Output::getClean($payment->data()->amount),
         'CURRENCY_SYMBOL' => Output::getClean('$'),
@@ -335,20 +363,32 @@ if(isset($_GET['player'])){
         foreach($payments as $paymentQuery){
             $payment = new Payment($paymentQuery->id);
             
-            $payment_user = new User(str_replace('-', '', $paymentQuery->uuid), 'uuid');
-            if($payment_user->data()){
+            if($paymentQuery->player_id != null) {
+                // Custumer paid as a guest, attempt to load user by uuid
+                $payment_user = new User(str_replace('-', '', $paymentQuery->uuid), 'uuid');
+                if($payment_user->data()){
+                    $username = Output::getClean($paymentQuery->username);
+                    $avatar = $payment_user->getAvatar();
+                    $style = $payment_user->getGroupClass();
+                } else {
+                    $username = Output::getClean($paymentQuery->username);
+                    $avatar = Util::getAvatarFromUUID(Output::getClean($paymentQuery->uuid));
+                    $style = '';
+                }
+            } else if($paymentQuery->user_id != null) {
+                // Custumer paid while being logged in
+                $payment_user = new User($paymentQuery->user_id);
+                
+                $username = $payment_user->getDisplayname(true);
                 $avatar = $payment_user->getAvatar();
                 $style = $payment_user->getGroupClass();
-            } else {
-                $avatar = Util::getAvatarFromUUID(Output::getClean($paymentQuery->uuid));
-                $style = '';
             }
 
             $template_payments[] = array(
-                'user_link' =>  URL::build('/panel/store/payments/', 'player=' . Output::getClean($paymentQuery->username)),
+                'user_link' =>  URL::build('/panel/store/payments/', 'player=' . $username),
                 'user_style' => $style,
                 'user_avatar' => $avatar,
-                'username' => Output::getClean($paymentQuery->username),
+                'username' => $username,
                 'uuid' => Output::getClean($paymentQuery->uuid),
                 'status_id' => $paymentQuery->status_id,
                 'status' => $payment->getStatusHtml(),

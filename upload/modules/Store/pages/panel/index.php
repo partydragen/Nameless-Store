@@ -39,8 +39,15 @@ if(isset($_POST) && !empty($_POST)){
 				$allow_guests = 1;
 			else
 				$allow_guests = 0;
+            
+            // Enable Player Login
+			if(isset($_POST['player_login']) && $_POST['player_login'] == 'on')
+				$player_login = 1;
+			else
+				$player_login = 0;
 
 			$configuration->set('store', 'allow_guests', $allow_guests);
+            $configuration->set('store', 'player_login', $player_login);
             $configuration->set('store', 'currency', Output::getClean(Input::get('currency')));
             $configuration->set('store', 'currency_symbol', Output::getClean(Input::get('currency_symbol')));
             
@@ -160,6 +167,9 @@ if(isset($errors) && count($errors))
 // Can guest make purchases
 $allow_guests = $configuration->get('store', 'allow_guests');
 
+// Require player to enter minecraft username when visiting store
+$player_login = $configuration->get('store', 'player_login');
+
 // Store content
 $store_index_content = $queries->getWhere('store_settings', array('name', '=', 'store_content'));
 if(count($store_index_content)){
@@ -205,6 +215,8 @@ $smarty->assign(array(
 	'SETTINGS' => $store_language->get('admin', 'settings'),
 	'ALLOW_GUESTS' => $store_language->get('admin', 'allow_guests'),
 	'ALLOW_GUESTS_VALUE' => ($allow_guests == 1),
+	'PLAYER_LOGIN' => $store_language->get('admin', 'enable_player_login'),
+	'PLAYER_LOGIN_VALUE' => ($player_login == 1),
 	'STORE_PATH' => $store_language->get('admin', 'store_path'),
 	'STORE_PATH_VALUE' => URL::build($store_path),
     'CURRENCY' => $store_language->get('admin', 'currency'),

@@ -24,7 +24,7 @@ if(Input::exists()){
 }
 
 // Assign smarty variables
-if($player->isLoggedIn()) {
+if($store->isPlayerSystemEnabled() && $player->isLoggedIn()) {
     $smarty->assign(array(
         'STORE_PLAYER' => $player->getUsername(),
         'LOGOUT' => $store_language->get('general', 'logout'),

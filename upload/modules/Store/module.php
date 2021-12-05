@@ -495,6 +495,13 @@ class Store_Module extends Module {
                 }
             }
         }
+        
+        if($old_version < 130) {
+            $queries->create('store_settings', array(
+				'name' => 'player_login',
+				'value' => 1
+			));
+        }
     }
 	
 	private function initialise(){
@@ -644,6 +651,11 @@ class Store_Module extends Module {
             $queries->create('store_settings', array(
 				'name' => 'allow_guests',
 				'value' => 0
+			));
+            
+            $queries->create('store_settings', array(
+				'name' => 'player_login',
+				'value' => 1
 			));
 		}
 		

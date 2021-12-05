@@ -141,11 +141,15 @@ $smarty->assign(array(
     'TOKEN' => Token::get(),
 ));
 
-if(!$player->isLoggedIn()) {
+if($store->isPlayerSystemEnabled() && !$player->isLoggedIn()) {
     $smarty->assign(array(
         'PLEASE_ENTER_USERNAME' => $store_language->get('general', 'please_enter_username'),
         'CONTINUE' => $store_language->get('general', 'continue'),
     ));
+    
+    $template_file = 'store/player_login.tpl';
+} else {
+    $template_file = 'store/category.tpl';
 }
 
 $template->addCSSFiles(array(
@@ -172,4 +176,4 @@ require(ROOT_PATH . '/core/templates/navbar.php');
 require(ROOT_PATH . '/core/templates/footer.php');
 
 // Display template
-$template->displayTemplate('store/category.tpl', $smarty);
+$template->displayTemplate($template_file, $smarty);

@@ -13,15 +13,15 @@
 define('PAGE', 'store');
 $page_title = $store_language->get('general', 'store');
 
-if(!$configuration->get('store', 'allow_guests')) {
+require_once(ROOT_PATH . '/core/templates/frontend_init.php');
+require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
+
+if(!$store->isPlayerSystemEnabled() || !$configuration->get('store', 'allow_guests')) {
     if(!$user->isLoggedIn()) {
         Redirect::to(URL::build('/login/'));
         die();
     }
 }
-
-require_once(ROOT_PATH . '/core/templates/frontend_init.php');
-require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
 
 $gateways = new Gateways();
 
@@ -305,7 +305,7 @@ if(isset($_GET['do'])){
 }
 
 // Check if store player is required and isset
-if(!$player->isLoggedIn()) {
+if($store->isPlayerSystemEnabled() && !$player->isLoggedIn()) {
     Redirect::to(URL::build($store_url));
     die();
 }
