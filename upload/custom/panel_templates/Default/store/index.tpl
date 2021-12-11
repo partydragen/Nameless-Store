@@ -45,6 +45,11 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label for="inputPlayerLogin">{$PLAYER_LOGIN}</label>
+                                    <input type="checkbox" name="player_login" id="inputPlayerLogin" class="js-switch" {if $PLAYER_LOGIN_VALUE} checked{/if} />
+                                </div>
+
+                                <div class="form-group">
                                     <label for="inputStorePath">{$STORE_PATH}</label>
                                     <input type="text" class="form-control" id="inputStorePath" name="store_path" placeholder="{$STORE_PATH}" value="{$STORE_PATH_VALUE}">
                                 </div>
