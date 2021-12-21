@@ -34,7 +34,7 @@ if(isset($_GET['player'])){
         $payments = $payments->results();
         
         if($payments[0]->player_id != null) {
-            // Custumer paid as a guest, attempt to load user by uuid
+            // Use ingame user data
             $payment_user = new User(str_replace('-', '', $payments[0]->uuid), 'uuid');
             if($payment_user->data()){
                 $username = Output::getClean($payments[0]->username);
@@ -46,7 +46,7 @@ if(isset($_GET['player'])){
                 $style = '';
             }
         } else if($payments[0]->user_id != null) {
-            // Custumer paid while being logged in
+            // Use User data
             $payment_user = new User($payments[0]->user_id);
                 
             $username = $payment_user->getDisplayname(true);

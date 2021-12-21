@@ -8,25 +8,22 @@ class CommandsExecuted extends EndpointBase {
     }
 
     public function execute(Nameless2API $api) {
-        $query = 'UPDATE `nl2_store_pending_actions` SET `status`=1';
-        $where = ' WHERE player_id = ?';
-        $params = array($_GET['player_id']);
-
-        if (isset($_GET['online'])) {
-            $where .= ' AND require_online = ?';
-            array_push($params, $_GET['online']);
+        $commands = $_POST['commands'];
+        if(!is_array($commands) || !count($commands)) {
+            $api->throwError(110, 'No commands provided');
         }
         
-        if (isset($_GET['connection_id']) || isset($_GET['server_id'])) {
-            $where .= ' AND connection_id = ?';
-            array_push($params, (isset($_GET['connection_id']) ? $_GET['connection_id'] : $_GET['server_id']));
+        $ids = '(';
+        foreach ($commands as $id) {
+            if (is_numeric($id)) {
+                $ids .= ((int) $id) . ',';
+            }
         }
+        $ids = rtrim($ids, ',') . ')';
 
         // Ensure the user exists
-        $user = $api->getDb()->createQuery($query . $where, $params);
-
-
-
+        $user = $api->getDb()->createQuery('UPDATE `nl2_store_pending_actions` SET `status`=1 WHERE id IN ' . $ids);
+        
         $api->returnArray(array('success' => true));
     }
 }
