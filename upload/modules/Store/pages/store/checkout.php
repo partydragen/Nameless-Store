@@ -237,8 +237,24 @@ if(isset($_GET['do'])){
 
                 $gateway = $gateways->get($_POST['payment_method']);
                 if($gateway) {
-                    // Load gateway process
-                    require_once(ROOT_PATH . '/modules/Store/gateways/'.$gateway->getName().'/process.php');
+                    if($shopping_cart->getTotalPrice() != 0) {
+                        // Load gateway process
+                        require_once(ROOT_PATH . '/modules/Store/gateways/'.$gateway->getName().'/process.php');
+                    } else {
+                        // Nothing ti pay, Complete order
+                        $payment = new Payment();
+                        $payment->handlePaymentEvent('COMPLETED', array(
+                            'order_id' => $order->data()->id,
+                            'gateway_id' => $gateway->getId(),
+                            'amount' => 0,
+                            'currency' => Output::getClean($configuration->get('store', 'currency')),
+                            'fee' => 0
+                        ));
+                        
+                        $shopping_cart->clear();
+                        Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
+                        die();
+                    }
                 } else {
                     die('Invalid gateway');
                 }
