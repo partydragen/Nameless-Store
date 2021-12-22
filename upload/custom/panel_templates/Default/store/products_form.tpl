@@ -58,7 +58,7 @@
                                         <div class="col-md-6">
 											<label for="inputPrice">{$PRICE}</label>
 											<div class="input-group">
-												<input type="number" name="price" class="form-control" id="inputPrice" step="0.01" min="0.01" value="{$PRODUCT_PRICE_VALUE}" placeholder="{$PRICE}" required>
+												<input type="number" name="price" class="form-control" id="inputPrice" step="0.01" min="0.00" value="{$PRODUCT_PRICE_VALUE}" placeholder="{$PRICE}" required>
 												<div class="input-group-append">
 													<span class="input-group-text">{$CURRENCY}</span>
 												</div>

@@ -118,7 +118,7 @@ if(!isset($_GET['action'])) {
                         }
                         
                         // Get price
-                        if(!isset($_POST['price']) || !is_numeric($_POST['price']) || $_POST['price'] < 0.01 || $_POST['price'] > 1000 || !preg_match('/^\d+(?:\.\d{2})?$/', $_POST['price'])){
+                        if(!isset($_POST['price']) || !is_numeric($_POST['price']) || $_POST['price'] < 0.00 || $_POST['price'] > 1000 || !preg_match('/^\d+(?:\.\d{2})?$/', $_POST['price'])){
                             $errors[] = $store_language->get('admin', 'invalid_price');
                         } else {
                             $price = number_format($_POST['price'], 2, '.', '');
@@ -274,7 +274,7 @@ if(!isset($_GET['action'])) {
                         }
                             
                         // Get price
-                        if(!isset($_POST['price']) || !is_numeric($_POST['price']) || $_POST['price'] < 0.01 || $_POST['price'] > 1000 || !preg_match('/^\d+(?:\.\d{2})?$/', $_POST['price'])){
+                        if(!isset($_POST['price']) || !is_numeric($_POST['price']) || $_POST['price'] < 0.00 || $_POST['price'] > 1000 || !preg_match('/^\d+(?:\.\d{2})?$/', $_POST['price'])){
                             $errors[] = $store_language->get('admin', 'invalid_price');
                         } else {
                             $price = number_format($_POST['price'], 2, '.', '');
