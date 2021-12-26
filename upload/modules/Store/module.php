@@ -146,12 +146,12 @@ class Store_Module extends Module {
 		if(defined('BACK_END')){
 			// Define permissions which belong to this module
 			PermissionHandler::registerPermissions('Store', array(
-				'staffcp.store' => $this->_store_language->get('admin', 'staffcp_store'),
-				'staffcp.store.settings' => $this->_store_language->get('admin', 'staffcp_store_settings'),
-                'staffcp.store.gateways' => $this->_store_language->get('admin', 'staffcp_store_gateways'),
-				'staffcp.store.products' => $this->_store_language->get('admin', 'staffcp_store_products'),
-				'staffcp.store.payments' => $this->_store_language->get('admin', 'staffcp_store_payments'),
-                'staffcp.store.manage' => $this->_store_language->get('admin', 'staffcp_store_manage'),
+				'staffcp.store' => $this->_store_language->get('perms', 'staffcp_store'),
+				'staffcp.store.settings' => $this->_store_language->get('perms', 'staffcp_store_settings'),
+                'staffcp.store.gateways' => $this->_store_language->get('perms', 'staffcp_store_gateways'),
+				'staffcp.store.products' => $this->_store_language->get('perms', 'staffcp_store_products'),
+				'staffcp.store.payments' => $this->_store_language->get('perms', 'staffcp_store_payments'),
+                'staffcp.store.manage' => $this->_store_language->get('perms', 'staffcp_store_manage'),
 			));
 		
 			if($user->hasPermission('staffcp.store')){
