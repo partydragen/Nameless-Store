@@ -6,7 +6,7 @@
  *
  *  License: MIT
  *
- *  Store module - German Language
+ *  Store module - EnglishUK Language
  */
  
 $language_version = '2.0.0-pr12';
