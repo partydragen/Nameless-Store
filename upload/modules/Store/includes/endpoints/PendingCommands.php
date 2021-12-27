@@ -43,8 +43,11 @@ class PendingCommands extends EndpointBase {
             );
         }
         
+        // Online mode or offline mode?
+        $uuid_linking = $api->getDb()->get('settings', array('name', '=', 'uuid_linking'))->results();
+        $uuid_linking = ($uuid_linking[0]->value == '1' ? true : false);
         
-        $api->returnArray(array('commands' => $commands_array));
+        $api->returnArray(array('online_mode' => $uuid_linking, 'commands' => $commands_array));
     }
     
     /**
