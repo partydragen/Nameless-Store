@@ -146,12 +146,13 @@ class Store_Module extends Module {
 		if(defined('BACK_END')){
 			// Define permissions which belong to this module
 			PermissionHandler::registerPermissions('Store', array(
-				'staffcp.store' => $this->_store_language->get('admin', 'staffcp_store'),
-				'staffcp.store.settings' => $this->_store_language->get('admin', 'staffcp_store_settings'),
-                'staffcp.store.gateways' => $this->_store_language->get('admin', 'staffcp_store_gateways'),
-				'staffcp.store.products' => $this->_store_language->get('admin', 'staffcp_store_products'),
-				'staffcp.store.payments' => $this->_store_language->get('admin', 'staffcp_store_payments'),
-                'staffcp.store.manage' => $this->_store_language->get('admin', 'staffcp_store_manage'),
+                'staffcp.store' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('general', 'store'),
+				'staffcp.store.settings' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'settings'),
+                'staffcp.store.gateways' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'gateways'),
+				'staffcp.store.products' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'products'),
+				'staffcp.store.payments' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments'),
+                'staffcp.store.connections' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'connections'),
+                'staffcp.store.fields' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'fields'),
 			));
 		
 			if($user->hasPermission('staffcp.store')){
@@ -205,7 +206,7 @@ class Store_Module extends Module {
 					$navs[2]->add('store_payments', $this->_store_language->get('admin', 'payments'), URL::build('/panel/store/payments'), 'top', null, ($order + 0.4), $icon);
 				}
                 
-                if($user->hasPermission('staffcp.store.manage')){
+                if($user->hasPermission('staffcp.store.connections')){
 					if(!$cache->isCached('store_connections_icon')){
 						$icon = '<i class="nav-icon fas fa-plug"></i>';
 						$cache->store('store_connections_icon', $icon);
@@ -215,7 +216,7 @@ class Store_Module extends Module {
 					$navs[2]->add('store_connections', $this->_store_language->get('admin', 'connections'), URL::build('/panel/store/connections'), 'top', null, ($order + 0.5), $icon);
 				}
                 
-                if($user->hasPermission('staffcp.store.manage')){
+                if($user->hasPermission('staffcp.store.fields')){
 					if(!$cache->isCached('store_fields_icon')){
 						$icon = '<i class="nav-icon fas fa-id-card"></i>';
 						$cache->store('store_fields_icon', $icon);
@@ -501,6 +502,21 @@ class Store_Module extends Module {
 				'name' => 'player_login',
 				'value' => 1
 			));
+            
+            try {
+                // Update main admin group permissions
+                $group = $queries->getWhere('groups', array('id', '=', 2));
+                $group = $group[0];
+                
+                $group_permissions = json_decode($group->permissions, TRUE);
+                $group_permissions['staffcp.store.connections'] = 1;
+                $group_permissions['staffcp.store.fields'] = 1;
+                
+                $group_permissions = json_encode($group_permissions);
+                $queries->update('groups', 2, array('permissions' => $group_permissions));
+			} catch(Exception $e){
+				// Error
+			}
         }
     }
 	
@@ -696,8 +712,9 @@ class Store_Module extends Module {
             $group_permissions['staffcp.store.products'] = 1;
             $group_permissions['staffcp.store.payments'] = 1;
             $group_permissions['staffcp.store.gateways'] = 1;
-            $group_permissions['staffcp.store.manage'] = 1;
-			
+            $group_permissions['staffcp.store.connections'] = 1;
+            $group_permissions['staffcp.store.fields'] = 1;
+            
 			$group_permissions = json_encode($group_permissions);
 			$queries->update('groups', 2, array('permissions' => $group_permissions));
 		} catch(Exception $e){

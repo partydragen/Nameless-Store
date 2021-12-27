@@ -10,7 +10,7 @@
  */
  
 // Can the user view the StaffCP?
-if(!$user->handlePanelPageLoad('staffcp.store.manage')) {
+if(!$user->handlePanelPageLoad('staffcp.store.connections')) {
     require_once(ROOT_PATH . '/403.php');
     die();
 }
