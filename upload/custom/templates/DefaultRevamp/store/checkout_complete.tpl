@@ -14,11 +14,11 @@
     
     <div class="ui {if count($WIDGETS_LEFT) && count($WIDGETS_RIGHT) }four wide tablet eight wide computer{elseif count($WIDGETS_LEFT) || count($WIDGETS_RIGHT)}ten wide tablet twelve wide computer{else}sixteen wide{/if} column">
       <div class="ui segment">
-	
-		<h1 style="display:inline">{$STORE}</h1>
-		{include file='store/navbar.tpl'}
-		
-		{$CHECKOUT_COMPLETE_CONTENT}
+    
+        <h1 style="display:inline">{$STORE}</h1>
+        {include file='store/navbar.tpl'}
+        
+        {$CHECKOUT_COMPLETE_CONTENT}
       </div>
     </div>
     

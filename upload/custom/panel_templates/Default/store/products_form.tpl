@@ -43,57 +43,57 @@
 
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
-							
+                            
                             <form action="" method="post">
-								<div class="form-group">
-									<label for="InputName">{$PRODUCT_NAME}</label>
-									<input type="text" name="name" class="form-control" id="InputName" value="{$PRODUCT_NAME_VALUE}" placeholder="{$PRODUCT_NAME}" required>
-								</div>
-								<div class="form-group">
+                                <div class="form-group">
+                                    <label for="InputName">{$PRODUCT_NAME}</label>
+                                    <input type="text" name="name" class="form-control" id="InputName" value="{$PRODUCT_NAME_VALUE}" placeholder="{$PRODUCT_NAME}" required>
+                                </div>
+                                <div class="form-group">
                                     <strong><label for="inputDescription">{$PRODUCT_DESCRIPTION}</label></strong>
                                     <textarea id="inputDescription" name="description">{$PRODUCT_DESCRIPTION_VALUE}</textarea>
                                 </div>
-								<div class="form-group">
-									<div class="row">
-                                        <div class="col-md-6">
-											<label for="inputPrice">{$PRICE}</label>
-											<div class="input-group">
-												<input type="number" name="price" class="form-control" id="inputPrice" step="0.01" min="0.00" value="{$PRODUCT_PRICE_VALUE}" placeholder="{$PRICE}" required>
-												<div class="input-group-append">
-													<span class="input-group-text">{$CURRENCY}</span>
-												</div>
-											</div>
-										</div>
-                                        <div class="col-md-6">
-											<label for="inputCategory">{$CATEGORY}</label>
-											<select name="category" class="form-control" id="inputCategory" required>
-												{foreach from=$CATEGORY_LIST item=category}
-												<option value="{$category.id}" {if $PRODUCT_CATEGORY_VALUE == {$category.id}} selected{/if}>{$category.name}</option>
-												{/foreach}
-											</select>
-										</div>
-                                    </div>
-								</div>
                                 <div class="form-group">
-									<div class="row">
+                                    <div class="row">
                                         <div class="col-md-6">
-											<label for="inputConnections">{$CONNECTIONS}</label>
-											<select name="connections[]" id="label_connections" size="3" class="form-control" multiple style="overflow:auto;">
-												{foreach from=$CONNECTIONS_LIST item=connection}
-                                                <option value="{$connection.id}"{if $connection.selected} selected{/if}>{$connection.name}</option>
-												{/foreach}
-											</select>
-										</div>
+                                            <label for="inputPrice">{$PRICE}</label>
+                                            <div class="input-group">
+                                                <input type="number" name="price" class="form-control" id="inputPrice" step="0.01" min="0.00" value="{$PRODUCT_PRICE_VALUE}" placeholder="{$PRICE}" required>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text">{$CURRENCY}</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="col-md-6">
-											<label for="inputFields">{$FIELDS}</label>
-											<select name="fields[]" id="label_fields" size="3" class="form-control" multiple style="overflow:auto;">
-												{foreach from=$FIELDS_LIST item=field}
-                                                <option value="{$field.id}"{if $field.selected} selected{/if}>{$field.identifier}</option>
-												{/foreach}
-											</select>
-										</div>
+                                            <label for="inputCategory">{$CATEGORY}</label>
+                                            <select name="category" class="form-control" id="inputCategory" required>
+                                                {foreach from=$CATEGORY_LIST item=category}
+                                                <option value="{$category.id}" {if $PRODUCT_CATEGORY_VALUE == {$category.id}} selected{/if}>{$category.name}</option>
+                                                {/foreach}
+                                            </select>
+                                        </div>
                                     </div>
-								</div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="inputConnections">{$CONNECTIONS}</label>
+                                            <select name="connections[]" id="label_connections" size="3" class="form-control" multiple style="overflow:auto;">
+                                                {foreach from=$CONNECTIONS_LIST item=connection}
+                                                <option value="{$connection.id}"{if $connection.selected} selected{/if}>{$connection.name}</option>
+                                                {/foreach}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="inputFields">{$FIELDS}</label>
+                                            <select name="fields[]" id="label_fields" size="3" class="form-control" multiple style="overflow:auto;">
+                                                {foreach from=$FIELDS_LIST item=field}
+                                                <option value="{$field.id}"{if $field.selected} selected{/if}>{$field.identifier}</option>
+                                                {/foreach}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="form-group">
                                     <label for="inputHidden">{$HIDE_PRODUCT}</label>
                                     <input id="inputHidden" name="hidden" type="checkbox" class="js-switch"{if $HIDE_PRODUCT_VALUE eq 1} checked{/if} />
@@ -107,9 +107,9 @@
                                     <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
                                 </div>
                             </form>
-							
-							</br>
-							
+                            
+                            </br>
+                            
                             {if isset($ACTIONS)}
                                 <h5 style="display:inline">{$ACTIONS}</h5>
                                 <div class="float-md-right">

@@ -15,7 +15,7 @@ $language = array(
     /*
      *  Admin terms
      */
-	 
+     
     'settings' => 'Nastavení',
     'payments' => 'Platby',
     'store_content_max' => 'Obsah domovské stránky obchodu může mít maximálně 1 000 000 znaků.',
@@ -88,7 +88,7 @@ $language = array(
     'editing_gateway_x' => 'Úprava platební brány {x}', // Don't replace {x}
     'config_not_writable' => 'Váš soubor <strong>modules/Store/config.php</strong> není zapisovatelný. Zkontrolujte prosím oprávnění souboru.',
     'unavailable_generate_config' => 'Nepodařilo se vygenerovat soubor config.php v adresáři <strong>modules/Store</strong>, adresář není zapisovatelný. Zkontrolujte prosím oprávnění souborů.',
-	
+    
     // Category
     'categories' => 'Kategorie',
     'new_category' => 'Nová kategorie',
@@ -105,7 +105,7 @@ $language = array(
     'hide_category_from_menu' => 'Nezobrazovat tuto kategorii v menu.',
     'hide_category_from_dropdown_menu' => 'Nezobrazovat tuto kategori v rozbalovací nabídce podkategorie.',
     'disable_category' => 'Zakázat tuto kategorii a odebrat jí z obchodu.',
-	
+    
     // Product
     'products' => 'Produkty',
     'new_product' => 'Nový produkt',
@@ -120,7 +120,7 @@ $language = array(
     'product_image' => 'Obrázek produktu',
     'hide_product_from_store' => 'Nezobrazovat tento produkt v obchodě.',
     'disable_product' => 'Zakázat tento produkt a odebrat jej z obchodu.',
-	
+    
     // Actions
     'actions' => 'Akce',
     'new_action' => 'Nová akce',
@@ -177,7 +177,7 @@ $language = array(
     
     // Payment
     'confirm_payment_deletion' => 'Opravdu chcete odstranit platbu?',
-	
+    
     /*
      *  Admin Errors
      */

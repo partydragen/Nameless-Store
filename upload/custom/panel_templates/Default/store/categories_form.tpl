@@ -55,26 +55,26 @@
                                 <textarea id="inputDescription" name="description">{$CATEGORY_DESCRIPTION_VALUE}</textarea>
                             </div>
                             <div class="form-group">
-								<label for="inputParentCategory">{$PARENT_CATEGORY}</label>
-								<select name="parent_category" class="form-control" id="inputParentCategory" required>
+                                <label for="inputParentCategory">{$PARENT_CATEGORY}</label>
+                                <select name="parent_category" class="form-control" id="inputParentCategory" required>
                                     <option value="0" {if $PARENT_CATEGORY_VALUE == 0} selected{/if}>{$NO_PARENT}</option>
-									{foreach from=$PARENT_CATEGORY_LIST item=category}
-									<option value="{$category.id}" {if $PARENT_CATEGORY_VALUE == {$category.id}} selected{/if}>{$category.name}</option>
-									{/foreach}
-								</select>
-							</div>
-							<div class="form-group">
-								<label for="inputOnlySubCategories">{$ONLY_SUBCATEGORIES}</label>
-								<input id="inputOnlySubCategories" name="only_subcategories" type="checkbox" class="js-switch"{if $ONLY_SUBCATEGORIES_VALUE eq 1} checked{/if} />
-							</div>
+                                    {foreach from=$PARENT_CATEGORY_LIST item=category}
+                                    <option value="{$category.id}" {if $PARENT_CATEGORY_VALUE == {$category.id}} selected{/if}>{$category.name}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
                             <div class="form-group">
-								<label for="inputHidden">{$HIDE_CATEGORY}</label>
-								<input id="inputHidden" name="hidden" type="checkbox" class="js-switch"{if $HIDE_CATEGORY_VALUE eq 1} checked{/if} />
-							</div>
+                                <label for="inputOnlySubCategories">{$ONLY_SUBCATEGORIES}</label>
+                                <input id="inputOnlySubCategories" name="only_subcategories" type="checkbox" class="js-switch"{if $ONLY_SUBCATEGORIES_VALUE eq 1} checked{/if} />
+                            </div>
                             <div class="form-group">
-								<label for="inputDisabled">{$DISABLE_CATEGORY}</label>
-								<input id="inputDisabled" name="disabled" type="checkbox" class="js-switch"{if $DISABLE_CATEGORY_VALUE eq 1} checked{/if} />
-							</div>
+                                <label for="inputHidden">{$HIDE_CATEGORY}</label>
+                                <input id="inputHidden" name="hidden" type="checkbox" class="js-switch"{if $HIDE_CATEGORY_VALUE eq 1} checked{/if} />
+                            </div>
+                            <div class="form-group">
+                                <label for="inputDisabled">{$DISABLE_CATEGORY}</label>
+                                <input id="inputDisabled" name="disabled" type="checkbox" class="js-switch"{if $DISABLE_CATEGORY_VALUE eq 1} checked{/if} />
+                            </div>
                             <div class="form-group">
                                 <input type="hidden" name="token" value="{$TOKEN}">
                                 <input type="submit" class="btn btn-primary" value="{$SUBMIT}">

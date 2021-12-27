@@ -37,36 +37,36 @@
                     <div class="card-body">
                         <h5 style="display:inline">{$FIELD_TITLE}</h5>
                         <div class="float-md-right">
-							<a href="{$BACK_LINK}" class="btn btn-warning">{$BACK}</a>
+                            <a href="{$BACK_LINK}" class="btn btn-warning">{$BACK}</a>
                         </div>
-						<hr>
-						
+                        <hr>
+                        
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
-						
-						<form role="form" action="" method="post">
-							<div class="form-group">
-								<label for="InputIdentifier">{$IDENTIFIER}</label>
-								<input type="text" name="identifier" class="form-control" id="InputIdentifier" placeholder="{$IDENTIFIER}" value="{$IDENTIFIER_VALUE}">
-							</div>
+                        
+                        <form role="form" action="" method="post">
                             <div class="form-group">
-								<label for="InputName">{$DESCRIPTION}</label>
+                                <label for="InputIdentifier">{$IDENTIFIER}</label>
+                                <input type="text" name="identifier" class="form-control" id="InputIdentifier" placeholder="{$IDENTIFIER}" value="{$IDENTIFIER_VALUE}">
+                            </div>
+                            <div class="form-group">
+                                <label for="InputName">{$DESCRIPTION}</label>
                                 <input type="text" name="description" class="form-control" id="InputDescription" placeholder="{$DESCRIPTION}" value="{$DESCRIPTION_VALUE}">
-							</div>
-							<div class="form-group">
-								<label for="type">{$TYPE}</label>
-								<select class="form-control" id="type" name="type">
+                            </div>
+                            <div class="form-group">
+                                <label for="type">{$TYPE}</label>
+                                <select class="form-control" id="type" name="type">
                                   {foreach from=$TYPES item=type}
-									<option value="{$type.id}"{if $TYPE_VALUE eq {$type.id}} selected{/if}>{$type.name}</option>
+                                    <option value="{$type.id}"{if $TYPE_VALUE eq {$type.id}} selected{/if}>{$type.name}</option>
                                   {/foreach}
-								</select>
-							</div>
-							<div class="form-group">
-								<label for="InputOptions">{$OPTIONS} / {$CHECKBOX} / {$RADIO} - {$OPTIONS_HELP}</label>
-								<textarea rows="5" class="form-control" name="options" id="options" placeholder="{$OPTIONS} / {$CHECKBOX} / {$RADIO}">{$OPTIONS_VALUE}</textarea>
-							</div>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="InputOptions">{$OPTIONS} / {$CHECKBOX} / {$RADIO} - {$OPTIONS_HELP}</label>
+                                <textarea rows="5" class="form-control" name="options" id="options" placeholder="{$OPTIONS} / {$CHECKBOX} / {$RADIO}">{$OPTIONS_VALUE}</textarea>
+                            </div>
                             <div class="row">
-							  <div class="col-md-4">
+                              <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="InputOrder">{$FIELD_ORDER}</label>
                                     <input type="number" min="1" class="form-control" id="InputOrder" name="order" value="{$ORDER_VALUE}">
@@ -85,16 +85,16 @@
                                 </div>
                               </div>
                             </div>
-							<div class="form-group">
-								<label for="inputrequired">{$REQUIRED}</label>
-								<input id="inputrequired" name="required" type="checkbox" class="js-switch"{if $REQUIRED_VALUE eq 1} checked{/if} />
-							</div>
-							<div class="form-group">
-								<input type="hidden" name="token" value="{$TOKEN}">
-								<input type="submit" class="btn btn-primary" value="{$SUBMIT}">
-							</div>
-						</form>
-						
+                            <div class="form-group">
+                                <label for="inputrequired">{$REQUIRED}</label>
+                                <input id="inputrequired" name="required" type="checkbox" class="js-switch"{if $REQUIRED_VALUE eq 1} checked{/if} />
+                            </div>
+                            <div class="form-group">
+                                <input type="hidden" name="token" value="{$TOKEN}">
+                                <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
+                            </div>
+                        </form>
+                        
                         <center><p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a></p></center>
                     </div>
                 </div>

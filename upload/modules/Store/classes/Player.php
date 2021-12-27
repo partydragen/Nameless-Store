@@ -1,6 +1,6 @@
 <?php
 /*
- *	Made by Partydragen
+ *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
@@ -49,13 +49,13 @@ class Player {
         
         if ($uuid_linking == '1') {
             // Online mode
-			require(ROOT_PATH . '/core/integration/uuid.php'); // For UUID stuff
-				
-			$profile = ProfileUtils::getProfile(str_replace(' ', '%20', Input::get('username')));
-			$mcname_result = $profile ? $profile->getProfileAsArray() : array();
-			if(isset($mcname_result['username']) && !empty($mcname_result['username']) && isset($mcname_result['uuid']) && !empty($mcname_result['uuid'])){
-				$username = Output::getClean($mcname_result['username']);
-				$uuid = ProfileUtils::formatUUID(Output::getClean($mcname_result['uuid']));
+            require(ROOT_PATH . '/core/integration/uuid.php'); // For UUID stuff
+                
+            $profile = ProfileUtils::getProfile(str_replace(' ', '%20', Input::get('username')));
+            $mcname_result = $profile ? $profile->getProfileAsArray() : array();
+            if(isset($mcname_result['username']) && !empty($mcname_result['username']) && isset($mcname_result['uuid']) && !empty($mcname_result['uuid'])){
+                $username = Output::getClean($mcname_result['username']);
+                $uuid = ProfileUtils::formatUUID(Output::getClean($mcname_result['uuid']));
                 
                 if($this->find($uuid, 'uuid')) {
                     // Player already exist in database
@@ -83,10 +83,10 @@ class Player {
                     
                     return true;
                 }
-			} else {
-				// Invalid Minecraft name
-				return false;
-			}
+            } else {
+                // Invalid Minecraft name
+                return false;
+            }
         } else {
             
             // Offline mode

@@ -1,6 +1,6 @@
 <?php
 /*
- *	Made by Partydragen
+ *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
@@ -36,6 +36,6 @@ if(Input::exists()){
 }
 
 $smarty->assign(array(
-	'SETTINGS_TEMPLATE' => ROOT_PATH . '/modules/Store/gateways/PayPalBusiness/gateway_settings/settings.tpl',
+    'SETTINGS_TEMPLATE' => ROOT_PATH . '/modules/Store/gateways/PayPalBusiness/gateway_settings/settings.tpl',
     'ENABLE_VALUE' => ((isset($enabled)) ? $enabled : $gateway->isEnabled())
 ));

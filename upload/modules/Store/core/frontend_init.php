@@ -1,6 +1,6 @@
 <?php
 /*
- *	Made by Partydragen
+ *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
@@ -15,12 +15,12 @@ $shopping_cart = new ShoppingCart();
 
 // Check if player tries to logout
 if(Input::exists()){
-	if(Token::check(Input::get('token'))){
-		if(Input::get('type') == 'store_logout') {
-			// Logout the store player
-			$player->logout();
-		}
-	}
+    if(Token::check(Input::get('token'))){
+        if(Input::get('type') == 'store_logout') {
+            // Logout the store player
+            $player->logout();
+        }
+    }
 }
 
 // Assign smarty variables

@@ -1,6 +1,6 @@
 <?php
 /*
- *	Made by Partydragen
+ *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *

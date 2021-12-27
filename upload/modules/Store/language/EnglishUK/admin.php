@@ -1,6 +1,6 @@
 <?php
 /*
- *	Made by Partydragen
+ *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
@@ -15,13 +15,13 @@ $language = array(
     /*
      *  Admin terms
      */
-	 
+     
     'settings' => 'Settings',
     'payments' => 'Payments',
     'store_content_max' => 'The store index content must be a maximum of 1,000,000 characters.',
     'store_path' => 'Store Path',
     'store_index_content' => 'Store Index Content',
-	'checkout_complete_content' => 'Checkout Complete Content',
+    'checkout_complete_content' => 'Checkout Complete Content',
     'allow_guests' => 'Allow guests to make purchases?',
     'updated_successfully' => 'Updated successfully.',
     'no_payments' => 'No payments have been found!',
@@ -49,9 +49,9 @@ $language = array(
     'create_payment' => 'Create Payment',
     'payment_created_successfully' => 'Payment created successfully.',
     'viewing_payment' => 'Viewing payment {x}', // Don't replace {x}
-	'pending_commands' => 'Pending commands',
+    'pending_commands' => 'Pending commands',
     'no_pending_commands' => 'No pending commands.',
-	'processed_commands' => 'Processed commands',
+    'processed_commands' => 'Processed commands',
     'no_processed_commands' => 'No processed commands.',
     'email' => 'Email',
     'must_enter_uuid' => 'You must enter a UUID!',
@@ -88,16 +88,16 @@ $language = array(
     'editing_gateway_x' => 'Editing gateway {x}', // Don't replace {x}
     'config_not_writable' => 'Your <strong>modules/Store/config.php</strong> file is not writable. Please check file permissions.',
     'unavailable_generate_config' => 'Unavailable to generate config.php file in directory <strong>modules/Store</strong>, directory is not writable. Please check file permissions.',
-	
-	// Category
-	'categories' => 'Categories',
-	'new_category' => 'New Category',
-	'category_created_successfully' => 'Category created successfully.',
-	'category_updated_successfully' => 'Category updated successfully.',
-	'category_deleted_successfully' => 'Category deleted successfully.',
-	'category_confirm_delete' => 'Are you sure you want to delete this category?</br>Warning: This will delete all products in this category',
-	'editing_category_x' => 'Editing category {x}', // Don't replace {x}
-	'category_name' => 'Category Name',
+    
+    // Category
+    'categories' => 'Categories',
+    'new_category' => 'New Category',
+    'category_created_successfully' => 'Category created successfully.',
+    'category_updated_successfully' => 'Category updated successfully.',
+    'category_deleted_successfully' => 'Category deleted successfully.',
+    'category_confirm_delete' => 'Are you sure you want to delete this category?</br>Warning: This will delete all products in this category',
+    'editing_category_x' => 'Editing category {x}', // Don't replace {x}
+    'category_name' => 'Category Name',
     'category_description' => 'Category Description',
     'category_image' => 'Category Image',
     'parent_category' => 'Parent Category',
@@ -105,30 +105,30 @@ $language = array(
     'hide_category_from_menu' => 'Do not display this category menu.',
     'hide_category_from_dropdown_menu' => 'Do not display this category in the subcategory drop down menu.',
     'disable_category' => 'Disable this category and remove it from the webstore.',
-	
-	// Product
-	'products' => 'Products',
-	'new_product' => 'New Product',
-	'product' => 'Product',
-	'product_created_successfully' => 'Product created successfully.',
-	'product_updated_successfully' => 'Product updated successfully.',
-	'product_deleted_successfully' => 'Product deleted successfully.',
-	'product_confirm_delete' => 'Are you sure you want to delete this product?',
-	'editing_product_x' => 'Editing product {x}', // Don't replace {x}
-	'product_name' => 'Product Name',
+    
+    // Product
+    'products' => 'Products',
+    'new_product' => 'New Product',
+    'product' => 'Product',
+    'product_created_successfully' => 'Product created successfully.',
+    'product_updated_successfully' => 'Product updated successfully.',
+    'product_deleted_successfully' => 'Product deleted successfully.',
+    'product_confirm_delete' => 'Are you sure you want to delete this product?',
+    'editing_product_x' => 'Editing product {x}', // Don't replace {x}
+    'product_name' => 'Product Name',
     'product_description' => 'Product Description',
     'product_image' => 'Product Image',
     'hide_product_from_store' => 'Do not display this product on store.',
     'disable_product' => 'Disable this product and remove it from the store.',
-	
-	// Actions
-	'actions' => 'Actions',
-	'new_action' => 'New Action',
-	'new_action_for_x' => 'New action for {x}',
-	'editing_action_for_x' => 'Editing action for {x}',
-	'action_created_successfully' => 'Action created successfully.',
-	'action_updated_successfully' => 'Action updated successfully.',
-	'action_deleted_successfully' => 'Action deleted successfully.',
+    
+    // Actions
+    'actions' => 'Actions',
+    'new_action' => 'New Action',
+    'new_action_for_x' => 'New action for {x}',
+    'editing_action_for_x' => 'Editing action for {x}',
+    'action_created_successfully' => 'Action created successfully.',
+    'action_updated_successfully' => 'Action updated successfully.',
+    'action_deleted_successfully' => 'Action deleted successfully.',
     
     // Connections
     'connections' => 'Connections',
@@ -139,28 +139,28 @@ $language = array(
     'no_connections' => 'No connections have been made yet.',
     'creating_new_connection' => 'Creating new connection',
     'editing_connection_x' => 'Editing connection {x}', // Don't replace {x}
-	'connection_created_successfully' => 'Connection created successfully.',
-	'connection_updated_successfully' => 'Connection updated successfully.',
-	'connection_deleted_successfully' => 'Connection deleted successfully.',
+    'connection_created_successfully' => 'Connection created successfully.',
+    'connection_updated_successfully' => 'Connection updated successfully.',
+    'connection_deleted_successfully' => 'Connection deleted successfully.',
     'confirm_delete_connection' => 'Are you sure you want to delete this connection?',
     
     // Fields
     'fields' => 'Fields',
     'field' => 'Field',
     'new_field' => 'New Field',
-	'identifier' => 'Identifier',
+    'identifier' => 'Identifier',
     'description' => 'Description',
-	'field_created_successfully' => 'Field created successfully',
-	'field_updated_successfully' => 'Field updated successfully',
-	'field_deleted_successfully' => 'Field deleted successfully',
-	'creating_field' => 'Creating new field',
-	'editing_field_x' => 'Editing field {x}',
-	'none_fields_defined' => 'There are no fields yet.',
-	'confirm_delete_field' => 'Are you sure you want to delete this field?',
-	'options' => 'Options',
-	'options_help' => 'Each option on a new line; can be left empty (options only)',
-	'field_order' => 'Field Order',
-	'delete_field' => 'Are you sure you want to delete this field?',
+    'field_created_successfully' => 'Field created successfully',
+    'field_updated_successfully' => 'Field updated successfully',
+    'field_deleted_successfully' => 'Field deleted successfully',
+    'creating_field' => 'Creating new field',
+    'editing_field_x' => 'Editing field {x}',
+    'none_fields_defined' => 'There are no fields yet.',
+    'confirm_delete_field' => 'Are you sure you want to delete this field?',
+    'options' => 'Options',
+    'options_help' => 'Each option on a new line; can be left empty (options only)',
+    'field_order' => 'Field Order',
+    'delete_field' => 'Are you sure you want to delete this field?',
     'number' => 'Number',
     'radio' => 'Radio',
     'checkbox' => 'Checkbox',
@@ -168,12 +168,12 @@ $language = array(
     'maximum_characters' => 'Maximum Characters (0 to disable)',
     'fields_info' => 'Fields enable you to create customisable products such as allowing users to select the colour of their name upon purchase.',
     
-	'field_identifier_required' => 'The identifier field is required.',
+    'field_identifier_required' => 'The identifier field is required.',
     'field_description_required' => 'The description field is required.',
-	'field_identifier_minimum' => 'The field identifier must be a minimum of 2 characters.',
-	'field_identifier_maximum' => 'The field identifier must be a maximum of 32 characters.',
-	'field_description_minimum' => 'The field description must be a minimum of 2 characters.',
-	'field_description_maximum' => 'The field description must be a maximum of 255 characters.',
+    'field_identifier_minimum' => 'The field identifier must be a minimum of 2 characters.',
+    'field_identifier_maximum' => 'The field identifier must be a maximum of 32 characters.',
+    'field_description_minimum' => 'The field description must be a minimum of 2 characters.',
+    'field_description_maximum' => 'The field description must be a maximum of 255 characters.',
     
     // Payment
     'confirm_payment_deletion' => 'Are you sure you want to delete the payment?',
@@ -183,27 +183,27 @@ $language = array(
     'payment_refunded' => 'Payment Refunded',
     'payment_reversed' => 'Payment Reversed',
     'payment_denied' => 'Payment Denied',
-	
+    
     /*
      *  Admin Errors
      */
-	'invalid_price' => 'Invalid price.',
-	'invalid_category' => 'Invalid category.',
+    'invalid_price' => 'Invalid price.',
+    'invalid_category' => 'Invalid category.',
     'name_maximum_x' => 'The name must be no more than {x} characters',
     'name_required' => 'Please input a name.',
 
-	/*
-	 *  Hooks
-	 */
-	'purchase_hook_info' => 'New store purchase',
+    /*
+     *  Hooks
+     */
+    'purchase_hook_info' => 'New store purchase',
     
-	/*
-	 *  Update Alert
-	 */
-	'new_update_available_x' => 'There is a new update available for the module {x}',
-	'new_urgent_update_available_x' => 'There is a new urgent update available for the module {x}. Please update as soon as possible!',
-	'current_version_x' => 'Current module version: {x}',
-	'new_version_x' => 'New module version: {x}',
-	'view_resource' => 'View Resource',
+    /*
+     *  Update Alert
+     */
+    'new_update_available_x' => 'There is a new update available for the module {x}',
+    'new_urgent_update_available_x' => 'There is a new urgent update available for the module {x}. Please update as soon as possible!',
+    'current_version_x' => 'Current module version: {x}',
+    'new_version_x' => 'New module version: {x}',
+    'view_resource' => 'View Resource',
 
 );

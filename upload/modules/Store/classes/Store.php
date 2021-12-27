@@ -1,6 +1,6 @@
 <?php
 /*
- *	Made by Partydragen
+ *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
@@ -48,43 +48,43 @@ class Store {
         
         return $products_list;
     }
-	
-	// Get all payments
-	public function getAllPayments() {
-		$payments = $this->_db->query('SELECT nl2_store_payments.*, uuid, username, order_id, user_id, player_id FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id ORDER BY created DESC')->results();
-		
-		return $payments;
-	}
-	
-	// Get all categories
-	public function getAllCategories() {
-		$categories = $this->_db->query('SELECT * FROM nl2_store_categories WHERE deleted = 0 ORDER BY `order` ASC')->results();
-			
-		$categories_array = array();
-		foreach($categories as $category){
-			$categories_array[] = array(
-				'id' => Output::getClean($category->id),
-				'name' => Output::getClean($category->name)
-			);
-		}
-		
-		return $categories_array;
-	}
     
-	// Get all connections
-	public function getAllConnections() {
-		$connections = $this->_db->query('SELECT * FROM nl2_store_connections')->results();
-			
-		$connections_array = array();
-		foreach($connections as $connection){
-			$connections_array[] = array(
-				'id' => Output::getClean($connection->id),
-				'name' => Output::getClean($connection->name)
-			);
-		}
-		
-		return $connections_array;
-	}
+    // Get all payments
+    public function getAllPayments() {
+        $payments = $this->_db->query('SELECT nl2_store_payments.*, uuid, username, order_id, user_id, player_id FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id ORDER BY created DESC')->results();
+        
+        return $payments;
+    }
+    
+    // Get all categories
+    public function getAllCategories() {
+        $categories = $this->_db->query('SELECT * FROM nl2_store_categories WHERE deleted = 0 ORDER BY `order` ASC')->results();
+            
+        $categories_array = array();
+        foreach($categories as $category){
+            $categories_array[] = array(
+                'id' => Output::getClean($category->id),
+                'name' => Output::getClean($category->name)
+            );
+        }
+        
+        return $categories_array;
+    }
+    
+    // Get all connections
+    public function getAllConnections() {
+        $connections = $this->_db->query('SELECT * FROM nl2_store_connections')->results();
+            
+        $connections_array = array();
+        foreach($connections as $connection){
+            $connections_array[] = array(
+                'id' => Output::getClean($connection->id),
+                'name' => Output::getClean($connection->name)
+            );
+        }
+        
+        return $connections_array;
+    }
     
     // Get navbar menu
     public function getNavbarMenu($active) {
@@ -150,15 +150,15 @@ class Store {
 
         $uid = $queries->getWhere('settings', array('name', '=', 'unique_id'));
         $uid = $uid[0]->value;
-		
-		$enabled_modules = Module::getModules();
-		foreach($enabled_modules as $enabled_item){
-			if($enabled_item->getName() == 'Store'){
-				$module = $enabled_item;
-				break;
-			}
-		}
-		
+        
+        $enabled_modules = Module::getModules();
+        foreach($enabled_modules as $enabled_item){
+            if($enabled_item->getName() == 'Store'){
+                $module = $enabled_item;
+                break;
+            }
+        }
+        
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -168,11 +168,11 @@ class Store {
         $update_check = curl_exec($ch);
         curl_close($ch);
 
-		$info = json_decode($update_check);
-		if (isset($info->message)) {
-			die($info->message);
-		}
-		
+        $info = json_decode($update_check);
+        if (isset($info->message)) {
+            die($info->message);
+        }
+        
         return $update_check;
     }
 }

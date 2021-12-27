@@ -1,6 +1,6 @@
 <?php
 /*
- *	Made by Partydragen
+ *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
  *
@@ -10,7 +10,7 @@
  */
 
 if(isset($_GET['do'])){
-	if($_GET['do'] == 'success'){
+    if($_GET['do'] == 'success'){
 
         $payment = new Payment($_POST['txn_id'], 'transaction');
         if(!$payment->exists()) {
@@ -28,13 +28,13 @@ if(isset($_GET['do'])){
             ));
         }
 
-		Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
-		die();
-	} else {
-		// Invalid
-		Redirect::to(URL::build($store_url . '/checkout/', 'do=cancel'));
-		die();
-	}
+        Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
+        die();
+    } else {
+        // Invalid
+        Redirect::to(URL::build($store_url . '/checkout/', 'do=cancel'));
+        die();
+    }
 
 } else {
     // Build product names string

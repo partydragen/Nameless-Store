@@ -56,9 +56,9 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="inputType">Connection Type</label>
-									<select name="category" class="form-control" id="inputType" required>
-										<option value="Minecraft">Minecraft Server</option>
-									</select>
+                                    <select name="category" class="form-control" id="inputType" required>
+                                        <option value="Minecraft">Minecraft Server</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
                                     <input type="hidden" name="token" value="{$TOKEN}">

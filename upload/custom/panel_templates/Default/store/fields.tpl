@@ -49,7 +49,7 @@
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
                         
-						{if count($FIELDS_LIST)}
+                        {if count($FIELDS_LIST)}
                             <div class="table-responsive">
                                 <table class="table table-striped" style="width:100%">
                                     <thead>
