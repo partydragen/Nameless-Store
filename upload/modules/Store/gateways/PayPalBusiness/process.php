@@ -108,8 +108,7 @@ if(isset($_GET['do'])){
         die();
     } else {
         // Invalid
-        //Redirect::to(URL::build($store_url . '/checkout/', 'do=cancel'));
-        echo '<pre>', print_r($_POST), '</pre>';
+        Redirect::to(URL::build($store_url . '/checkout/', 'do=cancel'));
         die();
     }
 
