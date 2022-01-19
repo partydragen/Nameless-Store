@@ -62,6 +62,7 @@ if(isset($_GET['do'])){
       <input type="hidden" name="amount" value="<?php echo $shopping_cart->getTotalPrice(); ?>" />
       <input type="hidden" name="item_name" value="<?php echo $product_names; ?>">
       <input type="hidden" name="item_number" value="<?php echo $order->data()->id; ?>">
+      <input type="hidden" name="no_shipping" value="1">
       <input type="hidden" name="custom" value="<?php echo $order->data()->id; ?>">
       <input type="hidden" name="return" value="<?php echo $return_url; ?>">
       <input type="hidden" name="cancel_return" value="<?php echo $cancel_url; ?>">
