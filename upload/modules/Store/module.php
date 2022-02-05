@@ -135,7 +135,7 @@ class Store_Module extends Module {
             break;
             case 2:
                 // "More" dropdown
-                $navs[0]->addItemToDropdown('more_dropdown', 'forum', $this->_store_language->get('general', 'store'), URL::build($this->_store_url), 'top', null, $icon, $store_order);
+                $navs[0]->addItemToDropdown('more_dropdown', 'store', $this->_store_language->get('general', 'store'), URL::build($this->_store_url), 'top', null, $icon, $store_order);
             break;
             case 3:
                 // Footer
