@@ -8,32 +8,32 @@ class ProductsList extends EndpointBase {
     }
 
     public function execute(Nameless2API $api) {
-        $query = 'SELECT * FROM nl2_store_products WHERE deleted = 0 AND category_id = ?;';
+        $query = 'SELECT * FROM nl2_store_products';
 
         $where = ' WHERE deleted = 0';
-        $params = array();
+        $params = [];
 
         if (isset($_GET['category_id'])) {
+            $where .= ' AND category_id = ?';
             array_push($params, $_GET['category_id']);
         }
 
         // Ensure the user exists
-        $products_query = $api->getDb()->query($query, $params)->results();
+        $products_query = $api->getDb()->query($query . $where, $params)->results();
 
-        $products_array = array();
-        foreach($products_query as $product) {
-            if($product->name == null || $product->disabled) {
-                continue;
-            }
-            
-            $products_array[] = array(
-                'id' => $product->id,
-                'category_id' => $product->category_id,
-                'name' => $product->name,
-                'price' => (double)$product->price,
-            );
+        $products_array = [];
+        foreach ($products_query as $product) {
+            $products_array[] = [
+                'id' => (int) $product->id,
+                'category_id' => (int) $product->category_id,
+                'name' => Output::getClean($product->name),
+                'price' => (double) $product->price,
+                'order' => (int) $category->order,
+                'hidden' => (bool) $product->hidden,
+                'disabled' => (bool) $product->disabled
+            ];
         }
         
-        $api->returnArray(array('products' => $products_array));
+        $api->returnArray(['products' => $products_array]);
     }
 }
