@@ -300,13 +300,14 @@ class Payment {
      * Add actions from products to pending actions
      */
     public function addPendingActions($type) {
-        
-        
         $products = $this->_db->query('SELECT product_id, player_id FROM nl2_store_orders_products INNER JOIN nl2_store_orders ON order_id=nl2_store_orders.id INNER JOIN nl2_store_products ON nl2_store_products.id=product_id WHERE order_id = ?', array($this->data()->order_id))->results();
         foreach($products as $item) {
             
             $product = new Product($item->product_id);
             if($product->exists() && $product->data()->deleted == 0) {
+                
+                // Get custom fields values
+                $custom_fields = $this->_db->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', array($this->data()->order_id, $product->data()->id))->results();
                 
                 // Foreach all actions that belong to this product
                 foreach($product->getActions() as $action) {
@@ -314,8 +315,22 @@ class Payment {
                         continue;
                     }
                     
+                    // Execute this action on all selected connections
                     $connections = ($action->data()->own_connections ? $action->getConnections() : $product->getConnections());
                     foreach($connections as $connection) {
+                        // Replace command placeholders with values
+                        $command = $action->data()->command;
+                        foreach ($custom_fields as $field) {
+                            $command = str_replace('{'.$field->identifier.'}', Output::getClean($field->value), $command);
+                        }
+                        
+                        $command = str_replace(
+                            ['{productId}', '{productPrice}', '{productName}', '{connection}', '{transaction}', '{amount}', '{currency}', '{orderId}', '{time}', '{date}'], 
+                            [$product->data()->id, $product->data()->price, $product->data()->name, $connection->name, $this->data()->transaction, $this->data()->amount, $this->data()->currency, $this->data()->order_id, date('H:i', $this->data()->created), date('d M Y', $this->data()->created)],
+                            $command
+                        );
+                        
+                        // Save queued command
                         $this->_db->insert('store_pending_actions', array(
                             'order_id' => $this->data()->order_id,
                             'action_id' => $action->data()->id,
@@ -323,7 +338,7 @@ class Payment {
                             'player_id' => $item->player_id,
                             'connection_id' => $connection->id,
                             'type' => $action->data()->type,
-                            'command' => $action->data()->command,
+                            'command' => $command,
                             'require_online' => $action->data()->require_online,
                             'order' => $action->data()->order,
                         ));
