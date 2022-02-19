@@ -44,6 +44,7 @@ class Store_Module extends Module {
         $pages->add('Store', '/panel/store', 'pages/panel/index.php');
         $pages->add('Store', '/panel/store/gateways', 'pages/panel/gateways.php');
         $pages->add('Store', '/panel/store/products', 'pages/panel/products.php');
+        $pages->add('Store', '/panel/store/product', 'pages/panel/product.php');
         $pages->add('Store', '/panel/store/categories', 'pages/panel/categories.php');
         $pages->add('Store', '/panel/store/payments', 'pages/panel/payments.php');
         $pages->add('Store', '/panel/store/connections', 'pages/panel/connections.php');
