@@ -31,12 +31,9 @@ if(!isset($_GET['action'])) {
 
     if($categories->count()){
         $categories = $categories->results();
-        
-        $currency = $queries->getWhere('store_settings', array('name', '=', 'currency_symbol'));
-        if(count($currency))
-            $currency = Output::getPurified($currency[0]->value);
-        else
-            $currency = '';
+
+        $currency = Output::getClean($configuration->get('store', 'currency'));
+        $currency_symbol = Output::getClean($configuration->get('store', 'currency_symbol'));
 
         foreach($categories as $category){
             $new_category = array(
@@ -56,7 +53,7 @@ if(!isset($_GET['action'])) {
                         'id' => Output::getClean($product->id),
                         'id_x' => str_replace('{x}', Output::getClean($product->id), $store_language->get('admin', 'id_x')),
                         'name' => Output::getClean($product->name),
-                        'price' => $currency . Output::getClean($product->price) . ' USD',
+                        'price' => Output::getClean($product->price),
                         'edit_link' => URL::build('/panel/store/products/', 'action=edit&id=' . Output::getClean($product->id)),
                         'delete_link' => URL::build('/panel/store/products/', 'action=delete&id=' . Output::getClean($product->id))
                     );
@@ -75,6 +72,7 @@ if(!isset($_GET['action'])) {
     $smarty->assign(array(
         'ALL_CATEGORIES' => $all_categories,
         'CURRENCY' => $currency,
+        'CURRENCY_SYMBOL' => $currency_symbol,
         'NEW_CATEGORY' => $store_language->get('admin', 'new_category'),
         'NEW_CATEGORY_LINK' => URL::build('/panel/store/categories/', 'action=new'),
         'NEW_PRODUCT' => $store_language->get('admin', 'new_product'),

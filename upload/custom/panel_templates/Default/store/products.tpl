@@ -67,7 +67,7 @@
                                             {$product.name} <small>{$product.id_x}</small>
                                         </div>
                                         <div class="col-md-4">
-                                            <center>{$product.price}</center>
+                                            <center>{$CURRENCY_SYMBOL}{$product.price} {$CURRENCY}</center>
                                         </div>
                                         <div class="col-md-4">
                                             {if isset($product.edit_link)}
