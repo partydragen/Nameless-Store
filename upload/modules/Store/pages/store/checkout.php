@@ -131,7 +131,7 @@ if(isset($_GET['do'])){
                             continue;
                         
                         $item = $_POST[$field->id];
-                        $value = (!is_array($item) ? nl2br($item) : implode(', ', $item));
+                        $value = (!is_array($item) ? $item : implode(', ', $item));
                             
                         $product_fields[] = array(
                             'id' => Output::getClean($field->id),
@@ -241,7 +241,7 @@ if(isset($_GET['do'])){
                         // Load gateway process
                         require_once(ROOT_PATH . '/modules/Store/gateways/'.$gateway->getName().'/process.php');
                     } else {
-                        // Nothing ti pay, Complete order
+                        // Nothing to pay, Complete order
                         $payment = new Payment();
                         $payment->handlePaymentEvent('COMPLETED', array(
                             'order_id' => $order->data()->id,
