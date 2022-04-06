@@ -31,6 +31,7 @@ $language = array(
     'description_updated_successfully' => 'Description updated successfully.',
     'image_updated_successfully' => 'Image updated successfully.',
     'unable_to_upload_image' => 'Unable to upload image: {x}', // Don't replace {x} (error message)
+    'unable_to_create_image_directory' => 'Unable to create the <strong>/uploads/store</strong> directory to store images.',
     'enable_player_login' => 'Require customer to enter minecraft username when visiting store (Disabling will force user login)',
     'user_dont_exist' => 'User does not exists',
 

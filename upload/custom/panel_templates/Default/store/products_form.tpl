@@ -35,11 +35,11 @@
 
                 <div class="card shadow mb-4">
                     <div class="card-body">
-                            <h5 style="display:inline">{$PRODUCT_TITLE}</h5>
-                            <div class="float-md-right">
-                                <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
-                            </div>
-                            <hr />
+                        <h5 style="display:inline">{$PRODUCT_TITLE}</h5>
+                        <div class="float-md-right">
+                            <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
+                        </div>
+                        <hr />
 
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
@@ -104,6 +104,7 @@
                                 </div>
                                 <div class="form-group">
                                     <input type="hidden" name="token" value="{$TOKEN}">
+                                    <input type="hidden" name="type" value="settings">
                                     <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
                                 </div>
                             </form>
@@ -151,23 +152,28 @@
                                 {/if}
                             {/if}
                             
-                            <!--<form action="" method="post" enctype="multipart/form-data">
-                                <div class="form-group">
-                                    <strong>{$PRODUCT_IMAGE}</strong><br />
-                                    {if $PRODUCT_IMAGE_VALUE}
-                                        <img src="{$PRODUCT_IMAGE_VALUE}" alt="{$PRODUCT_NAME}" style="max-height:200px;max-width:200px;"><br />
-                                    {/if}
-                                    <strong>{$UPLOAD_NEW_IMAGE}</strong><br />
-                                    <label class="btn btn-secondary">
-                                        {$BROWSE} <input type="file" name="store_image" hidden/>
-                                    </label>
-                                </div>
-                                <div class="form-group">
+                            {if isset($ACTIONS)}
+                                <hr>
+                                <h5>{$PRODUCT_IMAGE}</h5>
+                                <form action="" method="post" enctype="multipart/form-data" style="display:inline;">
+                                    <div class="form-group">
+                                        {if $PRODUCT_IMAGE_VALUE}
+                                            <img src="{$PRODUCT_IMAGE_VALUE}" alt="{$PRODUCT_NAME}" style="max-height:200px;max-width:200px;"><br />
+                                        {/if}
+                                        <strong>{$UPLOAD_NEW_IMAGE}</strong><br />
+                                        <label class="btn btn-secondary">
+                                            {$BROWSE} <input type="file" name="product_image" hidden/>
+                                        </label>
+                                    </div>
+                                    
                                     <input type="hidden" name="token" value="{$TOKEN}">
                                     <input type="hidden" name="type" value="image">
                                     <input type="submit" value="{$SUBMIT}" class="btn btn-primary">
-                                </div>
-                            </form>-->
+                                </form>
+                                {if $PRODUCT_IMAGE_VALUE}
+                                    <a href="{$REMOVE_IMAGE_LINK}" class="btn btn-danger">{$REMOVE}</a>
+                                {/if}
+                            {/if}
 
                             <center><p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a></br>Support on <a href="https://discord.gg/TtH6tpp" target="_blank">Discord</a></p></center>
                     </div>

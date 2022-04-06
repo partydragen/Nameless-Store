@@ -40,6 +40,7 @@ if(!isset($_GET['action'])) {
     if(Input::exists()){
         $errors = array();
         if(Token::check(Input::get('token'))){
+            if (Input::get('type') == 'settings') {
             // Update product
             $validate = new Validate();
             $validation = $validate->check($_POST, array(
@@ -125,6 +126,43 @@ if(!isset($_GET['action'])) {
                 }
             } else {
                 $errors[] = $store_language->get('admin', 'description_max_100000');
+            }
+            } else if (Input::get('type') == 'image') {
+                // Product image
+                if (!is_dir(ROOT_PATH . '/uploads/store') ){
+                    try {
+                        mkdir(ROOT_PATH . '/uploads/store');
+                    } catch (Exception $e) {
+                        $errors[] = $store_language->get('admin', 'unable_to_create_image_directory');
+                    }
+                }
+
+                if (!count($errors)) {
+                    require(ROOT_PATH . '/core/includes/bulletproof/bulletproof.php');
+
+                    $image = new Bulletproof\Image($_FILES);
+
+                    $image->setSize(1000, 2 * 1048576)
+                        ->setMime(['jpeg', 'png', 'gif'])
+                        ->setDimension(2000, 2000)
+                        ->setLocation(ROOT_PATH . '/uploads/store', 0777);
+
+                    if ($image['product_image']) {
+                        $upload = $image->upload();
+
+                        if ($upload) {
+                            $product->update([
+                                'image' => Output::getClean($image->getName() . '.' . $image->getMime())
+                            ]);
+
+                            Session::flash('products_success', $store_language->get('admin', 'image_updated_successfully'));
+                            Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
+                            die();
+                        } else {
+                            $errors[] = str_replace('{x}', Output::getClean($image->getError()), $store_language->get('admin', 'unable_to_upload_image'));
+                        }
+                    }
+                }
             }
         } else {
             // Invalid token
@@ -212,7 +250,13 @@ if(!isset($_GET['action'])) {
         'HIDE_PRODUCT' => $store_language->get('admin', 'hide_product_from_store'),
         'HIDE_PRODUCT_VALUE' => $product->data()->hidden,
         'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),
-        'DISABLE_PRODUCT_VALUE' => $product->data()->disabled
+        'DISABLE_PRODUCT_VALUE' => $product->data()->disabled,
+        'PRODUCT_IMAGE' => $store_language->get('admin', 'product_image'),
+        'PRODUCT_IMAGE_VALUE' => (!is_null($product->data()->image) ? ((defined('CONFIG_PATH') ? CONFIG_PATH . '/' : '/') . 'uploads/store/' . Output::getClean($product->data()->image)) : null),
+        'UPLOAD_NEW_IMAGE' => $store_language->get('admin', 'upload_new_image'),
+        'BROWSE' => $language->get('general', 'browse'),
+        'REMOVE' => $language->get('general', 'remove'),
+        'REMOVE_IMAGE_LINK' => URL::build('/panel/store/product/' , 'action=remove_image&product=' . $product->data()->id),
     ));
 
     $template->addJSFiles(array(
@@ -448,6 +492,15 @@ if(!isset($_GET['action'])) {
                 $action->delete();
                 Session::flash('products_success', $store_language->get('admin', 'action_deleted_successfully'));
             } 
+            
+            Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
+            die();
+        break;
+        case 'remove_image';
+            // Remove image from product
+            $product->update([
+                'image' => null
+            ]);
             
             Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
             die();

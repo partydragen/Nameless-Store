@@ -30,7 +30,10 @@ $language = array(
     'description_max_100000' => 'Die Beschreibung darf maximal 100000 Zeichen lang sein.',
     'description_updated_successfully' => 'Beschreibung erfolgreich aktualisiert.',
     'image_updated_successfully' => 'Bild erfolgreich aktualisiert.',
+    'unable_to_create_image_directory' => 'Unable to create the <strong>/uploads/store</strong> directory to store images.',
     'unable_to_upload_image' => 'Bild {x} kann nicht hochgeladen werden!', // Don't replace {x} (error message)
+    'enable_player_login' => 'Require customer to enter minecraft username when visiting store (Disabling will force user login)',
+    'user_dont_exist' => 'User does not exists',
 
     'user' => 'Benutzer',
     'amount' => 'Menge',
