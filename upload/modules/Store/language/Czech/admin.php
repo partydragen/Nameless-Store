@@ -83,6 +83,12 @@ $language = array(
     'currency_symbol' => 'Symbol měny',
     'command' => 'Příkaz',
     'details' => 'Podrobnosti',
+    'add_credits' => 'Add Credits',
+    'remove_credits' => 'Remove Credits',
+    'enter_amount_to_add' => 'Enter amount of credits to add',
+    'enter_amount_to_remove' => 'Enter amount of credits to remove',
+    'successfully_added_credits' => 'Successfully added {amount} credits to user',
+    'successfully_removed_credits' => 'Successfully removed {amount} credits from user',
     
     // Gateways
     'gateways' => 'Platební brány',

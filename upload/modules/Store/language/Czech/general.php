@@ -32,6 +32,7 @@ $language = array(
     'options' => 'Možnosti',
     'please_enter_username' => 'Pro pokračování zadejte vaše Minecraft jméno',
     'logout' => 'Odhlásit se',
+    'credits' => 'Credits',
     'shopping_cart' => 'Nákupní košík',
     'total_price' => 'Celková cena:',
     'payment_method' => 'Způsob platby',
@@ -41,9 +42,20 @@ $language = array(
     'x_field_minimum_y' => '{x} musí obsahovat alespoň {y} znaků.',
     'x_field_maximum_y' => '{x} může obsahovat maximálně {y} znaků.',
     
+    /*
+	 *  Payment Events
+	 */
     'pending_payment_text' => 'Čekající platba od uživatele {x}',
     'completed_payment_text' => 'Nová platba od uživatele {x}, který si zakoupil následující produkty: {y}',
     'refunded_payment_text' => 'Refundace od uživatele {x}',
     'reversed_payment_text' => 'Obrácená platba od uživatele {x}',
     'denied_payment_text' => 'Odmítnutá platba od uživatele {x}',
+    
+	/*
+	 *  Widgets
+	 */
+	'latest_purchases' => 'Latest Purchases',
+	'no_purchases' => 'No purchases',
+	'latest_purchases_limit' => 'Latest purchases limit',
+	'widget_cached' => 'The latest purchases widget is cached for 2 minutes, your changes may not take effect immediately.',
 );

@@ -12,6 +12,7 @@
 $store = new Store($cache, $store_language);
 $player = new Player();
 $shopping_cart = new ShoppingCart();
+$customer = new Customer($user);
 
 // Check if player tries to logout
 if(Input::exists()){

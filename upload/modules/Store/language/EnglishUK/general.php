@@ -32,6 +32,7 @@ $language = array(
     'options' => 'Options',
     'please_enter_username' => 'Please enter your Minecraft Username to continue',
     'logout' => 'Logout',
+    'credits' => 'Credits',
     'shopping_cart' => 'Shopping Cart',
     'total_price' => 'Total Price:',
     'payment_method' => 'Payment Method',
@@ -41,9 +42,20 @@ $language = array(
     'x_field_minimum_y' => '{x} must be a minimum of {y} characters.',
     'x_field_maximum_y' => '{x} must be a maximum of {y} characters.',
     
+    /*
+	 *  Payment Events
+	 */
     'pending_payment_text' => 'Pending payment from {x}',
     'completed_payment_text' => 'New payment from {x} who bought the following products {y}',
     'refunded_payment_text' => 'Refunded payment from {x}',
     'reversed_payment_text' => 'Reversed payment from {x}',
     'denied_payment_text' => 'Denied payment from {x}',
+    
+	/*
+	 *  Widgets
+	 */
+	'latest_purchases' => 'Latest Purchases',
+	'no_purchases' => 'No purchases',
+	'latest_purchases_limit' => 'Latest purchases limit',
+	'widget_cached' => 'The latest purchases widget is cached for 2 minutes, your changes may not take effect immediately.',
 );

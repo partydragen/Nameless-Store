@@ -49,6 +49,7 @@ class Store_Module extends Module {
         $pages->add('Store', '/panel/store/payments', 'pages/panel/payments.php');
         $pages->add('Store', '/panel/store/connections', 'pages/panel/connections.php');
         $pages->add('Store', '/panel/store/fields', 'pages/panel/fields.php');
+        $pages->add('Store', '/panel/users/store', 'pages/panel/users_store.php');
         
         HookHandler::registerEvent('paymentPending',  $store_language->get('admin', 'payment_pending'));
         HookHandler::registerEvent('paymentCompleted', $store_language->get('admin', 'payment_completed'));
@@ -233,6 +234,9 @@ class Store_Module extends Module {
                     $navs[2]->add('store_fields', $this->_store_language->get('admin', 'fields'), URL::build('/panel/store/fields'), 'top', null, ($order + 0.5), $icon);
                 }
             }
+
+            if($user->hasPermission('staffcp.store.payments'))
+                Core_Module::addUserAction($this->_store_language->get('general', 'store'), URL::build('/panel/users/store/', 'user={id}'));
         }
         
         // Check for module updates
