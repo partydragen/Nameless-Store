@@ -16,7 +16,7 @@ if (!$user->handlePanelPageLoad('staffcp.store.gateways')) {
 }
 
 define('PAGE', 'panel');
-define('PARENT_PAGE', 'store');
+define('PARENT_PAGE', 'store_configuration');
 define('PANEL_PAGE', 'store_gateways');
 $page_title = $store_language->get('admin', 'gateways');
 

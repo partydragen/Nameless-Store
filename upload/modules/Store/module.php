@@ -41,7 +41,7 @@ class Store_Module extends Module {
         $pages->add('Store', $this->_store_url . '/view', 'pages/store/view.php');
         $pages->add('Store', '/store/process', 'pages/backend/process.php');
         $pages->add('Store', '/store/listener', 'pages/backend/listener.php');
-        $pages->add('Store', '/panel/store', 'pages/panel/index.php');
+        $pages->add('Store', '/panel/store/general_settings', 'pages/panel/general_settings.php');
         $pages->add('Store', '/panel/store/gateways', 'pages/panel/gateways.php');
         $pages->add('Store', '/panel/store/products', 'pages/panel/products.php');
         $pages->add('Store', '/panel/store/product', 'pages/panel/product.php');
@@ -174,14 +174,22 @@ class Store_Module extends Module {
 
                 $navs[2]->add('store_divider', mb_strtoupper($this->_store_language->get('general', 'store')), 'divider', 'top', null, $order, '');
 
-                if ($user->hasPermission('staffcp.store.settings')) {
-                    if (!$cache->isCached('store_icon')) {
-                        $icon = '<i class="nav-icon fas fa-shopping-cart"></i>';
-                        $cache->store('store_icon', $icon);
-                    } else
-                        $icon = $cache->retrieve('store_icon');
+                if (!$cache->isCached('store_configuration_icon')) {
+                    $icon = '<i class="nav-icon fas fa-wrench"></i>';
+                    $cache->store('store_configuration_icon', $icon);
+                } else
+                    $icon = $cache->retrieve('store_configuration_icon');
 
-                    $navs[2]->add('store', $this->_store_language->get('general', 'store'), URL::build('/panel/store'), 'top', null, ($order + 0.1), $icon);
+                $navs[2]->addDropdown('store_configuration', $this->_store_language->get('admin', 'store_configuration'), 'top', $order + 0.1, $icon);
+
+                if ($user->hasPermission('staffcp.store.settings')) {
+                    if (!$cache->isCached('store_settings_icon')) {
+                        $icon = '<i class="nav-icon fas fa-cogs"></i>';
+                        $cache->store('store_settings_icon', $icon);
+                    } else
+                        $icon = $cache->retrieve('store_settings_icon');
+
+                    $navs[2]->addItemToDropdown('store_configuration', 'general_settings', $this->_language->get('admin', 'general_settings'), URL::build('/panel/store/general_settings'), 'top', null, $icon, $order + 0.2);
                 }
                 
                 if ($user->hasPermission('staffcp.store.gateways')) {
@@ -191,27 +199,7 @@ class Store_Module extends Module {
                     } else
                         $icon = $cache->retrieve('store_gateways_icon');
 
-                    $navs[2]->add('store_gateways', $this->_store_language->get('admin', 'gateways'), URL::build('/panel/store/gateways'), 'top', null, ($order + 0.2), $icon);
-                }
-
-                if ($user->hasPermission('staffcp.store.products')) {
-                    if (!$cache->isCached('store_products_icon')) {
-                        $icon = '<i class="nav-icon fas fa-box-open"></i>';
-                        $cache->store('store_products_icon', $icon);
-                    } else
-                        $icon = $cache->retrieve('store_products_icon');
-
-                    $navs[2]->add('store_products', $this->_store_language->get('general', 'products'), URL::build('/panel/store/products'), 'top', null, ($order + 0.3), $icon);
-                }
-
-                if ($user->hasPermission('staffcp.store.payments')) {
-                    if (!$cache->isCached('store_payments_icon')) {
-                        $icon = '<i class="nav-icon fas fa-donate"></i>';
-                        $cache->store('store_payments_icon', $icon);
-                    } else
-                        $icon = $cache->retrieve('store_payments_icon');
-
-                    $navs[2]->add('store_payments', $this->_store_language->get('admin', 'payments'), URL::build('/panel/store/payments'), 'top', null, ($order + 0.4), $icon);
+                    $navs[2]->addItemToDropdown('store_configuration', 'store_gateways', $this->_store_language->get('admin', 'gateways'), URL::build('/panel/store/gateways'), 'top', null, $icon, $order + 0.3);
                 }
                 
                 if ($user->hasPermission('staffcp.store.connections')) {
@@ -221,7 +209,7 @@ class Store_Module extends Module {
                     } else
                         $icon = $cache->retrieve('store_connections_icon');
 
-                    $navs[2]->add('store_connections', $this->_store_language->get('admin', 'connections'), URL::build('/panel/store/connections'), 'top', null, ($order + 0.5), $icon);
+                    $navs[2]->addItemToDropdown('store_configuration', 'store_connections', $this->_store_language->get('admin', 'connections'), URL::build('/panel/store/connections'), 'top', null, $icon, $order + 0.4);
                 }
                 
                 if ($user->hasPermission('staffcp.store.fields')) {
@@ -231,7 +219,27 @@ class Store_Module extends Module {
                     } else
                         $icon = $cache->retrieve('store_fields_icon');
 
-                    $navs[2]->add('store_fields', $this->_store_language->get('admin', 'fields'), URL::build('/panel/store/fields'), 'top', null, ($order + 0.5), $icon);
+                    $navs[2]->addItemToDropdown('store_configuration', 'store_fields', $this->_store_language->get('admin', 'fields'), URL::build('/panel/store/fields'), 'top', null, $icon, $order + 0.5);
+                }
+
+                if ($user->hasPermission('staffcp.store.products')) {
+                    if (!$cache->isCached('store_products_icon')) {
+                        $icon = '<i class="nav-icon fas fa-box-open"></i>';
+                        $cache->store('store_products_icon', $icon);
+                    } else
+                        $icon = $cache->retrieve('store_products_icon');
+
+                    $navs[2]->add('store_products', $this->_store_language->get('general', 'products'), URL::build('/panel/store/products'), 'top', null, ($order + 0.6), $icon);
+                }
+
+                if ($user->hasPermission('staffcp.store.payments')) {
+                    if (!$cache->isCached('store_payments_icon')) {
+                        $icon = '<i class="nav-icon fas fa-donate"></i>';
+                        $cache->store('store_payments_icon', $icon);
+                    } else
+                        $icon = $cache->retrieve('store_payments_icon');
+
+                    $navs[2]->add('store_payments', $this->_store_language->get('admin', 'payments'), URL::build('/panel/store/payments'), 'top', null, ($order + 0.7), $icon);
                 }
             }
 

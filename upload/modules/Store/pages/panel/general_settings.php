@@ -16,8 +16,8 @@ if (!$user->handlePanelPageLoad('staffcp.store.settings')) {
 }
 
 define('PAGE', 'panel');
-define('PARENT_PAGE', 'store');
-define('PANEL_PAGE', 'store');
+define('PARENT_PAGE', 'store_configuration');
+define('PANEL_PAGE', 'general_settings');
 $page_title = $store_language->get('general', 'store');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
@@ -277,4 +277,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate('store/index.tpl', $smarty);
+$template->displayTemplate('store/general_settings.tpl', $smarty);

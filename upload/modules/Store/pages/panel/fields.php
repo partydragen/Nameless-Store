@@ -16,7 +16,7 @@ if (!$user->handlePanelPageLoad('staffcp.store.fields')) {
 }
 
 define('PAGE', 'panel');
-define('PARENT_PAGE', 'store');
+define('PARENT_PAGE', 'store_configuration');
 define('PANEL_PAGE', 'store_fields');
 $page_title = $store_language->get('admin', 'fields');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
