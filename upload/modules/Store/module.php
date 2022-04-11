@@ -682,7 +682,7 @@ class Store_Module extends Module {
             
             $queries->create('store_settings', array(
                 'name' => 'player_login',
-                'value' => 1
+                'value' => 0
             ));
         }
         
