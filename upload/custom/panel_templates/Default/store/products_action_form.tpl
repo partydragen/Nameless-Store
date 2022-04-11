@@ -154,6 +154,10 @@
                             <td>The date of the payment, e.g. 19 Feb 2022</td>
                         </tr>
                         <tr>
+                            <td>{userId}</td>
+                            <td>The ID of the NamelessMC User if user was logged in</td>
+                        </tr>
+                        <tr>
                             <td>{orderId}</td>
                             <td>The ID of the order</td>
                         </tr>

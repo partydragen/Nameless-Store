@@ -300,7 +300,7 @@ class Payment {
      * Add actions from products to pending actions
      */
     public function addPendingActions($type) {
-        $products = $this->_db->query('SELECT product_id, player_id FROM nl2_store_orders_products INNER JOIN nl2_store_orders ON order_id=nl2_store_orders.id INNER JOIN nl2_store_products ON nl2_store_products.id=product_id WHERE order_id = ?', [$this->data()->order_id])->results();
+        $products = $this->_db->query('SELECT product_id, user_id, player_id FROM nl2_store_orders_products INNER JOIN nl2_store_orders ON order_id=nl2_store_orders.id INNER JOIN nl2_store_products ON nl2_store_products.id=product_id WHERE order_id = ?', [$this->data()->order_id])->results();
         foreach ($products as $item) {
             
             $product = new Product($item->product_id);
@@ -323,10 +323,35 @@ class Payment {
                         foreach ($custom_fields as $field) {
                             $command = str_replace('{'.$field->identifier.'}', Output::getClean($field->value), $command);
                         }
-                        
+
+                        // Handle placeholders
                         $command = str_replace(
-                            ['{productId}', '{productPrice}', '{productName}', '{connection}', '{transaction}', '{amount}', '{currency}', '{orderId}', '{time}', '{date}'], 
-                            [$product->data()->id, $product->data()->price, $product->data()->name, $connection->name, $this->data()->transaction, $this->data()->amount, $this->data()->currency, $this->data()->order_id, date('H:i', $this->data()->created), date('d M Y', $this->data()->created)],
+                            [
+                                '{userId}',
+                                '{productId}',
+                                '{productPrice}',
+                                '{productName}',
+                                '{connection}',
+                                '{transaction}',
+                                '{amount}',
+                                '{currency}',
+                                '{orderId}',
+                                '{time}',
+                                '{date}'
+                            ], 
+                            [
+                                $item->user_id ?? 0,
+                                $product->data()->id,
+                                $product->data()->price,
+                                $product->data()->name,
+                                $connection->name,
+                                $this->data()->transaction,
+                                $this->data()->amount,
+                                $this->data()->currency,
+                                $this->data()->order_id,
+                                date('H:i', $this->data()->created),
+                                date('d M Y', $this->data()->created)
+                            ],
                             $command
                         );
                         

@@ -54,7 +54,7 @@ if (!isset($_GET['action'])) {
                         'description' => [
                             Validate::MAX => $store_language->get('admin', 'description_max_100000')
                         ]
-                    ]
+                    ]);
                     
                     
                     if ($validation->passed()) {
