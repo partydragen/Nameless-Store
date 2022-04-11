@@ -179,7 +179,7 @@
                         <tr>
                         <tr>
                             <td>{your field name}</td>
-                            <td>The value the custumer entered</td>
+                            <td>The value the customer entered</td>
                         </tr>
                         {/literal}
                     </tbody>
