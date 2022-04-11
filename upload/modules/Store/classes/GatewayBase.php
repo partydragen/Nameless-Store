@@ -22,13 +22,13 @@ class GatewayBase {
         $this->_settings = $settings;
         
         $db = DB::getInstance();
-        $gateway_query = $db->query('SELECT id, displayname, enabled FROM nl2_store_gateways WHERE `name` = ?', array($name))->first();
-        if($gateway_query) {
+        $gateway_query = $db->query('SELECT id, displayname, enabled FROM nl2_store_gateways WHERE `name` = ?', [$name])->first();
+        if ($gateway_query) {
             $this->_id = $gateway_query->id;
             $this->_displayname = $gateway_query->displayname;
             $this->_enabled = $gateway_query->enabled;
         } else {
-            $gateway_query = $db->createQuery('INSERT INTO `nl2_store_gateways` (`name`, `displayname`, `enabled`) VALUES (?, ?, ?)', array($name, $name, 0));
+            $gateway_query = $db->createQuery('INSERT INTO `nl2_store_gateways` (`name`, `displayname`, `enabled`) VALUES (?, ?, ?)', [$name, $name, 0]);
             $this->_id = $db->lastId();
             $this->_displayname = $name;
             $this->_enabled = 0;

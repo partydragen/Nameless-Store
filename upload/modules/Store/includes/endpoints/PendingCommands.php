@@ -14,7 +14,7 @@ class PendingCommands extends EndpointBase {
         LEFT JOIN nl2_users ON nl2_store_orders.user_id=nl2_users.id';
 
         $where = ' WHERE status = 0';
-        $params = array();
+        $params = [];
 
         if (isset($_GET['connection_id']) || isset($_GET['server_id'])) {
             $where .= ' AND connection_id = ?';
@@ -24,13 +24,13 @@ class PendingCommands extends EndpointBase {
         // Ensure the user exists
         $commands_query = $api->getDb()->query($query . $where, $params)->results();
 
-        $commands_array = array();
-        foreach($commands_query as $command) {
-            if($command->uuid == null && $command->username == null) {
+        $commands_array = [];
+        foreach ($commands_query as $command) {
+            if ($command->uuid == null && $command->username == null) {
                 continue;
             }
             
-            $commands_array[] = array(
+            $commands_array[] = [
                 'id' => $command->id,
                 'command' => $command->command,
                 'order_id' => (int) $command->order_id,
@@ -40,14 +40,14 @@ class PendingCommands extends EndpointBase {
                 'uuid' => $command->uuid != null ? $this->formatUUID(str_replace('-', '', $command->uuid)) : null,
                 'require_online' => (boolean) $command->require_online,
                 'order' => (int) $command->order,
-            );
+            ];
         }
         
         // Online mode or offline mode?
-        $uuid_linking = $api->getDb()->get('settings', array('name', '=', 'uuid_linking'))->results();
+        $uuid_linking = $api->getDb()->get('settings', ['name', '=', 'uuid_linking'])->results();
         $uuid_linking = ($uuid_linking[0]->value == '1' ? true : false);
         
-        $api->returnArray(array('online_mode' => $uuid_linking, 'commands' => $commands_array));
+        $api->returnArray(['online_mode' => $uuid_linking, 'commands' => $commands_array]);
     }
     
     /**

@@ -10,7 +10,7 @@
  */
 
 // Can the user view the StaffCP?
-if(!$user->handlePanelPageLoad('staffcp.store.payments')) {
+if (!$user->handlePanelPageLoad('staffcp.store.payments')) {
     require_once(ROOT_PATH . '/403.php');
     die();
 }
@@ -24,19 +24,19 @@ require_once(ROOT_PATH . '/core/templates/backend_init.php');
 $store = new Store($cache, $store_language);
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, array($navigation, $cc_nav, $mod_nav), $widgets);
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets);
 
-if(isset($_GET['player'])){
+if (isset($_GET['player'])) {
     // Get payments for user
-    $payments = DB::getInstance()->query('SELECT nl2_store_payments.*, uuid, username, order_id, user_id, player_id FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id WHERE nl2_store_players.username = ? ORDER BY created DESC', array($_GET['player']));
+    $payments = DB::getInstance()->query('SELECT nl2_store_payments.*, uuid, username, order_id, user_id, player_id FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id WHERE nl2_store_players.username = ? ORDER BY created DESC', [$_GET['player']]);
 
-    if($payments->count()){
+    if ($payments->count()) {
         $payments = $payments->results();
         
-        if($payments[0]->player_id != null) {
+        if ($payments[0]->player_id != null) {
             // Use ingame user data
             $payment_user = new User(str_replace('-', '', $payments[0]->uuid), 'uuid');
-            if($payment_user->data()){
+            if ($payment_user->data()) {
                 $username = Output::getClean($payments[0]->username);
                 $avatar = $payment_user->getAvatar();
                 $style = $payment_user->getGroupClass();
@@ -45,7 +45,7 @@ if(isset($_GET['player'])){
                 $avatar = Util::getAvatarFromUUID(Output::getClean($payments[0]->uuid));
                 $style = '';
             }
-        } else if($payments[0]->user_id != null) {
+        } else if ($payments[0]->user_id != null) {
             // Use User data
             $payment_user = new User($payments[0]->user_id);
                 
@@ -54,12 +54,12 @@ if(isset($_GET['player'])){
             $style = $payment_user->getGroupClass();
         }
 
-        $template_payments = array();
+        $template_payments = [];
 
-        foreach($payments as $paymentQuery){
+        foreach ($payments as $paymentQuery) {
             $payment = new Payment($paymentQuery->id);
             
-            $template_payments[] = array(
+            $template_payments[] = [
                 'user_link' => URL::build('/panel/store/payments/', 'player=' . Output::getClean($paymentQuery->username)),
                 'user_style' => $style,
                 'user_avatar' => $avatar,
@@ -71,23 +71,23 @@ if(isset($_GET['player'])){
                 'amount' => Output::getClean($paymentQuery->amount),
                 'date' => date('d M Y, H:i', $paymentQuery->created),
                 'link' => URL::build('/panel/store/payments', 'payment=' . Output::getClean($paymentQuery->id))
-            );
+            ];
         }
 
-        $smarty->assign(array(
+        $smarty->assign([
             'VIEW' => $store_language->get('admin', 'view'),
             'USER_PAYMENTS' => $template_payments
-        ));
+        ]);
 
-        if(!defined('TEMPLATE_STORE_SUPPORT')){
-            $template->addCSSFiles(array(
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/css/dataTables.bootstrap4.min.css' => array()
-            ));
+        if (!defined('TEMPLATE_STORE_SUPPORT')) {
+            $template->addCSSFiles([
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/css/dataTables.bootstrap4.min.css' => []
+            ]);
 
-            $template->addJSFiles(array(
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/dataTables/jquery.dataTables.min.js' => array(),
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/js/dataTables.bootstrap4.min.js' => array()
-            ));
+            $template->addJSFiles([
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/dataTables/jquery.dataTables.min.js' => [],
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/js/dataTables.bootstrap4.min.js' => []
+            ]);
 
             $template->addJSScript('
                 $(document).ready(function() {
@@ -114,15 +114,15 @@ if(isset($_GET['player'])){
     } else
         $smarty->assign('NO_PAYMENTS', $store_language->get('admin', 'no_payments_for_user'));
 
-    $smarty->assign(array(
+    $smarty->assign([
         'VIEWING_PAYMENTS_FOR_USER' => str_replace('{x}', Output::getClean($_GET['player']), $store_language->get('admin', 'viewing_payments_for_user_x')),
         'BACK' => $language->get('general', 'back'),
         'BACK_LINK' => URL::build('/panel/store/payments')
-    ));
+    ]);
 
     $template_file = 'store/payments_user.tpl';
 
-} else if(isset($_GET['payment'])){
+} else if (isset($_GET['payment'])) {
     // View payment
     $payment = new Payment($_GET['payment']);
     if (!$payment->exists()) {
@@ -131,19 +131,20 @@ if(isset($_GET['player'])){
     }
     
     // Handle input
-    if(Input::exists()){
-        $errors = array();
-        if(Token::check(Input::get('token'))){
-            if(Input::get('action') == 'delete_payment') {
+    if (Input::exists()) {
+        $errors = [];
+
+        if (Token::check(Input::get('token'))) {
+            if (Input::get('action') == 'delete_payment') {
                 // Delete payment only if payment is manual
-                if($payment->data()->gateway_id == 0) {
+                if ($payment->data()->gateway_id == 0) {
                     $payment->delete();
                     
                     Session::flash('store_payment_success', $store_language->get('admin', 'payment_deleted_successfully'));
                     Redirect::to(URL::build('/panel/store/payments'));
                     die();
                 }
-            } else if(Input::get('action') == 'delete_command') {
+            } else if (Input::get('action') == 'delete_command') {
                 // Delete pending command
             }
         } else {
@@ -155,11 +156,11 @@ if(isset($_GET['player'])){
     $order = $payment->getOrder();
     
     // Get user details
-    if($order->data()->player_id != null) {
+    if ($order->data()->player_id != null) {
         $player = new Player($order->data()->player_id);
         
         $payment_user = new User(str_replace('-', '', $player->getUUID()), 'uuid');
-        if($payment_user->data()){
+        if ($payment_user->exists()) {
             $username = Output::getClean($player->getUsername());
             $avatar = $payment_user->getAvatar();
             $style = $payment_user->getGroupClass();
@@ -170,7 +171,7 @@ if(isset($_GET['player'])){
             $style = '';
             $uuid = Output::getClean($player->getUUID());
         }
-    } else if($order->data()->user_id != null) {
+    } else if ($order->data()->user_id != null) {
         // Custumer paid while being logged in
         $payment_user = new User($order->data()->user_id);
                 
@@ -181,51 +182,51 @@ if(isset($_GET['player'])){
     }
 
     // Get Products
-    $products_list = array();
-    foreach($order->getProducts() as $product) {
-        $fields_array = array();
-        $fields = DB::getInstance()->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', array($payment->data()->order_id, $product->id))->results();
-        foreach($fields as $field) {
-            $fields_array[] = array(
+    $products_list = [];
+    foreach ($order->getProducts() as $product) {
+        $fields_array = [];
+        $fields = DB::getInstance()->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$payment->data()->order_id, $product->id])->results();
+        foreach ($fields as $field) {
+            $fields_array[] = [
                 'identifier' => Output::getClean($field->identifier),
                 'value' => Output::getClean($field->value)
-            );
+            ];
         }
         
-        $products_list[] = array(
+        $products_list[] = [
             'id' => Output::getClean($product->id),
             'name' => Output::getClean($product->name),
             'fields' => $fields_array
-        );
+        ];
     }
    
-    $pending_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions INNER JOIN nl2_store_connections ON connection_id=nl2_store_connections.id WHERE order_id = ? AND status = 0', array($payment->data()->order_id))->results();
-    $pending_commands_array = array();
-    foreach($pending_commands as $command){
-        $pending_commands_array[] = array(
+    $pending_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions INNER JOIN nl2_store_connections ON connection_id=nl2_store_connections.id WHERE order_id = ? AND status = 0', [$payment->data()->order_id])->results();
+    $pending_commands_array = [];
+    foreach ($pending_commands as $command) {
+        $pending_commands_array[] = [
             'command' => Output::getClean($command->command),
             'connection_name' => Output::getClean($command->name)
-        );
+        ];
     }
     
-    $processed_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions INNER JOIN nl2_store_connections ON connection_id=nl2_store_connections.id WHERE order_id = ? AND status = 1', array($payment->data()->order_id))->results();
-    $processed_commands_array = array();
-    foreach($processed_commands as $command){
-        $processed_commands_array[] = array(
+    $processed_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions INNER JOIN nl2_store_connections ON connection_id=nl2_store_connections.id WHERE order_id = ? AND status = 1', [$payment->data()->order_id])->results();
+    $processed_commands_array = [];
+    foreach ($processed_commands as $command) {
+        $processed_commands_array[] = [
             'command' => Output::getClean($command->command),
             'connection_name' => Output::getClean($command->name)
-        );
+        ];
     }
     
     // Allow manual payment deletion
-    if($payment->data()->gateway_id == 0) {
-        $smarty->assign(array(
+    if ($payment->data()->gateway_id == 0) {
+        $smarty->assign([
             'DELETE_PAYMENT' => $language->get('admin', 'delete'),
             'CONFIRM_DELETE_PAYMENT' => $store_language->get('admin', 'confirm_payment_deletion'),
-        ));
+        ]);
     }
     
-    $smarty->assign(array(
+    $smarty->assign([
         'VIEWING_PAYMENT' => str_replace('{x}', Output::getClean($payment->data()->transaction), $store_language->get('admin', 'viewing_payment')),
         'BACK' => $language->get('general', 'back'),
         'BACK_LINK' => URL::build('/panel/store/payments'),
@@ -261,34 +262,34 @@ if(isset($_GET['player'])){
         'ARE_YOU_SURE' => $language->get('general', 'are_you_sure'),
         'YES' => $language->get('general', 'yes'),
         'NO' => $language->get('general', 'no')
-    ));
+    ]);
 
     $template_file = 'store/payments_view.tpl';
 
-} else if(isset($_GET['action'])){
-    if($_GET['action'] == 'create'){
+} else if (isset($_GET['action'])) {
+    if ($_GET['action'] == 'create') {
         // Create payment
         if (Input::exists()) {
-            $errors = array();
+            $errors = [];
             
             if (Token::check()) {
                 $validate = new Validate();
                 
-                $to_validation = array(
-                    'username' => array(
+                $to_validation = [
+                    'username' => [
                         Validate::REQUIRED => true
-                    )
-                );
+                    ]
+                ];
                 
                 // Valid, continue with validation
                 $validation = $validate->check($_POST, $to_validation);
                 if ($validation->passed()) {
                     
                     $player = new Player();
-                    if($store->isPlayerSystemEnabled()) {
+                    if ($store->isPlayerSystemEnabled()) {
                         // Attempt to load player
                         $player = new Player();
-                        if(!$player->login(Output::getClean(Input::get('username')), false)) {
+                        if (!$player->login(Output::getClean(Input::get('username')), false)) {
                             $errors[] = $language->get('user', 'invalid_mcname');
                         }
                         
@@ -296,34 +297,34 @@ if(isset($_GET['player'])){
                     } else {
                         // User required
                         $target_user = new User(Output::getClean(Input::get('username')), 'username');
-                        if(!$target_user->exists()) {
+                        if (!$target_user->exists()) {
                             $errors[] = $store_language->get('admin', 'user_dont_exist');
                         }
                     }
                     
-                    $items = array();
+                    $items = [];
                     $selected_products = $_POST['products'];
-                    foreach($selected_products as $item) {
-                        $items[$item] = array(
+                    foreach ($selected_products as $item) {
+                        $items[$item] = [
                             'id' => $item,
                             'quantity' => 1
-                        );
+                        ];
                     }
 
-                    if(!count($errors) && count($items)) {
+                    if (!count($errors) && count($items)) {
                         // Register order
                         $order = new Order();
                         $order->create($target_user, $player, $items);
                         
                         // Register payment
                         $payment = new Payment();
-                        $payment->handlePaymentEvent('COMPLETED', array(
+                        $payment->handlePaymentEvent('COMPLETED', [
                             'order_id' => $order->data()->id,
                             'gateway_id' => 0,
                             'amount' => 0,
                             'currency' => Output::getClean($configuration->get('store', 'currency')),
                             'fee' => 0
-                        ));
+                        ]);
                         
                         Session::flash('store_payment_success', $store_language->get('admin', 'payment_created_successfully'));
                         Redirect::to(URL::build('/panel/store/payments/', 'payment=' . $payment->data()->id));
@@ -336,30 +337,30 @@ if(isset($_GET['player'])){
             }
         }
     
-        $smarty->assign(array(
+        $smarty->assign([
             'CREATE_PAYMENT' => $store_language->get('admin', 'create_payment'),
             'BACK' => $language->get('general', 'back'),
             'BACK_LINK' => URL::build('/panel/store/payments')
-        ));
+        ]);
 
         // Products to choose
         $products = $store->getProducts();
         
-        if(count($products)){
-            $template_products = array();
+        if (count($products)) {
+            $template_products = [];
 
-            foreach($products as $product){
-                $template_products[] = array(
+            foreach ($products as $product) {
+                $template_products[] = [
                     'id' => Output::getClean($product->data()->id),
                     'name' => Output::getClean($product->data()->name)
-                );
+                ];
             }
 
-            $smarty->assign(array(
+            $smarty->assign([
                 'USERNAME' => $store->isPlayerSystemEnabled() ? $store_language->get('admin', 'ign') : $language->get('user', 'username'),
                 'PRODUCTS' => $store_language->get('general', 'products') . ' ' . $store_language->get('admin', 'select_multiple_with_ctrl'),
                 'PRODUCTS_LIST' => $template_products
-            ));
+            ]);
 
         } else
             $smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
@@ -369,16 +370,16 @@ if(isset($_GET['player'])){
 } else {
     $payments = $store->getAllPayments();
 
-    if(count($payments)){
-        $template_payments = array();
+    if (count($payments)) {
+        $template_payments = [];
 
-        foreach($payments as $paymentQuery){
+        foreach ($payments as $paymentQuery) {
             $payment = new Payment($paymentQuery->id);
             
-            if($paymentQuery->player_id != null) {
+            if ($paymentQuery->player_id != null) {
                 // Custumer paid as a guest, attempt to load user by uuid
                 $payment_user = new User(str_replace('-', '', $paymentQuery->uuid), 'uuid');
-                if($payment_user->data()){
+                if ($payment_user->exists()) {
                     $username = Output::getClean($paymentQuery->username);
                     $avatar = $payment_user->getAvatar();
                     $style = $payment_user->getGroupClass();
@@ -387,7 +388,7 @@ if(isset($_GET['player'])){
                     $avatar = Util::getAvatarFromUUID(Output::getClean($paymentQuery->uuid));
                     $style = '';
                 }
-            } else if($paymentQuery->user_id != null) {
+            } else if ($paymentQuery->user_id != null) {
                 // Custumer paid while being logged in
                 $payment_user = new User($paymentQuery->user_id);
                 
@@ -396,7 +397,7 @@ if(isset($_GET['player'])){
                 $style = $payment_user->getGroupClass();
             }
 
-            $template_payments[] = array(
+            $template_payments[] = [
                 'user_link' =>  URL::build('/panel/store/payments/', 'player=' . $username),
                 'user_style' => $style,
                 'user_avatar' => $avatar,
@@ -409,23 +410,23 @@ if(isset($_GET['player'])){
                 'date' => date('d M Y, H:i', $paymentQuery->created),
                 'date_unix' => Output::getClean($paymentQuery->created),
                 'link' => URL::build('/panel/store/payments/', 'payment=' . Output::getClean($paymentQuery->id))
-            );
+            ];
         }
 
-        $smarty->assign(array(
+        $smarty->assign([
             'VIEW' => $store_language->get('admin', 'view'),
             'ALL_PAYMENTS' => $template_payments
-        ));
+        ]);
 
-        if(!defined('TEMPLATE_STORE_SUPPORT')){
-            $template->addCSSFiles(array(
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/css/dataTables.bootstrap4.min.css' => array()
-            ));
+        if (!defined('TEMPLATE_STORE_SUPPORT')) {
+            $template->addCSSFiles([
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/css/dataTables.bootstrap4.min.css' => []
+            ]);
 
-            $template->addJSFiles(array(
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/dataTables/jquery.dataTables.min.js' => array(),
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/js/dataTables.bootstrap4.min.js' => array()
-            ));
+            $template->addJSFiles([
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/dataTables/jquery.dataTables.min.js' => [],
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/js/dataTables.bootstrap4.min.js' => []
+            ]);
 
             $template->addJSScript('
                 $(document).ready(function() {
@@ -452,16 +453,16 @@ if(isset($_GET['player'])){
     } else
         $smarty->assign('NO_PAYMENTS', $store_language->get('admin', 'no_payments'));
 
-    $smarty->assign(array(
+    $smarty->assign([
         'CREATE_PAYMENT' => $store_language->get('admin', 'create_payment'),
         'CREATE_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'action=create')
-    ));
+    ]);
 
     $template_file = 'store/payments.tpl';
 
 }
 
-$smarty->assign(array(
+$smarty->assign([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('admin', 'store'),
@@ -474,23 +475,23 @@ $smarty->assign(array(
     'AMOUNT' => $store_language->get('admin', 'amount'),
     'STATUS' => $store_language->get('admin', 'status'),
     'DATE' => $store_language->get('admin', 'date'),
-));
+]);
 
-if(Session::exists('store_payment_success')){
+if (Session::exists('store_payment_success')) {
     $success = Session::flash('store_payment_success');
 }
 
-if(isset($success))
-    $smarty->assign(array(
+if (isset($success))
+    $smarty->assign([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
-    ));
+    ]);
 
-if(isset($errors) && count($errors))
-    $smarty->assign(array(
+if (isset($errors) && count($errors))
+    $smarty->assign([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
-    ));
+    ]);
 
 $page_load = microtime(true) - $start;
 define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));

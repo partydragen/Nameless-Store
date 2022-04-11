@@ -11,31 +11,27 @@
 
 class PayPal_Business_Gateway extends GatewayBase {
 
-    public function __construct(){
+    public function __construct() {
         $name = 'PayPalBusiness';
         $settings = ROOT_PATH . '/modules/Store/gateways/PayPalBusiness/gateway_settings/settings.php';
 
         parent::__construct($name, $settings);
     }
 
-    public function onInstall() {
-        // Not necessary
-    }
-
-    public function onUninstall() {
-        // Not necessary
-    }
-
-    public function onEnable() {
-        // Not necessary
-    }
-
-    public function onDisable() {
-        // Not necessary
-    }
-    
     public function processOrder(Order $order) {
-        // Not necessary
+
+    }
+
+    public function onCancel() {
+
+    }
+
+    public function onReturn() {
+
+    }
+
+    public function onWebhookCall() {
+
     }
 }
 

@@ -10,7 +10,7 @@
  */
 
 // Can the user view the StaffCP?
-if(!$user->handlePanelPageLoad('staffcp.store.products')) {
+if (!$user->handlePanelPageLoad('staffcp.store.products')) {
     require_once(ROOT_PATH . '/403.php');
     die();
 }
@@ -24,39 +24,39 @@ require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
 
 $store = new Store($cache, $store_language);
 
-if(!isset($_GET['action'])) {
+if (!isset($_GET['action'])) {
     // Get all products and categories
-    $categories = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE deleted = 0 ORDER BY `order` ASC', array());
+    $categories = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE deleted = 0 ORDER BY `order` ASC', []);
     $all_categories = [];
 
-    if($categories->count()){
+    if ($categories->count()) {
         $categories = $categories->results();
 
         $currency = Output::getClean($configuration->get('store', 'currency'));
         $currency_symbol = Output::getClean($configuration->get('store', 'currency_symbol'));
 
-        foreach($categories as $category){
-            $new_category = array(
+        foreach ($categories as $category) {
+            $new_category = [
                 'name' => Output::getClean(Output::getDecoded($category->name)),
-                'products' => array(),
+                'products' => [],
                 'edit_link' => URL::build('/panel/store/categories/', 'action=edit&id=' . Output::getClean($category->id)),
                 'delete_link' => URL::build('/panel/store/categories/', 'action=delete&id=' . Output::getClean($category->id))
-            );
+            ];
 
-            $products = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE category_id = ? AND deleted = 0 ORDER BY `order` ASC', array(Output::getClean($category->id)));
+            $products = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE category_id = ? AND deleted = 0 ORDER BY `order` ASC', [Output::getClean($category->id)]);
 
-            if($products->count()){
+            if ($products->count()) {
                 $products = $products->results();
 
-                foreach($products as $product){
-                    $new_product = array(
+                foreach ($products as $product) {
+                    $new_product = [
                         'id' => Output::getClean($product->id),
                         'id_x' => str_replace('{x}', Output::getClean($product->id), $store_language->get('admin', 'id_x')),
                         'name' => Output::getClean($product->name),
                         'price' => Output::getClean($product->price),
                         'edit_link' => URL::build('/panel/store/product/', 'product=' . Output::getClean($product->id)),
                         'delete_link' => URL::build('/panel/store/product/', 'product=' . Output::getClean($product->id))
-                    );
+                    ];
 
                     $new_category['products'][] = $new_product;
                 }
@@ -69,7 +69,7 @@ if(!isset($_GET['action'])) {
         $smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
     }
 
-    $smarty->assign(array(
+    $smarty->assign([
         'ALL_CATEGORIES' => $all_categories,
         'CURRENCY' => $currency,
         'CURRENCY_SYMBOL' => $currency_symbol,
@@ -82,63 +82,64 @@ if(!isset($_GET['action'])) {
         'CONFIRM_DELETE_PRODUCT' => $store_language->get('admin', 'product_confirm_delete'),
         'YES' => $language->get('general', 'yes'),
         'NO' => $language->get('general', 'no'),
-    ));
+    ]);
     
-    $template->addJSFiles(array(
-        (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/js/jquery-ui.min.js' => array()
-    ));
+    $template->addJSFiles([
+        (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/js/jquery-ui.min.js' => []
+    ]);
 
     $template_file = 'store/products.tpl';
 } else {
-    switch($_GET['action']) {
+    switch ($_GET['action']) {
         case 'new';
             // Create new product
-            if(Input::exists()){
-                $errors = array();
-                if(Token::check(Input::get('token'))){
+            if (Input::exists()) {
+                $errors = [];
+
+                if (Token::check(Input::get('token'))) {
                     $validate = new Validate();
-                    $validation = $validate->check($_POST, array(
-                        'name' => array(
+                    $validation = $validate->check($_POST, [
+                        'name' => [
                             'required' => true,
                             'min' => 1,
                             'max' => 128
-                        ),
-                        'description' => array(
+                        ],
+                        'description' => [
                             'max' => 100000
-                        )
-                    ));
+                        ]
+                    ]);
                     
-                    if ($validation->passed()){
+                    if ($validation->passed()) {
                         // Validate if category exist
-                        $category = DB::getInstance()->query('SELECT id FROM nl2_store_categories WHERE id = ?', array(Input::get('category')))->results();
-                        if(!count($category)) {
+                        $category = DB::getInstance()->query('SELECT id FROM nl2_store_categories WHERE id = ?', [Input::get('category')])->results();
+                        if (!count($category)) {
                             $errors[] = $store_language->get('admin', 'invalid_category');
                         }
                         
                         // Get price
-                        if(!isset($_POST['price']) || !is_numeric($_POST['price']) || $_POST['price'] < 0.00 || $_POST['price'] > 1000 || !preg_match('/^\d+(?:\.\d{2})?$/', $_POST['price'])){
+                        if (!isset($_POST['price']) || !is_numeric($_POST['price']) || $_POST['price'] < 0.00 || $_POST['price'] > 1000 || !preg_match('/^\d+(?:\.\d{2})?$/', $_POST['price'])) {
                             $errors[] = $store_language->get('admin', 'invalid_price');
                         } else {
                             $price = number_format($_POST['price'], 2, '.', '');
                         }
 
                         // insert into database if there is no errors
-                        if(!count($errors)) {
+                        if (!count($errors)) {
                             // Get last order
                             $last_order = DB::getInstance()->query('SELECT * FROM nl2_store_products ORDER BY `order` DESC LIMIT 1')->results();
-                            if(count($last_order)) $last_order = $last_order[0]->order;
+                            if (count($last_order)) $last_order = $last_order[0]->order;
                             else $last_order = 0;
                             
                             // Hide category?
-                            if(isset($_POST['hidden']) && $_POST['hidden'] == 'on') $hidden = 1;
+                            if (isset($_POST['hidden']) && $_POST['hidden'] == 'on') $hidden = 1;
                             else $hidden = 0;
                             
                             // Disable category?
-                            if(isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
+                            if (isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
                             else $disabled = 0;
 
                             // Save to database
-                            $queries->create('store_products', array(
+                            $queries->create('store_products', [
                                 'name' => Output::getClean(Input::get('name')),
                                 'description' => Output::getClean(Input::get('description')),
                                 'category_id' => $category[0]->id,
@@ -146,12 +147,12 @@ if(!isset($_GET['action'])) {
                                 'hidden' => $hidden,
                                 'disabled' => $disabled,
                                 'order' => $last_order + 1,
-                            ));
+                            ]);
                             $lastId = $queries->getLastId();
                             $product = new Product($lastId);
                             
                             // Add the selected connections, if isset
-                            if(isset($_POST['connections']) && is_array($_POST['connections'])) {
+                            if (isset($_POST['connections']) && is_array($_POST['connections'])) {
                                 foreach ($_POST['connections'] as $connection) {
                                     if (!array_key_exists($connection, $product->getConnections())) {
                                         $product->addConnection($connection);
@@ -160,7 +161,7 @@ if(!isset($_GET['action'])) {
                             }
                             
                             // Add the selected fields, if isset
-                            if(isset($_POST['fields']) && is_array($_POST['fields'])) {
+                            if (isset($_POST['fields']) && is_array($_POST['fields'])) {
                                 foreach ($_POST['fields'] as $field) {
                                     if (!array_key_exists($field, $product->getFields())) {
                                         $product->addField($field);
@@ -182,28 +183,28 @@ if(!isset($_GET['action'])) {
             }
             
             // Connections
-            $connections_array = array();
+            $connections_array = [];
             $connections = DB::getInstance()->query('SELECT * FROM nl2_store_connections')->results();
-            foreach($connections as $connection){
-                $connections_array[] = array(
+            foreach ($connections as $connection) {
+                $connections_array[] = [
                     'id' => Output::getClean($connection->id),
                     'name' => Output::getClean($connection->name),
                     'selected' => ((isset($_POST['connections']) && is_array($_POST['connections'])) ? in_array($connection->id, $_POST['connections']) : false)
-                );
+                ];
             }
             
             // Fields
-            $fields_array = array();
+            $fields_array = [];
             $fields = DB::getInstance()->query('SELECT * FROM nl2_store_fields WHERE deleted = 0')->results();
-            foreach($fields as $field){
-                $fields_array[] = array(
+            foreach ($fields as $field) {
+                $fields_array[] = [
                     'id' => Output::getClean($field->id),
                     'identifier' => Output::getClean($field->identifier),
                     'selected' => ((isset($_POST['fields']) && is_array($_POST['fields'])) ? in_array($field->id, $_POST['fields']) : false)
-                );
+                ];
             }
             
-            $smarty->assign(array(
+            $smarty->assign([
                 'PRODUCT_TITLE' => $store_language->get('admin', 'new_product'),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/products/'),
@@ -224,12 +225,12 @@ if(!isset($_GET['action'])) {
                 'HIDE_PRODUCT_VALUE' => ((isset($_POST['hidden'])) ? 1 : 0),
                 'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),
                 'DISABLE_PRODUCT_VALUE' => ((isset($_POST['disabled'])) ? 1 : 0),
-            ));
+            ]);
             
-            $template->addJSFiles(array(
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array(),
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => array()
-            ));
+            $template->addJSFiles([
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => [],
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => []
+            ]);
 
             $template->addJSScript(Input::createEditor('inputDescription'));
             
@@ -243,24 +244,24 @@ if(!isset($_GET['action'])) {
 }
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, array($navigation, $cc_nav, $mod_nav), $widgets);
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets);
 
-if(Session::exists('products_success'))
+if (Session::exists('products_success'))
     $success = Session::flash('products_success');
 
-if(isset($success))
-    $smarty->assign(array(
+if (isset($success))
+    $smarty->assign([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
-    ));
+    ]);
 
-if(isset($errors) && count($errors))
-    $smarty->assign(array(
+if (isset($errors) && count($errors))
+    $smarty->assign([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
-    ));
+    ]);
 
-$smarty->assign(array(
+$smarty->assign([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -268,19 +269,19 @@ $smarty->assign(array(
     'TOKEN' => Token::get(),
     'SUBMIT' => $language->get('general', 'submit'),
     'PRODUCTS' => $store_language->get('general', 'products')
-));
+]);
 
-$template->addCSSFiles(array(
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.css' => array()
-));
+$template->addCSSFiles([
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.css' => []
+]);
 
-$template->addJSFiles(array(
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.js' => array()
-));
+$template->addJSFiles([
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.js' => []
+]);
 
 $template->addJSScript('
     var elems = Array.prototype.slice.call(document.querySelectorAll(\'.js-switch\'));
-    elems.forEach(function(html) {
+    elems.forEach (function(html) {
         var switchery = new Switchery(html, {color: \'#23923d\', secondaryColor: \'#e56464\'});
     });
 ');

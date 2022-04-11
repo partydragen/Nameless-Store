@@ -22,7 +22,7 @@ class Player {
             if (Session::exists('store_player')) {
                 $player = Session::get('store_player');
                 
-                if($this->find($player, $field)) {
+                if ($this->find($player, $field)) {
                     $this->_isLoggedIn = true;
                 }
             }
@@ -32,7 +32,7 @@ class Player {
     }
     
     public function find($value, $field) {
-        $data = $this->_db->get('store_players', array($field, '=', $value));
+        $data = $this->_db->get('store_players', [$field, '=', $value]);
         if ($data->count()) {
             $this->_data = $data->first();
             
@@ -44,7 +44,7 @@ class Player {
     
     public function login($username, $save = true) {
         // Online mode or offline mode?
-        $uuid_linking = $this->_db->get('settings', array('name', '=', 'uuid_linking'))->results();
+        $uuid_linking = $this->_db->get('settings', ['name', '=', 'uuid_linking'])->results();
         $uuid_linking = $uuid_linking[0]->value;
         
         if ($uuid_linking == '1') {
@@ -52,33 +52,33 @@ class Player {
             require(ROOT_PATH . '/core/integration/uuid.php'); // For UUID stuff
                 
             $profile = ProfileUtils::getProfile(str_replace(' ', '%20', Input::get('username')));
-            $mcname_result = $profile ? $profile->getProfileAsArray() : array();
-            if(isset($mcname_result['username']) && !empty($mcname_result['username']) && isset($mcname_result['uuid']) && !empty($mcname_result['uuid'])){
+            $mcname_result = $profile ? $profile->getProfileAs[] : [];
+            if (isset($mcname_result['username']) && !empty($mcname_result['username']) && isset($mcname_result['uuid']) && !empty($mcname_result['uuid'])) {
                 $username = Output::getClean($mcname_result['username']);
                 $uuid = ProfileUtils::formatUUID(Output::getClean($mcname_result['uuid']));
                 
-                if($this->find($uuid, 'uuid')) {
+                if ($this->find($uuid, 'uuid')) {
                     // Player already exist in database
-                    $this->_db->update('store_players', $this->data()->id, array(
+                    $this->_db->update('store_players', $this->data()->id, [
                         'username' => $username,
                         'uuid' => $uuid
-                    ));
+                    ]);
                     $this->_isLoggedIn = true;
                     
-                    if($save)
+                    if ($save)
                         Session::put('store_player', $this->data()->id);
                         
                     return true;
                 } else {
                     // Register new player
-                    $this->_db->insert('store_players', array(
+                    $this->_db->insert('store_players', [
                         'username' => $username,
                         'uuid' => $uuid
-                    ));
+                    ]);
                     $this->find($this->_db->lastId(), 'id');
                     $this->_isLoggedIn = true;
                 
-                    if($save)
+                    if ($save)
                         Session::put('store_player', $this->data()->id);
                     
                     return true;
@@ -90,23 +90,23 @@ class Player {
         } else {
             
             // Offline mode
-            if($this->find($username, 'username')) {
+            if ($this->find($username, 'username')) {
                 // Player already exist in database
                 $this->_isLoggedIn = true;
-                if($save)
+                if ($save)
                     Session::put('store_player', $this->data()->id);
                 
                 return true;
             } else {
                 // Register new player
-                $this->_db->insert('store_players', array(
+                $this->_db->insert('store_players', [
                     'username' => $username,
                     'uuid' => null
-                ));
+                ]);
                 $this->find($this->_db->lastId(), 'id');
                 $this->_isLoggedIn = true;
 
-                if($save)
+                if ($save)
                     Session::put('store_player', $this->data()->id);
                     
                 return true;

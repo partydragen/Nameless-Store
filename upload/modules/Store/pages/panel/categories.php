@@ -10,7 +10,7 @@
  */
 
 // Can the user view the StaffCP?
-if(!$user->handlePanelPageLoad('staffcp.store.products')) {
+if (!$user->handlePanelPageLoad('staffcp.store.products')) {
     require_once(ROOT_PATH . '/403.php');
     die();
 }
@@ -24,50 +24,51 @@ require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
 
 $store = new Store($cache, $store_language);
 
-if(!isset($_GET['action'])) {
+if (!isset($_GET['action'])) {
     Redirect::to(URL::build('/panel/core/products'));
     die();
 } else {
-    switch($_GET['action']) {
+    switch ($_GET['action']) {
         case 'new';
             // Create new category
-            if(Input::exists()){
-                $errors = array();
-                if(Token::check(Input::get('token'))){
+            if (Input::exists()) {
+                $errors = [];
+
+                if (Token::check(Input::get('token'))) {
                     $validate = new Validate();
-                    $validation = $validate->check($_POST, array(
-                        'name' => array(
+                    $validation = $validate->check($_POST, [
+                        'name' => [
                             'required' => true,
                             'min' => 1,
                             'max' => 128
-                        ),
-                        'description' => array(
+                        ],
+                        'description' => [
                             'max' => 100000
-                        )
-                    ));
+                        ]
+                    ]);
                     
-                    if ($validation->passed()){
+                    if ($validation->passed()) {
                         // Get last order
                         $last_order = DB::getInstance()->query('SELECT * FROM nl2_store_categories ORDER BY `order` DESC LIMIT 1')->results();
-                        if(count($last_order)) $last_order = $last_order[0]->order;
+                        if (count($last_order)) $last_order = $last_order[0]->order;
                         else $last_order = 0;
                         
                         $parent_category = Input::get('parent_category');
                         
                         // Hide category?
-                        if(isset($_POST['hidden']) && $_POST['hidden'] == 'on') $hidden = 1;
+                        if (isset($_POST['hidden']) && $_POST['hidden'] == 'on') $hidden = 1;
                         else $hidden = 0;
                         
                         // Hide category from dropdown?
-                        if(isset($_POST['only_subcategories']) && $_POST['only_subcategories'] == 'on') $only_subcategories = 1;
+                        if (isset($_POST['only_subcategories']) && $_POST['only_subcategories'] == 'on') $only_subcategories = 1;
                         else $only_subcategories = 0;
                         
                         // Disable category?
-                        if(isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
+                        if (isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
                         else $disabled = 0;
                         
                         // Save to database
-                        $queries->create('store_categories', array(
+                        $queries->create('store_categories', [
                             'name' => Output::getClean(Input::get('name')),
                             'description' => Output::getClean(Input::get('description')),
                             'parent_category' => $parent_category != 0 ? $parent_category : null,
@@ -75,7 +76,7 @@ if(!isset($_GET['action'])) {
                             'hidden' => $hidden,
                             'disabled' => $disabled,
                             'order' => $last_order + 1,
-                        ));
+                        ]);
                         
                         Session::flash('products_success', $store_language->get('admin', 'category_created_successfully'));
                         Redirect::to(URL::build('/panel/store/products'));
@@ -89,16 +90,16 @@ if(!isset($_GET['action'])) {
                 }
             }
             
-            $categories_list = array();
+            $categories_list = [];
             $categories = DB::getInstance()->query('SELECT id, name FROM nl2_store_categories WHERE deleted = 0')->results();
-            foreach($categories as $category) {
-                $categories_list[] = array(
+            foreach ($categories as $category) {
+                $categories_list[] = [
                     'id' => Output::getClean($category->id),
                     'name' => Output::getClean($category->name),
-                );
+                ];
             }
             
-            $smarty->assign(array(
+            $smarty->assign([
                 'CATEGORY_TITLE' => $store_language->get('admin', 'new_category'),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/products'),
@@ -116,12 +117,12 @@ if(!isset($_GET['action'])) {
                 'HIDE_CATEGORY_VALUE' => ((isset($_POST['hidden'])) ? 1 : 0),
                 'DISABLE_CATEGORY' => $store_language->get('admin', 'disable_category'),
                 'DISABLE_CATEGORY_VALUE' => ((isset($_POST['disabled'])) ? 1 : 0),
-            ));
+            ]);
             
-            $template->addJSFiles(array(
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array(),
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => array()
-            ));
+            $template->addJSFiles([
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => [],
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => []
+            ]);
 
             $template->addJSScript(Input::createEditor('inputDescription'));
             
@@ -129,57 +130,58 @@ if(!isset($_GET['action'])) {
         break;
         case 'edit';
             // Edit category
-            if(!isset($_GET['id']) || !is_numeric($_GET['id'])){
+            if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
                 Redirect::to(URL::build('/panel/store/products'));
                 die();
             }
             
-            $category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ?', array($_GET['id']))->results();
-            if(!count($category)) {
+            $category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ?', [$_GET['id']])->results();
+            if (!count($category)) {
                 Redirect::to(URL::build('/panel/store/products'));
                 die();
             }
             $category = $category[0];
-            
-            if(Input::exists()){
-                $errors = array();
-                if(Token::check(Input::get('token'))){
+
+            if (Input::exists()) {
+                $errors = [];
+
+                if (Token::check(Input::get('token'))) {
                     $validate = new Validate();
-                    $validation = $validate->check($_POST, array(
-                        'name' => array(
+                    $validation = $validate->check($_POST, [
+                        'name' => [
                             'required' => true,
                             'min' => 1,
                             'max' => 128
-                        ),
-                        'description' => array(
+                        ],
+                        'description' => [
                             'max' => 100000
-                        )
-                    ));
+                        ]
+                    ]);
                     
-                    if ($validation->passed()){
+                    if ($validation->passed()) {
                         $parent_category = Input::get('parent_category');
                         
                         // Hide category?
-                        if(isset($_POST['hidden']) && $_POST['hidden'] == 'on') $hidden = 1;
+                        if (isset($_POST['hidden']) && $_POST['hidden'] == 'on') $hidden = 1;
                         else $hidden = 0;
                         
                         // Hide category from dropdown?
-                        if(isset($_POST['only_subcategories']) && $_POST['only_subcategories'] == 'on') $only_subcategories = 1;
+                        if (isset($_POST['only_subcategories']) && $_POST['only_subcategories'] == 'on') $only_subcategories = 1;
                         else $only_subcategories = 0;
                         
                         // Disable category?
-                        if(isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
+                        if (isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
                         else $disabled = 0;
                         
                         // Save to database
-                        $queries->update('store_categories', $category->id, array(
+                        $queries->update('store_categories', $category->id, [
                             'name' => Output::getClean(Input::get('name')),
                             'description' => Output::getClean(Input::get('description')),
                             'parent_category' => $parent_category != 0 ? $parent_category : null,
                             'only_subcategories' => $only_subcategories,
                             'hidden' => $hidden,
                             'disabled' => $disabled
-                        ));
+                        ]);
                         
                         Session::flash('products_success', $store_language->get('admin', 'category_updated_successfully'));
                         Redirect::to(URL::build('/panel/store/products'));
@@ -193,16 +195,16 @@ if(!isset($_GET['action'])) {
                 }
             }
             
-            $categories_list = array();
-            $categories = DB::getInstance()->query('SELECT id, name FROM nl2_store_categories WHERE id <> ? AND deleted = 0', array($category->id))->results();
-            foreach($categories as $item) {
-                $categories_list[] = array(
+            $categories_list = [];
+            $categories = DB::getInstance()->query('SELECT id, name FROM nl2_store_categories WHERE id <> ? AND deleted = 0', [$category->id])->results();
+            foreach ($categories as $item) {
+                $categories_list[] = [
                     'id' => Output::getClean($item->id),
                     'name' => Output::getClean($item->name),
-                );
+                ];
             }
             
-            $smarty->assign(array(
+            $smarty->assign([
                 'CATEGORY_TITLE' => str_replace('{x}', Output::getClean($category->name), $store_language->get('admin', 'editing_category_x')),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/products'),
@@ -220,12 +222,12 @@ if(!isset($_GET['action'])) {
                 'HIDE_CATEGORY_VALUE' => $category->hidden,
                 'DISABLE_CATEGORY' => $store_language->get('admin', 'disable_category'),
                 'DISABLE_CATEGORY_VALUE' => $category->disabled,
-            ));
+            ]);
             
-            $template->addJSFiles(array(
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array(),
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => array()
-            ));
+            $template->addJSFiles([
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => [],
+                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => []
+            ]);
 
             $template->addJSScript(Input::createEditor('inputDescription'));
             
@@ -233,30 +235,30 @@ if(!isset($_GET['action'])) {
         break;
         case 'delete';
             // Delete category
-            if(!isset($_GET['id']) || !is_numeric($_GET['id'])){
+            if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
                 Redirect::to(URL::build('/panel/store/products'));
                 die();
             }
             
-            $category = DB::getInstance()->query('SELECT * FROM `nl2_store_categories` WHERE id = ?', array($_GET['id']))->results();
-            if(!count($category)) {
+            $category = DB::getInstance()->query('SELECT * FROM `nl2_store_categories` WHERE id = ?', [$_GET['id']])->results();
+            if (!count($category)) {
                 Redirect::to(URL::build('/panel/store/products'));
                 die();
             }
             $category = $category[0];
             
-            $products = DB::getInstance()->query('SELECT id FROM `nl2_store_products` WHERE category_id = ? AND deleted = 0', array($_GET['id']))->results();
-            if(count($products)) {
-                foreach($products as $product) {
-                    $queries->update('store_products', $product->id, array(
+            $products = DB::getInstance()->query('SELECT id FROM `nl2_store_products` WHERE category_id = ? AND deleted = 0', [$_GET['id']])->results();
+            if (count($products)) {
+                foreach ($products as $product) {
+                    $queries->update('store_products', $product->id, [
                         'deleted' => date('U')
-                    ));
+                    ]);
                 }
             }
             
-            $queries->update('store_categories', $category->id, array(
+            $queries->update('store_categories', $category->id, [
                 'deleted' => date('U')
-            ));
+            ]);
             
             Session::flash('products_success', $store_language->get('admin', 'category_deleted_successfully'));
             Redirect::to(URL::build('/panel/store/products'));
@@ -270,21 +272,21 @@ if(!isset($_GET['action'])) {
 }
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, array($navigation, $cc_nav, $mod_nav), $widgets);
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets);
 
-if(isset($success))
-    $smarty->assign(array(
+if (isset($success))
+    $smarty->assign([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
-    ));
+    ]);
 
-if(isset($errors) && count($errors))
-    $smarty->assign(array(
+if (isset($errors) && count($errors))
+    $smarty->assign([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
-    ));
+    ]);
 
-$smarty->assign(array(
+$smarty->assign([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -294,19 +296,19 @@ $smarty->assign(array(
     'STORE' => $store_language->get('general', 'store'),
     'CATEGORIES' => $store_language->get('admin', 'categories'),
     'PRODUCTS' => $store_language->get('general', 'products')
-));
+]);
 
-$template->addCSSFiles(array(
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.css' => array()
-));
+$template->addCSSFiles([
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.css' => []
+]);
 
-$template->addJSFiles(array(
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.js' => array()
-));
+$template->addJSFiles([
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.js' => []
+]);
 
 $template->addJSScript('
     var elems = Array.prototype.slice.call(document.querySelectorAll(\'.js-switch\'));
-    elems.forEach(function(html) {
+    elems.forEach (function(html) {
         var switchery = new Switchery(html, {color: \'#23923d\', secondaryColor: \'#e56464\'});
     });
 ');

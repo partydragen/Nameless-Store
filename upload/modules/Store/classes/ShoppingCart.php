@@ -14,12 +14,12 @@ class ShoppingCart {
             $_products;
     
     // Constructor
-    public function __construct(){
-        $this->_items = (isset($_SESSION['shopping_cart']) ? $_SESSION['shopping_cart'] : array());
+    public function __construct() {
+        $this->_items = (isset($_SESSION['shopping_cart']) ? $_SESSION['shopping_cart'] : []);
         
-        if(count($this->_items)) {
+        if (count($this->_items)) {
             $products_ids = '(';
-            foreach($this->_items as $product) {
+            foreach ($this->_items as $product) {
                 $products_ids .= (int) $product['id'] . ',';
             }
             $products_ids = rtrim($products_ids, ',');
@@ -31,14 +31,14 @@ class ShoppingCart {
     }
     
     // Add product to shopping cart
-    public function add($product_id, $quantity = 1, $fields = array()) {
-        $shopping_cart = (isset($_SESSION['shopping_cart']) ? $_SESSION['shopping_cart'] : array());
+    public function add($product_id, $quantity = 1, $fields = []) {
+        $shopping_cart = (isset($_SESSION['shopping_cart']) ? $_SESSION['shopping_cart'] : []);
         
-        $shopping_cart[$product_id] = array(
+        $shopping_cart[$product_id] = [
             'id' => $product_id,
             'quantity' => $quantity,
             'fields' => $fields
-        );
+        ];
         
         $_SESSION['shopping_cart'] = $shopping_cart;
     }
@@ -60,14 +60,14 @@ class ShoppingCart {
     
     // Get the products from the shopping cart
     public function getProducts() {
-        return $this->_products ? $this->_products : array();
+        return $this->_products ? $this->_products : [];
     }
     
     // Get total price to pay
     public function getTotalPrice() {
         $price = 0;
         
-        foreach($this->_products as $product) {
+        foreach ($this->_products as $product) {
             $price += $product->price;
         }
         

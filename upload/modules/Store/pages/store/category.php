@@ -24,30 +24,30 @@ if (!strlen($category_id)) {
 }
 
 $category_id = explode('-', $category_id);
-if(!is_numeric($category_id[0])){
+if (!is_numeric($category_id[0])) {
     require_once(ROOT_PATH . '/404.php');
     die();
 }
 $category_id = $category_id[0];
 
 // Query category
-$category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ?', array($category_id));
-if(!$category->count()){
+$category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ?', [$category_id]);
+if (!$category->count()) {
     require_once(ROOT_PATH . '/404.php');
     die();
 }
 
 $category = $category->first();
-if($category->disabled == 1){
+if ($category->disabled == 1) {
     require_once(ROOT_PATH . '/404.php');
     die();
 }
 
 $store_url = $store->getStoreURL();
 
-$page_metadata = $queries->getWhere('page_descriptions', array('page', '=', $store_url . '/view'));
-if(count($page_metadata)){
-    define('PAGE_DESCRIPTION', str_replace(array('{site}', '{category_title}', '{description}'), array(SITE_NAME, Output::getClean($category->name), Output::getClean(strip_tags(Output::getDecoded($category->description)))), $page_metadata[0]->description));
+$page_metadata = $queries->getWhere('page_descriptions', ['page', '=', $store_url . '/view']);
+if (count($page_metadata)) {
+    define('PAGE_DESCRIPTION', str_replace(['{site}', '{category_title}', '{description}'], [SITE_NAME, Output::getClean($category->name), Output::getClean(strip_tags(Output::getDecoded($category->description)))], $page_metadata[0]->description));
     define('PAGE_KEYWORDS', $page_metadata[0]->tags);
 }
 
@@ -57,23 +57,23 @@ require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 require(ROOT_PATH . '/core/includes/emojione/autoload.php'); // Emojione
 $emojione = new Emojione\Client(new Emojione\Ruleset());
 
-if(Input::exists()){
-    if(Token::check(Input::get('token'))){
-        $errors = array();
-        
-        if(Input::get('type') == 'store_login') {
+if (Input::exists()) {
+    if (Token::check(Input::get('token'))) {
+        $errors = [];
+
+        if (Input::get('type') == 'store_login') {
             $validate = new Validate();
-            $validation = $validate->check($_POST, array(
-                'username' => array(
+            $validation = $validate->check($_POST, [
+                'username' => [
                     'required' => true,
                     'min' => 3,
                     'max' => 16
-                )
-            ));
+                ]
+            ]);
             
-            if($validation->passed()){
+            if ($validation->passed()) {
                 // Attempt to load player
-                if(!$player->login(Output::getClean(Input::get('username')))) {
+                if (!$player->login(Output::getClean(Input::get('username')))) {
                     $errors[] = $language->get('user', 'invalid_mcname');
                 }
                 
@@ -87,22 +87,22 @@ if(Input::exists()){
 }
 
 // Get products
-$products = DB::getInstance()->query('SELECT id, name, `order`, price, description, image FROM nl2_store_products WHERE category_id = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', array($category_id));
+$products = DB::getInstance()->query('SELECT id, name, `order`, price, description, image FROM nl2_store_products WHERE category_id = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', [$category_id]);
 
-if(!$products->count()){
+if (!$products->count()) {
     $smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
 } else {
     $products = $products->results();
-    $category_products = array();
+    $category_products = [];
 
-    foreach($products as $product){
+    foreach ($products as $product) {
         $content = Output::getDecoded($product->description);
         $content = $emojione->unicodeToImage($content);
         $content = Output::getPurified($content);
 
         $image = (isset($product->image) && !is_null($product->image) ? (defined('CONFIG_PATH') ? CONFIG_PATH . '/' : '/' . 'uploads/store/' . Output::getClean(Output::getDecoded($product->image))) : null);
 
-        $category_products[] = array(
+        $category_products[] = [
             'id' => Output::getClean($product->id),
             'name' => Output::getClean($product->name),
             'price' => Output::getClean($product->price),
@@ -110,7 +110,7 @@ if(!$products->count()){
             'description' => $content,
             'image' => $image,
             'link' => URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->id))
-        );
+        ];
     }
 
     $smarty->assign('PRODUCTS', $category_products);
@@ -121,17 +121,17 @@ $content = Output::getDecoded($category->description);
 $content = $emojione->unicodeToImage($content);
 $content = Output::getPurified($content);
 
-$smarty->assign(array(
+$smarty->assign([
     'ACTIVE_CATEGORY' => Output::getClean($category->name),
     'BUY' => $store_language->get('general', 'buy'),
     'CLOSE' => $language->get('general', 'close'),
     'SALE' => $store_language->get('general', 'sale')
-));
+]);
 
-if(isset($errors) && count($errors))
+if (isset($errors) && count($errors))
     $smarty->assign('ERRORS', $errors);
 
-$smarty->assign(array(
+$smarty->assign([
     'STORE' => $store_language->get('general', 'store'),
     'STORE_URL' => URL::build($store_url),
     'HOME' => $store_language->get('general', 'home'),
@@ -139,30 +139,30 @@ $smarty->assign(array(
     'CATEGORIES' => $store->getNavbarMenu($category->name),
     'CONTENT' => $content,
     'TOKEN' => Token::get(),
-));
+]);
 
-if($store->isPlayerSystemEnabled() && !$player->isLoggedIn()) {
-    $smarty->assign(array(
+if ($store->isPlayerSystemEnabled() && !$player->isLoggedIn()) {
+    $smarty->assign([
         'PLEASE_ENTER_USERNAME' => $store_language->get('general', 'please_enter_username'),
         'CONTINUE' => $store_language->get('general', 'continue'),
-    ));
+    ]);
     
     $template_file = 'store/player_login.tpl';
 } else {
     $template_file = 'store/category.tpl';
 }
 
-$template->addCSSFiles(array(
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/css/spoiler.css' => array(),
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/emoji/css/emojione.min.css' => array()
-));
+$template->addCSSFiles([
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/css/spoiler.css' => [],
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/emoji/css/emojione.min.css' => []
+]);
 
-$template->addJSFiles(array(
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => array()
-));
+$template->addJSFiles([
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => []
+]);
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, array($navigation, $cc_nav, $mod_nav), $widgets, $template);
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets, $template);
 
 $page_load = microtime(true) - $start;
 define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));

@@ -9,7 +9,7 @@
  *  Panel users page
  */
 
-if(!$user->handlePanelPageLoad('staffcp.store.payments')) {
+if (!$user->handlePanelPageLoad('staffcp.store.payments')) {
     require_once(ROOT_PATH . '/403.php');
     die();
 }
@@ -36,7 +36,7 @@ require_once(ROOT_PATH . '/core/templates/backend_init.php');
 Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets);
 
 if (Input::exists()) {
-    $errors = array();
+    $errors = [];
 
     if (Token::check()) {
         // Validation
@@ -85,20 +85,20 @@ if ($user->hasPermission('staffcp.store.manage_credits')) {
     ]);
 }
 
-if(Session::exists('users_store_success'))
+if (Session::exists('users_store_success'))
     $success = Session::flash('users_store_success');
 
-if(isset($success))
-    $smarty->assign(array(
+if (isset($success))
+    $smarty->assign([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
-    ));
+    ]);
 
-if(isset($errors) && count($errors))
-    $smarty->assign(array(
+if (isset($errors) && count($errors))
+    $smarty->assign([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
-    ));
+    ]);
 
 $smarty->assign([
     'PARENT_PAGE' => PARENT_PAGE,

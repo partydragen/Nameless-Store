@@ -9,13 +9,13 @@
  *  Store module
  */
 
-if(isset($_GET['do'])){
-    if($_GET['do'] == 'success'){
+if (isset($_GET['do'])) {
+    if ($_GET['do'] == 'success') {
 
         $payment = new Payment($_POST['txn_id'], 'transaction');
-        if(!$payment->exists()) {
+        if (!$payment->exists()) {
             // Register pending payment
-            $payment->create(array(
+            $payment->create([
                 'order_id' => $_POST['custom'],
                 'gateway_id' => $gateway->getId(),
                 'transaction' => $_POST['txn_id'],
@@ -25,7 +25,7 @@ if(isset($_GET['do'])){
                 'amount' => $_POST['mc_gross'],
                 'currency' => $_POST['mc_currency'],
                 'fee' => $_POST['mc_fee']
-            ));
+            ]);
         }
 
         Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
@@ -39,7 +39,7 @@ if(isset($_GET['do'])){
 } else {
     // Build product names string
     $product_names = '';
-    foreach($order->getProducts() as $product) {
+    foreach ($order->getProducts() as $product) {
         $product_names .= $product->name . ', ';
     }
     $product_names = rtrim($product_names, ', ');

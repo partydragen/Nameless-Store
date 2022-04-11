@@ -20,8 +20,8 @@ class Product {
     public function __construct($value = null, $field = 'id') {
         $this->_db = DB::getInstance();
         
-        if($value != null) {
-            $data = $this->_db->get('store_products', array($field, '=', $value));
+        if ($value != null) {
+            $data = $this->_db->get('store_products', [$field, '=', $value]);
             if ($data->count()) {
                 $this->_data = $data->first();
             }
@@ -33,7 +33,7 @@ class Product {
      *
      * @param array $fields Column names and values to update.
      */
-    public function update($fields = array()) {
+    public function update($fields = []) {
         if (!$this->_db->update('store_products', $this->data()->id, $fields)) {
             throw new Exception('There was a problem updating product');
         }
@@ -70,10 +70,10 @@ class Product {
      * @return array Their connections.
      */
     public function getConnections() {
-        if($this->_connections == null) {
-            $this->_connections = array();
+        if ($this->_connections == null) {
+            $this->_connections = [];
             
-            $connections_query = $this->_db->query('SELECT nl2_store_connections.* FROM nl2_store_products_connections INNER JOIN nl2_store_connections ON connection_id = nl2_store_connections.id WHERE product_id = ? AND action_id IS NULL', array($this->data()->id));
+            $connections_query = $this->_db->query('SELECT nl2_store_connections.* FROM nl2_store_products_connections INNER JOIN nl2_store_connections ON connection_id = nl2_store_connections.id WHERE product_id = ? AND action_id IS NULL', [$this->data()->id]);
             if ($connections_query->count()) {
                 $connections_query = $connections_query->results();
                 foreach ($connections_query as $item) {
@@ -96,10 +96,10 @@ class Product {
         }
         
         $this->_db->createQuery('INSERT INTO `nl2_store_products_connections` (`product_id`, `connection_id`) VALUES (?, ?)',
-            array(
+            [
                 $this->data()->id,
                 $connection_id
-            )
+            ]
         );
     }
 
@@ -114,10 +114,10 @@ class Product {
         }
         
         $this->_db->createQuery('DELETE FROM `nl2_store_products_connections` WHERE `product_id` = ? AND `connection_id` = ? AND action_id IS NULL',
-            array(
+            [
                 $this->data()->id,
                 $connection_id
-            )
+            ]
         );
     }
     
@@ -127,10 +127,10 @@ class Product {
      * @return array Their fields.
      */
     public function getFields() {
-        if($this->_fields == null) {
-            $this->_fields = array();
+        if ($this->_fields == null) {
+            $this->_fields = [];
             
-            $fields_query = $this->_db->query('SELECT nl2_store_fields.* FROM nl2_store_products_fields INNER JOIN nl2_store_fields ON field_id = nl2_store_fields.id WHERE product_id = ? AND deleted = 0', array($this->data()->id));
+            $fields_query = $this->_db->query('SELECT nl2_store_fields.* FROM nl2_store_products_fields INNER JOIN nl2_store_fields ON field_id = nl2_store_fields.id WHERE product_id = ? AND deleted = 0', [$this->data()->id]);
             if ($fields_query->count()) {
                 $fields_query = $fields_query->results();
                 foreach ($fields_query as $field) {
@@ -153,10 +153,10 @@ class Product {
         }
         
         $this->_db->createQuery('INSERT INTO `nl2_store_products_fields` (`product_id`, `field_id`) VALUES (?, ?)',
-            array(
+            [
                 $this->data()->id,
                 $field_id
-            )
+            ]
         );
     }
 
@@ -171,22 +171,22 @@ class Product {
         }
         
         $this->_db->createQuery('DELETE FROM `nl2_store_products_fields` WHERE `product_id` = ? AND `field_id` = ?',
-            array(
+            [
                 $this->data()->id,
                 $field_id
-            )
+            ]
         );
     }
     
     public function getActions() {
-        if($this->_actions == null) {
-            $this->_connections = array();
+        if ($this->_actions == null) {
+            $this->_connections = [];
             
-            $actions = $this->_db->query('SELECT * FROM nl2_store_products_actions WHERE product_id = ? ORDER BY `order` ASC', array($this->data()->id));
+            $actions = $this->_db->query('SELECT * FROM nl2_store_products_actions WHERE product_id = ? ORDER BY `order` ASC', [$this->data()->id]);
             if ($actions->count()) {
                 $actions = $actions->results();
                 
-                foreach($actions as $data) {
+                foreach ($actions as $data) {
                     $action = new Action();
                     $action->setData($data);
                     
@@ -199,12 +199,12 @@ class Product {
     }
     
     public function delete() {
-        if($this->exists()) {
-            $this->update(array(
+        if ($this->exists()) {
+            $this->update([
                 'deleted' => date('U')
-            ));
+            ]);
             
-            $this->_db->createQuery('DELETE FROM `nl2_store_pending_actions` WHERE `product_id` = ?', array($this->data()->id));
+            $this->_db->createQuery('DELETE FROM `nl2_store_pending_actions` WHERE `product_id` = ?', [$this->data()->id]);
             
             return true;
         }

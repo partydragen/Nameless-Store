@@ -110,7 +110,7 @@ class Customer {
         if ($payments->count()) {
             $payments = $payments->results();
 
-            foreach  ($payments as $paymentQuery){
+            foreach  ($payments as $paymentQuery) {
                 $payment = new Payment($paymentQuery->id);
 
                 $payments_list[] = [

@@ -9,7 +9,7 @@
  *  Store module - Gateway Listener
  */
 
-if(!isset($_GET['gateway'])) {
+if (!isset($_GET['gateway'])) {
     die('Invalid');
 }
 
@@ -21,7 +21,7 @@ if (isset($store_conf) && is_array($store_conf)) {
 
 $gateways = new Gateways();
 $gateway = $gateways->get($_GET['gateway']);
-if($gateway) {
+if ($gateway) {
     // Load gateway listener
     require_once(ROOT_PATH . '/modules/Store/gateways/'.$gateway->getName().'/listener.php');
 } else {

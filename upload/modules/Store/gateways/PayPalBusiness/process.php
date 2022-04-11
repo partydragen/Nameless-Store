@@ -11,13 +11,13 @@
 
 require_once(ROOT_PATH . '/modules/Store/gateways/PayPalBusiness/paypal.php');
 
-if(isset($_GET['do'])){
-    if($_GET['do'] == 'success'){
-        if(!isset($_GET['paymentId']) && !isset($_GET['token'])){
+if (isset($_GET['do'])) {
+    if ($_GET['do'] == 'success') {
+        if (!isset($_GET['paymentId']) && !isset($_GET['token'])) {
             die('Invalid id!');
         }
 
-        if(isset($_GET['paymentId'])) {
+        if (isset($_GET['paymentId'])) {
             // Single payment successfully made
             $paymentId = $_GET['paymentId'];
             $payment = \PayPal\Api\Payment::get($paymentId, $apiContext);
@@ -28,7 +28,7 @@ if(isset($_GET['do'])){
             try {
                 $result = $payment->execute($execution, $apiContext);
                 $payment = \PayPal\Api\Payment::get($paymentId, $apiContext);
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 ErrorHandler::logCustomError('Message: ' . $e->getMessage());
                 die('Unknown error');
             }
@@ -38,9 +38,9 @@ if(isset($_GET['do'])){
             $sale = $related_resources[0]->getSale();
             
             $store_payment = new Payment($payment->getId(), 'payment_id');
-            if(!$store_payment->exists()) {
+            if (!$store_payment->exists()) {
                 // Register pending payment
-                $payment_id = $store_payment->create(array(
+                $payment_id = $store_payment->create([
                     'order_id' => Output::getClean($transactions[0]->invoice_number),
                     'gateway_id' => $gateway->getId(),
                     'payment_id' => Output::getClean($payment->getId()),
@@ -50,14 +50,14 @@ if(isset($_GET['do'])){
                     'fee' => $sale->getTransactionFee() ? $sale->getTransactionFee()->getValue() : null,
                     'created' => date('U'),
                     'last_updated' => date('U')
-                ));
+                ]);
             }
 
             $shopping_cart->clear();
 
             Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
             die();
-        } else if(isset($_GET['token'])) {
+        } else if (isset($_GET['token'])) {
             // Agreement successfully made
             $token = $_GET['token'];
             $agreement = new \PayPal\Api\Agreement();
@@ -74,17 +74,17 @@ if(isset($_GET['do'])){
             $payer = $agreement->getPayer();
             
             $last_payment_date = 0;
-            if($agreement->getAgreementDetails()->getLastPaymentDate() != null) {
+            if ($agreement->getAgreementDetails()->getLastPaymentDate() != null) {
                 $last_payment_date = date("U", strtotime($agreement->getAgreementDetails()->getLastPaymentDate()));
             }
             
             $next_billing_date = 0;
-            if($agreement->getAgreementDetails()->getNextBillingDate() != null) {
+            if ($agreement->getAgreementDetails()->getNextBillingDate() != null) {
                 $next_billing_date = date("U", strtotime($agreement->getAgreementDetails()->getNextBillingDate()));
             }
 
             // Save agreement to database
-            $queries->create('store_agreements', array(
+            $queries->create('store_agreements', [
                 'user_id' => ($user->isLoggedIn() ? $user->data()->id : null),
                 'player_id' => $player_id,
                 'agreement_id' => Output::getClean($agreement->id),
@@ -97,7 +97,7 @@ if(isset($_GET['do'])){
                 'next_billing_date' => $next_billing_date,
                 'created' => date('U'),
                 'updated' => date('U')
-            ));
+            ]);
 
             
             $shopping_cart->clear();
@@ -115,7 +115,7 @@ if(isset($_GET['do'])){
 } else {
     // Build product names string
     $product_names = '';
-    foreach($order->getProducts() as $product) {
+    foreach ($order->getProducts() as $product) {
         $product_names .= $product->name . ', ';
     }
     $product_names = rtrim($product_names, ', ');
@@ -142,7 +142,7 @@ if(isset($_GET['do'])){
     $payment = new \PayPal\Api\Payment();
     $payment->setIntent('sale')
         ->setPayer($payer)
-        ->setTransactions(array($transaction))
+        ->setTransactions([$transaction])
         ->setRedirectUrls($redirectUrls);
 
     try {

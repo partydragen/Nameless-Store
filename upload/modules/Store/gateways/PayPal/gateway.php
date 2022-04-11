@@ -10,11 +10,27 @@
  */
 
 class PayPal_Gateway extends GatewayBase {
-    public function __construct(){
+    public function __construct() {
         $name = 'PayPal';
         $settings = ROOT_PATH . '/modules/Store/gateways/PayPal/gateway_settings/settings.php';
             
         parent::__construct($name, $settings);
+    }
+
+    public function processOrder(Order $order) {
+
+    }
+
+    public function onCancel() {
+
+    }
+
+    public function onReturn() {
+
+    }
+
+    public function onWebhookCall() {
+
     }
 }
 

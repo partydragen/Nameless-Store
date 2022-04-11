@@ -14,7 +14,7 @@ $store_language = new Language(ROOT_PATH . '/modules/Store/language', LANGUAGE);
 
 // Load classes
 spl_autoload_register(function ($class) {
-    $path = join(DIRECTORY_SEPARATOR, array(ROOT_PATH, 'modules', 'Store', 'classes', $class . '.php'));
+    $path = join(DIRECTORY_SEPARATOR, [ROOT_PATH, 'modules', 'Store', 'classes', $class . '.php']);
     if (file_exists($path)) {
         require_once($path);
     }

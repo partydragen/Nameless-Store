@@ -11,7 +11,7 @@
 
 $client_id = StoreConfig::get('paypal_business/client_id');
 $client_secret = StoreConfig::get('paypal_business/client_secret');
-if($client_id && $client_secret) {
+if ($client_id && $client_secret) {
 	try {
 		require_once(ROOT_PATH . '/modules/Store/gateways/PayPalBusiness/autoload.php');
 		$apiContext = new \PayPal\Rest\ApiContext(
@@ -22,21 +22,21 @@ if($client_id && $client_secret) {
 		);
 
 		$apiContext->setConfig(
-			array(
+			[
 				'log.LogEnabled' => true,
 				'log.FileName' => ROOT_PATH . '/cache/logs/PayPal.log',
 				'log.LogLevel' => 'FINE',
 				'mode' => 'live',
-			)
+			]
 		);
 
         $hook_key = StoreConfig::get('paypal_business/hook_key');
-		if(!$hook_key) {
+		if (!$hook_key) {
             $key = md5(uniqid());
 
 			// Create API webhook
 			$webhook = new \PayPal\Api\Webhook();
-			$webhookEventTypes = array();
+			$webhookEventTypes = [];
 
 			$webhookEventTypes[] = new \PayPal\Api\WebhookEventType('{"name":"PAYMENT.SALE.COMPLETED"}');
 			$webhookEventTypes[] = new \PayPal\Api\WebhookEventType('{"name":"PAYMENT.SALE.DENIED"}');
@@ -58,9 +58,9 @@ if($client_id && $client_secret) {
 			$output = $webhook->create($apiContext);
 			$id = $output->getId();
 			
-            StoreConfig::set(array('paypal_business/key' => $key, 'paypal_business/hook_key' => $id));
+            StoreConfig::set(['paypal_business/key' => $key, 'paypal_business/hook_key' => $id]);
 		}
-	} catch(Exception $e){
+	} catch (Exception $e) {
 		die($e->getData());
 		ErrorHandler::logCustomError($e->getData());
 		die('PayPal integration incorrectly configured!');

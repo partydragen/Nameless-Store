@@ -12,7 +12,7 @@
 class Store_Module extends Module {
     private $_store_language, $_language, $_cache, $_store_url;
 
-    public function __construct($language, $store_language, $pages, $cache, $endpoints){
+    public function __construct($language, $store_language, $pages, $cache, $endpoints) {
         $this->_language = $language;
         $this->_store_language = $store_language;
         $this->_cache = $cache;
@@ -26,7 +26,7 @@ class Store_Module extends Module {
 
         // Get variables from cache
         $cache->setCache('store_settings');
-        if($cache->isCached('store_url')){
+        if ($cache->isCached('store_url')) {
             $this->_store_url = Output::getClean(rtrim($cache->retrieve('store_url'), '/'));
         } else {
             $this->_store_url = '/store';
@@ -59,51 +59,51 @@ class Store_Module extends Module {
         
         
         // Autoload API Endpoints
-        Util::loadEndpoints(join(DIRECTORY_SEPARATOR, array(ROOT_PATH, 'modules', 'Store', 'includes', 'endpoints')), $endpoints);
+        Util::loadEndpoints(join(DIRECTORY_SEPARATOR, [ROOT_PATH, 'modules', 'Store', 'includes', 'endpoints']), $endpoints);
         
         // Check if module version changed
         $cache->setCache('store_module_cache');
-        if(!$cache->isCached('module_version')){
+        if (!$cache->isCached('module_version')) {
             $cache->store('module_version', $module_version);
         } else {
-            if($module_version != $cache->retrieve('module_version')) {
+            if ($module_version != $cache->retrieve('module_version')) {
                 // Version have changed, Perform actions
                 $this->initialiseUpdate($cache->retrieve('module_version'));
                 
                 $cache->store('module_version', $module_version);
                 
-                if($cache->isCached('update_check')){
+                if ($cache->isCached('update_check')) {
                     $cache->erase('update_check');
                 }
             }
         }
     }
 
-    public function onInstall(){
+    public function onInstall() {
         // Initialise
         $this->initialise();
     }
 
-    public function onUninstall(){
+    public function onUninstall() {
         // Not necessary
     }
 
-    public function onEnable(){
+    public function onEnable() {
         // Check if we need to initialise again
         $this->initialise();
     }
 
-    public function onDisable(){
+    public function onDisable() {
         // Not necessary
     }
 
-    public function onPageLoad($user, $pages, $cache, $smarty, $navs, $widgets, $template){
+    public function onPageLoad($user, $pages, $cache, $smarty, $navs, $widgets, $template) {
         // Classes
         require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
         
         // Add link to navbar
         $cache->setCache('nav_location');
-        if(!$cache->isCached('store_location')){
+        if (!$cache->isCached('store_location')) {
             $link_location = 1;
             $cache->store('store_location', 1);
         } else {
@@ -111,7 +111,7 @@ class Store_Module extends Module {
         }
 
         $cache->setCache('navbar_order');
-        if(!$cache->isCached('store_order')){
+        if (!$cache->isCached('store_order')) {
             $store_order = 21;
             $cache->store('store_order', 21);
         } else {
@@ -119,18 +119,18 @@ class Store_Module extends Module {
         }
 
         $cache->setCache('navbar_icons');
-        if(!$cache->isCached('store_icon'))
+        if (!$cache->isCached('store_icon'))
             $icon = '';
         else
             $icon = $cache->retrieve('store_icon');
 
         $cache->setCache('store_settings');
-        if($cache->isCached('navbar_position'))
+        if ($cache->isCached('navbar_position'))
             $navbar_pos = $cache->retrieve('navbar_position');
         else
             $navbar_pos = 'top';
 
-        switch($link_location){
+        switch ($link_location) {
             case 1:
                 // Navbar
                 $navs[0]->add('store', $this->_store_language->get('general', 'store'), URL::build($this->_store_url), 'top', null, $store_order, $icon);
@@ -151,9 +151,9 @@ class Store_Module extends Module {
 		$module_pages = $widgets->getPages('Latest Purchases');
 		$widgets->add(new LatestStorePurchasesWidget($module_pages, $smarty, $this->_language, $this->_store_language, $cache, $user));
 
-        if(defined('BACK_END')){
+        if (defined('BACK_END')) {
             // Define permissions which belong to this module
-            PermissionHandler::registerPermissions('Store', array(
+            PermissionHandler::registerPermissions('Store', [
                 'staffcp.store' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('general', 'store'),
                 'staffcp.store.settings' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'settings'),
                 'staffcp.store.gateways' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'gateways'),
@@ -161,11 +161,11 @@ class Store_Module extends Module {
                 'staffcp.store.payments' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments'),
                 'staffcp.store.connections' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'connections'),
                 'staffcp.store.fields' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'fields'),
-            ));
+            ]);
         
-            if($user->hasPermission('staffcp.store')){
+            if ($user->hasPermission('staffcp.store')) {
                 $cache->setCache('panel_sidebar');
-                if(!$cache->isCached('store_order')){
+                if (!$cache->isCached('store_order')) {
                     $order = 18;
                     $cache->store('store_order', 18);
                 } else {
@@ -174,8 +174,8 @@ class Store_Module extends Module {
 
                 $navs[2]->add('store_divider', mb_strtoupper($this->_store_language->get('general', 'store')), 'divider', 'top', null, $order, '');
 
-                if($user->hasPermission('staffcp.store.settings')){
-                    if(!$cache->isCached('store_icon')){
+                if ($user->hasPermission('staffcp.store.settings')) {
+                    if (!$cache->isCached('store_icon')) {
                         $icon = '<i class="nav-icon fas fa-shopping-cart"></i>';
                         $cache->store('store_icon', $icon);
                     } else
@@ -184,8 +184,8 @@ class Store_Module extends Module {
                     $navs[2]->add('store', $this->_store_language->get('general', 'store'), URL::build('/panel/store'), 'top', null, ($order + 0.1), $icon);
                 }
                 
-                if($user->hasPermission('staffcp.store.gateways')){
-                    if(!$cache->isCached('store_gateways_icon')){
+                if ($user->hasPermission('staffcp.store.gateways')) {
+                    if (!$cache->isCached('store_gateways_icon')) {
                         $icon = '<i class="nav-icon far fa-credit-card"></i>';
                         $cache->store('store_gateways_icon', $icon);
                     } else
@@ -194,8 +194,8 @@ class Store_Module extends Module {
                     $navs[2]->add('store_gateways', $this->_store_language->get('admin', 'gateways'), URL::build('/panel/store/gateways'), 'top', null, ($order + 0.2), $icon);
                 }
 
-                if($user->hasPermission('staffcp.store.products')){
-                    if(!$cache->isCached('store_products_icon')){
+                if ($user->hasPermission('staffcp.store.products')) {
+                    if (!$cache->isCached('store_products_icon')) {
                         $icon = '<i class="nav-icon fas fa-box-open"></i>';
                         $cache->store('store_products_icon', $icon);
                     } else
@@ -204,8 +204,8 @@ class Store_Module extends Module {
                     $navs[2]->add('store_products', $this->_store_language->get('general', 'products'), URL::build('/panel/store/products'), 'top', null, ($order + 0.3), $icon);
                 }
 
-                if($user->hasPermission('staffcp.store.payments')){
-                    if(!$cache->isCached('store_payments_icon')){
+                if ($user->hasPermission('staffcp.store.payments')) {
+                    if (!$cache->isCached('store_payments_icon')) {
                         $icon = '<i class="nav-icon fas fa-donate"></i>';
                         $cache->store('store_payments_icon', $icon);
                     } else
@@ -214,8 +214,8 @@ class Store_Module extends Module {
                     $navs[2]->add('store_payments', $this->_store_language->get('admin', 'payments'), URL::build('/panel/store/payments'), 'top', null, ($order + 0.4), $icon);
                 }
                 
-                if($user->hasPermission('staffcp.store.connections')){
-                    if(!$cache->isCached('store_connections_icon')){
+                if ($user->hasPermission('staffcp.store.connections')) {
+                    if (!$cache->isCached('store_connections_icon')) {
                         $icon = '<i class="nav-icon fas fa-plug"></i>';
                         $cache->store('store_connections_icon', $icon);
                     } else
@@ -224,8 +224,8 @@ class Store_Module extends Module {
                     $navs[2]->add('store_connections', $this->_store_language->get('admin', 'connections'), URL::build('/panel/store/connections'), 'top', null, ($order + 0.5), $icon);
                 }
                 
-                if($user->hasPermission('staffcp.store.fields')){
-                    if(!$cache->isCached('store_fields_icon')){
+                if ($user->hasPermission('staffcp.store.fields')) {
+                    if (!$cache->isCached('store_fields_icon')) {
                         $icon = '<i class="nav-icon fas fa-id-card"></i>';
                         $cache->store('store_fields_icon', $icon);
                     } else
@@ -235,18 +235,18 @@ class Store_Module extends Module {
                 }
             }
 
-            if($user->hasPermission('staffcp.store.payments'))
+            if ($user->hasPermission('staffcp.store.payments'))
                 Core_Module::addUserAction($this->_store_language->get('general', 'store'), URL::build('/panel/users/store/', 'user={id}'));
         }
         
         // Check for module updates
-        if(isset($_GET['route']) && $user->isLoggedIn() && $user->hasPermission('admincp.update')){
+        if (isset($_GET['route']) && $user->isLoggedIn() && $user->hasPermission('admincp.update')) {
             // Page belong to this module?
             $page = $pages->getActivePage();
-            if($page['module'] == 'Store'){
+            if ($page['module'] == 'Store') {
 
                 $cache->setCache('store_module_cache');
-                if($cache->isCached('update_check')){
+                if ($cache->isCached('update_check')) {
                     $update_check = $cache->retrieve('update_check');
                 } else {
                     require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
@@ -255,41 +255,41 @@ class Store_Module extends Module {
                 }
 
                 $update_check = json_decode($update_check);
-                if(!isset($update_check->error) && !isset($update_check->no_update) && isset($update_check->new_version)){  
-                    $smarty->assign(array(
+                if (!isset($update_check->error) && !isset($update_check->no_update) && isset($update_check->new_version)) {  
+                    $smarty->assign([
                         'NEW_UPDATE' => str_replace('{x}', $this->getName(), (isset($update_check->urgent) && $update_check->urgent == 'true') ? $this->_store_language->get('admin', 'new_urgent_update_available_x') : $this->_store_language->get('admin', 'new_update_available_x')),
                         'NEW_UPDATE_URGENT' => (isset($update_check->urgent) && $update_check->urgent == 'true'),
                         'CURRENT_VERSION' => str_replace('{x}', $this->getVersion(), $this->_store_language->get('admin', 'current_version_x')),
                         'NEW_VERSION' => str_replace('{x}', Output::getClean($update_check->new_version), $this->_store_language->get('admin', 'new_version_x')),
                         'UPDATE' => $this->_store_language->get('admin', 'view_resource'),
                         'UPDATE_LINK' => Output::getClean($update_check->link)
-                    ));
+                    ]);
                 }
             }
         }
     }
     
-    private function initialiseUpdate($old_version){
-        $old_version = str_replace(array(".", "-"), "", $old_version);
+    private function initialiseUpdate($old_version) {
+        $old_version = str_replace([".", "-"], "", $old_version);
         $queries = new Queries();
         
         // Generate tables
         try {
             $engine = Config::get('mysql/engine');
             $charset = Config::get('mysql/charset');
-        } catch(Exception $e){
+        } catch (Exception $e) {
             $engine = 'InnoDB';
             $charset = 'utf8mb4';
         }
 
-        if(!$engine || is_array($engine))
+        if (!$engine || is_array($engine))
             $engine = 'InnoDB';
 
-        if(!$charset || is_array($charset))
+        if (!$charset || is_array($charset))
             $charset = 'latin1';
 
         // Old converter from pre release
-        if(!$queries->tableExists('store_orders')) {
+        if (!$queries->tableExists('store_orders')) {
             // Rename Tabels
             try {
                 DB::getInstance()->createQuery('RENAME TABLE nl2_store_packages TO nl2_store_products;');
@@ -333,10 +333,10 @@ class Store_Module extends Module {
             try {
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_gateways ADD `displayname` varchar(64) NOT NULL');
                 
-                $queries->update('store_gateways', 1, array(
+                $queries->update('store_gateways', 1, [
                     'name' => 'PayPal',
                     'displayname' => 'PayPal'
-                ));
+                ]);
                 
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_gateways DROP COLUMN client_id;');
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_gateways DROP COLUMN client_key;');
@@ -352,26 +352,26 @@ class Store_Module extends Module {
                 
                 // Convert old payments
                 $payments = DB::getInstance()->query('SELECT * FROM nl2_store_payments')->results();
-                foreach($payments as $payment) {
-                    $queries->create('store_orders', array(
+                foreach ($payments as $payment) {
+                    $queries->create('store_orders', [
                         'user_id' => $payment->user_id,
                         'player_id' => $payment->player_id,
                         'created' => $payment->created
-                    ));
+                    ]);
                     
                     $last_id = $queries->getLastId();
                     
-                    $packages = DB::getInstance()->query('SELECT * FROM nl2_store_payments_packages WHERE payment_id = ?', array($payment->id))->results();
-                    foreach($packages as $package) {
-                        $queries->create('store_orders_products', array(
+                    $packages = DB::getInstance()->query('SELECT * FROM nl2_store_payments_packages WHERE payment_id = ?', [$payment->id])->results();
+                    foreach ($packages as $package) {
+                        $queries->create('store_orders_products', [
                             'order_id' => $last_id,
                             'product_id' => $package->package_id
-                        ));
+                        ]);
                     }
                     
-                    $queries->update('store_payments', $payment->id, array(
+                    $queries->update('store_payments', $payment->id, [
                         'order_id' => $last_id
-                    ));
+                    ]);
                 }
                 
             } catch (Exception $e) {
@@ -396,27 +396,27 @@ class Store_Module extends Module {
             }
             
             try {
-                $queries->create('store_settings', array(
+                $queries->create('store_settings', [
                     'name' => 'checkout_complete_content',
                     'value' => 'Thanks for your payment, It can take up to 15 minutes for your payment to be processed'
-                ));
+                ]);
                 
-                $queries->create('store_settings', array(
+                $queries->create('store_settings', [
                     'name' => 'currency',
                     'value' => 'USD'
-                ));
+                ]);
                 
-                $queries->create('store_settings', array(
+                $queries->create('store_settings', [
                     'name' => 'currency_symbol',
                     'value' => '$'
-                ));
+                ]);
                 
-                $allow_guests_query = $queries->getWhere('store_settings', array('name', '=', 'allow_guests'));
-                if(!count($allow_guests_query)) {
-                    $queries->create('store_settings', array(
+                $allow_guests_query = $queries->getWhere('store_settings', ['name', '=', 'allow_guests']);
+                if (!count($allow_guests_query)) {
+                    $queries->create('store_settings', [
                         'name' => 'allow_guests',
                         'value' => 0
-                    ));
+                    ]);
                 }
             } catch (Exception $e) {
                 // unable to retrieve from config
@@ -424,22 +424,22 @@ class Store_Module extends Module {
             }
         }
         
-        if($old_version < 110) {
+        if ($old_version < 110) {
             try {
                 $queries->createTable('store_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `type` varchar(32) NOT NULL, `name` varchar(64) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
             
             try {
                 $queries->createTable('store_products_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `action_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
             
             try {
                 // Update main admin group permissions
-                $group = $queries->getWhere('groups', array('id', '=', 2));
+                $group = $queries->getWhere('groups', ['id', '=', 2]);
                 $group = $group[0];
                 
                 $group_permissions = json_decode($group->permissions, TRUE);
@@ -448,14 +448,14 @@ class Store_Module extends Module {
                 $group_permissions['staffcp.store.products'] = 1;
                 
                 $group_permissions = json_encode($group_permissions);
-                $queries->update('groups', 2, array('permissions' => $group_permissions));
-            } catch(Exception $e){
+                $queries->update('groups', 2, ['permissions' => $group_permissions]);
+            } catch (Exception $e) {
                 // Error
             }
             
             try {
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_products_commands DROP COLUMN server_id;');
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
             
@@ -484,39 +484,39 @@ class Store_Module extends Module {
             }
         }
         
-        if($old_version < 120) {
-            if(!$queries->tableExists('store_fields')){
+        if ($old_version < 120) {
+            if (!$queries->tableExists('store_fields')) {
                 try {
                     $queries->createTable("store_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `identifier` varchar(32) NOT NULL, `description` varchar(255) NOT NULL, `type` int(11) NOT NULL, `required` tinyint(1) NOT NULL DEFAULT '0', `min` int(11) NOT NULL DEFAULT '0', `max` int(11) NOT NULL DEFAULT '0', `options` text NULL, `deleted` int(11) NOT NULL DEFAULT '0', `order` int(11) NOT NULL DEFAULT '1', PRIMARY KEY (`id`)", "ENGINE=$engine DEFAULT CHARSET=$charset");
-                } catch(Exception $e){
+                } catch (Exception $e) {
                     // Error
                 }
             }
         
             try {
                 $queries->createTable("store_products_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `field_id` int(11) NOT NULL, PRIMARY KEY (`id`)", "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
             
-            if(!$queries->tableExists('store_orders_products_fields')){
+            if (!$queries->tableExists('store_orders_products_fields')) {
                 try {
                     $queries->createTable("store_orders_products_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `field_id` int(11) NOT NULL, `value` TEXT NOT NULL, PRIMARY KEY (`id`)", "ENGINE=$engine DEFAULT CHARSET=$charset");
-                } catch(Exception $e){
+                } catch (Exception $e) {
                     // Error
                 }
             }
         }
         
-        if($old_version < 130) {
-            $queries->create('store_settings', array(
+        if ($old_version < 130) {
+            $queries->create('store_settings', [
                 'name' => 'player_login',
                 'value' => 1
-            ));
+            ]);
             
             try {
                 // Update main admin group permissions
-                $group = $queries->getWhere('groups', array('id', '=', 2));
+                $group = $queries->getWhere('groups', ['id', '=', 2]);
                 $group = $group[0];
                 
                 $group_permissions = json_decode($group->permissions, TRUE);
@@ -524,197 +524,197 @@ class Store_Module extends Module {
                 $group_permissions['staffcp.store.fields'] = 1;
                 
                 $group_permissions = json_encode($group_permissions);
-                $queries->update('groups', 2, array('permissions' => $group_permissions));
-            } catch(Exception $e){
+                $queries->update('groups', 2, ['permissions' => $group_permissions]);
+            } catch (Exception $e) {
                 // Error
             }
         }
     }
     
-    private function initialise(){
+    private function initialise() {
         // Generate tables
         try {
             $engine = Config::get('mysql/engine');
             $charset = Config::get('mysql/charset');
-        } catch(Exception $e){
+        } catch (Exception $e) {
             $engine = 'InnoDB';
             $charset = 'utf8mb4';
         }
 
-        if(!$engine || is_array($engine))
+        if (!$engine || is_array($engine))
             $engine = 'InnoDB';
 
-        if(!$charset || is_array($charset))
+        if (!$charset || is_array($charset))
             $charset = 'latin1';
 
         $queries = new Queries();
         
-        if(!$queries->tableExists('store_agreements')) {
+        if (!$queries->tableExists('store_agreements')) {
             try {
                 $queries->createTable('store_agreements', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) NOT NULL, `player_id` int(11) NOT NULL, `agreement_id` varchar(32) NOT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `email` varchar(128) NOT NULL, `payment_method` int(11) NOT NULL, `verified` tinyint(1) NOT NULL, `payer_id` varchar(64) NOT NULL, `last_payment_date` int(11) NOT NULL, `next_billing_date` int(11) NOT NULL, `created` int(11) NOT NULL, `updated` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
-        if(!$queries->tableExists('store_categories')) {
+        if (!$queries->tableExists('store_categories')) {
             try {
                 $queries->createTable('store_categories', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(128) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `only_subcategories` tinyint(1) NOT NULL DEFAULT \'0\', `parent_category` int(11) DEFAULT NULL, `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
-        if(!$queries->tableExists('store_products')) {
+        if (!$queries->tableExists('store_products')) {
             try {
                 $queries->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price` varchar(8) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
-        if(!$queries->tableExists('store_products_connections')) {
+        if (!$queries->tableExists('store_products_connections')) {
             try {
                 $queries->createTable('store_products_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `action_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
-        if(!$queries->tableExists('store_products_fields')){
+        if (!$queries->tableExists('store_products_fields')) {
             try {
                 $queries->createTable("store_products_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `field_id` int(11) NOT NULL, PRIMARY KEY (`id`)", "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
-        if(!$queries->tableExists('store_products_actions')) {
+        if (!$queries->tableExists('store_products_actions')) {
             try {
                 $queries->createTable('store_products_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `own_connections` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
-        if(!$queries->tableExists('store_pending_actions')) {
+        if (!$queries->tableExists('store_pending_actions')) {
             try {
                 $queries->createTable('store_pending_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `action_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `player_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `status` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
-        if(!$queries->tableExists('store_orders')) {
+        if (!$queries->tableExists('store_orders')) {
             try {
                 $queries->createTable('store_orders', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `player_id` int(11) DEFAULT NULL, `created` int(11) NOT NULL, `ip` varchar(128) DEFAULT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
-        if(!$queries->tableExists('store_orders_products')) {
+        if (!$queries->tableExists('store_orders_products')) {
             try {
                 $queries->createTable('store_orders_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
-        if(!$queries->tableExists('store_orders_products_fields')){
+        if (!$queries->tableExists('store_orders_products_fields')) {
             try {
                 $queries->createTable("store_orders_products_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `field_id` int(11) NOT NULL, `value` TEXT NOT NULL, PRIMARY KEY (`id`)", "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
-        if(!$queries->tableExists('store_payments')) {
+        if (!$queries->tableExists('store_payments')) {
             try {
                 $queries->createTable('store_payments', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `payment_id` varchar(64) DEFAULT NULL, `agreement_id` varchar(64) DEFAULT NULL, `transaction` varchar(32) DEFAULT NULL, `amount` varchar(11) DEFAULT NULL, `currency` varchar(11) DEFAULT NULL, `fee` varchar(11) DEFAULT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `last_updated` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
-        if(!$queries->tableExists('store_players')) {
+        if (!$queries->tableExists('store_players')) {
             try {
                 $queries->createTable('store_players', ' `id` int(11) NOT NULL AUTO_INCREMENT, `username` varchar(64) NOT NULL, `uuid` varchar(64) DEFAULT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
-        if(!$queries->tableExists('store_connections')) {
+        if (!$queries->tableExists('store_connections')) {
             try {
                 $queries->createTable('store_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `type` varchar(32) NOT NULL, `name` varchar(64) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
-        if(!$queries->tableExists('store_settings')) {
+        if (!$queries->tableExists('store_settings')) {
             try {
                 $queries->createTable('store_settings', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `value` text, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
             
-            $queries->create('store_settings', array(
+            $queries->create('store_settings', [
                 'name' => 'checkout_complete_content',
                 'value' => 'Thanks for your payment, It can take up to 15 minutes for your payment to be processed'
-            ));
+            ]);
                 
-            $queries->create('store_settings', array(
+            $queries->create('store_settings', [
                 'name' => 'currency',
                 'value' => 'USD'
-            ));
+            ]);
                 
-            $queries->create('store_settings', array(
+            $queries->create('store_settings', [
                 'name' => 'currency_symbol',
                 'value' => '$'
-            ));
+            ]);
             
-            $queries->create('store_settings', array(
+            $queries->create('store_settings', [
                 'name' => 'allow_guests',
                 'value' => 0
-            ));
+            ]);
             
-            $queries->create('store_settings', array(
+            $queries->create('store_settings', [
                 'name' => 'player_login',
                 'value' => 0
-            ));
+            ]);
         }
         
-        if(!$queries->tableExists('store_gateways')) {
+        if (!$queries->tableExists('store_gateways')) {
             try {
                 $queries->createTable('store_gateways', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `displayname` varchar(64) NOT NULL, `enabled` tinyint(1) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
             
-            $queries->create('store_gateways', array(
+            $queries->create('store_gateways', [
                 'name' => 'PayPal',
                 'displayname' => 'PayPal'
-            ));
+            ]);
             
-            $queries->create('store_gateways', array(
+            $queries->create('store_gateways', [
                 'name' => 'PayPalBusiness',
                 'displayname' => 'PayPal'
-            ));
+            ]);
         }
         
-        if(!$queries->tableExists('store_fields')){
+        if (!$queries->tableExists('store_fields')) {
             try {
                 $queries->createTable("store_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `identifier` varchar(32) NOT NULL, `description` varchar(255) NOT NULL, `type` int(11) NOT NULL, `required` tinyint(1) NOT NULL DEFAULT '0', `min` int(11) NOT NULL DEFAULT '0', `max` int(11) NOT NULL DEFAULT '0', `options` text NULL, `deleted` int(11) NOT NULL DEFAULT '0', `order` int(11) NOT NULL DEFAULT '1', PRIMARY KEY (`id`)", "ENGINE=$engine DEFAULT CHARSET=$charset");
-            } catch(Exception $e){
+            } catch (Exception $e) {
                 // Error
             }
         }
         
         try {
             // Update main admin group permissions
-            $group = $queries->getWhere('groups', array('id', '=', 2));
+            $group = $queries->getWhere('groups', ['id', '=', 2]);
             $group = $group[0];
             
             $group_permissions = json_decode($group->permissions, TRUE);
@@ -727,8 +727,8 @@ class Store_Module extends Module {
             $group_permissions['staffcp.store.fields'] = 1;
             
             $group_permissions = json_encode($group_permissions);
-            $queries->update('groups', 2, array('permissions' => $group_permissions));
-        } catch(Exception $e){
+            $queries->update('groups', 2, ['permissions' => $group_permissions]);
+        } catch (Exception $e) {
             // Error
         }
     }

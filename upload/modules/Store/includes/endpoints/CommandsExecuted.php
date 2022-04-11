@@ -9,7 +9,7 @@ class CommandsExecuted extends EndpointBase {
 
     public function execute(Nameless2API $api) {
         $commands = $_POST['commands'];
-        if(!is_array($commands) || !count($commands)) {
+        if (!is_array($commands) || !count($commands)) {
             $api->throwError(110, 'No commands provided');
         }
         
@@ -24,6 +24,6 @@ class CommandsExecuted extends EndpointBase {
         // Ensure the user exists
         $user = $api->getDb()->createQuery('UPDATE `nl2_store_pending_actions` SET `status`=1 WHERE id IN ' . $ids);
         
-        $api->returnArray(array('success' => true));
+        $api->returnArray(['success' => true]);
     }
 }

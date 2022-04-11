@@ -14,7 +14,7 @@ class CategoryList extends EndpointBase {
         $categories_query = $api->getDb()->query($query)->results();
 
         $categories_array = [];
-        foreach($categories_query as $category) {
+        foreach ($categories_query as $category) {
             $category_array[] = [
                 'id' => (int) $category->id,
                 'name' => Output::getClean($category->name),

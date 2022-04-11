@@ -25,7 +25,7 @@ class Store {
     public function getStoreURL() {
         // Get variables from cache
         $this->_cache->setCache('store_settings');
-        if($this->_cache->isCached('store_url')){
+        if ($this->_cache->isCached('store_url')) {
             $store_url = Output::getClean(rtrim($this->_cache->retrieve('store_url'), '/'));
         } else {
             $store_url = '/store';
@@ -36,10 +36,10 @@ class Store {
     
     // Get all products
     public function getProducts() {
-        $products_list = array();
+        $products_list = [];
         
         $products = $this->_db->query('SELECT * FROM nl2_store_products WHERE deleted = 0 ORDER BY `order` ASC')->results();
-        foreach($products as $data) {
+        foreach ($products as $data) {
             $product = new Product();
             $product->setData($data);
             
@@ -60,12 +60,12 @@ class Store {
     public function getAllCategories() {
         $categories = $this->_db->query('SELECT * FROM nl2_store_categories WHERE deleted = 0 ORDER BY `order` ASC')->results();
             
-        $categories_array = array();
-        foreach($categories as $category){
-            $categories_array[] = array(
+        $categories_array = [];
+        foreach ($categories as $category) {
+            $categories_array[] = [
                 'id' => Output::getClean($category->id),
                 'name' => Output::getClean($category->name)
-            );
+            ];
         }
         
         return $categories_array;
@@ -75,12 +75,12 @@ class Store {
     public function getAllConnections() {
         $connections = $this->_db->query('SELECT * FROM nl2_store_connections')->results();
             
-        $connections_array = array();
-        foreach($connections as $connection){
-            $connections_array[] = array(
+        $connections_array = [];
+        foreach ($connections as $connection) {
+            $connections_array[] = [
                 'id' => Output::getClean($connection->id),
                 'name' => Output::getClean($connection->name)
-            );
+            ];
         }
         
         return $connections_array;
@@ -89,40 +89,40 @@ class Store {
     // Get navbar menu
     public function getNavbarMenu($active) {
         $store_url = $this->getStoreURL();
-        $categories = array();
+        $categories = [];
         
-        $categories[] = array(
+        $categories[] = [
             'url' => URL::build($store_url),
             'title' => $this->_store_language->get('general', 'home'),
             'active' => Output::getClean($active) == 'Home'
-        );
+        ];
         
         $categories_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE parent_category IS NULL AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC')->results();
-        if(count($categories_query)){
-            foreach($categories_query as $item){
-                $subcategories_query = DB::getInstance()->query('SELECT id, `name` FROM nl2_store_categories WHERE parent_category = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', array($item->id))->results();
+        if (count($categories_query)) {
+            foreach ($categories_query as $item) {
+                $subcategories_query = DB::getInstance()->query('SELECT id, `name` FROM nl2_store_categories WHERE parent_category = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', [$item->id])->results();
 
-                $subcategories = array();
+                $subcategories = [];
                 $sub_active = false;
-                if(count($subcategories_query)){
-                    foreach($subcategories_query as $subcategory){
+                if (count($subcategories_query)) {
+                    foreach ($subcategories_query as $subcategory) {
                         $sub_active = Output::getClean($active) == Output::getClean($subcategory->name);
 
-                        $subcategories[] = array(
+                        $subcategories[] = [
                             'url' => URL::build($store_url . '/category/' . Output::getClean($subcategory->id)),
                             'title' => Output::getClean($subcategory->name),
                             'active' => $sub_active
-                        );
+                        ];
                     }
                 }
 
-                $categories[$item->id] = array(
+                $categories[$item->id] = [
                     'url' => URL::build($store_url . '/category/' . Output::getClean($item->id)),
                     'title' => Output::getClean($item->name),
                     'subcategories' => $subcategories,
                     'active' => !$sub_active && Output::getClean($active) == Output::getClean($item->name),
                     'only_subcategories' => Output::getClean($item->only_subcategories)
-                );
+                ];
             }
         }
         
@@ -144,16 +144,16 @@ class Store {
 
         // Check for updates
         if (!$current_version) {
-            $current_version = $queries->getWhere('settings', array('name', '=', 'nameless_version'));
+            $current_version = $queries->getWhere('settings', ['name', '=', 'nameless_version']);
             $current_version = $current_version[0]->value;
         }
 
-        $uid = $queries->getWhere('settings', array('name', '=', 'unique_id'));
+        $uid = $queries->getWhere('settings', ['name', '=', 'unique_id']);
         $uid = $uid[0]->value;
         
         $enabled_modules = Module::getModules();
-        foreach($enabled_modules as $enabled_item){
-            if($enabled_item->getName() == 'Store'){
+        foreach ($enabled_modules as $enabled_item) {
+            if ($enabled_item->getName() == 'Store') {
                 $module = $enabled_item;
                 break;
             }

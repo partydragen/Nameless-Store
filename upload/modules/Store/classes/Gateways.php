@@ -15,10 +15,10 @@ class Gateways {
     // Constructor, connect to database
     public function __construct() {
         $directories = glob(ROOT_PATH . '/modules/Store/gateways/*' , GLOB_ONLYDIR);
-        foreach($directories as $directory){
+        foreach ($directories as $directory) {
             $folders = explode('/', $directory);
             
-            if(file_exists(ROOT_PATH . '/modules/Store/gateways/' . $folders[count($folders) - 1] . '/gateway.php')) {
+            if (file_exists(ROOT_PATH . '/modules/Store/gateways/' . $folders[count($folders) - 1] . '/gateway.php')) {
                 require_once(ROOT_PATH . '/modules/Store/gateways/' . $folders[count($folders) - 1] . '/gateway.php');
 
                 $this->_gateways[$gateway->getName()] = $gateway;

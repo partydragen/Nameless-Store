@@ -1,7 +1,7 @@
 <?php
 $raw_post_data = file_get_contents('php://input');
 $raw_post_array = explode('&', $raw_post_data);
-$myPost = array();
+$myPost = [];
 foreach ($raw_post_array as $keyval) {
     $keyval = explode('=', $keyval);
     if (count($keyval) == 2)
@@ -33,7 +33,7 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, $req);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 curl_setopt($ch, CURLOPT_FORBID_REUSE, 1);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Connection: Close'));
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Connection: Close']);
 
 
 if (!($res = curl_exec($ch))) {
@@ -44,8 +44,8 @@ if (!($res = curl_exec($ch))) {
 curl_close($ch);
 
 // Save response to log
-if(is_dir(ROOT_PATH . '/cache/paypal_logs/')){
-    if(isset($_POST['payment_status'])) {
+if (is_dir(ROOT_PATH . '/cache/paypal_logs/')) {
+    if (isset($_POST['payment_status'])) {
         file_put_contents(ROOT_PATH . '/cache/paypal_logs/'.$gateway->getName() . '_' . $_POST['payment_status'] .'_'.date('U').'.txt', $req);
     } else {
         file_put_contents(ROOT_PATH . '/cache/paypal_logs/'.$gateway->getName() . '_no_event_'.date('U').'.txt', $req);
@@ -71,28 +71,28 @@ if (strcmp($res, "VERIFIED") == 0) {
     if ($paypal_email == $receiver_email) {
         
         // Handle event
-        switch($payment_status) {
+        switch ($payment_status) {
             case 'Completed';
                 // Payment complete
                 $payment = new Payment($transaction_id, 'transaction');
-                if($payment->exists()) {
+                if ($payment->exists()) {
                     // Payment exists
-                    $data = array(
+                    $data = [
                         'transaction' => $transaction_id,
                         'amount' => $payment_amount,
                         'currency' => $payment_currency,
                         'fee' => $payment_fee
-                    );
+                    ];
                 } else {
                     // Register new payment
-                    $data = array(
+                    $data = [
                         'order_id' => $order_id,
                         'gateway_id' => $gateway->getId(),
                         'transaction' => $transaction_id,
                         'amount' => $payment_amount,
                         'currency' => $payment_currency,
                         'fee' => $payment_fee
-                    );
+                    ];
                 }
                 
                 $payment->handlePaymentEvent('COMPLETED', $data);
@@ -100,17 +100,17 @@ if (strcmp($res, "VERIFIED") == 0) {
             case 'Refunded';
                 // Payment refunded
                 $payment = new Payment($_POST['parent_txn_id'], 'transaction');
-                if($payment->exists()) {
+                if ($payment->exists()) {
                     // Payment exists
-                    $payment->handlePaymentEvent('REFUNDED', array());
+                    $payment->handlePaymentEvent('REFUNDED', []);
                 }
             break;
             default:
                 // Payment refunded
                 $payment = new Payment($transaction_id, 'transaction');
-                if($payment->exists()) {
+                if ($payment->exists()) {
                     // Payment exists
-                    $payment->handlePaymentEvent('REFUNDED', array());
+                    $payment->handlePaymentEvent('REFUNDED', []);
                 }
             break;
         }

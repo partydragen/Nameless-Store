@@ -9,7 +9,7 @@
  *  Store module - Gateway Processer
  */
 
-if(!isset($_GET['gateway'])) {
+if (!isset($_GET['gateway'])) {
     die('Invalid');
 }
 
@@ -24,14 +24,14 @@ if (isset($store_conf) && is_array($store_conf)) {
 
 // Get variables from cache
 $cache->setCache('store_settings');
-if($cache->isCached('store_url')){
+if ($cache->isCached('store_url')) {
     $store_url = Output::getClean(rtrim($cache->retrieve('store_url'), '/'));
 } else {
     $store_url = '/store';
 }
 
 $gateway = $gateways->get($_GET['gateway']);
-if($gateway) {
+if ($gateway) {
     // Load gateway process
     require_once(ROOT_PATH . '/modules/Store/gateways/'.$gateway->getName().'/process.php');
 } else {

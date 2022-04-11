@@ -10,7 +10,7 @@
  */
  
 // Can the user view the StaffCP?
-if(!$user->handlePanelPageLoad('staffcp.store.connections')) {
+if (!$user->handlePanelPageLoad('staffcp.store.connections')) {
     require_once(ROOT_PATH . '/403.php');
     die();
 }
@@ -21,26 +21,26 @@ define('PANEL_PAGE', 'store_connections');
 $page_title = $store_language->get('admin', 'connections');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
-if(!isset($_GET['action'])) {
+if (!isset($_GET['action'])) {
     
     $connections = DB::getInstance()->query('SELECT * FROM nl2_store_connections');
-    if($connections->count()){
+    if ($connections->count()) {
         $connections = $connections->results();
 
-        $connections_list = array();
-        foreach($connections as $connection){
-            $connections_list[] = array(
+        $connections_list = [];
+        foreach ($connections as $connection) {
+            $connections_list[] = [
                 'id' => Output::getClean($connection->id),
                 'name' => Output::getClean($connection->name),
                 'type' => Output::getClean($connection->type),
                 'edit_link' => URL::build('/panel/store/connections/', 'action=edit&id=' . Output::getClean($connection->id))
-            );
+            ];
         }
 
         $smarty->assign('CONNECTIONS_LIST', $connections_list);
     }
     
-    $smarty->assign(array(
+    $smarty->assign([
         'CONNECTIONS_INFO' => $store_language->get('admin', 'connections_info'),
         'NO_CONNECTIONS' => $store_language->get('admin', 'no_connections'),
         'NEW_CONNECTION' => $store_language->get('admin', 'new_connection'),
@@ -55,47 +55,48 @@ if(!isset($_GET['action'])) {
         'TOKEN' => Token::get(),
         'YES' => $language->get('general', 'yes'),
         'NO' => $language->get('general', 'no'),
-    ));
+    ]);
     
     $template_file = 'store/connections.tpl';
 } else {
-    switch($_GET['action']) {
+    switch ($_GET['action']) {
         case 'new';
             // Create new connections
-            if(Input::exists()){
-                $errors = array();
-                if(Token::check(Input::get('token'))){
+            if (Input::exists()) {
+                $errors = [];
+
+                if (Token::check(Input::get('token'))) {
                     // Update product
                     $validate = new Validate();
-                    $validation = $validate->check($_POST, array(
-                        'name' => array(
+                    $validation = $validate->check($_POST, [
+                        'name' => [
                             'required' => true,
                             'min' => 1,
                             'max' => 64
-                        )
-                    ));
+                        ]
+                    ]);
                         
-                    if ($validation->passed()){
+                    if ($validation->passed()) {
                         // Save to database
-                        $queries->create('store_connections', array(
+                        $queries->create('store_connections', [
                             'name' => Output::getClean(Input::get('name')),
                             'type' => 'Minecraft',
-                        ));
+                        ]);
                         
                         Session::flash('connections_success', $store_language->get('admin', 'connection_updated_successfully'));
                         Redirect::to(URL::build('/panel/store/connections'));
                         die();
                     } else {
                         // Errors
-                        foreach($validation->errors() as $item){
-                            if(strpos($item, 'is required') !== false){
-                                switch($item){
+                        foreach ($validation->errors() as $item) {
+                            if (strpos($item, 'is required') !== false) {
+                                switch ($item) {
                                     case (strpos($item, 'name') !== false):
                                         $errors[] = $store_language->get('admin', 'name_required');
                                     break;
                                 }
-                            } else if(strpos($item, 'maximum') !== false){
-                                switch($item){
+                            } else if (strpos($item, 'maximum') !== false) {
+                                switch ($item) {
                                     case (strpos($item, 'name') !== false):
                                         $errors[] = str_replace('{x}', '64', $store_language->get('admin', 'name_maximum_x'));
                                     break;
@@ -109,62 +110,63 @@ if(!isset($_GET['action'])) {
                 }
             }
             
-            $smarty->assign(array(
+            $smarty->assign([
                 'CONNECTIONS_TITLE' => $store_language->get('admin', 'creating_new_connection'),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/connections/'),
                 'NAME' => $language->get('admin', 'name'),
                 'NAME_VALUE' => ((isset($_POST['name']) && $_POST['name']) ? Output::getClean(Input::get('name')) : '')
-            ));
+            ]);
             
             $template_file = 'store/connections_form.tpl';
         break;
         case 'edit';
             // Edit connections
-            if(!isset($_GET['id']) || !is_numeric($_GET['id'])){
+            if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
                 Redirect::to(URL::build('/panel/store/connections/'));
                 die();
             }
-            
-            $connection = DB::getInstance()->query('SELECT * FROM nl2_store_connections WHERE id = ?', array($_GET['id']));
-            if(!$connection->count()) {
+
+            $connection = DB::getInstance()->query('SELECT * FROM nl2_store_connections WHERE id = ?', [$_GET['id']]);
+            if (!$connection->count()) {
                 Redirect::to(URL::build('/panel/store/connections/'));
                 die();
             }
             $connection = $connection->first();
-            
-            if(Input::exists()){
-                $errors = array();
-                if(Token::check(Input::get('token'))){
+
+            if (Input::exists()) {
+                $errors = [];
+
+                if (Token::check(Input::get('token'))) {
                     // Update product
                     $validate = new Validate();
-                    $validation = $validate->check($_POST, array(
-                        'name' => array(
+                    $validation = $validate->check($_POST, [
+                        'name' => [
                             'required' => true,
                             'min' => 1,
                             'max' => 64
-                        )
-                    ));
-                        
-                    if ($validation->passed()){
-                        $queries->update('store_connections', $connection->id, array(
+                        ]
+                    ]);
+
+                    if ($validation->passed()) {
+                        $queries->update('store_connections', $connection->id, [
                             'name' => Output::getClean(Input::get('name'))
-                        ));
-                        
+                        ]);
+
                         Session::flash('connections_success', $store_language->get('admin', 'connection_updated_successfully'));
                         Redirect::to(URL::build('/panel/store/connections'));
                         die();
                     } else {
                         // Errors
-                        foreach($validation->errors() as $item){
-                            if(strpos($item, 'is required') !== false){
-                                switch($item){
+                        foreach ($validation->errors() as $item) {
+                            if (strpos($item, 'is required') !== false) {
+                                switch ($item) {
                                     case (strpos($item, 'name') !== false):
                                         $errors[] = $store_language->get('admin', 'name_required');
                                     break;
                                 }
-                            } else if(strpos($item, 'maximum') !== false){
-                                switch($item){
+                            } else if (strpos($item, 'maximum') !== false) {
+                                switch ($item) {
                                     case (strpos($item, 'name') !== false):
                                         $errors[] = str_replace('{x}', '64', $store_language->get('admin', 'name_maximum_x'));
                                     break;
@@ -178,13 +180,13 @@ if(!isset($_GET['action'])) {
                 }
             }
             
-            $smarty->assign(array(
+            $smarty->assign([
                 'CONNECTIONS_TITLE' => str_replace('{x}', Output::getClean($connection->name), $store_language->get('admin', 'editing_connection_x')),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/connections/'),
                 'NAME' => $language->get('admin', 'name'),
                 'NAME_VALUE' => Output::getClean($connection->name)
-            ));
+            ]);
             
             $template_file = 'store/connections_form.tpl';
         break;
@@ -193,8 +195,8 @@ if(!isset($_GET['action'])) {
             if (Input::exists()) {
                 if (Token::check(Input::get('token'))) {
                     if (isset($_POST['id'])) {
-                        $queries->delete('store_connections', array('id', '=', $_POST['id']));
-                        $queries->delete('store_products_connections', array('connection_id', '=', $_POST['id']));
+                        $queries->delete('store_connections', ['id', '=', $_POST['id']]);
+                        $queries->delete('store_products_connections', ['connection_id', '=', $_POST['id']]);
 
                         Session::flash('connections_success', $store_language->get('admin', 'connection_deleted_successfully'));
                     }
@@ -212,27 +214,27 @@ if(!isset($_GET['action'])) {
 }
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, array($navigation, $cc_nav, $mod_nav), $widgets, $templates);
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets, $templates);
 
-if(Session::exists('connections_success'))
+if (Session::exists('connections_success'))
     $success = Session::flash('connections_success');
 
-if(Session::exists('connections_error'))
-    $errors = array(Session::flash('connections_error'));
+if (Session::exists('connections_error'))
+    $errors = [Session::flash('connections_error')];
 
-if(isset($success))
-    $smarty->assign(array(
+if (isset($success))
+    $smarty->assign([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
-    ));
+    ]);
 
-if(isset($errors) && count($errors))
-    $smarty->assign(array(
+if (isset($errors) && count($errors))
+    $smarty->assign([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
-    ));
+    ]);
 
-$smarty->assign(array(
+$smarty->assign([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -240,7 +242,7 @@ $smarty->assign(array(
     'TOKEN' => Token::get(),
     'SUBMIT' => $language->get('general', 'submit'),
     'CONNECTIONS' => $store_language->get('admin', 'connections')
-));
+]);
 
 $page_load = microtime(true) - $start;
 define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));

@@ -10,7 +10,7 @@
  */
 
 // Can the user view the StaffCP?
-if(!$user->handlePanelPageLoad('staffcp.store.fields')) {
+if (!$user->handlePanelPageLoad('staffcp.store.fields')) {
     require_once(ROOT_PATH . '/403.php');
     die();
 }
@@ -24,33 +24,33 @@ require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
 
 $store = new Store($cache, $store_language);
 
-$field_types = array();
-$field_types[1] = array('id' => 1, 'name' => $language->get('admin', 'text'));
-$field_types[2] = array('id' => 2, 'name' => $store_language->get('admin', 'options'));
-$field_types[3] = array('id' => 3, 'name' => $language->get('admin', 'textarea'));
-$field_types[4] = array('id' => 4, 'name' => $store_language->get('admin', 'number'));
-$field_types[5] = array('id' => 5, 'name' => $language->get('general', 'email_address'));
-$field_types[6] = array('id' => 6, 'name' => $store_language->get('admin', 'radio'));
-$field_types[7] = array('id' => 7, 'name' => $store_language->get('admin', 'checkbox'));
+$field_types = [];
+$field_types[1] = ['id' => 1, 'name' => $language->get('admin', 'text')];
+$field_types[2] = ['id' => 2, 'name' => $store_language->get('admin', 'options')];
+$field_types[3] = ['id' => 3, 'name' => $language->get('admin', 'textarea')];
+$field_types[4] = ['id' => 4, 'name' => $store_language->get('admin', 'number')];
+$field_types[5] = ['id' => 5, 'name' => $language->get('general', 'email_address')];
+$field_types[6] = ['id' => 6, 'name' => $store_language->get('admin', 'radio')];
+$field_types[7] = ['id' => 7, 'name' => $store_language->get('admin', 'checkbox')];
 
-if(!isset($_GET['action'])) {
+if (!isset($_GET['action'])) {
     // Get fields from database
     $fields = DB::getInstance()->query('SELECT * FROM nl2_store_fields WHERE deleted = 0 ORDER BY `order`')->results();
-    $fields_array = array();
-    if(count($fields)){
-        foreach($fields as $field){
-            $fields_array[] = array(
+    $fields_array = [];
+    if (count($fields)) {
+        foreach ($fields as $field) {
+            $fields_array[] = [
                 'identifier' => Output::getClean('{' . $field->identifier . '}'),
                 'description' => Output::getClean($field->description),
                 'type' => $field_types[$field->type]['name'],
                 'required' => Output::getClean($field->required),
                 'edit_link' => URL::build('/panel/store/fields/', 'action=edit&id='.$field->id),
                 'delete_link' => URL::build('/panel/store/fields/', 'action=delete&amp;id=' . $field->id)
-            );
+            ];
         }
     }
             
-    $smarty->assign(array(
+    $smarty->assign([
         'FIELDS_INFO' => $store_language->get('admin', 'fields_info'),
         'IDENTIFIER' => $store_language->get('admin', 'identifier'),
         'DESCRIPTION' => $store_language->get('admin', 'description'),
@@ -65,49 +65,50 @@ if(!isset($_GET['action'])) {
         'CONFIRM_DELETE_FIELD' => $store_language->get('admin', 'delete_field'),
         'YES' => $language->get('general', 'yes'),
         'NO' => $language->get('general', 'no')
-    ));
+    ]);
     
     $template_file = 'store/fields.tpl';
 } else {
-    switch($_GET['action']) {
+    switch ($_GET['action']) {
         case 'new';
             // New Field
-            if(Input::exists()){
-                $errors = array();
-                if(Token::check(Input::get('token'))){
+            if (Input::exists()) {
+                $errors = [];
+
+                if (Token::check(Input::get('token'))) {
                     // Validate input
                     $validate = new Validate();
-                    $validation = $validate->check($_POST, array(
-                        'identifier' => array(
+                    $validation = $validate->check($_POST, [
+                        'identifier' => [
                             'required' => true,
                             'min' => 2,
                             'max' => 32
-                        ),
-                        'description' => array(
+                        ],
+                        'description' => [
                             'required' => true,
                             'min' => 2,
                             'max' => 255
-                        )
-                    ));
+                        ]
+                    ]);
                                         
-                    if($validation->passed()){
+                    if ($validation->passed()) {
                         // Create field
                         try {
                             // Get field type
                             $type = 1;
-                            if(array_key_exists($_POST['type'], $field_types)) {
+                            if (array_key_exists($_POST['type'], $field_types)) {
                                 $type = $_POST['type'];
                             }
                                                 
                             // Is this field required
-                            if(isset($_POST['required']) && $_POST['required'] == 'on') $required = 1;
+                            if (isset($_POST['required']) && $_POST['required'] == 'on') $required = 1;
                             else $required = 0;
                                                 
                             // Get options into a string
                             $options = str_replace("\n", ',', Input::get('options'));
                                             
                             // Save to database
-                            $queries->create('store_fields', array(
+                            $queries->create('store_fields', [
                                 'identifier' => Output::getClean(Input::get('identifier')),
                                 'description' => Output::getClean(Input::get('description')),
                                 'type' => $type,
@@ -116,19 +117,19 @@ if(!isset($_GET['action'])) {
                                 'order' => Input::get('order'),
                                 'min' => Input::get('minimum'),
                                 'max' => Input::get('maximum')
-                            ));
+                            ]);
                                     
                             Session::flash('fields_success', $store_language->get('admin', 'field_created_successfully'));
                             Redirect::to(URL::build('/panel/store/fields/'));
                             die();
-                        } catch(Exception $e){
+                        } catch (Exception $e) {
                             $errors[] = $e->getMessage();
                         }
                     } else {
                         // Errors
-                        foreach($validation->errors() as $item){
-                            if(strpos($item, 'is required') !== false){
-                                switch($item){
+                        foreach ($validation->errors() as $item) {
+                            if (strpos($item, 'is required') !== false) {
+                                switch ($item) {
                                     case (strpos($item, 'identifier') !== false):
                                         $errors[] = $store_language->get('admin', 'field_identifier_required');
                                     break;
@@ -136,8 +137,8 @@ if(!isset($_GET['action'])) {
                                         $errors[] = $store_language->get('admin', 'field_description_required');
                                     break;
                                 }
-                            } else if(strpos($item, 'minimum') !== false){
-                                switch($item){
+                            } else if (strpos($item, 'minimum') !== false) {
+                                switch ($item) {
                                     case (strpos($item, 'identifier') !== false):
                                         $errors[] = $store_language->get('admin', 'field_identifier_minimum');
                                     break;
@@ -145,8 +146,8 @@ if(!isset($_GET['action'])) {
                                         $errors[] = $store_language->get('admin', 'field_description_minimum');
                                     break;
                                 }
-                            } else if(strpos($item, 'maximum') !== false){
-                                switch($item){
+                            } else if (strpos($item, 'maximum') !== false) {
+                                switch ($item) {
                                     case (strpos($item, 'identifier') !== false):
                                         $errors[] = $store_language->get('admin', 'field_identifier_maximum');
                                     break;
@@ -162,7 +163,7 @@ if(!isset($_GET['action'])) {
                 }
             }
             
-            $smarty->assign(array(
+            $smarty->assign([
                 'FIELD_TITLE' => $store_language->get('admin', 'creating_field'),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/fields/'),
@@ -187,17 +188,17 @@ if(!isset($_GET['action'])) {
                 'REQUIRED' => $language->get('admin', 'required'),
                 'REQUIRED_VALUE' => ((isset($_POST['required'])) ? 1 : 0),
                 
-            ));
+            ]);
         
             $template_file = 'store/fields_form.tpl';
         break;
         case 'edit';
-            if(!is_numeric($_GET['id'])){
+            if (!is_numeric($_GET['id'])) {
                 Redirect::to(URL::build('/panel/store/fields/'));
                 die();
             } else {
-                $field = $queries->getWhere('store_fields', array('id', '=', $_GET['id']));
-                if(!count($field)){
+                $field = $queries->getWhere('store_fields', ['id', '=', $_GET['id']]);
+                if (!count($field)) {
                     Redirect::to(URL::build('/panel/store/fields/'));
                     die();
                 }
@@ -205,42 +206,43 @@ if(!isset($_GET['action'])) {
             $field = $field[0];
 
             // Edit Field
-            if(Input::exists()){
-                $errors = array();
-                if(Token::check(Input::get('token'))){
+            if (Input::exists()) {
+                $errors = [];
+
+                if (Token::check(Input::get('token'))) {
                     // Validate input
                     $validate = new Validate();
-                    $validation = $validate->check($_POST, array(
-                        'identifier' => array(
+                    $validation = $validate->check($_POST, [
+                        'identifier' => [
                             'required' => true,
                             'min' => 2,
                             'max' => 32
-                        ),
-                        'description' => array(
+                        ],
+                        'description' => [
                             'required' => true,
                             'min' => 2,
                             'max' => 255
-                        )
-                    ));
+                        ]
+                    ]);
                                         
-                    if($validation->passed()){
+                    if ($validation->passed()) {
                         // Create field
                         try {
                             // Get field type
                             $type = 1;
-                            if(array_key_exists($_POST['type'], $field_types)) {
+                            if (array_key_exists($_POST['type'], $field_types)) {
                                 $type = $_POST['type'];
                             }
                                                 
                             // Is this field required
-                            if(isset($_POST['required']) && $_POST['required'] == 'on') $required = 1;
+                            if (isset($_POST['required']) && $_POST['required'] == 'on') $required = 1;
                             else $required = 0;
                                                 
                             // Get options into a string
                             $options = str_replace("\n", ',', Input::get('options'));
                                             
                             // Save to database
-                            $queries->update('store_fields', $field->id, array(
+                            $queries->update('store_fields', $field->id, [
                                 'identifier' => Output::getClean(Input::get('identifier')),
                                 'description' => Output::getClean(Input::get('description')),
                                 'type' => $type,
@@ -249,19 +251,19 @@ if(!isset($_GET['action'])) {
                                 'min' => Input::get('minimum'),
                                 'max' => Input::get('maximum'),
                                 '`order`' => Input::get('order')
-                            ));
+                            ]);
                                     
                             Session::flash('fields_success', $store_language->get('admin', 'field_updated_successfully'));
                             Redirect::to(URL::build('/panel/store/fields/'));
                             die();
-                        } catch(Exception $e){
+                        } catch (Exception $e) {
                             $errors[] = $e->getMessage();
                         }
                     } else {
                         // Errors
-                        foreach($validation->errors() as $item){
-                            if(strpos($item, 'is required') !== false){
-                                switch($item){
+                        foreach ($validation->errors() as $item) {
+                            if (strpos($item, 'is required') !== false) {
+                                switch ($item) {
                                     case (strpos($item, 'identifier') !== false):
                                         $errors[] = $store_language->get('admin', 'field_identifier_required');
                                     break;
@@ -269,8 +271,8 @@ if(!isset($_GET['action'])) {
                                         $errors[] = $store_language->get('admin', 'field_description_required');
                                     break;
                                 }
-                            } else if(strpos($item, 'minimum') !== false){
-                                switch($item){
+                            } else if (strpos($item, 'minimum') !== false) {
+                                switch ($item) {
                                     case (strpos($item, 'identifier') !== false):
                                         $errors[] = $store_language->get('admin', 'field_identifier_minimum');
                                     break;
@@ -278,8 +280,8 @@ if(!isset($_GET['action'])) {
                                         $errors[] = $store_language->get('admin', 'field_description_minimum');
                                     break;
                                 }
-                            } else if(strpos($item, 'maximum') !== false){
-                                switch($item){
+                            } else if (strpos($item, 'maximum') !== false) {
+                                switch ($item) {
                                     case (strpos($item, 'identifier') !== false):
                                         $errors[] = $store_language->get('admin', 'field_identifier_maximum');
                                     break;
@@ -296,13 +298,13 @@ if(!isset($_GET['action'])) {
             }
             
              // Get already inputted options
-            if($field->options == null){
+            if ($field->options == null) {
                 $options = '';
             } else {
                 $options = str_replace(',', "\n", htmlspecialchars($field->options));
             }
         
-            $smarty->assign(array(
+            $smarty->assign([
                 'FIELD_TITLE' => str_replace('{x}', Output::getClean($field->name), $store_language->get('admin', 'editing_field_x')),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/fields/'),
@@ -326,19 +328,19 @@ if(!isset($_GET['action'])) {
                 'MAXIMUM_CHARACTERS_VALUE' => $field->max,
                 'REQUIRED' => $language->get('admin', 'required'),
                 'REQUIRED_VALUE' => $field->required,
-            ));
+            ]);
         
             $template_file = 'store/fields_form.tpl';
         break;
         case 'delete';
             // Delete Field
-            if(!isset($_GET['id']) || !is_numeric($_GET['id'])){
+            if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
                 Redirect::to(URL::build('/panel/store/fields/'));
                 die();
             }
-            $queries->update('store_fields', $_GET['id'], array(
+            $queries->update('store_fields', $_GET['id'], [
                 'deleted' => date('U')
-            ));
+            ]);
                 
             Session::flash('fields_success', $store_language->get('admin', 'field_deleted_successfully'));
             Redirect::to(URL::build('/panel/store/fields/'));
@@ -352,24 +354,24 @@ if(!isset($_GET['action'])) {
 }
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, array($navigation, $cc_nav, $mod_nav), $widgets);
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets);
 
-if(Session::exists('fields_success'))
+if (Session::exists('fields_success'))
     $success = Session::flash('fields_success');
 
-if(isset($success))
-    $smarty->assign(array(
+if (isset($success))
+    $smarty->assign([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
-    ));
+    ]);
 
-if(isset($errors) && count($errors))
-    $smarty->assign(array(
+if (isset($errors) && count($errors))
+    $smarty->assign([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
-    ));
+    ]);
 
-$smarty->assign(array(
+$smarty->assign([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -377,19 +379,19 @@ $smarty->assign(array(
     'TOKEN' => Token::get(),
     'SUBMIT' => $language->get('general', 'submit'),
     'FIELDS' => $store_language->get('admin', 'fields')
-));
+]);
 
-$template->addCSSFiles(array(
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.css' => array()
-));
+$template->addCSSFiles([
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.css' => []
+]);
 
-$template->addJSFiles(array(
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.js' => array()
-));
+$template->addJSFiles([
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.js' => []
+]);
 
 $template->addJSScript('
     var elems = Array.prototype.slice.call(document.querySelectorAll(\'.js-switch\'));
-    elems.forEach(function(html) {
+    elems.forEach (function(html) {
         var switchery = new Switchery(html, {color: \'#23923d\', secondaryColor: \'#e56464\'});
     });
 ');

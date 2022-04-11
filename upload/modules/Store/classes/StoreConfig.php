@@ -66,7 +66,7 @@ class StoreConfig {
                 $store_conf[$key] = $value;
             } else {
                 $loc = &$store_conf;
-                foreach($path as $step) {
+                foreach ($path as $step) {
                     $loc = &$loc[$step];
                 }
                 $loc = $value;
