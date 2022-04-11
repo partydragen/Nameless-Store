@@ -9,7 +9,7 @@
  *  Store module - Latest purchases widget
  */
 
-class LatestPurchasesWidget extends WidgetBase {
+class LatestStorePurchasesWidget extends WidgetBase {
 	private $_smarty, $_language, $_cache, $_user, $_store_language;
 
 	public function __construct($pages, $smarty, $language, $store_language, $cache, $user){
