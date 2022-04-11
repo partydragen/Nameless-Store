@@ -98,7 +98,7 @@ class Action {
                 $this->data()->product_id,
                 $this->data()->id,
                 $connection_id
-            [
+            ]
         );
     }
 

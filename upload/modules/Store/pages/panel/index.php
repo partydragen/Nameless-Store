@@ -29,7 +29,17 @@ if (isset($_POST) && !empty($_POST)) {
 
         $validation = $validate->check($_POST, [
             'store_content' => [
-                'max' => 100000
+                Validate::MAX => 60000
+            ],
+            'checkout_complete_content' => [
+                Validate::MAX => 60000
+            ]
+        ])->messages([
+            'store_content' => [
+                Validate::MAX => $store_language->get('admin', 'store_content_max')
+            ],
+            'checkout_complete_content' => [
+                Validate::MAX => $store_language->get('admin', 'checkout_complete_content_max')
             ]
         ]);
 
@@ -142,7 +152,7 @@ if (isset($_POST) && !empty($_POST)) {
                 $success = $store_language->get('admin', 'updated_successfully');
 
         } else {
-            $errors[] = $store_language->get('admin', 'store_content_max');
+            $errors = $validation->errors();
         }
 
     } else

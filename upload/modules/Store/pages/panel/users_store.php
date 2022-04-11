@@ -47,7 +47,7 @@ if (Input::exists()) {
                 Validate::MIN => 1,
                 Validate::MAX => 11,
                 Validate::NUMERIC => true
-            ],
+            ]
         ]);
 
         if ($validation->passed()) {

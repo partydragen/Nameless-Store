@@ -70,9 +70,15 @@ if (!isset($_GET['action'])) {
                     $validate = new Validate();
                     $validation = $validate->check($_POST, [
                         'name' => [
-                            'required' => true,
-                            'min' => 1,
-                            'max' => 64
+                            Validate::REQUIRED => true,
+                            Validate::MIN => 1,
+                            Validate::MAX => 64
+                        ]
+                    ])->messages([
+                        'name' => [
+                            Validate::REQUIRED => $store_language->get('admin', 'name_required'),
+                            Validate::MIN => str_replace('{min}', '1', $store_language->get('admin', 'name_minimum_x')),
+                            Validate::MAX => str_replace('{max}', '64', $store_language->get('admin', 'name_maximum_x'))
                         ]
                     ]);
                         
@@ -88,21 +94,7 @@ if (!isset($_GET['action'])) {
                         die();
                     } else {
                         // Errors
-                        foreach ($validation->errors() as $item) {
-                            if (strpos($item, 'is required') !== false) {
-                                switch ($item) {
-                                    case (strpos($item, 'name') !== false):
-                                        $errors[] = $store_language->get('admin', 'name_required');
-                                    break;
-                                }
-                            } else if (strpos($item, 'maximum') !== false) {
-                                switch ($item) {
-                                    case (strpos($item, 'name') !== false):
-                                        $errors[] = str_replace('{x}', '64', $store_language->get('admin', 'name_maximum_x'));
-                                    break;
-                                }
-                            }
-                        }
+                        $errors = $validation->errors();
                     }
                 } else {
                     // Invalid token
@@ -142,9 +134,15 @@ if (!isset($_GET['action'])) {
                     $validate = new Validate();
                     $validation = $validate->check($_POST, [
                         'name' => [
-                            'required' => true,
-                            'min' => 1,
-                            'max' => 64
+                            Validate::REQUIRED => true,
+                            Validate::MIN => 1,
+                            Validate::MAX => 64
+                        ]
+                    ])->messages([
+                        'name' => [
+                            Validate::REQUIRED => $store_language->get('admin', 'name_required'),
+                            Validate::MIN => str_replace('{min}', '1', $store_language->get('admin', 'name_minimum_x')),
+                            Validate::MAX => str_replace('{max}', '64', $store_language->get('admin', 'name_maximum_x'))
                         ]
                     ]);
 
@@ -158,21 +156,7 @@ if (!isset($_GET['action'])) {
                         die();
                     } else {
                         // Errors
-                        foreach ($validation->errors() as $item) {
-                            if (strpos($item, 'is required') !== false) {
-                                switch ($item) {
-                                    case (strpos($item, 'name') !== false):
-                                        $errors[] = $store_language->get('admin', 'name_required');
-                                    break;
-                                }
-                            } else if (strpos($item, 'maximum') !== false) {
-                                switch ($item) {
-                                    case (strpos($item, 'name') !== false):
-                                        $errors[] = str_replace('{x}', '64', $store_language->get('admin', 'name_maximum_x'));
-                                    break;
-                                }
-                            }
-                        }
+                        $errors = $validation->errors();
                     }
                 } else {
                     // Invalid token

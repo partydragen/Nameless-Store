@@ -56,7 +56,7 @@ class LatestStorePurchasesWidget extends WidgetBase {
 
 				foreach ($latest_purchases_query as $purchase) {
                     if ($purchase->player_id != null) {
-                        // Custumer paid as a guest, attempt to load user by uuid
+                        // Customer paid as a guest, attempt to load user by uuid
                         $payment_user = new User(str_replace('-', '', $purchase->uuid), 'uuid');
                         if ($payment_user->exists()) {
                             $username = Output::getClean($purchase->username);
@@ -68,7 +68,7 @@ class LatestStorePurchasesWidget extends WidgetBase {
                             $style = '';
                         }
                     } else if ($purchase->user_id != null) {
-                        // Custumer paid while being logged in
+                        // Customer paid while being logged in
                         $payment_user = new User($purchase->user_id);
                         
                         $username = $payment_user->getDisplayname(true);

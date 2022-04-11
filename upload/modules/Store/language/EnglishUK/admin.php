@@ -18,10 +18,11 @@ $language = array(
      
     'settings' => 'Settings',
     'payments' => 'Payments',
-    'store_content_max' => 'The store index content must be a maximum of 1,000,000 characters.',
+    'store_content_max' => 'The store index content must be a maximum of 60000 characters.',
     'store_path' => 'Store Path',
     'store_index_content' => 'Store Index Content',
     'checkout_complete_content' => 'Checkout Complete Content',
+    'checkout_complete_content_max' => 'The store index content must be a maximum of 60000 characters.',
     'allow_guests' => 'Allow guests to make purchases?',
     'updated_successfully' => 'Updated successfully.',
     'no_payments' => 'No payments have been found!',
@@ -136,6 +137,9 @@ $language = array(
     'action_created_successfully' => 'Action created successfully.',
     'action_updated_successfully' => 'Action updated successfully.',
     'action_deleted_successfully' => 'Action deleted successfully.',
+    'command_required' => 'Command is required',
+    'command_min' => 'Please ensure your command is a minimum of 1 characters',
+    'command_max' => 'Please ensure your command is a maximum of 500 characters.',
     
     // Connections
     'connections' => 'Connections',
@@ -196,7 +200,8 @@ $language = array(
      */
     'invalid_price' => 'Invalid price.',
     'invalid_category' => 'Invalid category.',
-    'name_maximum_x' => 'The name must be no more than {x} characters',
+    'name_minimum_x' => 'Name must be a minimum of {x} characters.',
+    'name_maximum_x' => 'Name must be no more than {x} characters',
     'name_required' => 'Please input a name.',
 
     /*

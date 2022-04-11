@@ -38,14 +38,24 @@ if (!isset($_GET['action'])) {
                     $validate = new Validate();
                     $validation = $validate->check($_POST, [
                         'name' => [
-                            'required' => true,
-                            'min' => 1,
-                            'max' => 128
+                            Validate::REQUIRED => true,
+                            Validate::MIN => 1,
+                            Validate::MAX => 128
                         ],
                         'description' => [
-                            'max' => 100000
+                            Validate::MAX => 100000
                         ]
-                    ]);
+                    ])->messages([
+                        'name' => [
+                            Validate::REQUIRED => $store_language->get('admin', 'name_required'),
+                            Validate::MIN => str_replace('{min}', '1', $store_language->get('admin', 'name_minimum_x')),
+                            Validate::MAX => str_replace('{max}', '128', $store_language->get('admin', 'name_maximum_x'))
+                        ],
+                        'description' => [
+                            Validate::MAX => $store_language->get('admin', 'description_max_100000')
+                        ]
+                    ]
+                    
                     
                     if ($validation->passed()) {
                         // Get last order
@@ -82,7 +92,7 @@ if (!isset($_GET['action'])) {
                         Redirect::to(URL::build('/panel/store/products'));
                         die();
                     } else {
-                        $errors[] = $store_language->get('admin', 'description_max_100000');
+                        $errors = $validation->errors();
                     }
                 } else {
                     // Invalid token
@@ -149,12 +159,12 @@ if (!isset($_GET['action'])) {
                     $validate = new Validate();
                     $validation = $validate->check($_POST, [
                         'name' => [
-                            'required' => true,
-                            'min' => 1,
-                            'max' => 128
+                            Validate::REQUIRED => true,
+                            Validate::MIN => 1,
+                            Validate::MAX => 128
                         ],
                         'description' => [
-                            'max' => 100000
+                            Validate::MAX => 100000
                         ]
                     ]);
                     

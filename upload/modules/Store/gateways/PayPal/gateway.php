@@ -16,22 +16,6 @@ class PayPal_Gateway extends GatewayBase {
             
         parent::__construct($name, $settings);
     }
-
-    public function processOrder(Order $order) {
-
-    }
-
-    public function onCancel() {
-
-    }
-
-    public function onReturn() {
-
-    }
-
-    public function onWebhookCall() {
-
-    }
 }
 
 $gateway = new PayPal_Gateway();

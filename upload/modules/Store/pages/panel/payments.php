@@ -36,7 +36,7 @@ if (isset($_GET['player'])) {
         if ($payments[0]->player_id != null) {
             // Use ingame user data
             $payment_user = new User(str_replace('-', '', $payments[0]->uuid), 'uuid');
-            if ($payment_user->data()) {
+            if ($payment_user->exists()) {
                 $username = Output::getClean($payments[0]->username);
                 $avatar = $payment_user->getAvatar();
                 $style = $payment_user->getGroupClass();
@@ -330,6 +330,8 @@ if (isset($_GET['player'])) {
                         Redirect::to(URL::build('/panel/store/payments/', 'payment=' . $payment->data()->id));
                         die();
                     }
+                } else {
+                    $errors = $validation->errors();
                 }
             } else {
                 // Invalid token

@@ -98,15 +98,15 @@ if (isset($_GET['do'])) {
                     $field_validation = [];
 
                     if ($field->required == 1 /*&& $field->type != 9*/) {
-                        $field_validation['required'] = true;
+                        $field_validation[Validate::REQUIRED] = true;
                     }
 
                     if ($field->min != 0) {
-                        $field_validation['min'] = $field->min;
+                        $field_validation[Validate::MIN] = $field->min;
                     }
 
                     if ($field->max != 0) {
-                        $field_validation['max'] = $field->max;
+                        $field_validation[Validate::MAX] = $field->max;
                     }
 
                     if (count($field_validation)) {

@@ -52,7 +52,7 @@ class Player {
             require(ROOT_PATH . '/core/integration/uuid.php'); // For UUID stuff
                 
             $profile = ProfileUtils::getProfile(str_replace(' ', '%20', Input::get('username')));
-            $mcname_result = $profile ? $profile->getProfileAs[] : [];
+            $mcname_result = $profile ? $profile->getProfileAsArray() : array();
             if (isset($mcname_result['username']) && !empty($mcname_result['username']) && isset($mcname_result['uuid']) && !empty($mcname_result['uuid'])) {
                 $username = Output::getClean($mcname_result['username']);
                 $uuid = ProfileUtils::formatUUID(Output::getClean($mcname_result['uuid']));

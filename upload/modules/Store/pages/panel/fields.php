@@ -80,14 +80,25 @@ if (!isset($_GET['action'])) {
                     $validate = new Validate();
                     $validation = $validate->check($_POST, [
                         'identifier' => [
-                            'required' => true,
-                            'min' => 2,
-                            'max' => 32
+                            Validate::REQUIRED => true,
+                            Validate::MIN => 2,
+                            Validate::MAX => 32
                         ],
                         'description' => [
-                            'required' => true,
-                            'min' => 2,
-                            'max' => 255
+                            Validate::REQUIRED => true,
+                            Validate::MIN => 2,
+                            Validate::MAX => 255
+                        ]
+                    ])->messages([
+                        'identifier' => [
+                            Validate::REQUIRED => $store_language->get('admin', 'field_identifier_required'),
+                            Validate::MIN => $store_language->get('admin', 'field_identifier_minimum'),
+                            Validate::MAX => $store_language->get('admin', 'field_identifier_maximum')
+                        ],
+                        'description' => [
+                            Validate::REQUIRED => $store_language->get('admin', 'field_description_required'),
+                            Validate::MIN => $store_language->get('admin', 'field_description_minimum'),
+                            Validate::MAX => $store_language->get('admin', 'field_description_maximum')
                         ]
                     ]);
                                         
@@ -127,36 +138,7 @@ if (!isset($_GET['action'])) {
                         }
                     } else {
                         // Errors
-                        foreach ($validation->errors() as $item) {
-                            if (strpos($item, 'is required') !== false) {
-                                switch ($item) {
-                                    case (strpos($item, 'identifier') !== false):
-                                        $errors[] = $store_language->get('admin', 'field_identifier_required');
-                                    break;
-                                    case (strpos($item, 'description') !== false):
-                                        $errors[] = $store_language->get('admin', 'field_description_required');
-                                    break;
-                                }
-                            } else if (strpos($item, 'minimum') !== false) {
-                                switch ($item) {
-                                    case (strpos($item, 'identifier') !== false):
-                                        $errors[] = $store_language->get('admin', 'field_identifier_minimum');
-                                    break;
-                                    case (strpos($item, 'description') !== false):
-                                        $errors[] = $store_language->get('admin', 'field_description_minimum');
-                                    break;
-                                }
-                            } else if (strpos($item, 'maximum') !== false) {
-                                switch ($item) {
-                                    case (strpos($item, 'identifier') !== false):
-                                        $errors[] = $store_language->get('admin', 'field_identifier_maximum');
-                                    break;
-                                    case (strpos($item, 'description') !== false):
-                                        $errors[] = $store_language->get('admin', 'field_description_maximum');
-                                    break;
-                                }
-                            }
-                        }
+                        $errors = $validation->errors();
                     }
                 } else {
                     $errors[] = $language->get('general', 'invalid_token');
@@ -214,17 +196,28 @@ if (!isset($_GET['action'])) {
                     $validate = new Validate();
                     $validation = $validate->check($_POST, [
                         'identifier' => [
-                            'required' => true,
-                            'min' => 2,
-                            'max' => 32
+                            Validate::REQUIRED => true,
+                            Validate::MIN => 2,
+                            Validate::MAX => 32
                         ],
                         'description' => [
-                            'required' => true,
-                            'min' => 2,
-                            'max' => 255
+                            Validate::REQUIRED => true,
+                            Validate::MIN => 2,
+                            Validate::MAX => 255
+                        ]
+                    ])->messages([
+                        'identifier' => [
+                            Validate::REQUIRED => $store_language->get('admin', 'field_identifier_required'),
+                            Validate::MIN => $store_language->get('admin', 'field_identifier_minimum'),
+                            Validate::MAX => $store_language->get('admin', 'field_identifier_maximum')
+                        ],
+                        'description' => [
+                            Validate::REQUIRED => $store_language->get('admin', 'field_description_required'),
+                            Validate::MIN => $store_language->get('admin', 'field_description_minimum'),
+                            Validate::MAX => $store_language->get('admin', 'field_description_maximum')
                         ]
                     ]);
-                                        
+
                     if ($validation->passed()) {
                         // Create field
                         try {
@@ -261,36 +254,7 @@ if (!isset($_GET['action'])) {
                         }
                     } else {
                         // Errors
-                        foreach ($validation->errors() as $item) {
-                            if (strpos($item, 'is required') !== false) {
-                                switch ($item) {
-                                    case (strpos($item, 'identifier') !== false):
-                                        $errors[] = $store_language->get('admin', 'field_identifier_required');
-                                    break;
-                                    case (strpos($item, 'description') !== false):
-                                        $errors[] = $store_language->get('admin', 'field_description_required');
-                                    break;
-                                }
-                            } else if (strpos($item, 'minimum') !== false) {
-                                switch ($item) {
-                                    case (strpos($item, 'identifier') !== false):
-                                        $errors[] = $store_language->get('admin', 'field_identifier_minimum');
-                                    break;
-                                    case (strpos($item, 'description') !== false):
-                                        $errors[] = $store_language->get('admin', 'field_description_minimum');
-                                    break;
-                                }
-                            } else if (strpos($item, 'maximum') !== false) {
-                                switch ($item) {
-                                    case (strpos($item, 'identifier') !== false):
-                                        $errors[] = $store_language->get('admin', 'field_identifier_maximum');
-                                    break;
-                                    case (strpos($item, 'description') !== false):
-                                        $errors[] = $store_language->get('admin', 'field_description_maximum');
-                                    break;
-                                }
-                            }
-                        }
+                        $errors = $validation->errors();
                     }
                 } else {
                     $errors[] = $language->get('general', 'invalid_token');

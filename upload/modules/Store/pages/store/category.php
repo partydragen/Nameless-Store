@@ -65,12 +65,12 @@ if (Input::exists()) {
             $validate = new Validate();
             $validation = $validate->check($_POST, [
                 'username' => [
-                    'required' => true,
-                    'min' => 3,
-                    'max' => 16
+                    Validate::REQUIRED => true,
+                    Validate::MIN => 3,
+                    Validate::MAX => 16
                 ]
             ]);
-            
+
             if ($validation->passed()) {
                 // Attempt to load player
                 if (!$player->login(Output::getClean(Input::get('username')))) {
