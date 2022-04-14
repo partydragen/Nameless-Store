@@ -22,18 +22,19 @@ if (isset($store_conf) && is_array($store_conf)) {
     $GLOBALS['store_config'] = $store_conf;
 }
 
-// Get variables from cache
-$cache->setCache('store_settings');
-if ($cache->isCached('store_url')) {
-    $store_url = Output::getClean(rtrim($cache->retrieve('store_url'), '/'));
-} else {
-    $store_url = '/store';
-}
-
+// Handle return from gateway
 $gateway = $gateways->get($_GET['gateway']);
 if ($gateway) {
-    // Load gateway process
-    require_once(ROOT_PATH . '/modules/Store/gateways/'.$gateway->getName().'/process.php');
+    if ($gateway->handleReturn()) {
+        // Success 
+        $shopping_cart->clear();
+        Redirect::to(URL::build($store->getStoreURL() . '/checkout/', 'do=complete'));
+        die();
+    } else {
+        // Canceled or failed
+        Redirect::to(URL::build($store->getStoreURL() . '/checkout/', 'do=cancel'));
+        die();
+    }
 } else {
     die('Invalid gateway');
 }

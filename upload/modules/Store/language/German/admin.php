@@ -89,7 +89,8 @@ $language = array(
     'enter_amount_to_remove' => 'Enter amount of credits to remove',
     'successfully_added_credits' => 'Successfully added {amount} credits to user',
     'successfully_removed_credits' => 'Successfully removed {amount} credits from user',
-    
+    'store_configuration' => 'Store Configuration',
+
     // Gateways
     'gateways' => 'Gateways',
     'editing_gateway_x' => 'Gateway {x} bearbeiten', // Don't replace {x}

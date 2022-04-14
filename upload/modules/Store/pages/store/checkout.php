@@ -231,8 +231,13 @@ if (isset($_GET['do'])) {
                     $GLOBALS['store_config'] = $store_conf;
                 }
 
-                // Register order
+                // Create order
+                $amount = new Amount();
+                $amount->setCurrency($configuration->get('store', 'currency'));
+                $amount->setTotal($shopping_cart->getTotalPrice());
+
                 $order = new Order();
+                $order->setAmount($amount);
 
                 // Complete order if there is nothing to pay
                 $amount_to_pay = $shopping_cart->getTotalPrice();
@@ -260,7 +265,10 @@ if (isset($_GET['do'])) {
                         // Load gateway process
                         $order->create($user, $player, $shopping_cart->getItems());
                         
-                        require_once(ROOT_PATH . '/modules/Store/gateways/'.$gateway->getName().'/process.php');
+                        $gateway->processOrder($order);
+                        if (count($gateway->getErrors())) {
+                            $errors = $gateway->getErrors();
+                        }
                     } else {
                         $errors[] = 'Invalid Gateway';
                     }

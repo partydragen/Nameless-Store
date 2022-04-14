@@ -13,7 +13,12 @@ class Order {
 
     private $_db,
             $_data;
-    
+
+    /**
+     * @var Amount The amount to charge.
+     */
+    private Amount $_amount;
+
     // Constructor
     public function __construct($value = null, $field = 'id') {
         $this->_db = DB::getInstance();
@@ -79,5 +84,38 @@ class Order {
         if ($data->count()) {
             $this->_data = $data->first();
         }
+    }
+
+    /**
+     * Set the amount to charge.
+     *
+     * @param amount $amount
+     */
+    public function setAmount(Amount $amount): void {
+        $this->_amount = $amount;
+    }
+
+    /**
+     * Get the charge amount for this order.
+     *
+     * @return Amount
+     */
+    public function getAmount(): Amount {
+        return $this->_amount;
+    }
+
+    /**
+     * Description of all the product names.
+     *
+     * @return string Description of all the product names.
+     */
+    public function getDescription() {
+        $product_names = '';
+        foreach ($this->getProducts() as $product) {
+            $product_names .= $product->name . ', ';
+        }
+        $product_names = rtrim($product_names, ', ');
+        
+        return $product_names;
     }
 }
