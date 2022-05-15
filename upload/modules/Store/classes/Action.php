@@ -142,7 +142,7 @@ class Action {
     public function execute(Order $order, Product $product, Payment $payment) {
         $placeholders = [];
 
-        $custom_fields = $this->_db->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$this->data()->order_id, $product->data()->id])->results();
+        $custom_fields = $this->_db->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$order->data()->id, $product->data()->id])->results();
         foreach ($custom_fields as $field) {
             $placeholders['{'.$field->identifier.'}'] = Output::getClean($field->value);
         }
