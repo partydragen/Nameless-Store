@@ -143,8 +143,8 @@ $language = array(
     'command_max' => 'Please ensure your command is a maximum of 500 characters.',
     
     // Connections
-    'connections' => 'Connections',
-    'connections_info' => 'Connect your servers to your store to execute specific actions',
+    'service_connections' => 'Service Connections',
+    'connections_info' => 'Connect your services to your store to execute specific actions',
     'connection' => 'Connection',
     'new_connection' => 'New Connection',
     'connection_id' => 'Connection ID',

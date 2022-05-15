@@ -18,8 +18,10 @@ if (!$user->handlePanelPageLoad('staffcp.store.connections')) {
 define('PAGE', 'panel');
 define('PARENT_PAGE', 'store_configuration');
 define('PANEL_PAGE', 'store_connections');
-$page_title = $store_language->get('admin', 'connections');
+$page_title = $store_language->get('admin', 'service_connections');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
+
+$services = Services::getInstance();
 
 if (!isset($_GET['action'])) {
     
@@ -29,10 +31,15 @@ if (!isset($_GET['action'])) {
 
         $connections_list = [];
         foreach ($connections as $connection) {
+            $service = $services->get($connection->type);
+            if ($service == null) {
+                continue;
+            }
+
             $connections_list[] = [
                 'id' => Output::getClean($connection->id),
                 'name' => Output::getClean($connection->name),
-                'type' => Output::getClean($connection->type),
+                'service' => Output::getClean($service->getName()),
                 'edit_link' => URL::build('/panel/store/connections/', 'action=edit&id=' . Output::getClean($connection->id))
             ];
         }
@@ -62,55 +69,54 @@ if (!isset($_GET['action'])) {
     switch ($_GET['action']) {
         case 'new';
             // Create new connections
-            if (Input::exists()) {
-                $errors = [];
-
-                if (Token::check(Input::get('token'))) {
-                    // Update product
-                    $validate = new Validate();
-                    $validation = $validate->check($_POST, [
-                        'name' => [
-                            Validate::REQUIRED => true,
-                            Validate::MIN => 1,
-                            Validate::MAX => 64
-                        ]
-                    ])->messages([
-                        'name' => [
-                            Validate::REQUIRED => $store_language->get('admin', 'name_required'),
-                            Validate::MIN => str_replace('{min}', '1', $store_language->get('admin', 'name_minimum_x')),
-                            Validate::MAX => str_replace('{max}', '64', $store_language->get('admin', 'name_maximum_x'))
-                        ]
-                    ]);
-                        
-                    if ($validation->passed()) {
-                        // Save to database
-                        $queries->create('store_connections', [
-                            'name' => Output::getClean(Input::get('name')),
-                            'type' => 'Minecraft',
-                        ]);
-                        
-                        Session::flash('connections_success', $store_language->get('admin', 'connection_updated_successfully'));
-                        Redirect::to(URL::build('/panel/store/connections'));
-                        die();
-                    } else {
-                        // Errors
-                        $errors = $validation->errors();
-                    }
-                } else {
-                    // Invalid token
-                    $errors[] = $language->get('general', 'invalid_token');
+            if (!isset($_GET['service'])) {
+                // Select service type
+                $services_list = [];
+                foreach ($services->getAll() as $service) {
+                    $services_list[] = [
+                        'id' => Output::getClean($service->getId()),
+                        'name' => Output::getClean($service->getName()),
+                        'description' => Output::getClean($service->getDescription()),
+                        'select_link' => URL::build('/panel/store/connections', 'action=new&service=' . $service->getId())
+                    ];
                 }
+
+                $smarty->assign([
+                    'CONNECTIONS_TITLE' => 'Select Connection Type',
+                    'BACK' => $language->get('general', 'back'),
+                    'BACK_LINK' => URL::build('/panel/store/connections/'),
+                    'SERVICES_LIST' => $services_list
+                ]);
+                
+                $template_file = 'store/connections_type.tpl';
+            } else {
+                if (!is_numeric($_GET['service'])) {
+                    URL::build('/panel/store/connections', 'action=new');
+                    die();
+                }
+
+                $service = $services->get($_GET['service']);
+                if ($service == null) {
+                    URL::build('/panel/store/connections', 'action=new');
+                    die();
+                }
+
+                $fields = new StoreFields();
+
+                if (file_exists($service->getConnectionSettings())) {
+                    $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
+                    require_once($service->getConnectionSettings());
+                }
+
+                $smarty->assign([
+                    'CONNECTIONS_TITLE' => $store_language->get('admin', 'creating_new_connection'),
+                    'BACK' => $language->get('general', 'back'),
+                    'BACK_LINK' => URL::build('/panel/store/connections/'),
+                    'FIELDS' => $fields->getAll()
+                ]);
+                
+                $template_file = 'store/connections_form.tpl';
             }
-            
-            $smarty->assign([
-                'CONNECTIONS_TITLE' => $store_language->get('admin', 'creating_new_connection'),
-                'BACK' => $language->get('general', 'back'),
-                'BACK_LINK' => URL::build('/panel/store/connections/'),
-                'NAME' => $language->get('admin', 'name'),
-                'NAME_VALUE' => ((isset($_POST['name']) && $_POST['name']) ? Output::getClean(Input::get('name')) : '')
-            ]);
-            
-            $template_file = 'store/connections_form.tpl';
         break;
         case 'edit';
             // Edit connections
@@ -126,50 +132,24 @@ if (!isset($_GET['action'])) {
             }
             $connection = $connection->first();
 
-            if (Input::exists()) {
-                $errors = [];
-
-                if (Token::check(Input::get('token'))) {
-                    // Update product
-                    $validate = new Validate();
-                    $validation = $validate->check($_POST, [
-                        'name' => [
-                            Validate::REQUIRED => true,
-                            Validate::MIN => 1,
-                            Validate::MAX => 64
-                        ]
-                    ])->messages([
-                        'name' => [
-                            Validate::REQUIRED => $store_language->get('admin', 'name_required'),
-                            Validate::MIN => str_replace('{min}', '1', $store_language->get('admin', 'name_minimum_x')),
-                            Validate::MAX => str_replace('{max}', '64', $store_language->get('admin', 'name_maximum_x'))
-                        ]
-                    ]);
-
-                    if ($validation->passed()) {
-                        $queries->update('store_connections', $connection->id, [
-                            'name' => Output::getClean(Input::get('name'))
-                        ]);
-
-                        Session::flash('connections_success', $store_language->get('admin', 'connection_updated_successfully'));
-                        Redirect::to(URL::build('/panel/store/connections'));
-                        die();
-                    } else {
-                        // Errors
-                        $errors = $validation->errors();
-                    }
-                } else {
-                    // Invalid token
-                    $errors[] = $language->get('general', 'invalid_token');
-                }
+            $service = $services->get($connection->type);
+            if ($service == null) {
+                URL::build('/panel/store/connections', 'action=new');
+                die();
             }
-            
+
+            $fields = new StoreFields();
+
+            if (file_exists($service->getConnectionSettings())) {
+                $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
+                require_once($service->getConnectionSettings());
+            }
+
             $smarty->assign([
                 'CONNECTIONS_TITLE' => str_replace('{x}', Output::getClean($connection->name), $store_language->get('admin', 'editing_connection_x')),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/connections/'),
-                'NAME' => $language->get('admin', 'name'),
-                'NAME_VALUE' => Output::getClean($connection->name)
+                'FIELDS' => $fields->getAll()
             ]);
             
             $template_file = 'store/connections_form.tpl';
@@ -225,7 +205,7 @@ $smarty->assign([
     'PAGE' => PANEL_PAGE,
     'TOKEN' => Token::get(),
     'SUBMIT' => $language->get('general', 'submit'),
-    'CONNECTIONS' => $store_language->get('admin', 'connections')
+    'SERVICE_CONNECTIONS' => $store_language->get('admin', 'service_connections')
 ]);
 
 $page_load = microtime(true) - $start;

@@ -78,7 +78,7 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <label for="inputConnections">{$CONNECTIONS}</label>
-                                            <select name="connections[]" id="label_connections" size="3" class="form-control" multiple style="overflow:auto;">
+                                            <select name="connections[]" id="inputConnections" size="3" class="form-control" multiple style="overflow:auto;">
                                                 {foreach from=$CONNECTIONS_LIST item=connection}
                                                 <option value="{$connection.id}"{if $connection.selected} selected{/if}>{$connection.name}</option>
                                                 {/foreach}
@@ -86,7 +86,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <label for="inputFields">{$FIELDS}</label>
-                                            <select name="fields[]" id="label_fields" size="3" class="form-control" multiple style="overflow:auto;">
+                                            <select name="fields[]" id="inputFields" size="3" class="form-control" multiple style="overflow:auto;">
                                                 {foreach from=$FIELDS_LIST item=field}
                                                 <option value="{$field.id}"{if $field.selected} selected{/if}>{$field.identifier}</option>
                                                 {/foreach}
@@ -123,8 +123,8 @@
                                         <thead>
                                             <tr>
                                                 <th>Trigger On</th>
-                                                <th>Require the player to be online</th>
-                                                <th>Command (Without /)</th>
+                                                <th>Service</th>
+                                                <th>Command</th>
                                                 <th></th>
                                             </tr>
                                         </thead>
@@ -132,7 +132,7 @@
                                         {foreach from=$ACTION_LIST item=action}
                                             <tr data-id="{$command.id}">
                                                 <td>{$action.type}</td>
-                                                <td>{$action.requirePlayer}</td>
+                                                <td>{$action.service}</td>
                                                 <td>{$action.command}</td>
                                                 <td>
                                                     <div class="float-md-right">
@@ -197,6 +197,16 @@
 </div>
 
 {include file='scripts.tpl'}
+
+<script type="text/javascript">
+    $(document).ready(() => {
+        $('#inputConnections').select2({ placeholder: "No connections selected" });
+    })
+    
+    $(document).ready(() => {
+        $('#inputFields').select2({ placeholder: "No fields selected" });
+    })
+</script>
 
 </body>
 </html>

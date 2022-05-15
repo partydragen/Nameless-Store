@@ -40,9 +40,8 @@ class Store {
         
         $products = $this->_db->query('SELECT * FROM nl2_store_products WHERE deleted = 0 ORDER BY `order` ASC')->results();
         foreach ($products as $data) {
-            $product = new Product();
-            $product->setData($data);
-            
+            $product = new Product(null, null, $data);
+
             $products_list[] = $product;
         }
         

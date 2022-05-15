@@ -188,7 +188,7 @@ if (isset($_GET['player'])) {
     $products_list = [];
     foreach ($order->getProducts() as $product) {
         $fields_array = [];
-        $fields = DB::getInstance()->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$payment->data()->order_id, $product->id])->results();
+        $fields = DB::getInstance()->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$payment->data()->order_id, $product->data()->id])->results();
         foreach ($fields as $field) {
             $fields_array[] = [
                 'identifier' => Output::getClean($field->identifier),
@@ -197,8 +197,8 @@ if (isset($_GET['player'])) {
         }
         
         $products_list[] = [
-            'id' => Output::getClean($product->id),
-            'name' => Output::getClean($product->name),
+            'id' => Output::getClean($product->data()->id),
+            'name' => Output::getClean($product->data()->name),
             'fields' => $fields_array
         ];
     }

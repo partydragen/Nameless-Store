@@ -48,23 +48,42 @@
                             
                             <!-- Success and Error Alerts -->
                             {include file='includes/alerts.tpl'}
-
-                            <form role="form" action="" method="post">
-                                <div class="form-group">
-                                    <label for="InputName">{$NAME}</label>
-                                    <input type="text" name="name" class="form-control" id="InputName" placeholder="{$NAME}" value="{$NAME_VALUE}">
-                                </div>
-                                <div class="form-group">
-                                    <label for="inputType">Connection Type</label>
-                                    <select name="category" class="form-control" id="inputType" required>
-                                        <option value="Minecraft">Minecraft Server</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <input type="hidden" name="token" value="{$TOKEN}">
-                                    <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
-                                </div>
-                            </form>
+                            
+                            {if isset($SETTINGS_TEMPLATE)}
+                                {include file=$SETTINGS_TEMPLATE}
+                            {else}
+                                <form class="ui form" action="" method="post" id="form-register">
+                                    {assign var=counter value=1}
+                                    {foreach $FIELDS as $field_key => $field}
+                                        <div class="form-group">
+                                            <label for="input{$field_key}">{$field.name}</label>
+                                            {if $field.type eq 1}
+                                                <input type="text" name="{$field_key}" class="form-control" id="input{$field_key}" value="{$field.value}" placeholder="{$field.placeholder}" tabindex="{$counter++}"{if $field.required} required{/if}>
+                                            {else if $field.type eq 2}
+                                                <textarea name="{$field_key}" class="form-control" id="{$field_key}" placeholder="{$field.placeholder}" tabindex="{$counter++}"></textarea>
+                                            {else if $field.type eq 3}
+                                                <input type="date" name="{$field_key}" class="form-control" id="{$field_key}" value="{$field.value}" tabindex="{$counter++}">
+                                            {else if $field.type eq 4}
+                                                <input type="password" name="{$field_key}" class="form-control" id="{$field_key}" value="{$field.value}" placeholder="{$field.placeholder}" tabindex="{$counter++}"{if $field.required} required{/if}>
+                                            {else if $field.type eq 5}
+                                                <select class="form-control" name="{$field_key}" id="{$field_key}" {if $field.required}required{/if}>
+                                                    {foreach from=$field.options item=option}
+                                                        <option value="{$option.value}" {if $option.value eq $field.value} selected{/if}>{$option.option}</option>
+                                                    {/foreach}
+                                                </select>
+                                            {else if $field.type eq 6}
+                                                <input type="number" name="{$field_key}" class="form-control" id="{$field_key}" value="{$field.value}" placeholder="{$field.name}" tabindex="{$counter++}"{if $field.required} required{/if}>
+                                            {else if $field.type eq 7}
+                                                <input type="email" name="{$field_key}" class="form-control" id="{$field_key}" value="{$field.value}" placeholder="{$field.placeholder}" tabindex="{$counter++}"{if $field.required} required{/if}>
+                                            {/if}
+                                        </div>
+                                    {/foreach}
+                                    <div class="form-group">
+                                        <input type="hidden" name="token" value="{$TOKEN}">
+                                        <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
+                                    </div>
+                                </form>
+                            {/if}
                             
                             <center><p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a></br>Support on <a href="https://discord.gg/TtH6tpp" target="_blank">Discord</a></p></center>
                         </div>

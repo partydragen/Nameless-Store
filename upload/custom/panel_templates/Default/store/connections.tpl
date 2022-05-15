@@ -22,11 +22,11 @@
 
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">{$CONNECTIONS}</h1>
+                        <h1 class="h3 mb-0 text-gray-800">{$SERVICE_CONNECTIONS}</h1>
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item"><a href="{$PANEL_INDEX}">{$DASHBOARD}</a></li>
                             <li class="breadcrumb-item active">{$STORE}</li>
-                            <li class="breadcrumb-item active">{$CONNECTIONS}</li>
+                            <li class="breadcrumb-item active">{$SERVICE_CONNECTIONS}</li>
                         </ol>
                     </div>
 
@@ -56,7 +56,7 @@
                                         <tr>
                                             <th>{$CONNECTION_ID}</th>
                                             <th>{$NAME}</th>
-                                            <th>{$TYPE}</th>
+                                            <th>Service Name</th>
                                             <th class="float-md-right">{$ACTIONS}</th>
                                         </tr>
                                     </thead>
@@ -65,7 +65,7 @@
                                         <tr data-id="{$announcement[0]->id}">
                                             <td>{$connection.id}</td>
                                             <td>{$connection.name}</td>
-                                            <td>{$connection.type}</td>
+                                            <td>{$connection.service}</td>
                                             <td class="float-md-right">
                                                 <a href="{$connection.edit_link}" class="btn btn-warning btn-sm"><i class="fa fa-fw fa-edit"></i></a>
                                                 <a href="#" onclick="showDeleteModal({$connection.id})" class="btn btn-danger btn-sm"><i class="fa fa-fw fa-trash"></i></a>

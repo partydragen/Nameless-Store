@@ -35,6 +35,8 @@ require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
 
 $store = new Store($cache, $store_language);
 
+$services = Services::getInstance();
+
 if (!isset($_GET['action'])) {
     // Edit product
     if (Input::exists()) {
@@ -207,10 +209,8 @@ if (!isset($_GET['action'])) {
     }
 
     // Get product actions
-    $actions = $product->getActions();
-
     $actions_array = [];
-    foreach ($actions as $action) {
+    foreach ($product->getActions() as $action) {
         $type = 'Unknown';
         switch ($action->data()->type) {
             case 1:
@@ -228,6 +228,7 @@ if (!isset($_GET['action'])) {
             'id' => Output::getClean($action->data()->id),
             'command' => Output::getClean($action->data()->command),
             'type' => $type,
+            'service' => $action->getService()->getName(),
             'requirePlayer' => ($action->data()->require_online ? 'Yes' : 'No'),
             'edit_link' => URL::build('/panel/store/product', 'action=edit_action&product=' . $product->data()->id . '&aid=' . $action->data()->id),
             'delete_link' => URL::build('/panel/store/product', 'action=delete_action&product=' . $product->data()->id . '&aid=' . $action->data()->id),
@@ -248,9 +249,9 @@ if (!isset($_GET['action'])) {
         'PRODUCT_CATEGORY_VALUE' => Output::getClean($product->data()->category_id),
         'CATEGORY' => $store_language->get('admin', 'category'),
         'CATEGORY_LIST' => $store->getAllCategories(),
-        'CONNECTIONS' => $store_language->get('admin', 'connections') . ' ' . $store_language->get('admin', 'select_multiple_with_ctrl'),
+        'CONNECTIONS' => $store_language->get('admin', 'service_connections'),
         'CONNECTIONS_LIST' => $connections_array,
-        'FIELDS' => $store_language->get('admin', 'fields') . ' ' . $store_language->get('admin', 'select_multiple_with_ctrl'),
+        'FIELDS' => $store_language->get('admin', 'fields'),
         'FIELDS_LIST' => $fields_array,
         'ACTIONS' => $store_language->get('admin', 'actions'),
         'NEW_ACTION' => $store_language->get('admin', 'new_action'),
@@ -289,104 +290,56 @@ if (!isset($_GET['action'])) {
         break;
         case 'new_action';
             // New action for product
-            if (Input::exists()) {
-                $errors = [];
-
-                if (Token::check(Input::get('token'))) {
-                    // New Action
-                    $validate = new Validate();
-                    $validation = $validate->check($_POST, [
-                        'command' => [
-                            Validate::REQUIRED => true,
-                            Validate::MIN => 1,
-                            Validate::MAX => 500
-                        ]
-                    ])->messages([
-                        'command' => [
-                            Validate::REQUIRED => $store_language->get('admin', 'command_required'),
-                            Validate::MIN => $store_language->get('admin', 'command_min'),
-                            Validate::MAX => $store_language->get('admin', 'command_max')
-                        ]
-                    ]);
-                        
-                    if ($validation->passed()) {
-                        $trigger = Input::get('trigger');
-                        if (!in_array($trigger, [1,2,3])) {
-                            $errors[] = 'Invalid Trigger';
-                        }
-                            
-                        $require_player = Input::get('requirePlayer');
-                        if (!in_array($require_player, [0,1])) {
-                            $errors[] = 'Invalid requirePlayer';
-                        }
-                            
-                        if (!count($errors)) {
-                            // Get last order
-                            $last_order = DB::getInstance()->query('SELECT id FROM nl2_store_products_actions WHERE product_id = ? ORDER BY `order` DESC LIMIT 1', [$product->id])->results();
-                            if (count($last_order)) $last_order = $last_order[0]->order;
-                            else $last_order = 0;
-                            
-                            $selected_connections = (isset($_POST['connections']) && is_array($_POST['connections']) ? $_POST['connections'] : []);
-                            
-                            // Save to database
-                            $queries->create('store_products_actions', [
-                                'product_id' => $product->data()->id,
-                                'type' => $trigger,
-                                'command' => Output::getClean(Input::get('command')),
-                                'require_online' => $require_player,
-                                'order' => $last_order + 1,
-                                'own_connections' => (in_array(0, $selected_connections) ? 0 : 1)
-                            ]);
-                            $lastId = $queries->getLastId();
-                            
-                            // Handle selected connections if its use own connection list
-                            if (!in_array(0, $selected_connections)) {
-                                $action = new Action($lastId); 
-                                foreach ($selected_connections as $connection) {
-                                    $action->addConnection($connection);
-                                }
-                            }
-                            
-                            Session::flash('products_success', $store_language->get('admin', 'action_created_successfully'));
-                            Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
-                            die();
-                        }
-                    } else {
-                        $errors = $validation->errors();
-                    }
-                } else {
-                    // Invalid token
-                    $errors[] = $language->get('general', 'invalid_token');
+            if (!isset($_GET['service'])) {
+                // Select service type
+                $services_list = [];
+                foreach ($services->getAll() as $service) {
+                    $services_list[] = [
+                        'id' => Output::getClean($service->getId()),
+                        'name' => Output::getClean($service->getName()),
+                        'description' => Output::getClean($service->getDescription()),
+                        'select_link' => URL::build('/panel/store/product/' , 'action=new_action&product=' . $product->data()->id . '&service=' . $service->getId()),
+                    ];
                 }
+                
+                $smarty->assign([
+                    'ACTION_TITLE' => str_replace('{x}', Output::getClean($product->data()->name), $store_language->get('admin', 'new_action_for_x')),
+                    'BACK' => $language->get('general', 'back'),
+                    'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
+                    'SERVICES_LIST' => $services_list
+                ]);
+                
+                $template_file = 'store/products_action_type.tpl';
+            } else {
+                if (!is_numeric($_GET['service'])) {
+                    URL::build('/panel/store/connections', 'action=new');
+                    die();
+                }
+
+                $service = $services->get($_GET['service']);
+                if ($service == null) {
+                    URL::build('/panel/store/connections', 'action=new');
+                    die();
+                }
+
+                $fields = new StoreFields();
+
+                if (file_exists($service->getActionSettings())) {
+                    $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
+                    require_once($service->getActionSettings());
+                }
+
+                $service->onActionSettingsPageLoad($template, $fields);
+
+                $smarty->assign([
+                    'ACTION_TITLE' => str_replace('{x}', Output::getClean($product->data()->name), $store_language->get('admin', 'new_action_for_x')),
+                    'BACK' => $language->get('general', 'back'),
+                    'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
+                    'FIELDS' => $fields->getAll()
+                ]);
+                
+                $template_file = 'store/products_action_form.tpl';
             }
-            
-            // Connections
-            $connections = DB::getInstance()->query('SELECT * FROM nl2_store_connections')->results();
-            $connections_array[] = [
-                'id' => 0,
-                'name' => 'Execute on all connections selected on product',
-                'selected' => ((isset($_POST['connections']) && is_array($_POST['connections'])) ? in_array(0, $_POST['connections']) : true)
-            ];
-            foreach ($connections as $connection) {
-                $connections_array[] = [
-                    'id' => Output::getClean($connection->id),
-                    'name' => Output::getClean($connection->name),
-                    'selected' => ((isset($_POST['connections']) && is_array($_POST['connections'])) ? in_array($connection->id, $_POST['connections']) : false)
-                ];
-            }
-            
-            $smarty->assign([
-                'ACTION_TITLE' => str_replace('{x}', Output::getClean($product->data()->name), $store_language->get('admin', 'new_action_for_x')),
-                'BACK' => $language->get('general', 'back'),
-                'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
-                'TRIGGER_VALUE' => ((isset($_POST['trigger'])) ? Output::getClean($_POST['trigger']) : 1),
-                'REQUIRE_PLAYER_VALUE' => ((isset($_POST['requirePlayer'])) ? Output::getClean($_POST['requirePlayer']) : 1),
-                'COMMAND_VALUE' => ((isset($_POST['command']) && $_POST['command']) ? Output::getClean($_POST['command']) : ''),
-                'CONNECTIONS' => $store_language->get('admin', 'connections') . ' ' . $store_language->get('admin', 'select_multiple_with_ctrl'),
-                'CONNECTIONS_LIST' => $connections_array
-            ]);
-            
-            $template_file = 'store/products_action_form.tpl';
         break;
         case 'edit_action';
             // Editing action for product
@@ -394,114 +347,30 @@ if (!isset($_GET['action'])) {
                 Redirect::to(URL::build('/panel/store/products'));
                 die();
             }
-            
-            $action = new Action($_GET['aid']);
-            if (!$action->exists()) {
+
+            $action = $product->getAction($_GET['aid']);
+            if ($action == null) {
                 Redirect::to(URL::build('/panel/store/products'));
                 die();
             }
-            
-            if (Input::exists()) {
-                $errors = [];
+            $service = $action->getService();
 
-                if (Token::check(Input::get('token'))) {
-                    // Edit Action
-                    $validate = new Validate();
-                    $validation = $validate->check($_POST, [
-                        'command' => [
-                            Validate::REQUIRED => true,
-                            Validate::MIN => 1,
-                            Validate::MAX => 500
-                        ]
-                    ])->messages([
-                        'command' => [
-                            Validate::REQUIRED => $store_language->get('admin', 'command_required'),
-                            Validate::MIN => $store_language->get('admin', 'command_min'),
-                            Validate::MAX => $store_language->get('admin', 'command_max')
-                        ]
-                    ]);
-                        
-                    if ($validation->passed()) {
-                        $trigger = Input::get('trigger');
-                        if (!in_array($trigger, [1,2,3])) {
-                            $errors[] = 'Invalid Trigger';
-                        }
-                            
-                        $require_player = Input::get('requirePlayer');
-                        if (!in_array($require_player, [0,1])) {
-                            $errors[] = 'Invalid requirePlayer';
-                        }
-                        
-                        if (!count($errors)) {
-                            $selected_connections = (isset($_POST['connections']) && is_array($_POST['connections']) ? $_POST['connections'] : []);
-                            
-                            // Save to database
-                            $action->update([
-                                'type' => $trigger,
-                                'command' => Output::getClean(Input::get('command')),
-                                'require_online' => $require_player,
-                                'own_connections' => (in_array(0, $selected_connections) ? 0 : 1)
-                            ]);
-                            
-                            // Handle selected connections if its use own connection list
-                            if (!in_array(0, $selected_connections)) {
-                                // Check for new connections to give action which they dont already have
-                                foreach ($selected_connections as $connection) {
-                                    if (!array_key_exists($connection, $action->getConnections())) {
-                                        $action->addConnection($connection);
-                                    }
-                                }
+            $fields = new StoreFields();
 
-                                // Check for connections they had, but werent in the $_POST connections
-                                foreach ($action->getConnections() as $connection) {
-                                    if (!in_array($connection->id, $selected_connections)) {
-                                        $action->removeConnection($connection->id);
-                                    }
-                                }
-                            }
-                            
-                            Session::flash('products_success', $store_language->get('admin', 'action_updated_successfully'));
-                            Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
-                            die();
-                        }
-                    } else {
-                        $errors = $validation->errors();
-                    }
-                } else {
-                    // Invalid token
-                    $errors[] = $language->get('general', 'invalid_token');
-                }
+            if (file_exists($service->getActionSettings())) {
+                $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
+                require_once($service->getActionSettings());
             }
-            
-            // Connections
-            $connections_array = [];
-            $selected_connections = ($action->data()->own_connections ? $action->getConnections() : []);
 
-            $connections = DB::getInstance()->query('SELECT * FROM nl2_store_connections')->results();
-            $connections_array[] = [
-                'id' => 0,
-                'name' => 'Execute on all connections selected on product',
-                'selected' => !$action->data()->own_connections
-            ];
-            foreach ($connections as $connection) {
-                $connections_array[] = [
-                    'id' => Output::getClean($connection->id),
-                    'name' => Output::getClean($connection->name),
-                    'selected' => (array_key_exists($connection->id, $selected_connections))
-                ];
-            }
-            
+            $action->getService()->onActionSettingsPageLoad($template, $fields);
+
             $smarty->assign([
                 'ACTION_TITLE' => str_replace('{x}', Output::getClean($product->data()->name), $store_language->get('admin', 'editing_action_for_x')),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
-                'TRIGGER_VALUE' => Output::getClean($action->data()->type),
-                'REQUIRE_PLAYER_VALUE' => Output::getClean($action->data()->require_online),
-                'COMMAND_VALUE' => Output::getClean($action->data()->command),
-                'CONNECTIONS' => $store_language->get('admin', 'connections') . ' ' . $store_language->get('admin', 'select_multiple_with_ctrl'),
-                'CONNECTIONS_LIST' => $connections_array
+                'FIELDS' => $fields->getAll()
             ]);
-        
+
             $template_file = 'store/products_action_form.tpl';
         break;
         case 'delete_action';
@@ -511,8 +380,8 @@ if (!isset($_GET['action'])) {
                 die();
             }
             
-            $action = new Action($_GET['aid']);
-            if ($action->exists()) {
+            $action = $product->getAction($_GET['aid']);
+            if ($action != null) {
                 $action->delete();
                 Session::flash('products_success', $store_language->get('admin', 'action_deleted_successfully'));
             } 
@@ -535,6 +404,14 @@ if (!isset($_GET['action'])) {
         break;
     }
 }
+
+$template->addCSSFiles([
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/plugins/select2/select2.min.css' => []
+]);
+
+$template->addJSFiles([
+    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/plugins/select2/select2.min.js' => []
+]);
 
 // Load modules + template
 Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets);

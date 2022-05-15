@@ -45,43 +45,41 @@
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
 
-                        <form action="" method="post">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label for="inputTrigger">Trigger On</label>
-                                        <select name="trigger" class="form-control" id="inputTrigger">
-                                            <option value="1" {if $TRIGGER_VALUE == 1} selected{/if}>Purchase</option>
-                                            <option value="2" {if $TRIGGER_VALUE == 2} selected{/if}>Refund</option>
-                                            <option value="3" {if $TRIGGER_VALUE == 3} selected{/if}>Changeback</option>
-                                        </select>
+                        {if isset($SETTINGS_TEMPLATE)}
+                            {include file=$SETTINGS_TEMPLATE}
+                        {else}
+                            <form class="ui form" action="" method="post" id="form-register">
+                                {assign var=counter value=1}
+                                {foreach $FIELDS as $field_key => $field}
+                                    <div class="form-group">
+                                        <label for="input{$field_key}">{$field.name}</label>
+                                        {if $field.type eq 1}
+                                            <input type="text" name="{$field_key}" class="form-control" id="input{$field_key}" value="{$field.value}" placeholder="{$field.placeholder}" tabindex="{$counter++}"{if $field.required} required{/if}>
+                                        {else if $field.type eq 2}
+                                            <textarea name="{$field_key}" class="form-control" id="{$field_key}" placeholder="{$field.placeholder}" tabindex="{$counter++}"></textarea>
+                                        {else if $field.type eq 3}
+                                            <input type="date" name="{$field_key}" class="form-control" id="{$field_key}" value="{$field.value}" tabindex="{$counter++}">
+                                        {else if $field.type eq 4}
+                                            <input type="password" name="{$field_key}" class="form-control" id="{$field_key}" value="{$field.value}" placeholder="{$field.placeholder}" tabindex="{$counter++}"{if $field.required} required{/if}>
+                                        {else if $field.type eq 5}
+                                            <select class="form-control" name="{$field_key}" id="{$field_key}" {if $field.required}required{/if}>
+                                                {foreach from=$field.options item=option}
+                                                    <option value="{$option.value}" {if $option.value eq $field.value} selected{/if}>{$option.option}</option>
+                                                {/foreach}
+                                            </select>
+                                        {else if $field.type eq 6}
+                                            <input type="number" name="{$field_key}" class="form-control" id="{$field_key}" value="{$field.value}" placeholder="{$field.name}" tabindex="{$counter++}"{if $field.required} required{/if}>
+                                        {else if $field.type eq 7}
+                                            <input type="email" name="{$field_key}" class="form-control" id="{$field_key}" value="{$field.value}" placeholder="{$field.placeholder}" tabindex="{$counter++}"{if $field.required} required{/if}>
+                                        {/if}
                                     </div>
-                                    <div class="col-md-6">
-                                        <label for="inputRequirePlayer">Require the player to be online</label>
-                                        <select name="requirePlayer" class="form-control" id="inputRequirePlayer">
-                                            <option value="1" {if $REQUIRE_PLAYER_VALUE == 1} selected{/if}>Yes</option>
-                                            <option value="0" {if $REQUIRE_PLAYER_VALUE == 0} selected{/if}>No</option>
-                                        </select>
-                                    </div>
+                                {/foreach}
+                                <div class="form-group">
+                                    <input type="hidden" name="token" value="{$TOKEN}">
+                                    <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="inputConnections">{$CONNECTIONS}</label>
-                                <select name="connections[]" id="label_connections" size="3" class="form-control" multiple style="overflow:auto;" required>
-                                    {foreach from=$CONNECTIONS_LIST item=connection}
-                                        <option value="{$connection.id}"{if $connection.selected} selected{/if}>{$connection.name}</option>
-                                    {/foreach}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="InputCommand">Command (Without /)</label><a class="float-right btn btn-primary btn-sm" href="" data-toggle="modal" data-target="#placeholders">Placeholders</a></br>
-                                <input type="text" name="command" class="form-control" id="InputCommand" value="{$COMMAND_VALUE}" placeholder="{literal}say Thanks {username} for purchasing {productName}{/literal}">
-                            </div>
-                            <div class="form-group">
-                                <input type="hidden" name="token" value="{$TOKEN}">
-                                <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
-                            </div>
-                        </form>
+                            </form>
+                        {/if}
 
                         <center><p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a></br>Support on <a href="https://discord.gg/TtH6tpp" target="_blank">Discord</a></p></center>
                     </div>
@@ -193,6 +191,12 @@
 </div>
 
 {include file='scripts.tpl'}
+
+<script type="text/javascript">
+    $(document).ready(() => {
+        $('#inputConnections').select2({ placeholder: "{$NO_ITEM_SELECTED}" });
+    })
+</script>
 
 </body>
 </html>

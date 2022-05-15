@@ -33,7 +33,7 @@ class Customer {
      *
      * @param array $fields Column names and values to update.
      */
-    public function update($fields = []) {
+    public function update(array $fields = []) {
         if (!$this->_db->update('store_customer', $this->data()->id, $fields)) {
             throw new Exception('There was a problem updating customer');
         }
@@ -44,7 +44,7 @@ class Customer {
      *
      * @param array $fields Column names and values to insert to database.
      */
-    public function create($fields = []) {
+    public function create(array $fields = []) {
         if (!$this->_db->insert('store_customer', $fields)) {
             throw new Exception('There was a problem registering the customer');
         }
@@ -63,7 +63,7 @@ class Customer {
      *
      * @return bool Whether the customer exists (has data) or not.
      */
-    public function exists() {
+    public function exists(): bool {
         return (!empty($this->_data));
     }
 
@@ -103,7 +103,7 @@ class Customer {
         $this->_db->createQuery('UPDATE nl2_store_customer SET cents = cents - ? WHERE id = ?', [$amount * 100, $this->_data->id]);
     }
 
-    public function getPayments() {
+    public function getPayments(): array {
         $payments_list = [];
 
         $payments = DB::getInstance()->query('SELECT nl2_store_payments.*, order_id, user_id FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id WHERE nl2_store_orders.user_id = ? ORDER BY created DESC', [$this->_data->user_id]);

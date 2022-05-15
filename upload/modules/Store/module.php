@@ -209,7 +209,7 @@ class Store_Module extends Module {
                     } else
                         $icon = $cache->retrieve('store_connections_icon');
 
-                    $navs[2]->addItemToDropdown('store_configuration', 'store_connections', $this->_store_language->get('admin', 'connections'), URL::build('/panel/store/connections'), 'top', null, $icon, $order + 0.4);
+                    $navs[2]->addItemToDropdown('store_configuration', 'store_connections', $this->_store_language->get('admin', 'service_connections'), URL::build('/panel/store/connections'), 'top', null, $icon, $order + 0.4);
                 }
                 
                 if ($user->hasPermission('staffcp.store.fields')) {
