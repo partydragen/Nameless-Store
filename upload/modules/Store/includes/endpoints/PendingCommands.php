@@ -8,7 +8,7 @@ class PendingCommands extends EndpointBase {
     }
 
     public function execute(Nameless2API $api) {
-        $query = 'SELECT nl2_store_pending_actions.*, nl2_store_customers.id as pid, IFNULL(nl2_store_customers.username, nl2_users.username) as username, IFNULL(nl2_store_customers.uuid, nl2_users.uuid) as uuid, nl2_store_orders.user_id FROM nl2_store_pending_actions
+        $query = 'SELECT nl2_store_pending_actions.*, nl2_store_customers.id as pid, IFNULL(nl2_store_customers.username, nl2_users.username) as username, IFNULL(nl2_store_customers.identifier, nl2_users.uuid) as identifier, nl2_store_orders.user_id FROM nl2_store_pending_actions
         LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id
         LEFT JOIN nl2_store_customers ON nl2_store_pending_actions.customer_id=nl2_store_customers.id
         LEFT JOIN nl2_users ON nl2_store_orders.user_id=nl2_users.id';
@@ -26,7 +26,7 @@ class PendingCommands extends EndpointBase {
 
         $commands_array = [];
         foreach ($commands_query as $command) {
-            if ($command->uuid == null && $command->username == null) {
+            if ($command->identifier == null && $command->username == null) {
                 continue;
             }
             
@@ -37,7 +37,7 @@ class PendingCommands extends EndpointBase {
                 'user_id' => (int) $command->user_id,
                 'customer_id' => (int) $command->customer_id,
                 'username' => $command->username,
-                'uuid' => $command->uuid != null ? $this->formatUUID(str_replace('-', '', $command->uuid)) : null,
+                'uuid' => $command->identifier != null ? $this->formatUUID(str_replace('-', '', $command->identifier)) : null,
                 'require_online' => (boolean) $command->require_online,
                 'order' => (int) $command->order,
             ];
