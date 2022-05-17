@@ -10,4 +10,3 @@
  */
  
 $store = new Store($cache, $store_language);
-$player = new Player();

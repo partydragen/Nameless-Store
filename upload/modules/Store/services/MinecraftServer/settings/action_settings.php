@@ -74,7 +74,7 @@ if ($_GET['action'] == 'new_action') {
     }
             
     // Connections
-    $connections = DB::getInstance()->query('SELECT * FROM nl2_store_connections WHERE type = ?', [$service->getId()])->results();
+    $connections = DB::getInstance()->query('SELECT * FROM nl2_store_connections WHERE service_id = ?', [$service->getId()])->results();
     $connections_array[] = [
         'id' => 0,
         'name' => 'Execute on all Minecraft Server connections selected on product',
@@ -174,7 +174,7 @@ if ($_GET['action'] == 'new_action') {
     $connections_array = [];
     $selected_connections = ($action->data()->own_connections ? $action->getConnections() : []);
 
-    $connections = DB::getInstance()->query('SELECT * FROM nl2_store_connections WHERE type = ?', [$service->getId()])->results();
+    $connections = DB::getInstance()->query('SELECT * FROM nl2_store_connections WHERE service_id = ?', [$service->getId()])->results();
     $connections_array[] = [
         'id' => 0,
         'name' => 'Execute on all Minecraft Server connections selected on product',

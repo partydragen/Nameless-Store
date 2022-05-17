@@ -31,7 +31,7 @@ if (!isset($_GET['action'])) {
 
         $connections_list = [];
         foreach ($connections as $connection) {
-            $service = $services->get($connection->type);
+            $service = $services->get($connection->service_id);
             if ($service == null) {
                 continue;
             }
@@ -132,7 +132,7 @@ if (!isset($_GET['action'])) {
             }
             $connection = $connection->first();
 
-            $service = $services->get($connection->type);
+            $service = $services->get($connection->service_id);
             if ($service == null) {
                 URL::build('/panel/store/connections', 'action=new');
                 die();

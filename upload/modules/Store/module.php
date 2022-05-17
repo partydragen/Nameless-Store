@@ -19,7 +19,7 @@ class Store_Module extends Module {
 
         $name = 'Store';
         $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
-        $module_version = '1.3.1';
+        $module_version = '1.3.0';
         $nameless_version = '2.0.0-pr12';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
@@ -50,14 +50,13 @@ class Store_Module extends Module {
         $pages->add('Store', '/panel/store/connections', 'pages/panel/connections.php');
         $pages->add('Store', '/panel/store/fields', 'pages/panel/fields.php');
         $pages->add('Store', '/panel/users/store', 'pages/panel/users_store.php');
-        
+
         HookHandler::registerEvent('paymentPending',  $store_language->get('admin', 'payment_pending'));
         HookHandler::registerEvent('paymentCompleted', $store_language->get('admin', 'payment_completed'));
         HookHandler::registerEvent('paymentRefunded', $store_language->get('admin', 'payment_refunded'));
         HookHandler::registerEvent('paymentReversed', $store_language->get('admin', 'payment_reversed'));
         HookHandler::registerEvent('paymentDenied', $store_language->get('admin', 'payment_denied'));
-        
-        
+
         // Autoload API Endpoints
         Util::loadEndpoints(join(DIRECTORY_SEPARATOR, [ROOT_PATH, 'modules', 'Store', 'includes', 'endpoints']), $endpoints);
         
@@ -537,6 +536,59 @@ class Store_Module extends Module {
                 // Error
             }
         }
+        
+        if ($old_version < 140) {
+            try {
+                DB::getInstance()->createQuery('RENAME TABLE nl2_store_players TO nl2_store_customers');
+                
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_customers CHANGE `username` `username` varchar(64) DEFAULT NULL');
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_customers CHANGE `uuid` `identifier` varchar(64) DEFAULT NULL');
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_customers ADD `user_id` int(11) DEFAULT NULL');
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_customers ADD `cents` bigint(20) NOT NULL DEFAULT \'0\'');
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_customers ADD `integration_id` int(11) NOT NULL');
+
+                DB::getInstance()->createQuery('UPDATE nl2_store_customers SET `integration_id` = 1 WHERE id <> 0');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_connections DROP COLUMN type');
+                
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_connections ADD `service_id` int(11) NOT NULL');
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_connections ADD `data` text DEFAULT NULL');
+                
+                DB::getInstance()->createQuery('UPDATE nl2_store_connections SET `service_id` = 2 WHERE id <> 0');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_products_actions ADD `service_id` int(11) NOT NULL');
+                
+                DB::getInstance()->createQuery('UPDATE nl2_store_products_actions SET `service_id` = 2 WHERE id <> 0');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+            
+            try {
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_orders CHANGE `player_id` `to_customer_id` int(11)');
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_orders ADD `from_customer_id` int(11) NOT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+            
+            try {
+                DB::getInstance()->createQuery('ALTER TABLE nl2_store_pending_actions CHANGE `player_id` `customer_id` int(11)');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+        }
     }
     
     private function initialise() {
@@ -599,7 +651,7 @@ class Store_Module extends Module {
         
         if (!$queries->tableExists('store_products_actions')) {
             try {
-                $queries->createTable('store_products_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `own_connections` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+                $queries->createTable('store_products_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `service_id` int(11) NOT NULL, `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `own_connections` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
             } catch (Exception $e) {
                 // Error
             }
@@ -607,7 +659,7 @@ class Store_Module extends Module {
         
         if (!$queries->tableExists('store_pending_actions')) {
             try {
-                $queries->createTable('store_pending_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `action_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `player_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `status` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+                $queries->createTable('store_pending_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `action_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `customer_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `status` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
             } catch (Exception $e) {
                 // Error
             }
@@ -615,7 +667,7 @@ class Store_Module extends Module {
         
         if (!$queries->tableExists('store_orders')) {
             try {
-                $queries->createTable('store_orders', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `player_id` int(11) DEFAULT NULL, `created` int(11) NOT NULL, `ip` varchar(128) DEFAULT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+                $queries->createTable('store_orders', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `from_customer_id` int(11) NOT NULL, `to_customer_id` int(11) NOT NULL, `created` int(11) NOT NULL, `ip` varchar(128) DEFAULT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
             } catch (Exception $e) {
                 // Error
             }
@@ -645,9 +697,9 @@ class Store_Module extends Module {
             }
         }
         
-        if (!$queries->tableExists('store_players')) {
+        if (!$queries->tableExists('store_customers')) {
             try {
-                $queries->createTable('store_players', ' `id` int(11) NOT NULL AUTO_INCREMENT, `username` varchar(64) NOT NULL, `uuid` varchar(64) DEFAULT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+                $queries->createTable('store_customers', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `integration_id` int(11) NOT NULL, `username` varchar(64) DEFAULT NULL, `identifier` varchar(64) DEFAULT NULL, `cents` bigint(20) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
             } catch (Exception $e) {
                 // Error
             }
@@ -655,7 +707,7 @@ class Store_Module extends Module {
         
         if (!$queries->tableExists('store_connections')) {
             try {
-                $queries->createTable('store_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `type` varchar(32) NOT NULL, `name` varchar(64) NOT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
+                $queries->createTable('store_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `service_id` int(11) NOT NULL, `name` varchar(64) NOT NULL, `data` text DEFAULT NULL, PRIMARY KEY (`id`)', "ENGINE=$engine DEFAULT CHARSET=$charset");
             } catch (Exception $e) {
                 // Error
             }

@@ -24,7 +24,7 @@ if ($_GET['action'] == 'new') {
             if ($validation->passed()) {
                 $queries->create('store_connections', [
                     'name' => Output::getClean(Input::get('name')),
-                    'type' => $service->getId()
+                    'service_id' => $service->getId()
                 ]);
 
                 Session::flash('connections_success', $store_language->get('admin', 'connection_updated_successfully'));

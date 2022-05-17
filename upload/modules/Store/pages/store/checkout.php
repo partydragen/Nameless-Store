@@ -242,13 +242,14 @@ if (isset($_GET['do'])) {
                 // Complete order if there is nothing to pay
                 $amount_to_pay = $shopping_cart->getTotalPrice();
                 if ($amount_to_pay == 0) {
-                    $order->create($user, $player, $shopping_cart->getItems());
+                    $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems());
 
                     $payment = new Payment();
                     $payment->handlePaymentEvent('COMPLETED', [
                         'order_id' => $order->data()->id,
                         'gateway_id' => 0,
                         'amount' => 0,
+                        'transaction' => 'Free',
                         'currency' => Output::getClean($configuration->get('store', 'currency')),
                         'fee' => 0
                     ]);
@@ -263,7 +264,7 @@ if (isset($_GET['do'])) {
                     $gateway = $gateways->get($payment_method);
                     if ($gateway) {
                         // Load gateway process
-                        $order->create($user, $player, $shopping_cart->getItems());
+                        $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems());
                         
                         $gateway->processOrder($order);
                         if (count($gateway->getErrors())) {
@@ -274,17 +275,18 @@ if (isset($_GET['do'])) {
                     }
                 } else {
                     // User is paying with credits
-                    if ($customer->exists() && $customer->getCredits() >= $amount_to_pay) {
-                        $customer->removeCredits($amount_to_pay);
+                    if ($from_customer->exists() && $from_customer->getCredits() >= $amount_to_pay) {
+                        $from_customer->removeCredits($amount_to_pay);
 
-                        $order->create($user, $player, $shopping_cart->getItems());
+                        $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems());
 
                         $payment = new Payment();
                         $payment->handlePaymentEvent('COMPLETED', [
                             'order_id' => $order->data()->id,
                             'gateway_id' => 0,
                             'amount' => $amount_to_pay,
-                            'currency' => 'Credits',
+                            'transaction' => 'Credits',
+                            'currency' => Output::getClean($configuration->get('store', 'currency')),
                             'fee' => 0
                         ]);
 
@@ -331,8 +333,8 @@ if (isset($_GET['do'])) {
 
     // Get user credits if user is logged in
     $credits = 0;
-    if ($customer->exists()) {
-        $credits = $customer->getCredits();
+    if ($from_customer->exists()) {
+        $credits = $from_customer->getCredits();
     }
 
     // Load available gateways
@@ -373,8 +375,8 @@ if (isset($_GET['do'])) {
     $template_file = 'store/checkout.tpl';
 }
 
-// Check if store player is required and isset
-if ($store->isPlayerSystemEnabled() && !$player->isLoggedIn()) {
+// Check if store customer is required and isset
+if ($store->isPlayerSystemEnabled() && !$to_customer->isLoggedIn()) {
     Redirect::to(URL::build($store_url));
     die();
 }

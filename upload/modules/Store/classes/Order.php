@@ -72,10 +72,19 @@ class Order {
         })();
     }
 
-    public function create($user, $player, $items) {
+    /**
+     * Register the order to database.
+     *
+     * @param User $user The NamelessMC user buying the product.
+     * @param Customer $from_customer The customer buying the product.
+     * @param Customer $to_customer The customer who is receiving the product.
+     * @param array $items The list of products along with custom fields for product
+     */
+    public function create(User $user, Customer $from_customer, Customer $to_customer, array $items) {
         $this->_db->insert('store_orders', [
             'user_id' => $user->data() ? $user->data()->id : null,
-            'player_id' => $player->data() ? $player->data()->id : null,
+            'from_customer_id' => $from_customer->data()->id,
+            'to_customer_id' => $to_customer->data()->id,
             'created' => date('U'),
             'ip' => $user->getIP(),
         ]);
@@ -104,6 +113,22 @@ class Order {
         $data = $this->_db->get('store_orders', ['id', '=', $last_id]);
         if ($data->count()) {
             $this->_data = $data->first();
+        }
+    }
+    
+    public function customer(): Customer {
+        if ($this->data()->from_customer_id) {
+            return new Customer(null, $this->data()->from_customer_id, 'id');
+        } else {
+            return new Customer(null, $this->data()->user_id, 'user_id');
+        }
+    }
+    
+    public function recipient(): Customer {
+        if ($this->data()->to_customer_id) {
+            return new Customer(null, $this->data()->to_customer_id, 'id');
+        } else {
+            return new Customer(null, $this->data()->user_id, 'user_id');
         }
     }
 

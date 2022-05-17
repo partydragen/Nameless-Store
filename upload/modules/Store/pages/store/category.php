@@ -72,8 +72,8 @@ if (Input::exists()) {
             ]);
 
             if ($validation->passed()) {
-                // Attempt to load player
-                if (!$player->login(Output::getClean(Input::get('username')))) {
+                // Attempt to load customer
+                if (!$to_customer->login(Output::getClean(Input::get('username')))) {
                     $errors[] = $language->get('user', 'invalid_mcname');
                 }
                 
@@ -141,7 +141,7 @@ $smarty->assign([
     'TOKEN' => Token::get(),
 ]);
 
-if ($store->isPlayerSystemEnabled() && !$player->isLoggedIn()) {
+if ($store->isPlayerSystemEnabled() && !$to_customer->isLoggedIn()) {
     $smarty->assign([
         'PLEASE_ENTER_USERNAME' => $store_language->get('general', 'please_enter_username'),
         'CONTINUE' => $store_language->get('general', 'continue'),

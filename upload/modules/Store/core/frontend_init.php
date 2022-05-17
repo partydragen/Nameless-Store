@@ -10,24 +10,31 @@
  */
  
 $store = new Store($cache, $store_language);
-$player = new Player();
 $shopping_cart = new ShoppingCart();
-$customer = new Customer($user);
 
-// Check if player tries to logout
+$from_customer = new Customer($user);
+if ($store->isPlayerSystemEnabled()) {
+    // Customer will need to enter minecraft username to buy the products for
+    $to_customer = new Customer();
+} else {
+    // Customer will buy the products for them self
+    $to_customer = $from_customer;
+}
+
+// Check if customer tries to logout
 if (Input::exists()) {
     if (Token::check(Input::get('token'))) {
         if (Input::get('type') == 'store_logout') {
-            // Logout the store player
-            $player->logout();
+            // Logout the store customer
+            $to_customer->logout();
         }
     }
 }
 
 // Assign smarty variables
-if ($store->isPlayerSystemEnabled() && $player->isLoggedIn()) {
+if ($store->isPlayerSystemEnabled() && $to_customer->isLoggedIn()) {
     $smarty->assign([
-        'STORE_PLAYER' => $player->getUsername(),
+        'STORE_PLAYER' => $to_customer->getUsername(),
         'LOGOUT' => $store_language->get('general', 'logout'),
     ]);
 }

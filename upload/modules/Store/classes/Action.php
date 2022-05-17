@@ -147,16 +147,25 @@ class Action {
             $placeholders['{'.$field->identifier.'}'] = Output::getClean($field->value);
         }
 
-        $placeholders['{userId}'] = $order->data()->user_id ?? 0;
+        $customer = $order->customer();
+        $recipient = $order->recipient();
+        $placeholders['{userId}'] = $recipient->exists() ? $recipient->data()->user_id ?? 0 : 0;
+        $placeholders['{username}'] = $recipient->getUsername();
+        $placeholders['{uuid}'] = $recipient->getIdentifier();
         $placeholders['{productId}'] = $product->data()->id;
         $placeholders['{productPrice}'] = $product->data()->price;
         $placeholders['{productName}'] = $product->data()->name;
         $placeholders['{transaction}'] = $payment->data()->transaction;
+        $placeholders['{connection}'] = 'Lobby';
         $placeholders['{amount}'] = $payment->data()->amount;
         $placeholders['{currency}'] = $payment->data()->currency;
         $placeholders['{orderId}'] = $payment->data()->order_id;
+        $placeholders['{ip}'] = $order->data()->ip;
         $placeholders['{time}'] = date('H:i', $this->data()->created);
         $placeholders['{date}'] = date('d M Y', $this->data()->created);
+        $placeholders['{purchaserUserId}'] = $customer->exists() ? $customer->data()->user_id ?? 0 : 0;
+        $placeholders['{purchaserName}'] = $customer->getUsername();
+        $placeholders['{purchaserUuid}'] = $customer->getIdentifier();
 
         $this->_service->executeAction($this, $order, $product, $payment, $placeholders);
     }

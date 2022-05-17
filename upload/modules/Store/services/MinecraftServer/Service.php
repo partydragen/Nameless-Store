@@ -19,6 +19,10 @@ class MinecraftServerService extends ServiceBase {
     }
 
     public function executeAction(Action $action, Order $order, Product $product, Payment $payment, array $placeholders) {
+        // Plugin handle username and uuid replacement
+        unset($placeholders['{username}']);
+        unset($placeholders['{uuid}']);
+
         // Execute this action on all selected connections
         $connections = ($action->data()->own_connections ? $action->getConnections() : $product->getConnections());
         foreach ($connections as $connection) {
@@ -34,7 +38,7 @@ class MinecraftServerService extends ServiceBase {
                 'order_id' => $payment->data()->order_id,
                 'action_id' => $action->data()->id,
                 'product_id' => $product->data()->id,
-                'player_id' => $order->data()->player_id,
+                'customer_id' => $order->data()->to_customer_id,
                 'connection_id' => $connection->id,
                 'type' => $action->data()->type,
                 'command' => $command,

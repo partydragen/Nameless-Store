@@ -89,18 +89,7 @@ class Payment {
         if ($this->exists()) {
             // Payment exist, Continue with event handling
 
-            // Temp solution
-            $username = 'Unknown';
-            if ($this->getOrder()->data()->player_id != null) {
-                $player = new Player($this->getOrder()->data()->player_id);
-
-                $username = $player->getUsername();
-            } else if ($this->getOrder()->data()->user_id != null) {
-                $user = new User($this->getOrder()->data()->user_id);
-
-                $username = $user->getDisplayname(true);
-            }
-
+            $username = $this->getOrder()->recipient()->getUsername();
             switch ($event) {
                 case 'PENDING':
                     // Payment pending
@@ -213,18 +202,7 @@ class Payment {
 
                     $this->create(array_merge($insert_array, $extra_data));
 
-                    // Temp solution
-                    $username = 'Unknown';
-                    if ($this->getOrder()->data()->player_id != null) {
-                        $player = new Player($this->getOrder()->data()->player_id);
-
-                        $username = $player->getUsername();
-                    } else if ($this->getOrder()->data()->user_id != null) {
-                        $user = new User($this->getOrder()->data()->user_id);
-
-                        $username = $user->getDisplayname(true);
-                    }
-
+                    $username = $this->getOrder()->recipient()->getUsername();
                     HookHandler::executeEvent('paymentPending', [
                         'event' => 'paymentPending',
                         'order_id' => $this->data()->order_id,
@@ -243,20 +221,9 @@ class Payment {
 
                     $this->create(array_merge($insert_array, $extra_data));
 
-                    // Temp solution
-                    $username = 'Unknown';
-                    if ($this->getOrder()->data()->player_id != null) {
-                        $player = new Player($this->getOrder()->data()->player_id);
-
-                        $username = $player->getUsername();
-                    } else if ($this->getOrder()->data()->user_id != null) {
-                        $user = new User($this->getOrder()->data()->user_id);
-
-                        $username = $user->getDisplayname(true);
-                    }
-
                     $this->executeAllActions(1);
 
+                    $username = $this->getOrder()->recipient()->getUsername();
                     HookHandler::executeEvent('paymentCompleted', [
                         'event' => 'paymentCompleted',
                         'order_id' => $this->data()->order_id,

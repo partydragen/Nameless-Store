@@ -48,32 +48,33 @@ class LatestStorePurchasesWidget extends WidgetBase {
 				$purchase_limit = 10;
 			}
 
-            $latest_purchases_query = DB::getInstance()->query('SELECT nl2_store_payments.*, uuid, username, order_id, user_id, player_id FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_players ON player_id=nl2_store_players.id ORDER BY created DESC LIMIT ' . $purchase_limit)->results();
+            $latest_purchases_query = DB::getInstance()->query('SELECT nl2_store_payments.*, identifier, username, order_id, nl2_store_orders.user_id, to_customer_id FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_customers ON to_customer_id=nl2_store_customers.id ORDER BY created DESC LIMIT ' . $purchase_limit)->results();
 			$latest_purchases = [];
 
 			if (count($latest_purchases_query)) {
 				$timeago = new Timeago(TIMEZONE);
 
 				foreach ($latest_purchases_query as $purchase) {
-                    if ($purchase->player_id != null) {
-                        // Customer paid as a guest, attempt to load user by uuid
-                        $payment_user = new User(str_replace('-', '', $purchase->uuid), 'uuid');
-                        if ($payment_user->exists()) {
-                            $username = Output::getClean($purchase->username);
-                            $avatar = $payment_user->getAvatar();
-                            $style = $payment_user->getGroupClass();
-                        } else {
-                            $username = Output::getClean($purchase->username);
-                            $avatar = Util::getAvatarFromUUID(Output::getClean($purchase->uuid));
-                            $style = '';
-                        }
-                    } else if ($purchase->user_id != null) {
-                        // Customer paid while being logged in
-                        $payment_user = new User($purchase->user_id);
-                        
-                        $username = $payment_user->getDisplayname(true);
-                        $avatar = $payment_user->getAvatar();
-                        $style = $payment_user->getGroupClass();
+                    // Recipient
+                    if ($purchase->to_customer_id) {
+                        $recipient = new Customer(null, $purchase->to_customer_id, 'id');
+                    } else {
+                        $recipient = new Customer(null, $purchase->user_id, 'user_id');
+                    }
+
+                    if ($recipient->exists() && $recipient->getUser()->exists()) {
+                        $recipient_user = $recipient->getUser();
+                        $username = $recipient->getUsername();
+                        $avatar = $recipient_user->getAvatar();
+                        $style = $recipient_user->getGroupClass();
+                        $identifier = Output::getClean($recipient->getIdentifier());
+                        $user_id = $recipient_user->data()->id;
+                    } else {
+                        $username = $recipient->getUsername();
+                        $avatar = Util::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
+                        $style = '';
+                        $identifier = Output::getClean($recipient->getIdentifier());
+                        $user_id = null;
                     }
 
 					$latest_purchases[] = [
@@ -82,12 +83,12 @@ class LatestStorePurchasesWidget extends WidgetBase {
 						'price' => Output::getClean($purchase->amount),
 						'currency' => Output::getClean($purchase->currency),
 						'currency_symbol' => '$',
-						'uuid' => Output::getClean($purchase->uuid),
+						'uuid' => Output::getClean($purchase->identifier),
 						'date_full' => date('d M Y, H:i', $purchase->created),
 						'date_friendly' => $timeago->inWords(date('d M Y, H:i', $purchase->created), $this->_language->getTimeLanguage()),
 						'style' => $style,
 						'username' => $username,
-						'user_id' => $purchase->user_id
+						'user_id' => $user_id
 					];
 
 				}
