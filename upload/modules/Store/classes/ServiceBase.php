@@ -25,9 +25,9 @@ abstract class ServiceBase {
     private string $_description;
     
     /**
-     * @var string The connection settings path.
+     * @var string|null The connection settings path.
      */
-    protected string|null $_connection_settings;
+    protected ?string $_connection_settings;
     
     /**
      * @var string The action settings path.
