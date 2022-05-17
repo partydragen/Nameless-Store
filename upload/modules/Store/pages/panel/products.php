@@ -55,7 +55,7 @@ if (!isset($_GET['action'])) {
                         'name' => Output::getClean($product->name),
                         'price' => Output::getClean($product->price),
                         'edit_link' => URL::build('/panel/store/product/', 'product=' . Output::getClean($product->id)),
-                        'delete_link' => URL::build('/panel/store/product/', 'product=' . Output::getClean($product->id))
+                        'delete_link' => URL::build('/panel/store/product/', 'product=' . Output::getClean($product->id) . '&action=delete')
                     ];
 
                     $new_category['products'][] = $new_product;
