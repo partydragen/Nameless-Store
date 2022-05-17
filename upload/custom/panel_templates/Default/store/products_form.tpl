@@ -77,16 +77,24 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <label for="inputConnections">{$CONNECTIONS}</label>
-                                            <select name="connections[]" id="inputConnections" size="3" class="form-control" multiple style="overflow:auto;">
+                                            <label for="inputConnections">{$CONNECTIONS}</label> <span
+                                                class="badge badge-info"><i class="fas fa-question-circle"
+                                                                            data-container="body" data-toggle="popover"
+                                                                            data-placement="top" title="Info"
+                                                                            data-content="Each action will be executed on these connections unless the action override it"></i></span>
+                                            <select name="connections[]" id="inputConnections" class="form-control" multiple>
                                                 {foreach from=$CONNECTIONS_LIST item=connection}
                                                 <option value="{$connection.id}"{if $connection.selected} selected{/if}>{$connection.name}</option>
                                                 {/foreach}
                                             </select>
                                         </div>
                                         <div class="col-md-6">
-                                            <label for="inputFields">{$FIELDS}</label>
-                                            <select name="fields[]" id="inputFields" size="3" class="form-control" multiple style="overflow:auto;">
+                                            <label for="inputFields">{$FIELDS}</label> <span
+                                                class="badge badge-info"><i class="fas fa-question-circle"
+                                                                            data-container="body" data-toggle="popover"
+                                                                            data-placement="top" title="Info"
+                                                                            data-content="Customer will be requested to fill in these fields on checkout, Those can be used as command placeholders"></i></span>
+                                            <select name="fields[]" id="inputFields" class="form-control" multiple>
                                                 {foreach from=$FIELDS_LIST item=field}
                                                 <option value="{$field.id}"{if $field.selected} selected{/if}>{$field.identifier}</option>
                                                 {/foreach}
