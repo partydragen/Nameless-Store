@@ -201,12 +201,12 @@ if (isset($_GET['customer'])) {
         ];
     }
     
-    $processed_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions INNER JOIN nl2_store_connections ON connection_id=nl2_store_connections.id WHERE order_id = ? AND status = 1', [$payment->data()->order_id])->results();
+    $processed_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions LEFT JOIN nl2_store_connections ON connection_id=nl2_store_connections.id WHERE order_id = ? AND status = 1', [$payment->data()->order_id])->results();
     $processed_commands_array = [];
     foreach ($processed_commands as $command) {
         $processed_commands_array[] = [
             'command' => Output::getClean($command->command),
-            'connection_name' => Output::getClean($command->name)
+            'connection_name' => Output::getClean($command->name ?? 'Unknown')
         ];
     }
     

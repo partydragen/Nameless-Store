@@ -73,6 +73,10 @@ if (!isset($_GET['action'])) {
                 // Select service type
                 $services_list = [];
                 foreach ($services->getAll() as $service) {
+                    if ($service->getConnectionSettings() == null) {
+                        continue;
+                    }
+
                     $services_list[] = [
                         'id' => Output::getClean($service->getId()),
                         'name' => Output::getClean($service->getName()),

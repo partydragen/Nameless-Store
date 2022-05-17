@@ -156,7 +156,6 @@ class Action {
         $placeholders['{productPrice}'] = $product->data()->price;
         $placeholders['{productName}'] = $product->data()->name;
         $placeholders['{transaction}'] = $payment->data()->transaction;
-        $placeholders['{connection}'] = 'Lobby';
         $placeholders['{amount}'] = $payment->data()->amount;
         $placeholders['{currency}'] = $payment->data()->currency;
         $placeholders['{orderId}'] = $payment->data()->order_id;
@@ -167,7 +166,11 @@ class Action {
         $placeholders['{purchaserName}'] = $customer->getUsername();
         $placeholders['{purchaserUuid}'] = $customer->getIdentifier();
 
-        $this->_service->executeAction($this, $order, $product, $payment, $placeholders);
+        try {
+            $this->_service->executeAction($this, $order, $product, $payment, $placeholders);
+        } catch (Exception $e) {
+            
+        }
     }
 
     public function delete() {

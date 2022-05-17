@@ -3,7 +3,7 @@ class MinecraftServerService extends ServiceBase {
     public function __construct() {
         $id = 2;
         $name = 'Minecraft Server';
-        $description = 'Connect your Minecraft Server with the NamelessMC-Store plugin to execute commands from product actions';
+        $description = 'Connect your Minecraft servers with Service Connections and make actions execute commands on they';
         $connection_settings = ROOT_PATH . '/modules/Store/services/MinecraftServer/settings/connection_settings.php';
         $action_settings = ROOT_PATH . '/modules/Store/services/MinecraftServer/settings/action_settings.php';
 

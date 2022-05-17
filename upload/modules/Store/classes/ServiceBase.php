@@ -27,7 +27,7 @@ abstract class ServiceBase {
     /**
      * @var string The connection settings path.
      */
-    protected string $_connection_settings;
+    protected string|null $_connection_settings;
     
     /**
      * @var string The action settings path.
@@ -72,9 +72,9 @@ abstract class ServiceBase {
     /**
      * Get connection settings path.
      *
-     * @return string Connection settings path.
+     * @return string|null Connection settings path.
      */
-    public function getConnectionSettings(): string {
+    public function getConnectionSettings(): ?string {
         return $this->_connection_settings;
     }
 

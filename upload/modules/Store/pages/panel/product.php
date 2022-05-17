@@ -312,15 +312,17 @@ if (!isset($_GET['action'])) {
                 $template_file = 'store/products_action_type.tpl';
             } else {
                 if (!is_numeric($_GET['service'])) {
-                    URL::build('/panel/store/connections', 'action=new');
+                    Redirect::to(URL::build('/panel/store/products'));
                     die();
                 }
 
                 $service = $services->get($_GET['service']);
                 if ($service == null) {
-                    URL::build('/panel/store/connections', 'action=new');
+                    Redirect::to(URL::build('/panel/store/products'));
                     die();
                 }
+                
+                $action = new Action($service);
 
                 $fields = new StoreFields();
 
