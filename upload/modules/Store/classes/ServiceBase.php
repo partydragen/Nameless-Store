@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr12
+ * @version 2.0.0-pr13
  * @license MIT
  */
 abstract class ServiceBase {
@@ -23,12 +23,12 @@ abstract class ServiceBase {
      * @var string The service description
      */
     private string $_description;
-    
+
     /**
      * @var string|null The connection settings path.
      */
     protected ?string $_connection_settings;
-    
+
     /**
      * @var string The action settings path.
      */
@@ -90,12 +90,12 @@ abstract class ServiceBase {
     /**
      * Called when connection settings page is loaded
      */
-    abstract public function onConnectionSettingsPageLoad(TemplateBase $template, StoreFields $fields);
+    abstract public function onConnectionSettingsPageLoad(TemplateBase $template, Fields $fields);
 
     /**
      * Called when action settings page is loaded
      */
-    abstract public function onActionSettingsPageLoad(TemplateBase $template, StoreFields $fields);
+    abstract public function onActionSettingsPageLoad(TemplateBase $template, Fields $fields);
 
     /**
      * Execute product action on connection

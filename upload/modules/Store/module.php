@@ -3,6 +3,7 @@
  *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
+ *  NamelessMC version 2.0.0-pr13
  *
  *  License: MIT
  *
@@ -20,7 +21,7 @@ class Store_Module extends Module {
         $name = 'Store';
         $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
         $module_version = '1.4.0';
-        $nameless_version = '2.0.0-pr12';
+        $nameless_version = '2.0.0-pr13';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
 
@@ -51,14 +52,13 @@ class Store_Module extends Module {
         $pages->add('Store', '/panel/store/fields', 'pages/panel/fields.php');
         $pages->add('Store', '/panel/users/store', 'pages/panel/users_store.php');
 
-        HookHandler::registerEvent('paymentPending',  $store_language->get('admin', 'payment_pending'));
-        HookHandler::registerEvent('paymentCompleted', $store_language->get('admin', 'payment_completed'));
-        HookHandler::registerEvent('paymentRefunded', $store_language->get('admin', 'payment_refunded'));
-        HookHandler::registerEvent('paymentReversed', $store_language->get('admin', 'payment_reversed'));
-        HookHandler::registerEvent('paymentDenied', $store_language->get('admin', 'payment_denied'));
+        EventHandler::registerEvent('paymentPending',  $store_language->get('admin', 'payment_pending'));
+        EventHandler::registerEvent('paymentCompleted', $store_language->get('admin', 'payment_completed'));
+        EventHandler::registerEvent('paymentRefunded', $store_language->get('admin', 'payment_refunded'));
+        EventHandler::registerEvent('paymentReversed', $store_language->get('admin', 'payment_reversed'));
+        EventHandler::registerEvent('paymentDenied', $store_language->get('admin', 'payment_denied'));
 
-        // Autoload API Endpoints
-        Util::loadEndpoints(join(DIRECTORY_SEPARATOR, [ROOT_PATH, 'modules', 'Store', 'includes', 'endpoints']), $endpoints);
+        $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
         
         // Check if module version changed
         $cache->setCache('store_module_cache');
@@ -143,12 +143,11 @@ class Store_Module extends Module {
                 $navs[0]->add('store', $this->_store_language->get('general', 'store'), URL::build($this->_store_url), 'footer', null, $store_order, $icon);
             break;
         }
-        
+
 		// Widgets
 		// Latest purchases
 		require_once(ROOT_PATH . '/modules/Store/widgets/LatestPurchasesWidget.php');
-		$module_pages = $widgets->getPages('Latest Purchases');
-		$widgets->add(new LatestStorePurchasesWidget($module_pages, $smarty, $this->_language, $this->_store_language, $cache, $user));
+		$widgets->add(new LatestStorePurchasesWidget($smarty, $this->_language, $this->_store_language, $cache));
 
         if (defined('BACK_END')) {
             // Define permissions which belong to this module
@@ -245,7 +244,7 @@ class Store_Module extends Module {
             if ($user->hasPermission('staffcp.store.payments'))
                 Core_Module::addUserAction($this->_store_language->get('general', 'store'), URL::build('/panel/users/store/', 'user={id}'));
         }
-        
+
         // Check for module updates
         if (isset($_GET['route']) && $user->isLoggedIn() && $user->hasPermission('admincp.update')) {
             // Page belong to this module?
@@ -264,10 +263,10 @@ class Store_Module extends Module {
                 $update_check = json_decode($update_check);
                 if (!isset($update_check->error) && !isset($update_check->no_update) && isset($update_check->new_version)) {  
                     $smarty->assign([
-                        'NEW_UPDATE' => str_replace('{x}', $this->getName(), (isset($update_check->urgent) && $update_check->urgent == 'true') ? $this->_store_language->get('admin', 'new_urgent_update_available_x') : $this->_store_language->get('admin', 'new_update_available_x')),
+                        'NEW_UPDATE' => (isset($update_check->urgent) && $update_check->urgent == 'true') ? $this->_store_language->get('admin', 'new_urgent_update_available_x', ['module' => $this->getName()]) : $this->_store_language->get('admin', 'new_update_available_x', ['module' => $this->getName()]),
                         'NEW_UPDATE_URGENT' => (isset($update_check->urgent) && $update_check->urgent == 'true'),
-                        'CURRENT_VERSION' => str_replace('{x}', $this->getVersion(), $this->_store_language->get('admin', 'current_version_x')),
-                        'NEW_VERSION' => str_replace('{x}', Output::getClean($update_check->new_version), $this->_store_language->get('admin', 'new_version_x')),
+                        'CURRENT_VERSION' => $this->_store_language->get('admin', 'current_version_x', ['version' => Output::getClean($this->getVersion())]),
+                        'NEW_VERSION' => $this->_store_language->get('admin', 'new_version_x', ['new_version' => Output::getClean($update_check->new_version)]),
                         'UPDATE' => $this->_store_language->get('admin', 'view_resource'),
                         'UPDATE_LINK' => Output::getClean($update_check->link)
                     ]);
@@ -275,7 +274,10 @@ class Store_Module extends Module {
             }
         }
     }
-    
+
+    public function getDebugInfo(): array {
+    }
+
     private function initialiseUpdate($old_version) {
         $old_version = str_replace([".", "-"], "", $old_version);
         $queries = new Queries();
@@ -293,7 +295,7 @@ class Store_Module extends Module {
             $engine = 'InnoDB';
 
         if (!$charset || is_array($charset))
-            $charset = 'latin1';
+            $charset = 'utf8mb4';
 
         // Old converter from pre release
         if (!$queries->tableExists('store_orders')) {

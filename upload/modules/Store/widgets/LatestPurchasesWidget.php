@@ -10,30 +10,29 @@
  */
 
 class LatestStorePurchasesWidget extends WidgetBase {
-	private $_smarty, $_language, $_cache, $_user, $_store_language;
+	private $_language, $_cache, $_store_language;
 
-	public function __construct($pages, $smarty, $language, $store_language, $cache, $user) {
-		parent::__construct($pages);
-
+    public function __construct(Smarty $smarty, Language $language, Language $store_language, Cache $cache) {
 		$this->_smarty = $smarty;
 		$this->_language = $language;
 		$this->_store_language = $store_language;
 		$this->_cache = $cache;
-		$this->_user = $user;
 
-		// Get order
-		$order = DB::getInstance()->query('SELECT `order` FROM nl2_widgets WHERE `name` = ?', ['Latest Purchases'])->first();
+        // Get widget
+        $widget_query = self::getData('Latest Purchases');
+
+        parent::__construct(self::parsePages($widget_query->pages));
 
 		// Set widget variables
 		$this->_module = 'Store';
 		$this->_name = 'Latest Purchases';
-		$this->_location = 'right';
+		$this->_location = $widget_query->location;
 		$this->_description = 'Displays a list of your store\'s most recent purchases.';
 		$this->_settings = ROOT_PATH . '/modules/Store/widgets/admin/latest_purchases.php';
-		$this->_order = $order->order;
+		$this->_order = $widget_query->order;
 	}
 
-	public function initialise() {
+	public function initialise(): void {
 		// Generate HTML code for widget
 		$this->_cache->setCache('store_data');
 		$queries = new Queries();
@@ -52,7 +51,7 @@ class LatestStorePurchasesWidget extends WidgetBase {
 			$latest_purchases = [];
 
 			if (count($latest_purchases_query)) {
-				$timeago = new Timeago(TIMEZONE);
+				$timeago = new TimeAgo(TIMEZONE);
 
 				foreach ($latest_purchases_query as $purchase) {
                     // Recipient
@@ -71,7 +70,7 @@ class LatestStorePurchasesWidget extends WidgetBase {
                         $user_id = $recipient_user->data()->id;
                     } else {
                         $username = $recipient->getUsername();
-                        $avatar = Util::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
+                        $avatar = AvatarSource::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
                         $style = '';
                         $identifier = Output::getClean($recipient->getIdentifier());
                         $user_id = null;
@@ -85,7 +84,7 @@ class LatestStorePurchasesWidget extends WidgetBase {
 						'currency_symbol' => '$',
 						'uuid' => Output::getClean($purchase->identifier),
 						'date_full' => date('d M Y, H:i', $purchase->created),
-						'date_friendly' => $timeago->inWords(date('d M Y, H:i', $purchase->created), $this->_language->getTimeLanguage()),
+						'date_friendly' => $timeago->inWords($purchase->created, $this->_language),
 						'style' => $style,
 						'username' => $username,
 						'user_id' => $user_id

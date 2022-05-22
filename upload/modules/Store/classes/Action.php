@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr12
+ * @version 2.0.0-pr13
  * @license MIT
  */
 class Action {
@@ -169,7 +169,7 @@ class Action {
         try {
             $this->_service->executeAction($this, $order, $product, $payment, $placeholders);
         } catch (Exception $e) {
-            
+
         }
     }
 

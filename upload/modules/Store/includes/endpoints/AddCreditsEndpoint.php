@@ -1,18 +1,15 @@
 <?php
-class AddCreditsEndpoint extends EndpointBase {
+class AddCreditsEndpoint extends KeyAuthEndpoint {
 
     public function __construct() {
-        $this->_route = 'addCredits';
+        $this->_route = 'users/{user}/addcredits';
         $this->_module = 'Store';
         $this->_description = 'Add credits to user';
         $this->_method = 'POST';
     }
 
-    public function execute(Nameless2API $api) {
-        $api->validateParams($_POST, ['user', 'credits']);
-
-        // Ensure user exists
-        $user = $api->getUser('id', $_POST['user']);
+    public function execute(Nameless2API $api, User $user): void {
+        $api->validateParams($_POST, ['credits']);
 
         $credits = $_POST['credits'];
         if (!is_numeric($credits)) {

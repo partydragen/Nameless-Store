@@ -17,7 +17,9 @@
 
         <h1 style="display:inline;">{$STORE} &raquo; {$CHECKOUT}</h1>
         {include file='store/navbar.tpl'}
-
+        
+        </br>
+        
         {if isset($SUCCESS)}
           <div class="ui success icon message">
             <i class="check icon"></i>
@@ -36,8 +38,6 @@
               {/foreach}
             </div>
           </div>
-        {else}
-          </br>
         {/if}
         
         <form class="ui form" action="" method="post" id="forms">
@@ -77,7 +77,8 @@
               </div>
             </div>
           {/foreach}
-
+        
+        
           <h3>{$PURCHASE}</h3>
           <hr />
           <div class="field">

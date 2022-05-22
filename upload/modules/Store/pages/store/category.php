@@ -54,16 +54,12 @@ if (count($page_metadata)) {
 $page_title = Output::getClean($category->name);
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 
-require(ROOT_PATH . '/core/includes/emojione/autoload.php'); // Emojione
-$emojione = new Emojione\Client(new Emojione\Ruleset());
-
 if (Input::exists()) {
     if (Token::check(Input::get('token'))) {
         $errors = [];
 
         if (Input::get('type') == 'store_login') {
-            $validate = new Validate();
-            $validation = $validate->check($_POST, [
+            $validation = Validate::check($_POST, [
                 'username' => [
                     Validate::REQUIRED => true,
                     Validate::MIN => 3,
@@ -76,9 +72,8 @@ if (Input::exists()) {
                 if (!$to_customer->login(Output::getClean(Input::get('username')))) {
                     $errors[] = $language->get('user', 'invalid_mcname');
                 }
-                
+
                 Redirect::to(URL::build($store_url . '/category/' . $category->id));
-                die();
             } else {
                 $errors[] = 'Unable to find a player with that username';
             }
@@ -97,7 +92,6 @@ if (!$products->count()) {
 
     foreach ($products as $product) {
         $content = Output::getDecoded($product->description);
-        $content = $emojione->unicodeToImage($content);
         $content = Output::getPurified($content);
 
         $image = (isset($product->image) && !is_null($product->image) ? (defined('CONFIG_PATH') ? CONFIG_PATH . '/' : '/' . 'uploads/store/' . Output::getClean(Output::getDecoded($product->image))) : null);
@@ -118,7 +112,6 @@ if (!$products->count()) {
 
 // Category description
 $content = Output::getDecoded($category->description);
-$content = $emojione->unicodeToImage($content);
 $content = Output::getPurified($content);
 
 $smarty->assign([
@@ -152,20 +145,15 @@ if ($store->isPlayerSystemEnabled() && !$to_customer->isLoggedIn()) {
     $template_file = 'store/category.tpl';
 }
 
-$template->addCSSFiles([
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/css/spoiler.css' => [],
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/emoji/css/emojione.min.css' => []
-]);
-
-$template->addJSFiles([
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => []
+$template->assets()->include([
+    DARK_MODE
+        ? AssetTree::PRISM_DARK
+        : AssetTree::PRISM_LIGHT,
+    AssetTree::TINYMCE_SPOILER,
 ]);
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets, $template);
-
-$page_load = microtime(true) - $start;
-define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
 $template->onPageLoad();
 

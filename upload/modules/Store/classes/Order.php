@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr12
+ * @version 2.0.0-pr13
  * @license MIT
  */
 class Order {
@@ -115,7 +115,7 @@ class Order {
             $this->_data = $data->first();
         }
     }
-    
+
     public function customer(): Customer {
         if ($this->data()->from_customer_id) {
             return new Customer(null, $this->data()->from_customer_id, 'id');
@@ -123,7 +123,7 @@ class Order {
             return new Customer(null, $this->data()->user_id, 'user_id');
         }
     }
-    
+
     public function recipient(): Customer {
         if ($this->data()->to_customer_id) {
             return new Customer(null, $this->data()->to_customer_id, 'id');

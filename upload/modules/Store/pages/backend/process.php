@@ -29,11 +29,9 @@ if ($gateway) {
         // Success 
         $shopping_cart->clear();
         Redirect::to(URL::build($store->getStoreURL() . '/checkout/', 'do=complete'));
-        die();
     } else {
         // Canceled or failed
         Redirect::to(URL::build($store->getStoreURL() . '/checkout/', 'do=cancel'));
-        die();
     }
 } else {
     die('Invalid gateway');

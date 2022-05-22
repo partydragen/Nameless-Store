@@ -17,7 +17,7 @@ class Gateways {
         $directories = glob(ROOT_PATH . '/modules/Store/gateways/*' , GLOB_ONLYDIR);
         foreach ($directories as $directory) {
             $folders = explode('/', $directory);
-            
+
             if (file_exists(ROOT_PATH . '/modules/Store/gateways/' . $folders[count($folders) - 1] . '/gateway.php')) {
                 require_once(ROOT_PATH . '/modules/Store/gateways/' . $folders[count($folders) - 1] . '/gateway.php');
 
@@ -25,12 +25,12 @@ class Gateways {
             }
         }
     }
-    
+
     // Get all gateways
     public function getAll() {
         return $this->_gateways;
     }
-    
+
     // Get gateway by name
     public function get($name) {
         if (array_key_exists($name, $this->_gateways)) {

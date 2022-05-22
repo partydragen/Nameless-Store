@@ -17,11 +17,11 @@ class Store {
     // Constructor, connect to database
     public function __construct($cache, $store_language) {
         $this->_db = DB::getInstance();
-        
+
         $this->_cache = $cache;
         $this->_store_language = $store_language;
     }
-    
+
     public function getStoreURL() {
         // Get variables from cache
         $this->_cache->setCache('store_settings');
@@ -30,35 +30,35 @@ class Store {
         } else {
             $store_url = '/store';
         }
-        
+
         return $store_url;
     }
-    
+
     // Get all products
     public function getProducts() {
         $products_list = [];
-        
+
         $products = $this->_db->query('SELECT * FROM nl2_store_products WHERE deleted = 0 ORDER BY `order` ASC')->results();
         foreach ($products as $data) {
             $product = new Product(null, null, $data);
 
             $products_list[] = $product;
         }
-        
+
         return $products_list;
     }
     
     // Get all payments
     public function getAllPayments() {
         $payments = $this->_db->query('SELECT nl2_store_payments.*, identifier, username, order_id, nl2_store_orders.user_id, to_customer_id FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_customers ON to_customer_id=nl2_store_customers.id ORDER BY created DESC')->results();
-        
+
         return $payments;
     }
     
     // Get all categories
     public function getAllCategories() {
         $categories = $this->_db->query('SELECT * FROM nl2_store_categories WHERE deleted = 0 ORDER BY `order` ASC')->results();
-            
+
         $categories_array = [];
         foreach ($categories as $category) {
             $categories_array[] = [
@@ -66,14 +66,14 @@ class Store {
                 'name' => Output::getClean($category->name)
             ];
         }
-        
+
         return $categories_array;
     }
     
     // Get all connections
     public function getAllConnections() {
         $connections = $this->_db->query('SELECT * FROM nl2_store_connections')->results();
-            
+
         $connections_array = [];
         foreach ($connections as $connection) {
             $connections_array[] = [
@@ -81,7 +81,7 @@ class Store {
                 'name' => Output::getClean($connection->name)
             ];
         }
-        
+
         return $connections_array;
     }
     
@@ -89,13 +89,13 @@ class Store {
     public function getNavbarMenu($active) {
         $store_url = $this->getStoreURL();
         $categories = [];
-        
+
         $categories[] = [
             'url' => URL::build($store_url),
             'title' => $this->_store_language->get('general', 'home'),
             'active' => Output::getClean($active) == 'Home'
         ];
-        
+
         $categories_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE parent_category IS NULL AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC')->results();
         if (count($categories_query)) {
             foreach ($categories_query as $item) {
@@ -124,16 +124,16 @@ class Store {
                 ];
             }
         }
-        
+
         return $categories;
     }
-    
+
     public function isPlayerSystemEnabled() {
         $configuration = new Configuration($this->_cache);
-        
+
         return $configuration->get('store', 'player_login');
     }
-    
+
     /*
      *  Check for Module updates
      *  Returns JSON object with information about any updates
@@ -149,7 +149,7 @@ class Store {
 
         $uid = $queries->getWhere('settings', ['name', '=', 'unique_id']);
         $uid = $uid[0]->value;
-        
+
         $enabled_modules = Module::getModules();
         foreach ($enabled_modules as $enabled_item) {
             if ($enabled_item->getName() == 'Store') {
@@ -157,7 +157,6 @@ class Store {
                 break;
             }
         }
-        
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -171,7 +170,7 @@ class Store {
         if (isset($info->message)) {
             die($info->message);
         }
-        
+
         return $update_check;
     }
 }

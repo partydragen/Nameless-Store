@@ -1,13 +1,14 @@
 <?php
-class CommandsExecuted extends EndpointBase {
+class CommandsExecuted extends KeyAuthEndpoint {
 
     public function __construct() {
         $this->_route = 'storeCommandsExecuted';
         $this->_module = 'Store';
         $this->_description = 'Mark commands as complete';
+        $this->_method = 'POST';
     }
 
-    public function execute(Nameless2API $api) {
+    public function execute(Nameless2API $api): void {
         $commands = $_POST['commands'];
         if (!is_array($commands) || !count($commands)) {
             $api->throwError(110, 'No commands provided');

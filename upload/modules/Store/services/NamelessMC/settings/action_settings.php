@@ -5,8 +5,7 @@ if (Input::exists()) {
 
     if (Token::check(Input::get('token'))) {
         // New Action
-        $validate = new Validate();
-        $validation = $validate->check($_POST, [
+        $validation = Validate::check($_POST, [
             'add_credits' => [
                 Validate::MIN => 1,
                 Validate::MAX => 11,
@@ -85,7 +84,6 @@ if (Input::exists()) {
 
                     Session::flash('products_success', $store_language->get('admin', 'action_created_successfully'));
                     Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
-                    die();
                 } else {
                     // Update existing action
                     $action->update([
@@ -97,11 +95,6 @@ if (Input::exists()) {
 
                     Session::flash('products_success', $store_language->get('admin', 'action_updated_successfully'));
                     Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
-                    die();
-
-                    Session::flash('products_success', $store_language->get('admin', 'action_created_successfully'));
-                    Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
-                    die();
                 }
             }
         } else {

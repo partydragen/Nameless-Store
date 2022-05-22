@@ -1,5 +1,5 @@
 <?php
-class PaymentInfoEndpoint extends EndpointBase {
+class PaymentInfoEndpoint extends KeyAuthEndpoint {
 
     public function __construct() {
         $this->_route = 'payment';
@@ -8,7 +8,7 @@ class PaymentInfoEndpoint extends EndpointBase {
         $this->_method = 'GET';
     }
 
-    public function execute(Nameless2API $api) {
+    public function execute(Nameless2API $api): void {
         $api->validateParams($_GET, ['id']);
 
         // Get payment

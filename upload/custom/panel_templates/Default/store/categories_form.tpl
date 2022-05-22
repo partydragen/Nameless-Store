@@ -63,17 +63,17 @@
                                     {/foreach}
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label for="inputOnlySubCategories">{$ONLY_SUBCATEGORIES}</label>
-                                <input id="inputOnlySubCategories" name="only_subcategories" type="checkbox" class="js-switch"{if $ONLY_SUBCATEGORIES_VALUE eq 1} checked{/if} />
+                            <div class="form-group custom-control custom-switch">
+                                <input id="inputOnlySubCategories" name="only_subcategories" type="checkbox" class="custom-control-input"{if $ONLY_SUBCATEGORIES_VALUE eq 1} checked{/if} />
+                                <label class="custom-control-label" for="inputOnlySubCategories">{$ONLY_SUBCATEGORIES}</label>
                             </div>
-                            <div class="form-group">
-                                <label for="inputHidden">{$HIDE_CATEGORY}</label>
-                                <input id="inputHidden" name="hidden" type="checkbox" class="js-switch"{if $HIDE_CATEGORY_VALUE eq 1} checked{/if} />
+                            <div class="form-group custom-control custom-switch">
+                                <input id="inputHidden" name="hidden" type="checkbox" class="custom-control-input"{if $HIDE_CATEGORY_VALUE eq 1} checked{/if} />
+                                <label class="custom-control-label" for="inputHidden">{$HIDE_CATEGORY}</label>
                             </div>
-                            <div class="form-group">
-                                <label for="inputDisabled">{$DISABLE_CATEGORY}</label>
-                                <input id="inputDisabled" name="disabled" type="checkbox" class="js-switch"{if $DISABLE_CATEGORY_VALUE eq 1} checked{/if} />
+                            <div class="form-group custom-control custom-switch">
+                                <input id="inputDisabled" name="disabled" type="checkbox" class="custom-control-input"{if $DISABLE_CATEGORY_VALUE eq 1} checked{/if} />
+                                <label class="custom-control-label" for="inputDisabled">{$DISABLE_CATEGORY}</label>
                             </div>
                             <div class="form-group">
                                 <input type="hidden" name="token" value="{$TOKEN}">

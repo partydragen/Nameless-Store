@@ -1,13 +1,14 @@
 <?php
-class ProductsList extends EndpointBase {
+class ProductsList extends KeyAuthEndpoint {
 
     public function __construct() {
         $this->_route = 'storeProducts';
         $this->_module = 'Store';
         $this->_description = 'Get list of products in a category';
+        $this->_method = 'GET';
     }
 
-    public function execute(Nameless2API $api) {
+    public function execute(Nameless2API $api): void {
         $query = 'SELECT * FROM nl2_store_products';
 
         $where = ' WHERE deleted = 0';

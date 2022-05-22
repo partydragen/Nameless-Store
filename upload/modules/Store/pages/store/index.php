@@ -15,12 +15,8 @@ $page_title = $store_language->get('general', 'store');
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
 
-require(ROOT_PATH . '/core/includes/emojione/autoload.php'); // Emojione
-$emojione = new Emojione\Client(new Emojione\Ruleset());
-
 $content = $queries->getWhere('store_settings', ['name', '=', 'store_content']);
 $content = Output::getDecoded($content[0]->value);
-$content = $emojione->unicodeToImage($content);
 $content = Output::getPurified($content);
 
 $smarty->assign([
@@ -31,20 +27,15 @@ $smarty->assign([
     'TOKEN' => Token::get(),
 ]);
 
-$template->addCSSFiles([
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/css/spoiler.css' => [],
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/emoji/css/emojione.min.css' => []
-]);
-
-$template->addJSFiles([
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => []
+$template->assets()->include([
+    DARK_MODE
+        ? AssetTree::PRISM_DARK
+        : AssetTree::PRISM_LIGHT,
+    AssetTree::TINYMCE_SPOILER,
 ]);
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets, $template);
-
-$page_load = microtime(true) - $start;
-define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
 $template->onPageLoad();
 

@@ -24,7 +24,7 @@ require_once(ROOT_PATH . '/core/templates/backend_init.php');
 $store = new Store($cache, $store_language);
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets);
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
 if (isset($_GET['customer'])) {
     // Get payments for user
@@ -49,7 +49,7 @@ if (isset($_GET['customer'])) {
             $link = URL::build('/panel/users/store/', 'user=' . $recipient_user->data()->id);
         } else {
             $username = $recipient->getUsername();
-            $avatar = Util::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
+            $avatar = AvatarSource::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
             $style = '';
             $identifier = Output::getClean($recipient->getIdentifier());
             $link = URL::build('/panel/store/payments/', 'customer=' . $username);
@@ -81,13 +81,8 @@ if (isset($_GET['customer'])) {
         ]);
 
         if (!defined('TEMPLATE_STORE_SUPPORT')) {
-            $template->addCSSFiles([
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/css/dataTables.bootstrap4.min.css' => []
-            ]);
-
-            $template->addJSFiles([
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/dataTables/jquery.dataTables.min.js' => [],
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/js/dataTables.bootstrap4.min.js' => []
+            $template->assets()->include([
+                AssetTree::DATATABLES
             ]);
 
             $template->addJSScript('
@@ -116,7 +111,7 @@ if (isset($_GET['customer'])) {
         $smarty->assign('NO_PAYMENTS', $store_language->get('admin', 'no_payments_for_user'));
 
     $smarty->assign([
-        'VIEWING_PAYMENTS_FOR_USER' => str_replace('{x}', Output::getClean($_GET['customer']), $store_language->get('admin', 'viewing_payments_for_user_x')),
+        'VIEWING_PAYMENTS_FOR_USER' => $store_language->get('admin', 'viewing_payments_for_user_x', ['user' => Output::getClean($_GET['customer'])]),
         'BACK' => $language->get('general', 'back'),
         'BACK_LINK' => URL::build('/panel/store/payments')
     ]);
@@ -128,9 +123,8 @@ if (isset($_GET['customer'])) {
     $payment = new Payment($_GET['payment']);
     if (!$payment->exists()) {
         Redirect::to(URL::build('/panel/store/payments'));
-        die();
     }
-    
+
     // Handle input
     if (Input::exists()) {
         $errors = [];
@@ -140,10 +134,9 @@ if (isset($_GET['customer'])) {
                 // Delete payment only if payment is manual
                 if ($payment->data()->gateway_id == 0) {
                     $payment->delete();
-                    
+
                     Session::flash('store_payment_success', $store_language->get('admin', 'payment_deleted_successfully'));
                     Redirect::to(URL::build('/panel/store/payments'));
-                    die();
                 }
             } else if (Input::get('action') == 'delete_command') {
                 // Delete pending command
@@ -153,7 +146,7 @@ if (isset($_GET['customer'])) {
             $errors[] = $language->get('general', 'invalid_token');
         }
     }
-    
+
     $order = $payment->getOrder();
 
     // Recipient
@@ -167,7 +160,7 @@ if (isset($_GET['customer'])) {
         $link = URL::build('/panel/users/store/', 'user=' . $recipient_user->data()->id);
     } else {
         $username = $recipient->getUsername();
-        $avatar = Util::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
+        $avatar = AvatarSource::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
         $style = '';
         $uuid = Output::getClean($recipient->getIdentifier());
         $link = URL::build('/panel/store/payments/', 'customer=' . $username);
@@ -184,14 +177,14 @@ if (isset($_GET['customer'])) {
                 'value' => Output::getClean($field->value)
             ];
         }
-        
+
         $products_list[] = [
             'id' => Output::getClean($product->data()->id),
             'name' => Output::getClean($product->data()->name),
             'fields' => $fields_array
         ];
     }
-   
+
     $pending_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions INNER JOIN nl2_store_connections ON connection_id=nl2_store_connections.id WHERE order_id = ? AND status = 0', [$payment->data()->order_id])->results();
     $pending_commands_array = [];
     foreach ($pending_commands as $command) {
@@ -200,7 +193,7 @@ if (isset($_GET['customer'])) {
             'connection_name' => Output::getClean($command->name)
         ];
     }
-    
+
     $processed_commands = DB::getInstance()->query('SELECT * FROM nl2_store_pending_actions LEFT JOIN nl2_store_connections ON connection_id=nl2_store_connections.id WHERE order_id = ? AND status = 1', [$payment->data()->order_id])->results();
     $processed_commands_array = [];
     foreach ($processed_commands as $command) {
@@ -209,7 +202,7 @@ if (isset($_GET['customer'])) {
             'connection_name' => Output::getClean($command->name ?? 'Unknown')
         ];
     }
-    
+
     // Allow manual payment deletion
     if ($payment->data()->gateway_id == 0) {
         $smarty->assign([
@@ -217,9 +210,9 @@ if (isset($_GET['customer'])) {
             'CONFIRM_DELETE_PAYMENT' => $store_language->get('admin', 'confirm_payment_deletion'),
         ]);
     }
-    
+
     $smarty->assign([
-        'VIEWING_PAYMENT' => str_replace('{x}', Output::getClean($payment->data()->transaction), $store_language->get('admin', 'viewing_payment')),
+        'VIEWING_PAYMENT' => $store_language->get('admin', 'viewing_payment', ['payment' => Output::getClean($payment->data()->transaction)]),
         'BACK' => $language->get('general', 'back'),
         'BACK_LINK' => URL::build('/panel/store/payments'),
         'IGN' => $store_language->get('admin', 'ign'),
@@ -263,27 +256,25 @@ if (isset($_GET['customer'])) {
         // Create payment
         if (Input::exists()) {
             $errors = [];
-            
+
             if (Token::check()) {
-                $validate = new Validate();
-                
                 $to_validation = [
                     'username' => [
                         Validate::REQUIRED => true
                     ]
                 ];
-                
+
                 // Valid, continue with validation
-                $validation = $validate->check($_POST, $to_validation);
+                $validation = Validate::check($_POST, $to_validation);
                 if ($validation->passed()) {
-                    
+
                     if ($store->isPlayerSystemEnabled()) {
                         // Attempt to load recipient
                         $recipient = new Customer();
                         if (!$recipient->login(Output::getClean(Input::get('username')), false)) {
                             $errors[] = $language->get('user', 'invalid_mcname');
                         }
-                        
+
                         $target_user = new User(Output::getClean(Input::get('username')), 'username');
                     } else {
                         // User required
@@ -291,10 +282,10 @@ if (isset($_GET['customer'])) {
                         if (!$target_user->exists()) {
                             $errors[] = $store_language->get('admin', 'user_dont_exist');
                         }
-                        
+
                         $recipient = new Customer($target_user);
                     }
-                    
+
                     $items = [];
                     $selected_products = $_POST['products'];
                     foreach ($selected_products as $item) {
@@ -308,7 +299,7 @@ if (isset($_GET['customer'])) {
                         // Register order
                         $order = new Order();
                         $order->create($target_user, $recipient, $recipient, $items);
-                        
+
                         // Register payment
                         $payment = new Payment();
                         $payment->handlePaymentEvent('COMPLETED', [
@@ -318,10 +309,9 @@ if (isset($_GET['customer'])) {
                             'currency' => Output::getClean($configuration->get('store', 'currency')),
                             'fee' => 0
                         ]);
-                        
+
                         Session::flash('store_payment_success', $store_language->get('admin', 'payment_created_successfully'));
                         Redirect::to(URL::build('/panel/store/payments/', 'payment=' . $payment->data()->id));
-                        die();
                     }
                 } else {
                     $errors = $validation->errors();
@@ -387,7 +377,7 @@ if (isset($_GET['customer'])) {
                 $link = URL::build('/panel/users/store/', 'user=' . $recipient_user->data()->id);
             } else {
                 $username = $recipient->getUsername();
-                $avatar = Util::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
+                $avatar = AvatarSource::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
                 $style = '';
                 $identifier = Output::getClean($recipient->getIdentifier());
                 $link = URL::build('/panel/store/payments/', 'customer=' . $username);
@@ -415,13 +405,8 @@ if (isset($_GET['customer'])) {
         ]);
 
         if (!defined('TEMPLATE_STORE_SUPPORT')) {
-            $template->addCSSFiles([
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/css/dataTables.bootstrap4.min.css' => []
-            ]);
-
-            $template->addJSFiles([
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/dataTables/jquery.dataTables.min.js' => [],
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/js/dataTables.bootstrap4.min.js' => []
+            $template->assets()->include([
+                AssetTree::DATATABLES
             ]);
 
             $template->addJSScript('
@@ -488,9 +473,6 @@ if (isset($errors) && count($errors))
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
-
-$page_load = microtime(true) - $start;
-define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));
 
 $template->onPageLoad();
 

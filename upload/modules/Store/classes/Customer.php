@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr12
+ * @version 2.0.0-pr13
  * @license MIT
  */
 class Customer {
@@ -123,7 +123,13 @@ class Customer {
             if ($this->data()->user_id != null) {
                 return new User($this->data()->user_id);
             } else if ($this->data()->identifier != null) {
-                return new User(str_replace('-', '', $this->data()->identifier), 'uuid');
+                $integration = Integrations::getInstance()->getIntegration('Minecraft');
+                if ($integration != null) {
+                    $integration_user = new IntegrationUser($integration, str_replace('-', '', $this->data()->identifier), 'identifier');
+                    if ($integration_user->exists()) {
+                        return $integration_user->getUser();
+                    }
+                }
             }
 
             return new User($this->data()->username);
@@ -188,13 +194,11 @@ class Customer {
 
         if ($uuid_linking == '1') {
             // Online mode
-            require(ROOT_PATH . '/core/integration/uuid.php'); // For UUID stuff
-
-            $profile = ProfileUtils::getProfile(str_replace(' ', '%20', Input::get('username')));
-            $mcname_result = $profile ? $profile->getProfileAsArray() : array();
-            if (isset($mcname_result['username']) && !empty($mcname_result['username']) && isset($mcname_result['uuid']) && !empty($mcname_result['uuid'])) {
+            $profile = ProfileUtils::getProfile(str_replace(' ', '%20', $username));
+            $mcname_result = $profile ? $profile->getProfileAsArray() : [];
+            if (isset($mcname_result['username'], $mcname_result['uuid']) && !empty($mcname_result['username']) && !empty($mcname_result['uuid'])) {
                 $username = Output::getClean($mcname_result['username']);
-                $uuid = ProfileUtils::formatUUID(Output::getClean($mcname_result['uuid']));
+                $uuid = $this->formatUUID(Output::getClean($mcname_result['uuid']));
 
                 if ($this->find($uuid, 'identifier')) {
                     // Customer already exist in database
@@ -253,6 +257,16 @@ class Customer {
         }
 
         return false;
+    }
+
+    public static function formatUUID($uuid) {
+        $uid = "";
+        $uid .= substr($uuid, 0, 8)."-";
+        $uid .= substr($uuid, 8, 4)."-";
+        $uid .= substr($uuid, 12, 4)."-";
+        $uid .= substr($uuid, 16, 4)."-";
+        $uid .= substr($uuid, 20);
+        return $uid;
     }
 
     /**

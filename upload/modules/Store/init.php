@@ -1,8 +1,9 @@
 <?php
 /*
- *  Made by Samerton
- *  https://github.com/samerton
- *  NamelessMC version 2.0.0-pr5
+ *  Made by Partydragen
+ *  https://partydragen.com/resources/resource/5-store-module/
+ *  https://partydragen.com/
+ *  NamelessMC version 2.0.0-pr13
  *
  *  License: MIT
  *

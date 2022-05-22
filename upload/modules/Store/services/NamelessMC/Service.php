@@ -10,11 +10,11 @@ class NamelessMCService extends ServiceBase {
         parent::__construct($id, $name, $description, $connection_settings, $action_settings);
     }
 
-    public function onConnectionSettingsPageLoad(TemplateBase $template, StoreFields $fields) {
+    public function onConnectionSettingsPageLoad(TemplateBase $template, Fields $fields) {
 
     }
 
-    public function onActionSettingsPageLoad(TemplateBase $template, StoreFields $fields) {
+    public function onActionSettingsPageLoad(TemplateBase $template, Fields $fields) {
 
     }
 
@@ -24,7 +24,7 @@ class NamelessMCService extends ServiceBase {
             // Get original recipient user
             $recipient = new Customer($recipient->getUser());
             $user = $recipient->getUser();
-            
+
             $command = json_decode($action->data()->command, true);
             if (isset($command['add_groups']) && is_array($command['add_groups']) && count($command['add_groups'])) {
                 foreach ($command['add_groups'] as $group) {
@@ -46,7 +46,7 @@ class NamelessMCService extends ServiceBase {
                 $recipient->removeCredits($command['remove_credits']);
             }
         }
-        
+
         // Action executed
         DB::getInstance()->insert('store_pending_actions', [
             'order_id' => $payment->data()->order_id,

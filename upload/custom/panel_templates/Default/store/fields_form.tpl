@@ -85,9 +85,9 @@
                                 </div>
                               </div>
                             </div>
-                            <div class="form-group">
-                                <label for="inputrequired">{$REQUIRED}</label>
-                                <input id="inputrequired" name="required" type="checkbox" class="js-switch"{if $REQUIRED_VALUE eq 1} checked{/if} />
+                            <div class="form-group custom-control custom-switch">
+                                <input id="inputRequired" name="required" type="checkbox" class="custom-control-input"{if $REQUIRED_VALUE eq 1} checked{/if} />
+                                <label class="custom-control-label" for="inputRequired">{$REQUIRED}</label>
                             </div>
                             <div class="form-group">
                                 <input type="hidden" name="token" value="{$TOKEN}">

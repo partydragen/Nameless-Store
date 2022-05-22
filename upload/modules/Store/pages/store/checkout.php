@@ -19,7 +19,6 @@ require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
 if (!$store->isPlayerSystemEnabled() || !$configuration->get('store', 'allow_guests')) {
     if (!$user->isLoggedIn()) {
         Redirect::to(URL::build('/login/'));
-        die();
     }
 }
 
@@ -37,7 +36,6 @@ if (isset($_GET['do'])) {
     } else {
         // Invalid
         Redirect::to(URL::build($store_url . '/checkout/'));
-        die();
     }
 } else if (isset($_GET['add'])) {
     // Add item to shopping cart
@@ -58,10 +56,10 @@ if (isset($_GET['do'])) {
         $product_fields = [];
         foreach ($fields as $field) {
             $options = explode(',', Output::getClean($field->options));
-            
+
             // Is value forced loaded?
             $forced = isset($_GET[$field->identifier]);
-            
+
             $product_fields[] = [
                 'id' => Output::getClean($field->id),
                 'identifier' => Output::getClean($field->identifier),
@@ -72,28 +70,25 @@ if (isset($_GET['do'])) {
                 'options' => $options,
                 'forced' => $forced
             ];
-            
+
             // Continue to next step if all fields are force loaded
             if (!$forced)
                 $force_continue = false;
         }
-        
+
         // Continue to next step if all fields are force loaded
         if ($force_continue) {
             $shopping_cart->add($_GET['add'], 1, $product_fields);
             Redirect::to(URL::build($store_url . '/checkout/'));
-            die();
         }
-        
+
         // Deal with any input
         if (Input::exists()) {
             $errors = [];
 
             if (Token::check()) {
                 // Validation
-                $validate = new Validate();
                 $to_validate = [];
-
                 foreach ($fields as $field) {
                     $field_validation = [];
 
@@ -120,7 +115,7 @@ if (isset($_GET['do'])) {
                     $validate_post[$key] = !is_array($item) ? $item : true ;
                 }
 
-                $validation = $validate->check($validate_post, $to_validate);
+                $validation = Validate::check($validate_post, $to_validate);
                 if ($validation->passed()) {
                     // Validation passed
                     
@@ -144,7 +139,6 @@ if (isset($_GET['do'])) {
                     
                     $shopping_cart->add($_GET['add'], 1, $product_fields);
                     Redirect::to(URL::build($store_url . '/checkout/'));
-                    die();
                 } else {
                     // Validation errors
                     foreach ($validation->errors() as $item) {
@@ -157,11 +151,11 @@ if (isset($_GET['do'])) {
                             $fielderror = $fielderror[0];
 
                             if (strpos($item, 'is required') !== false) {
-                                $errors[] = str_replace('{x}', Output::getClean($fielderror->name), $language->get('user', 'field_is_required'));
+                                $errors[] = $language->get('user', 'field_is_required', ['field' => Output::getClean($fielderror->description)]);
                             } else if (strpos($item, 'minimum') !== false) {
-                                $errors[] = str_replace(['{x}', '{y}'], [Output::getClean($fielderror->name), $fielderror->min], $store_language->get('general', 'x_field_minimum_y'));
+                                $errors[] = $store_language->get('general', 'x_field_minimum_y', ['field' => Output::getClean($fielderror->description), 'min' => $fielderror->min]);
                             } else if (strpos($item, 'maximum') !== false) {
-                                $errors[] = str_replace(['{x}', '{y}'], [Output::getClean($fielderror->name), $fielderror->max], $store_language->get('general', 'x_field_maximum_y'));
+                                $errors[] = $store_language->get('general', 'x_field_maximum_y', ['field' => Output::getClean($fielderror->description), 'max' => $fielderror->max]);
                             }
                         }
                     }
@@ -185,7 +179,6 @@ if (isset($_GET['do'])) {
         // No fields to fill, continue to next step
         $shopping_cart->add($_GET['add']);
         Redirect::to(URL::build($store_url . '/checkout/'));
-        die();
     }
     
 } else if (isset($_GET['remove'])) {
@@ -193,15 +186,13 @@ if (isset($_GET['do'])) {
         die('Invalid product');
     }
     $shopping_cart->remove($_GET['remove']);
-        
+
     Redirect::to(URL::build($store_url . '/checkout/'));
-    die();
-    
+
 } else {
     // Make sure the shopping cart is not empty
     if (!count($shopping_cart->getItems())) {
         Redirect::to(URL::build($store_url));
-        die();
     }
 
     // Deal with any input
@@ -209,8 +200,6 @@ if (isset($_GET['do'])) {
         $errors = [];
 
         if (Token::check()) {
-            $validate = new Validate();
-            
             $to_validation = [
                 'payment_method' => [
                     Validate::REQUIRED => true
@@ -220,9 +209,9 @@ if (isset($_GET['do'])) {
                     Validate::AGREE => true
                 ]
             ];
-            
+
             // Valid, continue with validation
-            $validation = $validate->check($_POST, $to_validation); // Execute validation
+            $validation = Validate::check($_POST, $to_validation); // Execute validation
             if ($validation->passed()) {
                 require_once(ROOT_PATH . '/modules/Store/config.php');
 
@@ -256,7 +245,6 @@ if (isset($_GET['do'])) {
 
                     $shopping_cart->clear();
                     Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
-                    die();
                 }
 
                 $payment_method = $_POST['payment_method'];
@@ -292,7 +280,6 @@ if (isset($_GET['do'])) {
 
                         $shopping_cart->clear();
                         Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
-                        die();
                     } else {
                         $errors[] = 'You don\'t have enough credits to complete this order!';
                     }
@@ -303,9 +290,9 @@ if (isset($_GET['do'])) {
                     if (strpos($validation_error, 'is required') !== false) {
                         // x is required
                         if (strpos($validation_error, 'payment_method') !== false) {
-                            $errors[] = 'Please choose your desired payment option.';
+                            $errors[] = $store_language->get('general', 'choose_payment_method');
                         } else if (strpos($validation_error, 't_and_c') !== false) {
-                            $errors[] = 'You must accept the terms and conditions';
+                            $errors[] = $store_language->get('general', 'accept_terms');
                         }
                     }
                 }
@@ -341,7 +328,11 @@ if (isset($_GET['do'])) {
     $payment_methods = [];
     if ($credits > 0) {
         $payment_methods[] = [
-            'displayname' => 'Pay with your credit balance of '.$currency_symbol . $credits . ' ' . $currency,
+            'displayname' => $store_language->get('general', 'pay_with_credits', [
+                'currency_symbol' => $currency_symbol,
+                'currency' => $currency,
+                'credits' => $credits
+            ]),
             'name' => 'Credits'
         ];
     }
@@ -367,7 +358,10 @@ if (isset($_GET['do'])) {
         'TOTAL_PRICE_VALUE' => $shopping_cart->getTotalPrice(),
         'PAYMENT_METHOD' => $store_language->get('general', 'payment_method'),
         'PURCHASE' => $store_language->get('general', 'purchase'),
-        'AGREE_T_AND_C_PURCHASE' => str_replace('{x}', URL::build('/terms'), $store_language->get('general', 'agree_t_and_c_purchase')),
+        'AGREE_T_AND_C_PURCHASE' => $store_language->get('general', 'agree_t_and_c_purchase', [
+            'termsLinkStart' => '<a href="'.URL::build('/terms').'" target="_blank">',
+            'termsLinkEnd' => '</a>',
+        ]),
         'PAYMENT_METHODS' => $payment_methods,
         'SHOPPING_CART_LIST' => $shopping_cart_list
     ]);
@@ -378,7 +372,6 @@ if (isset($_GET['do'])) {
 // Check if store customer is required and isset
 if ($store->isPlayerSystemEnabled() && !$to_customer->isLoggedIn()) {
     Redirect::to(URL::build($store_url));
-    die();
 }
 
 $smarty->assign([
@@ -388,7 +381,7 @@ $smarty->assign([
 ]);
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets, $template);
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
 if (isset($success))
     $smarty->assign([
@@ -401,9 +394,6 @@ if (isset($errors) && count($errors))
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
-    
-$page_load = microtime(true) - $start;
-define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));
 
 $template->onPageLoad();
 

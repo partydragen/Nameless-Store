@@ -39,14 +39,14 @@
                         {include file='includes/alerts.tpl'}
 
                             <form action="" method="post">
-                                <div class="form-group">
-                                    <label for="inputAllowGuests">{$ALLOW_GUESTS}</label>
-                                    <input type="checkbox" name="allow_guests" id="inputAllowGuests" class="js-switch" {if $ALLOW_GUESTS_VALUE} checked{/if} />
+                                <div class="form-group custom-control custom-switch">
+                                    <input type="checkbox" name="allow_guests" id="inputAllowGuests" class="custom-control-input" {if $ALLOW_GUESTS_VALUE} checked{/if} />
+                                    <label class="custom-control-label" for="inputAllowGuests">{$ALLOW_GUESTS}</label>
                                 </div>
 
-                                <div class="form-group">
-                                    <label for="inputPlayerLogin">{$PLAYER_LOGIN}</label>
-                                    <input type="checkbox" name="player_login" id="inputPlayerLogin" class="js-switch" {if $PLAYER_LOGIN_VALUE} checked{/if} />
+                                <div class="form-group custom-control custom-switch">
+                                    <input type="checkbox" name="player_login" id="inputPlayerLogin" class="custom-control-input" {if $PLAYER_LOGIN_VALUE} checked{/if} />
+                                    <label class="custom-control-label" for="inputPlayerLogin">{$PLAYER_LOGIN}</label>
                                 </div>
 
                                 <div class="form-group">

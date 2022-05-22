@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr12
+ * @version 2.0.0-pr13
  * @license MIT
  */
 class Amount {

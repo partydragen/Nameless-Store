@@ -25,9 +25,7 @@ if (isset($_POST) && !empty($_POST)) {
     $errors = [];
 
     if (Token::check(Input::get('token'))) {
-        $validate = new Validate();
-
-        $validation = $validate->check($_POST, [
+        $validation = Validate::check($_POST, [
             'store_content' => [
                 Validate::MAX => 60000
             ],
@@ -49,7 +47,7 @@ if (isset($_POST) && !empty($_POST)) {
                 $allow_guests = 1;
             else
                 $allow_guests = 0;
-            
+
             // Enable Player Login
             if (isset($_POST['player_login']) && $_POST['player_login'] == 'on')
                 $player_login = 1;
@@ -60,7 +58,7 @@ if (isset($_POST) && !empty($_POST)) {
             $configuration->set('store', 'player_login', $player_login);
             $configuration->set('store', 'currency', Output::getClean(Input::get('currency')));
             $configuration->set('store', 'currency_symbol', Output::getClean(Input::get('currency_symbol')));
-            
+
             // Update link location
             if (isset($_POST['link_location'])) {
                 switch ($_POST['link_location']) {
@@ -75,7 +73,7 @@ if (isset($_POST) && !empty($_POST)) {
                 }
             } else
                 $location = 1;
-                                                
+
             // Update Link location cache
             $cache->setCache('nav_location');
             $cache->store('store_location', $location);
@@ -99,7 +97,7 @@ if (isset($_POST) && !empty($_POST)) {
             } catch (Exception $e) {
                 $errors[] = $e->getMessage();
             }
-            
+
             // Update checkout content
             try {
                 $checkout_complete_content = $queries->getWhere('store_settings', ['name', '=', 'checkout_complete_content']);
@@ -160,7 +158,7 @@ if (isset($_POST) && !empty($_POST)) {
 }
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets);
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
 if (isset($success))
     $smarty->assign([
@@ -246,31 +244,12 @@ $smarty->assign([
     'LINK_NONE' => $language->get('admin', 'page_link_none'),
 ]);
 
-if (!defined('TEMPLATE_STORE_SUPPORT')) {
-    $template->addCSSFiles([
-        (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.css' => []
-    ]);
+$template->assets()->include([
+    AssetTree::TINYMCE,
+]);
 
-    $template->addJSFiles([
-        (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.js' => [],
-        (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/emoji/js/emojione.min.js' => [],
-        (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => [],
-        (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => []
-    ]);
-
-    $template->addJSScript(Input::createEditor('inputStoreContent', true));
-    $template->addJSScript(Input::createEditor('inputCheckoutCompleteContent', true));
-    $template->addJSScript('
-    var elems = Array.prototype.slice.call(document.querySelectorAll(\'.js-switch\'));
-
-    elems.forEach (function(html) {
-      var switchery = new Switchery(html, {color: \'#23923d\', secondaryColor: \'#e56464\'});
-    });
-    ');
-}
-
-$page_load = microtime(true) - $start;
-define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));
+$template->addJSScript(Input::createTinyEditor($language, 'inputStoreContent'));
+$template->addJSScript(Input::createTinyEditor($language, 'inputCheckoutCompleteContent'));
 
 $template->onPageLoad();
 

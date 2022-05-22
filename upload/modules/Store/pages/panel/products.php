@@ -51,7 +51,7 @@ if (!isset($_GET['action'])) {
                 foreach ($products as $product) {
                     $new_product = [
                         'id' => Output::getClean($product->id),
-                        'id_x' => str_replace('{x}', Output::getClean($product->id), $store_language->get('admin', 'id_x')),
+                        'id_x' => $store_language->get('admin', 'id_x', ['id' => Output::getClean($product->id)]),
                         'name' => Output::getClean($product->name),
                         'price' => Output::getClean($product->price),
                         'edit_link' => URL::build('/panel/store/product/', 'product=' . Output::getClean($product->id)),
@@ -83,10 +83,6 @@ if (!isset($_GET['action'])) {
         'YES' => $language->get('general', 'yes'),
         'NO' => $language->get('general', 'no'),
     ]);
-    
-    $template->addJSFiles([
-        (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/js/jquery-ui.min.js' => []
-    ]);
 
     $template_file = 'store/products.tpl';
 } else {
@@ -97,8 +93,7 @@ if (!isset($_GET['action'])) {
                 $errors = [];
 
                 if (Token::check(Input::get('token'))) {
-                    $validate = new Validate();
-                    $validation = $validate->check($_POST, [
+                    $validation = Validate::check($_POST, [
                         'name' => [
                             Validate::REQUIRED => true,
                             Validate::MIN => 1,
@@ -110,8 +105,8 @@ if (!isset($_GET['action'])) {
                     ])->messages([
                         'name' => [
                             Validate::REQUIRED => $store_language->get('admin', 'name_required'),
-                            Validate::MIN => str_replace('{min}', '1', $store_language->get('admin', 'name_minimum_x')),
-                            Validate::MAX => str_replace('{max}', '128', $store_language->get('admin', 'name_maximum_x'))
+                            Validate::MIN => $store_language->get('admin', 'name_minimum_x', ['min' => '1']),
+                            Validate::MAX => $store_language->get('admin', 'name_maximum_x', ['max' => '128'])
                         ],
                         'description' => [
                             Validate::MAX => $store_language->get('admin', 'description_max_100000')
@@ -124,7 +119,7 @@ if (!isset($_GET['action'])) {
                         if (!count($category)) {
                             $errors[] = $store_language->get('admin', 'invalid_category');
                         }
-                        
+
                         // Get price
                         if (!isset($_POST['price']) || !is_numeric($_POST['price']) || $_POST['price'] < 0.00 || $_POST['price'] > 1000 || !preg_match('/^\d+(?:\.\d{2})?$/', $_POST['price'])) {
                             $errors[] = $store_language->get('admin', 'invalid_price');
@@ -138,11 +133,11 @@ if (!isset($_GET['action'])) {
                             $last_order = DB::getInstance()->query('SELECT * FROM nl2_store_products ORDER BY `order` DESC LIMIT 1')->results();
                             if (count($last_order)) $last_order = $last_order[0]->order;
                             else $last_order = 0;
-                            
+
                             // Hide category?
                             if (isset($_POST['hidden']) && $_POST['hidden'] == 'on') $hidden = 1;
                             else $hidden = 0;
-                            
+
                             // Disable category?
                             if (isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
                             else $disabled = 0;
@@ -159,7 +154,7 @@ if (!isset($_GET['action'])) {
                             ]);
                             $lastId = $queries->getLastId();
                             $product = new Product($lastId);
-                            
+
                             // Add the selected connections, if isset
                             if (isset($_POST['connections']) && is_array($_POST['connections'])) {
                                 foreach ($_POST['connections'] as $connection) {
@@ -168,7 +163,7 @@ if (!isset($_GET['action'])) {
                                     }
                                 }
                             }
-                            
+
                             // Add the selected fields, if isset
                             if (isset($_POST['fields']) && is_array($_POST['fields'])) {
                                 foreach ($_POST['fields'] as $field) {
@@ -177,10 +172,9 @@ if (!isset($_GET['action'])) {
                                     }
                                 }
                             }
-                            
+
                             Session::flash('products_success', $store_language->get('admin', 'product_created_successfully'));
                             Redirect::to(URL::build('/panel/store/product/', 'product=' . $lastId));
-                            die();
                         }
                     } else {
                         $errors = $validation->errors();
@@ -190,7 +184,7 @@ if (!isset($_GET['action'])) {
                     $errors[] = $language->get('general', 'invalid_token');
                 }
             }
-            
+
             // Connections
             $connections_array = [];
             $connections = DB::getInstance()->query('SELECT * FROM nl2_store_connections')->results();
@@ -201,7 +195,7 @@ if (!isset($_GET['action'])) {
                     'selected' => ((isset($_POST['connections']) && is_array($_POST['connections'])) ? in_array($connection->id, $_POST['connections']) : false)
                 ];
             }
-            
+
             // Fields
             $fields_array = [];
             $fields = DB::getInstance()->query('SELECT * FROM nl2_store_fields WHERE deleted = 0')->results();
@@ -212,7 +206,7 @@ if (!isset($_GET['action'])) {
                     'selected' => ((isset($_POST['fields']) && is_array($_POST['fields'])) ? in_array($field->id, $_POST['fields']) : false)
                 ];
             }
-            
+
             $smarty->assign([
                 'PRODUCT_TITLE' => $store_language->get('admin', 'new_product'),
                 'BACK' => $language->get('general', 'back'),
@@ -235,25 +229,23 @@ if (!isset($_GET['action'])) {
                 'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),
                 'DISABLE_PRODUCT_VALUE' => ((isset($_POST['disabled'])) ? 1 : 0),
             ]);
-            
-            $template->addJSFiles([
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => [],
-                (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => []
+
+            $template->assets()->include([
+                AssetTree::TINYMCE,
             ]);
 
-            $template->addJSScript(Input::createEditor('inputDescription'));
-            
+            $template->addJSScript(Input::createTinyEditor($language, 'inputDescription'));
+
             $template_file = 'store/products_form.tpl';
         break;
         default:
             Redirect::to(URL::build('/panel/store/products'));
-            die();
         break;
     }
 }
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets);
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
 if (Session::exists('products_success'))
     $success = Session::flash('products_success');
@@ -279,24 +271,6 @@ $smarty->assign([
     'SUBMIT' => $language->get('general', 'submit'),
     'PRODUCTS' => $store_language->get('general', 'products')
 ]);
-
-$template->addCSSFiles([
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.css' => []
-]);
-
-$template->addJSFiles([
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.js' => []
-]);
-
-$template->addJSScript('
-    var elems = Array.prototype.slice.call(document.querySelectorAll(\'.js-switch\'));
-    elems.forEach (function(html) {
-        var switchery = new Switchery(html, {color: \'#23923d\', secondaryColor: \'#e56464\'});
-    });
-');
-
-$page_load = microtime(true) - $start;
-define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));
 
 $template->onPageLoad();
 

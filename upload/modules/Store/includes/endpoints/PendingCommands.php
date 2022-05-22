@@ -1,17 +1,18 @@
 <?php
-class PendingCommands extends EndpointBase {
+class PendingCommands extends KeyAuthEndpoint {
 
     public function __construct() {
-        $this->_route = 'pendingStoreCommands';
+        $this->_route = 'pendingStoreCommand';
         $this->_module = 'Store';
         $this->_description = 'Get pending commands';
+        $this->_method = 'GET';
     }
 
-    public function execute(Nameless2API $api) {
-        $query = 'SELECT nl2_store_pending_actions.*, nl2_store_customers.id as pid, IFNULL(nl2_store_customers.username, nl2_users.username) as username, IFNULL(nl2_store_customers.identifier, nl2_users.uuid) as identifier, nl2_store_orders.user_id FROM nl2_store_pending_actions
+    public function execute(Nameless2API $api): void {
+        $query = 'SELECT nl2_store_pending_actions.*, nl2_store_customers.id as pid, IFNULL(nl2_store_customers.username, nl2_users_integrations.username) as username, IFNULL(nl2_store_customers.identifier, nl2_users_integrations.identifier) as identifier, nl2_store_orders.user_id FROM nl2_store_pending_actions
         LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id
         LEFT JOIN nl2_store_customers ON nl2_store_pending_actions.customer_id=nl2_store_customers.id
-        LEFT JOIN nl2_users ON nl2_store_orders.user_id=nl2_users.id';
+        LEFT JOIN nl2_users_integrations ON nl2_store_orders.user_id=nl2_users_integrations.user_id AND nl2_users_integrations.integration_id=1';
 
         $where = ' WHERE status = 0';
         $params = [];
@@ -29,7 +30,7 @@ class PendingCommands extends EndpointBase {
             if ($command->identifier == null && $command->username == null) {
                 continue;
             }
-            
+
             $commands_array[] = [
                 'id' => $command->id,
                 'command' => $command->command,
@@ -42,11 +43,11 @@ class PendingCommands extends EndpointBase {
                 'order' => (int) $command->order,
             ];
         }
-        
+
         // Online mode or offline mode?
         $uuid_linking = $api->getDb()->get('settings', ['name', '=', 'uuid_linking'])->results();
         $uuid_linking = ($uuid_linking[0]->value == '1' ? true : false);
-        
+
         $api->returnArray(['online_mode' => $uuid_linking, 'commands' => $commands_array]);
     }
     

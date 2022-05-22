@@ -102,13 +102,13 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="inputHidden">{$HIDE_PRODUCT}</label>
-                                    <input id="inputHidden" name="hidden" type="checkbox" class="js-switch"{if $HIDE_PRODUCT_VALUE eq 1} checked{/if} />
+                                <div class="form-group custom-control custom-switch">
+                                    <input id="inputHidden" name="hidden" type="checkbox" class="custom-control-input"{if $HIDE_PRODUCT_VALUE eq 1} checked{/if} />
+                                    <label class="custom-control-label" for="inputHidden">{$HIDE_PRODUCT}</label>
                                 </div>
-                                <div class="form-group">
-                                    <label for="inputDisabled">{$DISABLE_PRODUCT}</label>
-                                    <input id="inputDisabled" name="disabled" type="checkbox" class="js-switch"{if $DISABLE_PRODUCT_VALUE eq 1} checked{/if} />
+                                <div class="form-group custom-control custom-switch">
+                                    <input id="inputDisabled" name="disabled" type="checkbox" class="custom-control-input"{if $DISABLE_PRODUCT_VALUE eq 1} checked{/if} />
+                                    <label class="custom-control-label" for="inputDisabled">{$DISABLE_PRODUCT}</label>
                                 </div>
                                 <div class="form-group">
                                     <input type="hidden" name="token" value="{$TOKEN}">

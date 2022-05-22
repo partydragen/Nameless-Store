@@ -44,7 +44,12 @@ $currency_symbol = Output::getClean($configuration->get('store', 'currency_symbo
 
 $smarty->assign([
     'SHOPPING_CART_PRODUCTS' => $shopping_cart->getProducts(),
-    'X_ITEMS_FOR_Y' => str_replace(['{x}', '{y}'], [count($shopping_cart->getItems()), $currency_symbol . $shopping_cart->getTotalPrice() . ' ' . $currency], $store_language->get('general', 'x_items_for_y')),
+    'X_ITEMS_FOR_Y' => $store_language->get('general', 'x_items_for_y', [
+        'items' => count($shopping_cart->getItems()),
+        'amount' => $shopping_cart->getTotalPrice(),
+        'currency' => $currency,
+        'currency_symbol' => $currency_symbol,
+    ]),
     'CHECKOUT_LINK' => URL::build($store->getStoreURL() . '/checkout/'),
     'CURRENCY' => $currency,
     'CURRENCY_SYMBOL' => $currency_symbol

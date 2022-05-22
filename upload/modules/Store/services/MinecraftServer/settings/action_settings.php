@@ -6,8 +6,7 @@ if ($_GET['action'] == 'new_action') {
 
         if (Token::check(Input::get('token'))) {
             // New Action
-                $validate = new Validate();
-                $validation = $validate->check($_POST, [
+            $validation = Validate::check($_POST, [
                 'command' => [
                     Validate::REQUIRED => true,
                     Validate::MIN => 1,
@@ -37,9 +36,9 @@ if ($_GET['action'] == 'new_action') {
                     $last_order = DB::getInstance()->query('SELECT id FROM nl2_store_products_actions WHERE product_id = ? ORDER BY `order` DESC LIMIT 1', [$product->id])->results();
                     if (count($last_order)) $last_order = $last_order[0]->order;
                     else $last_order = 0;
-                            
+
                     $selected_connections = (isset($_POST['connections']) && is_array($_POST['connections']) ? $_POST['connections'] : []);
-                            
+
                     // Save to database
                     $queries->create('store_products_actions', [
                         'product_id' => $product->data()->id,
@@ -62,7 +61,6 @@ if ($_GET['action'] == 'new_action') {
 
                     Session::flash('products_success', $store_language->get('admin', 'action_created_successfully'));
                     Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
-                    die();
                 }
             } else {
                 $errors = $validation->errors();
@@ -72,7 +70,7 @@ if ($_GET['action'] == 'new_action') {
             $errors[] = $language->get('general', 'invalid_token');
         }
     }
-            
+
     // Connections
     $connections = DB::getInstance()->query('SELECT * FROM nl2_store_connections WHERE service_id = ?', [$service->getId()])->results();
     $connections_array[] = [
@@ -103,8 +101,7 @@ if ($_GET['action'] == 'new_action') {
         $errors = [];
 
         if (Token::check(Input::get('token'))) {
-            $validate = new Validate();
-            $validation = $validate->check($_POST, [
+            $validation = Validate::check($_POST, [
                 'command' => [
                     Validate::REQUIRED => true,
                     Validate::MIN => 1,
@@ -159,7 +156,6 @@ if ($_GET['action'] == 'new_action') {
 
                     Session::flash('products_success', $store_language->get('admin', 'action_updated_successfully'));
                     Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
-                    die();
                 }
             } else {
                 $errors = $validation->errors();

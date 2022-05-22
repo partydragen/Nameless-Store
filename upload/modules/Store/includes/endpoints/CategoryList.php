@@ -1,13 +1,14 @@
 <?php
-class CategoryList extends EndpointBase {
+class CategoryList extends KeyAuthEndpoint {
 
     public function __construct() {
         $this->_route = 'storeCategories';
         $this->_module = 'Store';
         $this->_description = 'Get list of categories';
+        $this->_method = 'GET';
     }
 
-    public function execute(Nameless2API $api) {
+    public function execute(Nameless2API $api): void {
         $query = 'SELECT * FROM nl2_store_categories WHERE deleted = 0;';
 
         // Ensure the user exists

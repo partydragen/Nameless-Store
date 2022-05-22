@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr12
+ * @version 2.0.0-pr13
  * @license MIT
  */
 class PayPal_Business_Gateway extends GatewayBase {
@@ -48,7 +48,6 @@ class PayPal_Business_Gateway extends GatewayBase {
             $payment->create($apiContext);
 
             Redirect::to($payment->getApprovalLink());
-            die();
         } catch (\PayPal\Exception\PayPalConnectionException $ex) {
             ErrorHandler::logCustomError($ex->getData());
         }

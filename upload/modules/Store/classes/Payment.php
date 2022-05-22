@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr12
+ * @version 2.0.0-pr13
  * @license MIT
  */
 class Payment {
@@ -15,7 +15,7 @@ class Payment {
 
     public function __construct($value = null, $field = 'id') {
         $this->_db = DB::getInstance();
-        
+
         if ($value != null) {
             $data = $this->_db->get('store_payments', [$field, '=', $value]);
             if ($data->count()) {
@@ -100,12 +100,12 @@ class Payment {
 
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
 
-                    HookHandler::executeEvent('paymentPending', [
+                    EventHandler::executeEvent('paymentPending', [
                         'event' => 'paymentPending',
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                         'username' => $username,
-                        'content_full' => str_replace(['{x}'], [$username], $store_language->get('general', 'pending_payment_text')),
+                        'content_full' => $store_language->get('general', 'pending_payment_text', ['user' => $username]),
                     ]);
                 break;
                 case 'COMPLETED':
@@ -119,10 +119,10 @@ class Payment {
 
                     $this->executeAllActions(1);
 
-                    HookHandler::executeEvent('paymentCompleted', [
+                    EventHandler::executeEvent('paymentCompleted', [
                         'event' => 'paymentCompleted',
                         'username' => $username,
-                        'content_full' => str_replace(['{x}', '{y}'], [$username, $this->getOrder()->getDescription()], $store_language->get('general', 'completed_payment_text')),
+                        'content_full' => $store_language->get('general', 'completed_payment_text', ['user' => $username, 'products' => $this->getOrder()->getDescription()]),
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                     ]);
@@ -139,12 +139,12 @@ class Payment {
                     $this->deletePendingActions();
                     $this->executeAllActions(2);
 
-                    HookHandler::executeEvent('paymentRefunded', [
+                    EventHandler::executeEvent('paymentRefunded', [
                         'event' => 'paymentRefunded',
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                         'username' => $username,
-                        'content_full' => str_replace(['{x}'], [$username], $store_language->get('general', 'refunded_payment_text')),
+                        'content_full' => $store_language->get('general', 'refunded_payment_text', ['user' => $username]),
                     ]);
                 break;
                 case 'REVERSED':
@@ -159,12 +159,12 @@ class Payment {
                     $this->deletePendingActions();
                     $this->executeAllActions(3);
 
-                    HookHandler::executeEvent('paymentReversed', [
+                    EventHandler::executeEvent('paymentReversed', [
                         'event' => 'paymentReversed',
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                         'username' => $username,
-                        'content_full' => str_replace(['{x}'], [$username], $store_language->get('general', 'reversed_payment_text')),
+                        'content_full' => $store_language->get('general', 'reversed_payment_text', ['user' => $username]),
                     ]);
                 break;
                 case 'DENIED':
@@ -176,12 +176,12 @@ class Payment {
 
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
 
-                    HookHandler::executeEvent('paymentDenied', [
+                    EventHandler::executeEvent('paymentDenied', [
                         'event' => 'paymentDenied',
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                         'username' => $username,
-                        'content_full' => str_replace(['{x}'], [$username], $store_language->get('general', 'denied_payment_text')),
+                        'content_full' => $store_language->get('general', 'denied_payment_text', ['user' => $username]),
                     ]);
                 break;
                 default:
@@ -203,12 +203,12 @@ class Payment {
                     $this->create(array_merge($insert_array, $extra_data));
 
                     $username = $this->getOrder()->recipient()->getUsername();
-                    HookHandler::executeEvent('paymentPending', [
+                    EventHandler::executeEvent('paymentPending', [
                         'event' => 'paymentPending',
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                         'username' => $username,
-                        'content_full' => str_replace(['{x}'], [$username], $store_language->get('general', 'pending_payment_text')),
+                        'content_full' => $store_language->get('general', 'pending_payment_text', ['user' => $username]),
                     ]);
                 break;
                 case 'COMPLETED':
@@ -224,12 +224,12 @@ class Payment {
                     $this->executeAllActions(1);
 
                     $username = $this->getOrder()->recipient()->getUsername();
-                    HookHandler::executeEvent('paymentCompleted', [
+                    EventHandler::executeEvent('paymentCompleted', [
                         'event' => 'paymentCompleted',
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                         'username' => $username,
-                        'content_full' => str_replace(['{x}', '{y}'], [$username, $this->getOrder()->getDescription()], $store_language->get('general', 'completed_payment_text')),
+                        'content_full' => $store_language->get('general', 'completed_payment_text', ['user' => $username, 'products' => $this->getOrder()->getDescription()]),
                     ]);
                 break;
             }
@@ -260,7 +260,7 @@ class Payment {
 
     public function getStatusHtml() {
         $status = '<span class="badge badge-danger">Unknown</span>';
-        
+
         switch ($this->data()->status_id) {
             case 0;
                 $status = '<span class="badge badge-warning">Pending</span>';

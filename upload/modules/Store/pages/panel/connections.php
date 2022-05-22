@@ -24,7 +24,7 @@ require_once(ROOT_PATH . '/core/templates/backend_init.php');
 $services = Services::getInstance();
 
 if (!isset($_GET['action'])) {
-    
+
     $connections = DB::getInstance()->query('SELECT * FROM nl2_store_connections');
     if ($connections->count()) {
         $connections = $connections->results();
@@ -46,7 +46,7 @@ if (!isset($_GET['action'])) {
 
         $smarty->assign('CONNECTIONS_LIST', $connections_list);
     }
-    
+
     $smarty->assign([
         'CONNECTIONS_INFO' => $store_language->get('admin', 'connections_info'),
         'NO_CONNECTIONS' => $store_language->get('admin', 'no_connections'),
@@ -91,21 +91,19 @@ if (!isset($_GET['action'])) {
                     'BACK_LINK' => URL::build('/panel/store/connections/'),
                     'SERVICES_LIST' => $services_list
                 ]);
-                
+
                 $template_file = 'store/connections_type.tpl';
             } else {
                 if (!is_numeric($_GET['service'])) {
                     URL::build('/panel/store/connections', 'action=new');
-                    die();
                 }
 
                 $service = $services->get($_GET['service']);
                 if ($service == null) {
                     URL::build('/panel/store/connections', 'action=new');
-                    die();
                 }
 
-                $fields = new StoreFields();
+                $fields = new Fields();
 
                 if (file_exists($service->getConnectionSettings())) {
                     $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
@@ -126,31 +124,27 @@ if (!isset($_GET['action'])) {
             // Edit connections
             if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
                 Redirect::to(URL::build('/panel/store/connections/'));
-                die();
             }
 
             $connection = DB::getInstance()->query('SELECT * FROM nl2_store_connections WHERE id = ?', [$_GET['id']]);
             if (!$connection->count()) {
                 Redirect::to(URL::build('/panel/store/connections/'));
-                die();
             }
             $connection = $connection->first();
 
             $service = $services->get($connection->service_id);
             if ($service == null) {
                 URL::build('/panel/store/connections', 'action=new');
-                die();
             }
 
-            $fields = new StoreFields();
-
+            $fields = new Fields();
             if (file_exists($service->getConnectionSettings())) {
                 $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
                 require_once($service->getConnectionSettings());
             }
 
             $smarty->assign([
-                'CONNECTIONS_TITLE' => str_replace('{x}', Output::getClean($connection->name), $store_language->get('admin', 'editing_connection_x')),
+                'CONNECTIONS_TITLE' => $store_language->get('admin', 'editing_connection_x', ['connection' => Output::getClean($connection->name)]),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/connections/'),
                 'FIELDS' => $fields->getAll()
@@ -176,13 +170,12 @@ if (!isset($_GET['action'])) {
         break;
         default:
             Redirect::to(URL::build('/panel/store/connections'));
-            die();
         break;
     }
 }
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets, $templates);
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
 if (Session::exists('connections_success'))
     $success = Session::flash('connections_success');
@@ -211,9 +204,6 @@ $smarty->assign([
     'SUBMIT' => $language->get('general', 'submit'),
     'SERVICE_CONNECTIONS' => $store_language->get('admin', 'service_connections')
 ]);
-
-$page_load = microtime(true) - $start;
-define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));
 
 $template->onPageLoad();
 

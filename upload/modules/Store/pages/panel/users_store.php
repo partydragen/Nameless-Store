@@ -1,8 +1,8 @@
 <?php
 /*
- *	Made by Samerton
+ *	Made by Partydragen
  *  https://github.com/NamelessMC/Nameless/
- *  NamelessMC version 2.0.0-pr8
+ *  NamelessMC version 2.0.0-pr13
  *
  *  License: MIT
  *
@@ -16,13 +16,11 @@ if (!$user->handlePanelPageLoad('staffcp.store.payments')) {
 
 if (!isset($_GET['user']) || !is_numeric($_GET['user'])) {
     Redirect::to(URL::build('/panel/users'));
-    die();
 }
 
 $view_user = new User($_GET['user']);
 if (!$view_user->exists()) {
     Redirect::to('/panel/users');
-    die();
 }
 $customer = new Customer($view_user);
 
@@ -33,15 +31,14 @@ $page_title = $store_language->get('general', 'store');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets);
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
 if (Input::exists()) {
     $errors = [];
 
     if (Token::check()) {
         // Validation
-        $validate = new Validate();
-        $validation = $validate->check($_POST, [
+        $validation = Validate::check($_POST, [
             'credits' => [
                 Validate::REQUIRED => true,
                 Validate::MIN => 1,
@@ -56,15 +53,14 @@ if (Input::exists()) {
             if (Input::get('action') == 'addCredits') {
                 $customer->addCredits($credits);
 
-                Session::flash('users_store_success', str_replace('{amount}', $credits, $store_language->get('admin', 'successfully_added_credits')));
+                Session::flash('users_store_success', $store_language->get('admin', 'successfully_added_credits', ['amount' => $credits]));
             } else if (Input::get('action') == 'removeCredits') {
                 $customer->removeCredits($credits);
 
-                Session::flash('users_store_success', str_replace('{amount}', $credits, $store_language->get('admin', 'successfully_removed_credits')));
+                Session::flash('users_store_success', $store_language->get('admin', 'successfully_removed_credits', ['amount' => $credits]));
             }
 
             Redirect::to(URL::build('/panel/users/store/', 'user=' . $view_user->data()->id));
-            die();
         } else {
             $errors = $validation->errors();
         }
@@ -106,7 +102,7 @@ $smarty->assign([
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'USER_MANAGEMENT' => $language->get('admin', 'user_management'),
     'STORE' => $store_language->get('general', 'store'),
-    'VIEWING_USER' => str_replace('{x}', $view_user->getDisplayname(), $language->get('moderator', 'viewing_user_x')),
+    'VIEWING_USER' => $language->get('moderator', 'viewing_user_x', ['user' => $view_user->getDisplayname()]),
     'BACK_LINK' => URL::build('/panel/user/' . $view_user->data()->id),
     'BACK' => $language->get('general', 'back'),
     'CREDITS' => $store_language->get('general', 'credits'),
@@ -116,14 +112,11 @@ $smarty->assign([
     'DATE' => $store_language->get('admin', 'date'),
     'VIEW' => $store_language->get('admin', 'view'),
     'CANCEL' => $language->get('general', 'cancel'),
-    'VIEWING_PAYMENTS_FOR_USER' => str_replace('{x}', $view_user->getDisplayname(), $store_language->get('admin', 'viewing_payments_for_user_x')),
+    'VIEWING_PAYMENTS_FOR_USER' => $store_language->get('admin', 'viewing_payments_for_user_x', ['user' => $view_user->getDisplayname()]),
     'PAYMENTS_LIST' => $payments,
     'NO_PAYMENTS' => $store_language->get('admin', 'no_payments_for_user'),
     'TOKEN' => Token::get(),
 ]);
-
-$page_load = microtime(true) - $start;
-define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));
 
 $template->onPageLoad();
 

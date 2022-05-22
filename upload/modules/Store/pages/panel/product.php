@@ -17,13 +17,11 @@ if (!$user->handlePanelPageLoad('staffcp.store.products')) {
 
 if (!isset($_GET['product']) || !is_numeric($_GET['product'])) {
     Redirect::to(URL::build('/panel/store/products'));
-    die();
 }
 
 $product = new Product($_GET['product']);
 if (!$product->exists()) {
     Redirect::to(URL::build('/panel/store/products'));
-    die();
 }
 
 define('PAGE', 'panel');
@@ -45,8 +43,7 @@ if (!isset($_GET['action'])) {
         if (Token::check(Input::get('token'))) {
             if (Input::get('type') == 'settings') {
             // Update product
-            $validate = new Validate();
-            $validation = $validate->check($_POST, [
+            $validation = Validate::check($_POST, [
                 'name' => [
                     Validate::REQUIRED => true,
                     Validate::MIN => 1,
@@ -58,21 +55,21 @@ if (!isset($_GET['action'])) {
             ])->messages([
                 'name' => [
                     Validate::REQUIRED => $store_language->get('admin', 'name_required'),
-                    Validate::MIN => str_replace('{min}', '1', $store_language->get('admin', 'name_minimum_x')),
-                    Validate::MAX => str_replace('{max}', '128', $store_language->get('admin', 'name_maximum_x'))
+                    Validate::MIN => $store_language->get('admin', 'name_minimum_x', ['min' => '1']),
+                    Validate::MAX => $store_language->get('admin', 'name_maximum_x', ['max' => '128'])
                 ],
                 'description' => [
                     Validate::MAX => $store_language->get('admin', 'description_max_100000')
                 ]
             ]);
-                        
+
             if ($validation->passed()) {
                 // Validate if category exist
                 $category = DB::getInstance()->query('SELECT id FROM nl2_store_categories WHERE id = ?', [Input::get('category')])->results();
                 if (!count($category)) {
                     $errors[] = $store_language->get('admin', 'invalid_category');
                 }
-                            
+
                 // Get price
                 if (!isset($_POST['price']) || !is_numeric($_POST['price']) || $_POST['price'] < 0.00 || $_POST['price'] > 1000 || !preg_match('/^\d+(?:\.\d{2})?$/', $_POST['price'])) {
                     $errors[] = $store_language->get('admin', 'invalid_price');
@@ -85,7 +82,7 @@ if (!isset($_GET['action'])) {
                     // Hide category?
                     if (isset($_POST['hidden']) && $_POST['hidden'] == 'on') $hidden = 1;
                     else $hidden = 0;
-                            
+
                     // Disable category?
                     if (isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
                     else $disabled = 0;
@@ -115,9 +112,9 @@ if (!isset($_GET['action'])) {
                             $product->removeConnection($connection->id);
                         }
                     }
-                            
+
                     $selected_fields = isset($_POST['fields']) && is_array($_POST['fields']) ? $_POST['fields'] : [];
-                            
+
                     // Check for new fields to give product which they dont already have
                     foreach ($selected_fields as $field) {
                         if (!array_key_exists($field, $product->getFields())) {
@@ -131,10 +128,9 @@ if (!isset($_GET['action'])) {
                             $product->removeField($field->id);
                         }
                     }
-                                
+
                     Session::flash('products_success', $store_language->get('admin', 'product_updated_successfully'));
                     Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
-                    die();
                 }
             } else {
                 $errors = $validation->errors();
@@ -169,9 +165,8 @@ if (!isset($_GET['action'])) {
 
                             Session::flash('products_success', $store_language->get('admin', 'image_updated_successfully'));
                             Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
-                            die();
                         } else {
-                            $errors[] = str_replace('{x}', Output::getClean($image->getError()), $store_language->get('admin', 'unable_to_upload_image'));
+                            $errors[] = $store_language->get('admin', 'unable_to_upload_image', ['error' => Output::getClean($image->getError())]);
                         }
                     }
                 }
@@ -181,7 +176,7 @@ if (!isset($_GET['action'])) {
             $errors[] = $language->get('general', 'invalid_token');
         }
     }
-            
+
     // Connections
     $connections_array = [];
     $selected_connections = $product->getConnections();
@@ -194,7 +189,7 @@ if (!isset($_GET['action'])) {
             'selected' => (array_key_exists($connection->id, $selected_connections))
         ];
     }
-            
+
     // Fields
     $fields_array = [];
     $selected_fields = $product->getFields();
@@ -236,7 +231,7 @@ if (!isset($_GET['action'])) {
     }
 
     $smarty->assign([
-        'PRODUCT_TITLE' => str_replace('{x}', Output::getClean($product->data()->name), $store_language->get('admin', 'editing_product_x')),
+        'PRODUCT_TITLE' => $store_language->get('admin', 'editing_product_x', ['product' => Output::getClean($product->data()->name)]),
         'ID' => Output::getClean($product->data()->id),
         'BACK' => $language->get('general', 'back'),
         'BACK_LINK' => URL::build('/panel/store/products/'),
@@ -270,12 +265,11 @@ if (!isset($_GET['action'])) {
         'REMOVE_IMAGE_LINK' => URL::build('/panel/store/product/' , 'action=remove_image&product=' . $product->data()->id),
     ]);
 
-    $template->addJSFiles([
-        (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/plugins/spoiler/js/spoiler.js' => [],
-        (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/ckeditor/ckeditor.js' => []
+    $template->assets()->include([
+        AssetTree::TINYMCE,
     ]);
 
-    $template->addJSScript(Input::createEditor('inputDescription'));
+    $template->addJSScript(Input::createTinyEditor($language, 'inputDescription'));
 
     $template_file = 'store/products_form.tpl';
 } else {
@@ -286,7 +280,6 @@ if (!isset($_GET['action'])) {
             Session::flash('products_success', $store_language->get('admin', 'product_deleted_successfully'));
 
             Redirect::to(URL::build('/panel/store/products'));
-            die();
         break;
         case 'new_action';
             // New action for product
@@ -303,7 +296,7 @@ if (!isset($_GET['action'])) {
                 }
                 
                 $smarty->assign([
-                    'ACTION_TITLE' => str_replace('{x}', Output::getClean($product->data()->name), $store_language->get('admin', 'new_action_for_x')),
+                    'ACTION_TITLE' => $store_language->get('admin', 'new_action_for_x', ['product' => Output::getClean($product->data()->name)]),
                     'BACK' => $language->get('general', 'back'),
                     'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
                     'SERVICES_LIST' => $services_list
@@ -313,19 +306,16 @@ if (!isset($_GET['action'])) {
             } else {
                 if (!is_numeric($_GET['service'])) {
                     Redirect::to(URL::build('/panel/store/products'));
-                    die();
                 }
 
                 $service = $services->get($_GET['service']);
                 if ($service == null) {
                     Redirect::to(URL::build('/panel/store/products'));
-                    die();
                 }
-                
+
                 $action = new Action($service);
 
-                $fields = new StoreFields();
-
+                $fields = new Fields();
                 if (file_exists($service->getActionSettings())) {
                     $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
                     require_once($service->getActionSettings());
@@ -334,7 +324,7 @@ if (!isset($_GET['action'])) {
                 $service->onActionSettingsPageLoad($template, $fields);
 
                 $smarty->assign([
-                    'ACTION_TITLE' => str_replace('{x}', Output::getClean($product->data()->name), $store_language->get('admin', 'new_action_for_x')),
+                    'ACTION_TITLE' => $store_language->get('admin', 'new_action_for_x', ['product' => Output::getClean($product->data()->name)]),
                     'BACK' => $language->get('general', 'back'),
                     'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
                     'FIELDS' => $fields->getAll()
@@ -347,18 +337,15 @@ if (!isset($_GET['action'])) {
             // Editing action for product
             if (!isset($_GET['aid']) || !is_numeric($_GET['aid'])) {
                 Redirect::to(URL::build('/panel/store/products'));
-                die();
             }
 
             $action = $product->getAction($_GET['aid']);
             if ($action == null) {
                 Redirect::to(URL::build('/panel/store/products'));
-                die();
             }
             $service = $action->getService();
 
-            $fields = new StoreFields();
-
+            $fields = new Fields();
             if (file_exists($service->getActionSettings())) {
                 $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
                 require_once($service->getActionSettings());
@@ -367,7 +354,7 @@ if (!isset($_GET['action'])) {
             $action->getService()->onActionSettingsPageLoad($template, $fields);
 
             $smarty->assign([
-                'ACTION_TITLE' => str_replace('{x}', Output::getClean($product->data()->name), $store_language->get('admin', 'editing_action_for_x')),
+                'ACTION_TITLE' => $store_language->get('admin', 'editing_action_for_x', ['product' => Output::getClean($product->data()->name)]),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
                 'FIELDS' => $fields->getAll()
@@ -379,44 +366,31 @@ if (!isset($_GET['action'])) {
             // Delete product
             if (!isset($_GET['aid']) || !is_numeric($_GET['aid'])) {
                 Redirect::to(URL::build('/panel/store/products'));
-                die();
             }
-            
+
             $action = $product->getAction($_GET['aid']);
             if ($action != null) {
                 $action->delete();
                 Session::flash('products_success', $store_language->get('admin', 'action_deleted_successfully'));
-            } 
-            
+            }
+
             Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
-            die();
         break;
         case 'remove_image';
             // Remove image from product
             $product->update([
                 'image' => null
             ]);
-            
             Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
-            die();
         break;
         default:
             Redirect::to(URL::build('/panel/store/products'));
-            die();
         break;
     }
 }
 
-$template->addCSSFiles([
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/plugins/select2/select2.min.css' => []
-]);
-
-$template->addJSFiles([
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/custom/panel_templates/Default/assets/plugins/select2/select2.min.js' => []
-]);
-
 // Load modules + template
-Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $mod_nav], $widgets);
+Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
 if (Session::exists('products_success'))
     $success = Session::flash('products_success');
@@ -442,24 +416,6 @@ $smarty->assign([
     'SUBMIT' => $language->get('general', 'submit'),
     'PRODUCTS' => $store_language->get('general', 'products')
 ]);
-
-$template->addCSSFiles([
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.css' => []
-]);
-
-$template->addJSFiles([
-    (defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/core/assets/plugins/switchery/switchery.min.js' => []
-]);
-
-$template->addJSScript('
-    var elems = Array.prototype.slice.call(document.querySelectorAll(\'.js-switch\'));
-    elems.forEach (function(html) {
-        var switchery = new Switchery(html, {color: \'#23923d\', secondaryColor: \'#e56464\'});
-    });
-');
-
-$page_load = microtime(true) - $start;
-define('PAGE_LOAD_TIME', str_replace('{x}', round($page_load, 3), $language->get('general', 'page_loaded_in')));
 
 $template->onPageLoad();
 
