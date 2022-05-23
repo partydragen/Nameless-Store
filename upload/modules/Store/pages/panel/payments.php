@@ -70,7 +70,7 @@ if (isset($_GET['customer'])) {
                 'status' => $payment->getStatusHtml(),
                 'currency' => Output::getPurified($paymentQuery->currency),
                 'amount' => Output::getClean($paymentQuery->amount),
-                'date' => date('d M Y, H:i', $paymentQuery->created),
+                'date' => date(DATE_FORMAT, $paymentQuery->created),
                 'link' => URL::build('/panel/store/payments', 'payment=' . Output::getClean($paymentQuery->id))
             ];
         }
@@ -232,7 +232,7 @@ if (isset($_GET['customer'])) {
         'PRICE_VALUE' => Output::getClean($payment->data()->amount),
         'CURRENCY_SYMBOL' => Output::getClean('$'),
         'CURRENCY_ISO' => Output::getClean($payment->data()->currency),
-        'DATE_VALUE' => date('d M Y, H:i', $payment->data()->created),
+        'DATE_VALUE' => date(DATE_FORMAT, $payment->data()->created),
         'PRODUCTS' => $store_language->get('admin', 'products'),
         'PRODUCTS_LIST' => $products_list,
         'DETAILS' => $store_language->get('admin', 'details'),
@@ -393,7 +393,7 @@ if (isset($_GET['customer'])) {
                 'status' => $payment->getStatusHtml(),
                 'currency_symbol' => '$',
                 'amount' => Output::getClean($paymentQuery->amount),
-                'date' => date('d M Y, H:i', $paymentQuery->created),
+                'date' => date(DATE_FORMAT, $paymentQuery->created),
                 'date_unix' => Output::getClean($paymentQuery->created),
                 'link' => URL::build('/panel/store/payments/', 'payment=' . Output::getClean($paymentQuery->id))
             ];
