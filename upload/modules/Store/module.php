@@ -20,7 +20,7 @@ class Store_Module extends Module {
 
         $name = 'Store';
         $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
-        $module_version = '1.3.0';
+        $module_version = '1.4.0';
         $nameless_version = '2.0.0-pr13';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
@@ -590,7 +590,9 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
+        }
 
+        if ($old_version < 150) {
             try {
                 // Attempt to register customer for old orders bought from namelessmc users and update the orders with the new customer data
                 $namelessmc_customers = [];
