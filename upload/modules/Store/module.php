@@ -20,7 +20,7 @@ class Store_Module extends Module {
 
         $name = 'Store';
         $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
-        $module_version = '1.4.0';
+        $module_version = '1.3.0';
         $nameless_version = '2.0.0-pr13';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
@@ -575,7 +575,7 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
-            
+
             try {
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_orders CHANGE `player_id` `to_customer_id` int(11)');
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_orders ADD `from_customer_id` int(11) NOT NULL');
@@ -583,9 +583,49 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
-            
+
             try {
                 DB::getInstance()->createQuery('ALTER TABLE nl2_store_pending_actions CHANGE `player_id` `customer_id` int(11)');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                // Attempt to register customer for old orders bought from namelessmc users and update the orders with the new customer data
+                $namelessmc_customers = [];
+                $orders = DB::getInstance()->query('SELECT * FROM nl2_store_orders WHERE to_customer_id IS NULL AND user_id IS NOT NULL')->results();
+                foreach ($orders as $order) {
+                    if (array_key_exists($order->user_id, $namelessmc_customers)) {
+                        $customer_id = $namelessmc_customers[$order->user_id];
+                    } else {
+                        $customer = new Customer(null, $order->user_id, 'user_id');
+                        if ($customer->exists()) {
+                            $customer_id = $customer->data()->id;
+                        } else {
+                            DB::getInstance()->insert('store_customers', [
+                                'user_id' => $order->user_id,
+                                'integration_id' => 0
+                            ]);
+
+                            $customer_id = DB::getInstance()->lastId();
+                        }
+
+                        $namelessmc_customers[$order->user_id] = $customer_id;
+                    }
+
+                    DB::getInstance()->createQuery('UPDATE nl2_store_orders SET `from_customer_id` = ?, `to_customer_id` = ? WHERE id = ?', [$customer_id, $customer_id, $order->id]);
+                    DB::getInstance()->createQuery('UPDATE nl2_store_pending_actions SET `customer_id` = ? WHERE order_id = ?', [$customer_id, $order->id]);
+                }
+
+                print_r($namelessmc_customers);
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                DB::getInstance()->createQuery('UPDATE nl2_store_orders SET `from_customer_id` = to_customer_id WHERE id <> 0', []);
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
