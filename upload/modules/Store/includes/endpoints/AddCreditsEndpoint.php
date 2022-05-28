@@ -2,7 +2,7 @@
 class AddCreditsEndpoint extends KeyAuthEndpoint {
 
     public function __construct() {
-        $this->_route = 'users/{user}/addcredits';
+        $this->_route = 'users/{user}/add-credits';
         $this->_module = 'Store';
         $this->_description = 'Add credits to user';
         $this->_method = 'POST';
@@ -13,7 +13,7 @@ class AddCreditsEndpoint extends KeyAuthEndpoint {
 
         $credits = $_POST['credits'];
         if (!is_numeric($credits)) {
-            $api->throwError(250, 'Invalid credits amount');
+            $api->throwError(StoreApiErrors::ERROR_INVALID_CREDITS_AMOUNT);
         }
 
         $customer = new Customer($user);

@@ -55,7 +55,12 @@ class Customer {
      * @return bool True/false on success or failure respectfully.
      */
     public function find(string $value = null, string $field = 'id'): bool {
-        $data = $this->_db->get('store_customers', [$field, '=', $value]);
+        if ($field == 'id' || $field == 'user_id') {
+            $data = $this->_db->query('SELECT `c`.`id`, `c`.`user_id`, `c`.`integration_id`, `c`.`cents`, IFNULL(`c`.`username`, ui.username) as username, IFNULL(`c`.`identifier`, `ui`.`identifier`) as identifier FROM `nl2_store_customers` AS c LEFT JOIN nl2_users_integrations AS ui ON c.user_id=ui.user_id AND ui.integration_id=1 WHERE `c`.`'.$field.'` = ?', [$value]);
+        } else {
+            $data = $this->_db->get('store_customers', [$field, '=', $value]);
+        }
+
         if ($data->count()) {
             $this->_data = $data->first();
 
@@ -290,14 +295,7 @@ class Customer {
 
     public function getIdentifier(): string {
         if ($this->exists()) {
-            if ($this->_data->user_id) {
-                $user = $this->getUser();
-                if ($user->exists()) {
-                    return Output::getClean($user->data()->uuid);
-                }
-            } else if ($this->_data->identifier) {
-                return Output::getClean($this->_data->identifier);
-            }
+            return Output::getClean($this->_data->identifier);
         }
 
         return 'none';
@@ -305,14 +303,7 @@ class Customer {
 
     public function getUsername(): string {
         if ($this->exists()) {
-            if ($this->_data->user_id) {
-                $user = $this->getUser();
-                if ($user->exists()) {
-                    return Output::getClean($user->data()->username);
-                }
-            } else if ($this->_data->username) {
-                return Output::getClean($this->_data->username);
-            }
+            return Output::getClean($this->_data->username);
         }
 
         return 'Unknown';

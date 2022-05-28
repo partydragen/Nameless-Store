@@ -2,7 +2,7 @@
 class PaymentInfoEndpoint extends KeyAuthEndpoint {
 
     public function __construct() {
-        $this->_route = 'payment';
+        $this->_route = 'store/payment';
         $this->_module = 'Store';
         $this->_description = 'Payment info';
         $this->_method = 'GET';
@@ -14,7 +14,7 @@ class PaymentInfoEndpoint extends KeyAuthEndpoint {
         // Get payment
         $payment = new Payment($_GET['id'], 'id');
         if (!$payment->exists()) {
-            $api->throwError(251, 'Payment not found');
+            $api->throwError(StoreApiErrors::ERROR_PAYMENT_NOT_FOUND);
         }
 
         $order = $payment->getOrder();

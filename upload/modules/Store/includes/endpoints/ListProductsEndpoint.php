@@ -1,10 +1,10 @@
 <?php
-class ProductsList extends KeyAuthEndpoint {
+class ListProductsEndpoint extends KeyAuthEndpoint {
 
     public function __construct() {
-        $this->_route = 'storeProducts';
+        $this->_route = 'store/products';
         $this->_module = 'Store';
-        $this->_description = 'Get list of products in a category';
+        $this->_description = 'List all products or in a category';
         $this->_method = 'GET';
     }
 
@@ -34,7 +34,7 @@ class ProductsList extends KeyAuthEndpoint {
                 'disabled' => (bool) $product->disabled
             ];
         }
-        
+ 
         $api->returnArray(['products' => $products_array]);
     }
 }

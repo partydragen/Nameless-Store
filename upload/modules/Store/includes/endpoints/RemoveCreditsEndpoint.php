@@ -2,8 +2,7 @@
 class RemoveCreditsEndpoint extends KeyAuthEndpoint {
 
     public function __construct() {
-        $this->_route = 'removeCredits';
-        $this->_route = 'users/{user}/removecredits';
+        $this->_route = 'users/{user}/remove-credits';
         $this->_module = 'Store';
         $this->_description = 'Remove credits from user';
         $this->_method = 'POST';
@@ -14,12 +13,12 @@ class RemoveCreditsEndpoint extends KeyAuthEndpoint {
 
         $credits = $_POST['credits'];
         if (!is_numeric($credits)) {
-            $api->throwError(250, 'Invalid credits amount');
+            $api->throwError(StoreApiErrors::ERROR_INVALID_CREDITS_AMOUNT);
         }
 
         $customer = new Customer($user);
         $customer->removeCredits($credits);
 
-        $api->returnArray(['message' => 'Successfully added credits to user']);
+        $api->returnArray(['message' => 'Successfully removed credits from user']);
     }
 }

@@ -1,19 +1,15 @@
 <?php
-class PendingCommands extends KeyAuthEndpoint {
+class PendingCommandsEndpoint extends KeyAuthEndpoint {
 
     public function __construct() {
-        $this->_route = 'pendingStoreCommand';
+        $this->_route = 'store/pending-commands';
         $this->_module = 'Store';
-        $this->_description = 'Get pending commands';
+        $this->_description = 'List all pending commands';
         $this->_method = 'GET';
     }
 
     public function execute(Nameless2API $api): void {
-        $query = 'SELECT nl2_store_pending_actions.*, nl2_store_customers.id as pid, IFNULL(nl2_store_customers.username, nl2_users_integrations.username) as username, IFNULL(nl2_store_customers.identifier, nl2_users_integrations.identifier) as identifier, nl2_store_orders.user_id FROM nl2_store_pending_actions
-        LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id
-        LEFT JOIN nl2_store_customers ON nl2_store_pending_actions.customer_id=nl2_store_customers.id
-        LEFT JOIN nl2_users_integrations ON nl2_store_orders.user_id=nl2_users_integrations.user_id AND nl2_users_integrations.integration_id=1';
-
+        $query = 'SELECT * FROM nl2_store_pending_actions';
         $where = ' WHERE status = 0';
         $params = [];
 
@@ -25,30 +21,36 @@ class PendingCommands extends KeyAuthEndpoint {
         // Ensure the user exists
         $commands_query = $api->getDb()->query($query . $where, $params)->results();
 
-        $commands_array = [];
+        $customers_commands = [];
         foreach ($commands_query as $command) {
-            if ($command->identifier == null && $command->username == null) {
-                continue;
-            }
-
-            $commands_array[] = [
+            $customers_commands[$command->customer_id][] = [
                 'id' => $command->id,
                 'command' => $command->command,
                 'order_id' => (int) $command->order_id,
-                'user_id' => (int) $command->user_id,
-                'customer_id' => (int) $command->customer_id,
-                'username' => $command->username,
-                'uuid' => $command->identifier != null ? $this->formatUUID(str_replace('-', '', $command->identifier)) : null,
                 'require_online' => (boolean) $command->require_online,
                 'order' => (int) $command->order,
             ];
+        }
+
+        $customers = [];
+        foreach ($customers_commands as $customer_id => $commands) {
+            $customer = new Customer(null, $customer_id);
+            if ($customer->exists() && $customer->data()->username != null) {
+                $customers[] = [
+                    'customer_id' => (int) $customer->data()->id,
+                    'user_id' => (int) $customer->data()->user_id,
+                    'identifier' => $customer->data()->identifier != null ? $this->formatUUID(str_replace('-', '', $customer->data()->identifier)) : null,
+                    'username' => $customer->data()->username,
+                    'commands' => $commands
+                ];
+            }
         }
 
         // Online mode or offline mode?
         $uuid_linking = $api->getDb()->get('settings', ['name', '=', 'uuid_linking'])->results();
         $uuid_linking = ($uuid_linking[0]->value == '1' ? true : false);
 
-        $api->returnArray(['online_mode' => $uuid_linking, 'commands' => $commands_array]);
+        $api->returnArray(['online_mode' => $uuid_linking, 'customers' => $customers]);
     }
     
     /**

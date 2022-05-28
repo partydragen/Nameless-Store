@@ -1,8 +1,8 @@
 <?php
-class CommandsExecuted extends KeyAuthEndpoint {
+class CommandsExecutedEndpoint extends KeyAuthEndpoint {
 
     public function __construct() {
-        $this->_route = 'storeCommandsExecuted';
+        $this->_route = 'store/commands-executed';
         $this->_module = 'Store';
         $this->_description = 'Mark commands as complete';
         $this->_method = 'POST';
@@ -11,7 +11,7 @@ class CommandsExecuted extends KeyAuthEndpoint {
     public function execute(Nameless2API $api): void {
         $commands = $_POST['commands'];
         if (!is_array($commands) || !count($commands)) {
-            $api->throwError(110, 'No commands provided');
+            $api->throwError('store:no_commands_provided');
         }
         
         $ids = '(';
