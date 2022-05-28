@@ -359,7 +359,7 @@ if (isset($_GET['customer'])) {
         $template_payments = [];
 
         foreach ($payments as $paymentQuery) {
-            $payment = new Payment($paymentQuery->id);
+            $payment = new Payment(null, null, $paymentQuery);
 
             // Recipient
             if ($paymentQuery->to_customer_id) {

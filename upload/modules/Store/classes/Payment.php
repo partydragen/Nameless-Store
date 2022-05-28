@@ -13,14 +13,17 @@ class Payment {
             $_data,
             $_order;
 
-    public function __construct($value = null, $field = 'id') {
+    public function __construct($value = null, $field = 'id', $query_data = null) {
         $this->_db = DB::getInstance();
 
-        if ($value != null) {
+        if (!$query_data && $value) {
             $data = $this->_db->get('store_payments', [$field, '=', $value]);
             if ($data->count()) {
                 $this->_data = $data->first();
             }
+        } else if ($query_data) {
+            // Load data from existing query.
+            $this->_data = $query_data;
         }
     }
 
