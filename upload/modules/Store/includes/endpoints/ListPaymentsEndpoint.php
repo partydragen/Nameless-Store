@@ -1,8 +1,6 @@
 <?php
 class ListPaymentsEndpoint extends KeyAuthEndpoint {
 
-    private array $_customers_cache = [];
-
     public function __construct() {
         $this->_route = 'store/payments';
         $this->_module = 'Store';
@@ -51,7 +49,7 @@ class ListPaymentsEndpoint extends KeyAuthEndpoint {
 
         $payments_list = [];
         foreach ($payments_query as $payment) {
-            $customer = $this->getCustomer($payment->from_customer_id);
+            $customer = new Customer(null, $payment->from_customer_id);
             $customer_data = [
                 'customer_id' => $payment->from_customer_id,
                 'user_id' => $customer->exists() ? $customer->data()->user_id : null,
@@ -59,7 +57,7 @@ class ListPaymentsEndpoint extends KeyAuthEndpoint {
                 'identifier' => $customer->exists() ? $customer->data()->identifier : null
             ];
 
-            $recipient = $this->getCustomer($payment->to_customer_id);
+            $recipient = new Customer(null, $payment->to_customer_id);
             $recipient_data = [
                 'customer_id' => $payment->to_customer_id,
                 'user_id' => $recipient->exists() ? $recipient->data()->user_id : null,
@@ -94,16 +92,5 @@ class ListPaymentsEndpoint extends KeyAuthEndpoint {
         }
  
         $api->returnArray(['payments' => $payments_list]);
-    }
-    
-    private function getCustomer(int $customer_id): Customer {
-        if (array_key_exists($customer_id, $this->_customers_cache)) {
-            return $this->_customers_cache[$customer_id];
-        } else {
-            $customer = new Customer(null, $customer_id);
-            $this->_customers_cache[$customer_id] = $customer;
-
-            return $customer;
-        }
     }
 }

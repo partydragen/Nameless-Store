@@ -9,6 +9,8 @@
  */
 class Customer {
 
+    private static array $_customers_cache = [];
+
     private DB $_db;
     private User $_user;
 
@@ -55,6 +57,11 @@ class Customer {
      * @return bool True/false on success or failure respectfully.
      */
     public function find(string $value = null, string $field = 'id'): bool {
+        if (isset(self::$_customers_cache["$value.$field"])) {
+            $this->_data = self::$_customers_cache["$value.$field"];
+            return true;
+        }
+
         if ($field == 'id' || $field == 'user_id') {
             $data = $this->_db->query('SELECT `c`.`id`, `c`.`user_id`, `c`.`integration_id`, `c`.`cents`, IFNULL(`c`.`username`, ui.username) as username, IFNULL(`c`.`identifier`, `ui`.`identifier`) as identifier FROM `nl2_store_customers` AS c LEFT JOIN nl2_users_integrations AS ui ON c.user_id=ui.user_id AND ui.integration_id=1 WHERE `c`.`'.$field.'` = ?', [$value]);
         } else {
@@ -63,7 +70,7 @@ class Customer {
 
         if ($data->count()) {
             $this->_data = $data->first();
-
+            self::$_customers_cache["$value.$field"] = $this->_data;
             return true;
         }
 
@@ -137,7 +144,7 @@ class Customer {
                 }
             }
 
-            return new User($this->data()->username);
+            return new User($this->data()->username, 'username');
         })();
     }
 
