@@ -11,6 +11,7 @@ class PendingCommandsEndpoint extends KeyAuthEndpoint {
     public function execute(Nameless2API $api): void {
         $query = 'SELECT * FROM nl2_store_pending_actions';
         $where = ' WHERE status = 0';
+        $order = ' ORDER BY `order` ASC';
         $params = [];
 
         if (isset($_GET['connection_id']) || isset($_GET['server_id'])) {
@@ -19,7 +20,7 @@ class PendingCommandsEndpoint extends KeyAuthEndpoint {
         }
 
         // Ensure the user exists
-        $commands_query = $api->getDb()->query($query . $where, $params)->results();
+        $commands_query = $api->getDb()->query($query . $where . $order, $params)->results();
 
         $customers_commands = [];
         foreach ($commands_query as $command) {
@@ -27,8 +28,7 @@ class PendingCommandsEndpoint extends KeyAuthEndpoint {
                 'id' => $command->id,
                 'command' => $command->command,
                 'order_id' => (int) $command->order_id,
-                'require_online' => (boolean) $command->require_online,
-                'order' => (int) $command->order,
+                'require_online' => (boolean) $command->require_online
             ];
         }
 

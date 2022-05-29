@@ -10,18 +10,18 @@ class ListCategoriesEndpoint extends KeyAuthEndpoint {
 
     public function execute(Nameless2API $api): void {
         $query = 'SELECT * FROM nl2_store_categories WHERE deleted = 0;';
+        $order = ' ORDER BY `order` ASC';
 
         // Ensure the user exists
-        $categories_query = $api->getDb()->query($query)->results();
+        $categories_query = $api->getDb()->query($query . $order)->results();
 
         $categories_array = [];
         foreach ($categories_query as $category) {
             $category_array[] = [
                 'id' => (int) $category->id,
                 'name' => Output::getClean($category->name),
-                'order' => (int) $category->order,
-                'hidden' => (bool) $product->hidden,
-                'disabled' => (bool) $product->disabled
+                'hidden' => (bool) $category->hidden,
+                'disabled' => (bool) $category->disabled
             ];
         }
 

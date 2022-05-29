@@ -10,8 +10,8 @@ class ListProductsEndpoint extends KeyAuthEndpoint {
 
     public function execute(Nameless2API $api): void {
         $query = 'SELECT * FROM nl2_store_products';
-
         $where = ' WHERE deleted = 0';
+        $order = ' ORDER BY `order` ASC';
         $params = [];
 
         if (isset($_GET['category_id'])) {
@@ -20,7 +20,7 @@ class ListProductsEndpoint extends KeyAuthEndpoint {
         }
 
         // Ensure the user exists
-        $products_query = $api->getDb()->query($query . $where, $params)->results();
+        $products_query = $api->getDb()->query($query . $where . $order, $params)->results();
 
         $products_array = [];
         foreach ($products_query as $product) {
@@ -29,7 +29,6 @@ class ListProductsEndpoint extends KeyAuthEndpoint {
                 'category_id' => (int) $product->category_id,
                 'name' => Output::getClean($product->name),
                 'price' => (double) $product->price,
-                'order' => (int) $category->order,
                 'hidden' => (bool) $product->hidden,
                 'disabled' => (bool) $product->disabled
             ];
