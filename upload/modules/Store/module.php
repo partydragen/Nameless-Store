@@ -276,6 +276,90 @@ class Store_Module extends Module {
     }
 
     public function getDebugInfo(): array {
+        // Services
+        $services_list = [];
+        foreach (Services::getInstance()->getAll() as $service) {
+            $services_list[] = [
+                'id' => Output::getClean($service->getId()),
+                'name' => Output::getClean($service->getName()),
+            ];
+        }
+
+        // Connections
+        $connections_list = [];
+        $connections_query = DB::getInstance()->query('SELECT * FROM nl2_store_connections')->results();
+        foreach ($connections_query as $data) {
+            $connections_list[] = [
+                'id' => $data->id,
+                'name' => Output::getClean($data->name),
+                'service_id' => $data->service_id,
+            ];
+        }
+
+        // Fields
+        $fields_list = [];
+        $fields_query = DB::getInstance()->query('SELECT * FROM nl2_store_fields')->results();
+        foreach ($fields_query as $data) {
+            $fields_list[] = [
+                'id' => $data->id,
+                'identifier' => Output::getClean($data->identifier),
+                'type' => $data->type,
+                'required' => $data->required,
+                'min' => $data->min,
+                'max' => $data->max,
+                'options' => Output::getClean($data->options),
+            ];
+        }
+
+        // Products
+        $products_list = [];
+        $products_query = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE deleted = 0 ORDER BY `order` ASC')->results();
+        foreach ($products_query as $data) {
+            $product = new Product(null, null, $data);
+
+            $connections = [];
+            foreach ($product->getConnections() as $connection) {
+                $connections[] = $connection->id;
+            }
+
+            $fields = [];
+            foreach ($product->getFields() as $field) {
+                $fields[] = $field->id;
+            }
+            
+            $actions = [];
+            foreach ($product->getActions() as $action) {
+                $action_connections = [];
+                if ($action->data()->own_connections) {
+                    foreach ($action->getConnections() as $connection) {
+                        $action_connections[] = $connection->id;
+                    }
+                }
+
+                $actions[] = [
+                    'id' => $action->data()->id,
+                    'trigger' => $action->data()->type,
+                    'command' => $action->data()->command,
+                    'require_online' => $action->data()->require_online,
+                    'own_connections' => $action->data()->own_connections,
+                    'service_id' => $action->data()->service_id,
+                    'connections' => $action_connections,
+                ];
+            }
+
+            $products_list[] = [
+                'id' => $product->data()->id,
+                'name' => Output::getClean($product->data()->name),
+                'price' => Output::getClean($product->data()->price),
+                'hidden' => $product->data()->hidden,
+                'disabled' => $product->data()->disabled,
+                'connections' => $connections,
+                'fields' => $fields,
+                'actions' => $actions
+            ];
+        }
+
+        return ['services' => $services_list, 'connections' => $connections_list, 'fields' => $fields_list, 'products' => $products_list];
     }
 
     private function initialiseUpdate($old_version) {
