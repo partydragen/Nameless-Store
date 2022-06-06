@@ -21,7 +21,7 @@ class LatestStorePurchasesWidget extends WidgetBase {
         // Get widget
         $widget_query = self::getData('Latest Purchases');
 
-        parent::__construct(self::parsePages($widget_query->pages));
+        parent::__construct(self::parsePages($widget_query));
 
 		// Set widget variables
 		$this->_module = 'Store';
@@ -35,7 +35,6 @@ class LatestStorePurchasesWidget extends WidgetBase {
 	public function initialise(): void {
 		// Generate HTML code for widget
 		$this->_cache->setCache('store_data');
-		$queries = new Queries();
 
 		if ($this->_cache->isCached('latest_purchases')) {
 			$latest_purchases = $this->_cache->retrieve('latest_purchases');

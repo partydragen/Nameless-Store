@@ -75,7 +75,7 @@ if (!isset($_GET['action'])) {
                         else $disabled = 0;
 
                         // Save to database
-                        $queries->create('store_categories', [
+                        DB::getInstance()->insert('store_categories', [
                             'name' => Output::getClean(Input::get('name')),
                             'description' => Output::getClean(Input::get('description')),
                             'parent_category' => $parent_category != 0 ? $parent_category : null,
@@ -176,7 +176,7 @@ if (!isset($_GET['action'])) {
                         else $disabled = 0;
 
                         // Save to database
-                        $queries->update('store_categories', $category->id, [
+                        DB::getInstance()->update('store_categories', $category->id, [
                             'name' => Output::getClean(Input::get('name')),
                             'description' => Output::getClean(Input::get('description')),
                             'parent_category' => $parent_category != 0 ? $parent_category : null,
@@ -248,13 +248,13 @@ if (!isset($_GET['action'])) {
             $products = DB::getInstance()->query('SELECT id FROM `nl2_store_products` WHERE category_id = ? AND deleted = 0', [$_GET['id']])->results();
             if (count($products)) {
                 foreach ($products as $product) {
-                    $queries->update('store_products', $product->id, [
+                    DB::getInstance()->update('store_products', $product->id, [
                         'deleted' => date('U')
                     ]);
                 }
             }
 
-            $queries->update('store_categories', $category->id, [
+            DB::getInstance()->update('store_categories', $category->id, [
                 'deleted' => date('U')
             ]);
 

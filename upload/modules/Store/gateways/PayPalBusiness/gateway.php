@@ -131,7 +131,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                 }
 
                 // Save agreement to database
-                $queries->create('store_agreements', [
+                DB::getInstance()->insert('store_agreements', [
                     'user_id' => ($user->isLoggedIn() ? $user->data()->id : null),
                     'player_id' => $player_id,
                     'agreement_id' => $agreement->id,

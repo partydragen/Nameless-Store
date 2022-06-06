@@ -21,6 +21,8 @@ define('PANEL_PAGE', 'general_settings');
 $page_title = $store_language->get('general', 'store');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
+$configuration = new Configuration('store');
+
 if (isset($_POST) && !empty($_POST)) {
     $errors = [];
 
@@ -54,10 +56,10 @@ if (isset($_POST) && !empty($_POST)) {
             else
                 $player_login = 0;
 
-            $configuration->set('store', 'allow_guests', $allow_guests);
-            $configuration->set('store', 'player_login', $player_login);
-            $configuration->set('store', 'currency', Output::getClean(Input::get('currency')));
-            $configuration->set('store', 'currency_symbol', Output::getClean(Input::get('currency_symbol')));
+            $configuration->set('allow_guests', $allow_guests);
+            $configuration->set('player_login', $player_login);
+            $configuration->set('currency', Output::getClean(Input::get('currency')));
+            $configuration->set('currency_symbol', Output::getClean(Input::get('currency_symbol')));
 
             // Update link location
             if (isset($_POST['link_location'])) {
@@ -80,15 +82,15 @@ if (isset($_POST) && !empty($_POST)) {
 
             // Update store content
             try {
-                $store_index_content = $queries->getWhere('store_settings', ['name', '=', 'store_content']);
+                $store_index_content = DB::getInstance()->get('store_settings', ['name', '=', 'store_content'])->results();
 
                 if (count($store_index_content)) {
                     $store_index_content = $store_index_content[0]->id;
-                    $queries->update('store_settings', $store_index_content, [
+                    DB::getInstance()->update('store_settings', $store_index_content, [
                         'value' => Output::getClean(Input::get('store_content'))
                     ]);
                 } else {
-                    $queries->create('store_settings', [
+                    DB::getInstance()->insert('store_settings', [
                         'name' => 'store_content',
                         'value' => Output::getClean(Input::get('store_content'))
                     ]);
@@ -100,15 +102,15 @@ if (isset($_POST) && !empty($_POST)) {
 
             // Update checkout content
             try {
-                $checkout_complete_content = $queries->getWhere('store_settings', ['name', '=', 'checkout_complete_content']);
+                $checkout_complete_content = DB::getInstance()->get('store_settings', ['name', '=', 'checkout_complete_content'])->results();
 
                 if (count($checkout_complete_content)) {
                     $checkout_complete_content = $checkout_complete_content[0]->id;
-                    $queries->update('store_settings', $checkout_complete_content, [
+                    DB::getInstance()->update('store_settings', $checkout_complete_content, [
                         'value' => Output::getClean(Input::get('checkout_complete_content'))
                     ]);
                 } else {
-                    $queries->create('store_settings', [
+                    DB::getInstance()->insert('store_settings', [
                         'name' => 'checkout_complete_content',
                         'value' => Output::getClean(Input::get('checkout_complete_content'))
                     ]);
@@ -120,7 +122,7 @@ if (isset($_POST) && !empty($_POST)) {
 
             // Update store path
             try {
-                $store_path = $queries->getWhere('store_settings', ['name', '=', 'store_path']);
+                $store_path = DB::getInstance()->get('store_settings', ['name', '=', 'store_path'])->results();
 
                 if (isset($_POST['store_path']) && strlen(str_replace(' ', '', $_POST['store_path'])) > 0)
                     $store_path_input = rtrim(Output::getClean($_POST['store_path']), '/');
@@ -129,11 +131,11 @@ if (isset($_POST) && !empty($_POST)) {
 
                 if (count($store_path)) {
                     $store_path = $store_path[0]->id;
-                    $queries->update('store_settings', $store_path, [
+                    DB::getInstance()->update('store_settings', $store_path, [
                         'value' => $store_path_input
                     ]);
                 } else {
-                    $queries->create('store_settings', [
+                    DB::getInstance()->insert('store_settings', [
                         'name' => 'store_path',
                         'value' => $store_path_input
                     ]);
@@ -173,13 +175,13 @@ if (isset($errors) && count($errors))
     ]);
 
 // Can guest make purchases
-$allow_guests = $configuration->get('store', 'allow_guests');
+$allow_guests = $configuration->get('allow_guests');
 
 // Require player to enter minecraft username when visiting store
-$player_login = $configuration->get('store', 'player_login');
+$player_login = $configuration->get('player_login');
 
 // Store content
-$store_index_content = $queries->getWhere('store_settings', ['name', '=', 'store_content']);
+$store_index_content = DB::getInstance()->get('store_settings', ['name', '=', 'store_content'])->results();
 if (count($store_index_content)) {
     $store_index_content = Output::getClean(Output::getPurified(Output::getDecoded($store_index_content[0]->value)));
 } else {
@@ -187,7 +189,7 @@ if (count($store_index_content)) {
 }
 
 // Checkout complete content
-$checkout_complete_content = $queries->getWhere('store_settings', ['name', '=', 'checkout_complete_content']);
+$checkout_complete_content = DB::getInstance()->get('store_settings', ['name', '=', 'checkout_complete_content'])->results();
 if (count($checkout_complete_content)) {
     $checkout_complete_content = Output::getClean(Output::getPurified(Output::getDecoded($checkout_complete_content[0]->value)));
 } else {
@@ -195,7 +197,7 @@ if (count($checkout_complete_content)) {
 }
 
 // Store Path
-$store_path = $queries->getWhere('store_settings', ['name', '=', 'store_path']);
+$store_path = DB::getInstance()->get('store_settings', ['name', '=', 'store_path'])->results();
 if (count($store_path)) {
     $store_path = Output::getClean($store_path[0]->value);
 } else {
@@ -204,10 +206,10 @@ if (count($store_path)) {
 
 // Currency
 $currency_list = ['USD', 'EUR', 'GBP', 'NOK', 'SEK', 'PLN', 'DKK', 'CAD', 'BRL', 'AUD'];
-$currency = $configuration->get('store', 'currency');
+$currency = $configuration->get('currency');
 
 // Currency Symbol
-$currency_symbol = $configuration->get('store', 'currency_symbol');
+$currency_symbol = $configuration->get('currency_symbol');
 
 // Retrieve Link Location from cache
 $cache->setCache('nav_location');

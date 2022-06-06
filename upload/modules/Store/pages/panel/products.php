@@ -23,6 +23,7 @@ require_once(ROOT_PATH . '/core/templates/backend_init.php');
 require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
 
 $store = new Store($cache, $store_language);
+$configuration = new Configuration('store');
 
 if (!isset($_GET['action'])) {
     // Get all products and categories
@@ -32,8 +33,8 @@ if (!isset($_GET['action'])) {
     if ($categories->count()) {
         $categories = $categories->results();
 
-        $currency = Output::getClean($configuration->get('store', 'currency'));
-        $currency_symbol = Output::getClean($configuration->get('store', 'currency_symbol'));
+        $currency = Output::getClean($configuration->get('currency'));
+        $currency_symbol = Output::getClean($configuration->get('currency_symbol'));
 
         foreach ($categories as $category) {
             $new_category = [
@@ -143,7 +144,7 @@ if (!isset($_GET['action'])) {
                             else $disabled = 0;
 
                             // Save to database
-                            $queries->create('store_products', [
+                            DB::getInstance()->insert('store_products', [
                                 'name' => Output::getClean(Input::get('name')),
                                 'description' => Output::getClean(Input::get('description')),
                                 'category_id' => $category[0]->id,
@@ -152,7 +153,7 @@ if (!isset($_GET['action'])) {
                                 'disabled' => $disabled,
                                 'order' => $last_order + 1,
                             ]);
-                            $lastId = $queries->getLastId();
+                            $lastId = DB::getInstance()->lastId();
                             $product = new Product($lastId);
 
                             // Add the selected connections, if isset
@@ -223,7 +224,7 @@ if (!isset($_GET['action'])) {
                 'CONNECTIONS_LIST' => $connections_array,
                 'FIELDS' => $store_language->get('admin', 'fields'),
                 'FIELDS_LIST' => $fields_array,
-                'CURRENCY' => Output::getClean($configuration->get('store', 'currency')),
+                'CURRENCY' => Output::getClean($configuration->get('currency')),
                 'HIDE_PRODUCT' => $store_language->get('admin', 'hide_product_from_store'),
                 'HIDE_PRODUCT_VALUE' => ((isset($_POST['hidden'])) ? 1 : 0),
                 'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),

@@ -71,7 +71,7 @@ if (Input::exists()) {
                     if (count($last_order)) $last_order = $last_order[0]->order;
                     else $last_order = 0;
 
-                    $queries->create('store_products_actions', [
+                    DB::getInstance()->insert('store_products_actions', [
                         'product_id' => $product->data()->id,
                         'type' => $trigger,
                         'service_id' => $service->getId(),
@@ -80,7 +80,7 @@ if (Input::exists()) {
                         'order' => $last_order + 1,
                         'own_connections' => 0
                     ]);
-                    $lastId = $queries->getLastId();
+                    $lastId = DB::getInstance()->lastId();
 
                     Session::flash('products_success', $store_language->get('admin', 'action_created_successfully'));
                     Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
@@ -129,7 +129,7 @@ if (!$action->exists()) {
 }
 
 $smarty->assign([
-    'ALL_GROUPS' => $groups = $queries->orderAll('groups', '`order`', 'ASC'),
+    'ALL_GROUPS' => $groups = DB::getInstance()->orderAll('groups', '`order`', 'ASC')->results(),
     'SETTINGS_TEMPLATE' => ROOT_PATH . '/modules/Store/services/NamelessMC/settings/action_settings.tpl'
 ]);
 

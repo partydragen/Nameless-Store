@@ -118,7 +118,7 @@ if (!isset($_GET['action'])) {
                             $options = str_replace("\n", ',', Input::get('options'));
 
                             // Save to database
-                            $queries->create('store_fields', [
+                            DB::getInstance()->insert('store_fields', [
                                 'identifier' => Output::getClean(Input::get('identifier')),
                                 'description' => Output::getClean(Input::get('description')),
                                 'type' => $type,
@@ -175,7 +175,7 @@ if (!isset($_GET['action'])) {
             if (!is_numeric($_GET['id'])) {
                 Redirect::to(URL::build('/panel/store/fields/'));
             } else {
-                $field = $queries->getWhere('store_fields', ['id', '=', $_GET['id']]);
+                $field = DB::getInstance()->get('store_fields', ['id', '=', $_GET['id']])->results();
                 if (!count($field)) {
                     Redirect::to(URL::build('/panel/store/fields/'));
                 }
@@ -229,7 +229,7 @@ if (!isset($_GET['action'])) {
                             $options = str_replace("\n", ',', Input::get('options'));
 
                             // Save to database
-                            $queries->update('store_fields', $field->id, [
+                            DB::getInstance()->update('store_fields', $field->id, [
                                 'identifier' => Output::getClean(Input::get('identifier')),
                                 'description' => Output::getClean(Input::get('description')),
                                 'type' => $type,
@@ -294,7 +294,7 @@ if (!isset($_GET['action'])) {
             if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
                 Redirect::to(URL::build('/panel/store/fields/'));
             }
-            $queries->update('store_fields', $_GET['id'], [
+            DB::getInstance()->update('store_fields', $_GET['id'], [
                 'deleted' => date('U')
             ]);
 

@@ -45,7 +45,7 @@ if ($category->disabled == 1) {
 
 $store_url = $store->getStoreURL();
 
-$page_metadata = $queries->getWhere('page_descriptions', ['page', '=', $store_url . '/view']);
+$page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/view'])->results();
 if (count($page_metadata)) {
     define('PAGE_DESCRIPTION', str_replace(['{site}', '{category_title}', '{description}'], [SITE_NAME, Output::getClean($category->name), Output::getClean(strip_tags(Output::getDecoded($category->description)))], $page_metadata[0]->description));
     define('PAGE_KEYWORDS', $page_metadata[0]->tags);

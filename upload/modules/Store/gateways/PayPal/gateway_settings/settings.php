@@ -25,7 +25,7 @@ if (Input::exists()) {
         if (isset($_POST['enable']) && $_POST['enable'] == 'on') $enabled = 1;
         else $enabled = 0;
         
-        $queries->update('store_gateways', $gateway->getId(), [
+        DB::getInstance()->update('store_gateways', $gateway->getId(), [
             'enabled' => $enabled
         ]);
 

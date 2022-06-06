@@ -40,7 +40,7 @@ if ($_GET['action'] == 'new_action') {
                     $selected_connections = (isset($_POST['connections']) && is_array($_POST['connections']) ? $_POST['connections'] : []);
 
                     // Save to database
-                    $queries->create('store_products_actions', [
+                    DB::getInstance()->insert('store_products_actions', [
                         'product_id' => $product->data()->id,
                         'type' => $trigger,
                         'service_id' => $service->getId(),
@@ -49,7 +49,7 @@ if ($_GET['action'] == 'new_action') {
                         'order' => $last_order + 1,
                         'own_connections' => (in_array(0, $selected_connections) ? 0 : 1)
                     ]);
-                    $lastId = $queries->getLastId();
+                    $lastId = DB::getInstance()->lastId();
 
                     // Handle selected connections if its use own connection list
                     if (!in_array(0, $selected_connections)) {

@@ -157,8 +157,8 @@ if (!isset($_GET['action'])) {
             if (Input::exists()) {
                 if (Token::check(Input::get('token'))) {
                     if (isset($_POST['id'])) {
-                        $queries->delete('store_connections', ['id', '=', $_POST['id']]);
-                        $queries->delete('store_products_connections', ['connection_id', '=', $_POST['id']]);
+                        DB::getInstance()->delete('store_connections', ['id', '=', $_POST['id']]);
+                        DB::getInstance()->delete('store_products_connections', ['connection_id', '=', $_POST['id']]);
 
                         Session::flash('connections_success', $store_language->get('admin', 'connection_deleted_successfully'));
                     }

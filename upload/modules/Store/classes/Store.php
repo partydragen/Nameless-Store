@@ -129,26 +129,18 @@ class Store {
     }
 
     public function isPlayerSystemEnabled() {
-        $configuration = new Configuration($this->_cache);
+        $configuration = new Configuration('store');
 
-        return $configuration->get('store', 'player_login');
+        return $configuration->get('player_login');
     }
 
     /*
      *  Check for Module updates
      *  Returns JSON object with information about any updates
      */
-    public static function updateCheck($current_version = null) {
-        $queries = new Queries();
-
-        // Check for updates
-        if (!$current_version) {
-            $current_version = $queries->getWhere('settings', ['name', '=', 'nameless_version']);
-            $current_version = $current_version[0]->value;
-        }
-
-        $uid = $queries->getWhere('settings', ['name', '=', 'unique_id']);
-        $uid = $uid[0]->value;
+    public static function updateCheck() {
+        $current_version = Util::getSetting('nameless_version');
+        $uid = Util::getSetting('unique_id');
 
         $enabled_modules = Module::getModules();
         foreach ($enabled_modules as $enabled_item) {

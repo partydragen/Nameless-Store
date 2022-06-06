@@ -86,7 +86,7 @@ class Order {
             'from_customer_id' => $from_customer->data()->id,
             'to_customer_id' => $to_customer->data()->id,
             'created' => date('U'),
-            'ip' => $user->getIP(),
+            'ip' => Util::getRemoteAddress(),
         ]);
         $last_id = $this->_db->lastId();
 

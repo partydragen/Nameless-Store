@@ -21,7 +21,7 @@ if ($_GET['action'] == 'new') {
             ]);
 
             if ($validation->passed()) {
-                $queries->create('store_connections', [
+                DB::getInstance()->insert('store_connections', [
                     'name' => Output::getClean(Input::get('name')),
                     'service_id' => $service->getId()
                 ]);
@@ -65,7 +65,7 @@ if ($_GET['action'] == 'new') {
             ]);
 
             if ($validation->passed()) {
-                $queries->update('store_connections', $connection->id, [
+                DB::getInstance()->update('store_connections', $connection->id, [
                     'name' => Output::getClean(Input::get('name'))
                 ]);
 

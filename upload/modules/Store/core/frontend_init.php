@@ -39,8 +39,9 @@ if ($store->isPlayerSystemEnabled() && $to_customer->isLoggedIn()) {
     ]);
 }
 
-$currency = Output::getClean($configuration->get('store', 'currency'));
-$currency_symbol = Output::getClean($configuration->get('store', 'currency_symbol'));
+$configuration = new Configuration('store');
+$currency = Output::getClean($configuration->get('currency'));
+$currency_symbol = Output::getClean($configuration->get('currency_symbol'));
 
 $smarty->assign([
     'SHOPPING_CART_PRODUCTS' => $shopping_cart->getProducts(),

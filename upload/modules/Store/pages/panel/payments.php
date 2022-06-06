@@ -302,11 +302,13 @@ if (isset($_GET['customer'])) {
 
                         // Register payment
                         $payment = new Payment();
+                        $configuration = new Configuration('store');
                         $payment->handlePaymentEvent('COMPLETED', [
                             'order_id' => $order->data()->id,
                             'gateway_id' => 0,
                             'amount' => 0,
-                            'currency' => Output::getClean($configuration->get('store', 'currency')),
+                            'currency' => Output::getClean($configuration->get('currency')),
+                            'transaction' => 'Manual',
                             'fee' => 0
                         ]);
 

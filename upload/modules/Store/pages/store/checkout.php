@@ -16,7 +16,8 @@ $page_title = $store_language->get('general', 'store');
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
 
-if (!$store->isPlayerSystemEnabled() || !$configuration->get('store', 'allow_guests')) {
+$configuration = new Configuration('store');
+if (!$store->isPlayerSystemEnabled() || !$configuration->get('allow_guests')) {
     if (!$user->isLoggedIn()) {
         Redirect::to(URL::build('/login/'));
     }
@@ -29,7 +30,7 @@ $store_url = $store->getStoreURL();
 if (isset($_GET['do'])) {
     if ($_GET['do'] == 'complete') {
         // Checkout complete page
-        $checkout_complete_content = $queries->getWhere('store_settings', ['name', '=', 'checkout_complete_content']);
+        $checkout_complete_content = DB::getInstance()->get('store_settings', ['name', '=', 'checkout_complete_content'])->results();
         $smarty->assign('CHECKOUT_COMPLETE_CONTENT', Output::getPurified(Output::getDecoded($checkout_complete_content[0]->value)));
         
         $template_file = 'store/checkout_complete.tpl';
@@ -146,7 +147,7 @@ if (isset($_GET['do'])) {
                         $id = explode(' ', $item);
                         $id = $id[0];
 
-                        $fielderror = $queries->getWhere('store_fields', ['id', '=', $id]);
+                        $fielderror = DB::getInstance()->get('store_fields', ['id', '=', $id])->results();
                         if (count($fielderror)) {
                             $fielderror = $fielderror[0];
 
@@ -222,7 +223,7 @@ if (isset($_GET['do'])) {
 
                 // Create order
                 $amount = new Amount();
-                $amount->setCurrency($configuration->get('store', 'currency'));
+                $amount->setCurrency($configuration->get('currency'));
                 $amount->setTotal($shopping_cart->getTotalPrice());
 
                 $order = new Order();
@@ -239,7 +240,7 @@ if (isset($_GET['do'])) {
                         'gateway_id' => 0,
                         'amount' => 0,
                         'transaction' => 'Free',
-                        'currency' => Output::getClean($configuration->get('store', 'currency')),
+                        'currency' => Output::getClean($configuration->get('currency')),
                         'fee' => 0
                     ]);
 
@@ -274,7 +275,7 @@ if (isset($_GET['do'])) {
                             'gateway_id' => 0,
                             'amount' => $amount_to_pay,
                             'transaction' => 'Credits',
-                            'currency' => Output::getClean($configuration->get('store', 'currency')),
+                            'currency' => Output::getClean($configuration->get('currency')),
                             'fee' => 0
                         ]);
 
@@ -303,8 +304,8 @@ if (isset($_GET['do'])) {
         }
     }
 
-    $currency = Output::getClean($configuration->get('store', 'currency'));
-    $currency_symbol = Output::getClean($configuration->get('store', 'currency_symbol'));
+    $currency = Output::getClean($configuration->get('currency'));
+    $currency_symbol = Output::getClean($configuration->get('currency_symbol'));
 
     // Load shopping list
     $shopping_cart_list = [];
