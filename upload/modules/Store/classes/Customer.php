@@ -302,7 +302,7 @@ class Customer {
 
     public function getIdentifier(): string {
         if ($this->exists()) {
-            return Output::getClean($this->_data->identifier);
+            return Output::getClean($this->_data->identifier ?? 'none');
         }
 
         return 'none';
@@ -310,7 +310,7 @@ class Customer {
 
     public function getUsername(): string {
         if ($this->exists()) {
-            return Output::getClean($this->_data->username);
+            return Output::getClean($this->_data->username ?? 'Unknown');
         }
 
         return 'Unknown';
