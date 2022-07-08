@@ -91,7 +91,7 @@
                             <p style="margin-top: 7px; margin-bottom: 7px;">Downloads</p>
                             <hr>
                             
-                            Minecraft Plugin for Spigot or Bukkit - <a href="https://www.spigotmc.org/resources/nameless-store.87221/" target="_blank" class="btn btn-primary btn-sm">Go to Spigot</a>
+                            Minecraft Plugin - <a href="https://www.spigotmc.org/resources/nameless-plugin-for-v2.59032/" target="_blank" class="btn btn-primary btn-sm">Go to Spigot</a>
                             
                             <center><p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a></br>Support on <a href="https://discord.gg/TtH6tpp" target="_blank">Discord</a></p></center>
                         </div>
