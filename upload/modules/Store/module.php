@@ -292,9 +292,10 @@ class Store_Module extends Module {
         $connections_query = $this->_db->query('SELECT * FROM nl2_store_connections')->results();
         foreach ($connections_query as $data) {
             $connections_list[] = [
-                'id' => $data->id,
+                'id' => (int)$data->id,
                 'name' => Output::getClean($data->name),
                 'service_id' => $data->service_id,
+                'last_fetch' => (int)$data->last_fetch,
             ];
         }
 
@@ -662,7 +663,7 @@ class Store_Module extends Module {
             }
         }
 
-        if ($old_version < 150) {
+        if ($old_version < 140) {
             try {
                 // Attempt to register customer for old orders bought from namelessmc users and update the orders with the new customer data
                 $namelessmc_customers = [];
@@ -698,6 +699,15 @@ class Store_Module extends Module {
 
             try {
                 $this->_db->createQuery('UPDATE nl2_store_orders SET `from_customer_id` = to_customer_id WHERE id <> 0', []);
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+        }
+
+        if ($old_version < 142) {
+            try {
+                $this->_db->createQuery('ALTER TABLE nl2_store_connections ADD `last_fetch` int(20) NOT NULL DEFAULT \'0\'');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -805,7 +815,7 @@ class Store_Module extends Module {
         
         if (!$this->_db->showTables('store_connections')) {
             try {
-                $this->_db->createTable('store_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `service_id` int(11) NOT NULL, `name` varchar(64) NOT NULL, `data` text DEFAULT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `service_id` int(11) NOT NULL, `name` varchar(64) NOT NULL, `data` text DEFAULT NULL, `last_fetch` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }

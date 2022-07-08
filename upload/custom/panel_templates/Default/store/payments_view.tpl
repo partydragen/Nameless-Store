@@ -109,7 +109,12 @@
                                         {foreach from=$PENDING_COMMANDS_LIST item=command}
                                             <tr>
                                                 <td>{$command.command}</td>
-                                                <td>{$command.connection_name}</td>
+                                                <td>{$command.connection_name}{if $command.error}
+                                            &nbsp;
+                                            <button role="button" class="btn btn-sm btn-warning" data-toggle="popover"
+                                                data-title="{$WARNING}" data-content="{$command.error}"><i
+                                                    class="fa fa-exclamation-triangle"></i></button>
+                                            {/if}</td>
                                             </tr>
                                         {/foreach}
                                         </tbody>

@@ -190,7 +190,8 @@ if (isset($_GET['customer'])) {
     foreach ($pending_commands as $command) {
         $pending_commands_array[] = [
             'command' => Output::getClean($command->command),
-            'connection_name' => Output::getClean($command->name)
+            'connection_name' => Output::getClean($command->name),
+            'error' => $command->service_id == 2 && $command->last_fetch < strtotime('-1 hour') ? 'There has been no API fetch within the last hour, Is the nameless plugin installed, and is store module integration enabled in modules.yaml?' : false
         ];
     }
 
@@ -246,7 +247,8 @@ if (isset($_GET['customer'])) {
         'PROCESSED_COMMANDS_LIST' => $processed_commands_array,
         'ARE_YOU_SURE' => $language->get('general', 'are_you_sure'),
         'YES' => $language->get('general', 'yes'),
-        'NO' => $language->get('general', 'no')
+        'NO' => $language->get('general', 'no'),
+        'WARNING' => $language->get('general', 'warning')
     ]);
 
     $template_file = 'store/payments_view.tpl';
@@ -308,7 +310,6 @@ if (isset($_GET['customer'])) {
                             'gateway_id' => 0,
                             'amount' => 0,
                             'currency' => Output::getClean($configuration->get('currency')),
-                            'transaction' => 'Manual',
                             'fee' => 0
                         ]);
 

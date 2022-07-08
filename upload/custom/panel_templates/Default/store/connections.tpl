@@ -63,7 +63,12 @@
                                     <tbody id="sortable">
                                         {foreach from=$CONNECTIONS_LIST item=connection}
                                         <tr data-id="{$announcement[0]->id}">
-                                            <td>{$connection.id}</td>
+                                            <td>{$connection.id}{if $connection.error}
+                                            &nbsp;
+                                            <button role="button" class="btn btn-sm btn-warning" data-toggle="popover"
+                                                data-title="{$WARNING}" data-content="{$connection.error}"><i
+                                                    class="fa fa-exclamation-triangle"></i></button>
+                                            {/if}</td>
                                             <td>{$connection.name}</td>
                                             <td>{$connection.service}</td>
                                             <td class="float-md-right">

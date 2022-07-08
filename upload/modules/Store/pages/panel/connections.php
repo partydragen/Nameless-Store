@@ -40,7 +40,8 @@ if (!isset($_GET['action'])) {
                 'id' => Output::getClean($connection->id),
                 'name' => Output::getClean($connection->name),
                 'service' => Output::getClean($service->getName()),
-                'edit_link' => URL::build('/panel/store/connections/', 'action=edit&id=' . Output::getClean($connection->id))
+                'edit_link' => URL::build('/panel/store/connections/', 'action=edit&id=' . Output::getClean($connection->id)),
+                'error' => $service->getId() == 2 && $connection->last_fetch < strtotime('-1 hour') ? 'There has been no API fetch within the last hour, Is the nameless plugin installed, and is store module integration enabled in modules.yaml?' : false
             ];
         }
 
@@ -62,6 +63,7 @@ if (!isset($_GET['action'])) {
         'TOKEN' => Token::get(),
         'YES' => $language->get('general', 'yes'),
         'NO' => $language->get('general', 'no'),
+        'WARNING' => $language->get('general', 'warning')
     ]);
     
     $template_file = 'store/connections.tpl';
