@@ -20,7 +20,7 @@ if (Input::exists()) {
 			$cache->store('purchase_limit', 10);
 
 	} else {
-		$errors = [$language->get('general', 'invalid_token']);
+		$errors = [$language->get('general', 'invalid_token')];
 	}
 }
 
