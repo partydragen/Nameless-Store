@@ -209,5 +209,6 @@
     "general\/widget_cached": "The latest purchases widget is cached for 2 minutes, your changes may not take effect immediately.",
     "general\/x_field_maximum_y": "{{field}} doit être au maximum de {{max}} caractères.",
     "general\/x_field_minimum_y": "{{field}} doit être au minimum de {{min}} caractères.",
-    "general\/x_items_for_y": "{{items}} élément(s) pour {{currency_symbol}}{{amount}} {{currency}}"
+    "general\/x_items_for_y": "{{items}} élément(s) pour {{currency_symbol}}{{amount}} {{currency}}",
+    "general/product_requires_integration": "This product requires you to link your {{integration}} account, You can do this at {{linkStart}}account connections{{linkEnd}}"
 }

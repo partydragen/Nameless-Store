@@ -209,5 +209,6 @@
     "general\/widget_cached": "Widget posledných nákupov je v cache po dobu 2 minút, takže môže chvíľu trvať, než sa vaše zmeny prejavia.",
     "general\/x_field_maximum_y": "{{field}} môže obsahovať maximálne {{max}} znakov.",
     "general\/x_field_minimum_y": "{{field}} musí obsahovať aspoň {{min}} znakov.",
-    "general\/x_items_for_y": "{{items}} položky za {{currency_symbol}}{{amount}} {{currency}}"
+    "general\/x_items_for_y": "{{items}} položky za {{currency_symbol}}{{amount}} {{currency}}",
+    "general/product_requires_integration": "This product requires you to link your {{integration}} account, You can do this at {{linkStart}}account connections{{linkEnd}}"
 }

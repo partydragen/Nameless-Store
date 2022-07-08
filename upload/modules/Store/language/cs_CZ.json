@@ -209,5 +209,6 @@
     "general\/widget_cached": "Widget posledních nákupů je v mezipaměti po dobu 2 minut, takže může chvíli trvat, než se vaše změny projeví.",
     "general\/x_field_maximum_y": "{{field}} může obsahovat maximálně {{max}} znaků.",
     "general\/x_field_minimum_y": "{{field}} musí obsahovat alespoň {{min}} znaků.",
-    "general\/x_items_for_y": "{{items}} položek za {{currency_symbol}}{{amount}} {{currency}}"
+    "general\/x_items_for_y": "{{items}} položek za {{currency_symbol}}{{amount}} {{currency}}",
+    "general/product_requires_integration": "This product requires you to link your {{integration}} account, You can do this at {{linkStart}}account connections{{linkEnd}}"
 }

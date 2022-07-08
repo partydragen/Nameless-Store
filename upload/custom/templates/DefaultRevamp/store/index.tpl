@@ -17,6 +17,26 @@
         <h1 style="display:inline;">{$STORE}</h1>
         {include file='store/navbar.tpl'}
 
+        {if isset($SUCCESS)}
+          <div class="ui success icon message">
+            <i class="check icon"></i>
+            <div class="content">
+             {$SUCCESS}
+            </div>
+          </div>
+        {/if}
+
+        {if isset($ERRORS)}
+          <div class="ui negative icon message">
+            <i class="x icon"></i>
+            <div class="content">
+              {foreach from=$ERRORS item=error}
+                {$error}<br />
+              {/foreach}
+            </div>
+          </div>
+        {/if}
+
         <div class="ui bottom attached segment">
           {$CONTENT}
         </div>

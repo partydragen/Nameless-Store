@@ -252,6 +252,27 @@ class Product {
         return $this->getActions()[$id] ?? null;
     }
 
+    /**
+     * Get the required user integrations that this product require.
+     *
+     * @return array List of required integrations.
+     */
+    public function getRequiredIntegrations(): array {
+        $required_integrations = [];
+
+        $integrations = Integrations::getInstance();
+        foreach ($this->getActions() as $action) {
+            if ($action->getService()->getId() == 2) {
+                $integration = $integrations->getIntegration('Minecraft');
+                if ($integration != null) {
+                    $required_integrations[] = $integration;
+                }
+            }
+        }
+
+        return $required_integrations;
+    }
+
     public function delete() {
         if ($this->exists()) {
             $this->update([

@@ -48,7 +48,21 @@ if (isset($_GET['do'])) {
     if (!$product->exists()) {
         die('Invalid product');
     }
-    
+
+    if ($user->isLoggedIn()) {
+        foreach ($product->getRequiredIntegrations() as $integration) {
+            $integrationUser = $user->getIntegration($integration->getName());
+            if ($integrationUser == null || $integrationUser->data()->username == null || $integrationUser->data()->identifier == null) {
+                Session::flash('store_error', $store_language->get('general', 'product_requires_integration', [
+                    'integration' => Output::getClean($integration->getName()),
+                    'linkStart' => '<a href="' . URL::build('/user/connections') . '">',
+                    'linkEnd' => '</a>'
+                ]));
+                Redirect::to(URL::build($store_url . '/category/' . $product->data()->category_id));
+            }
+        }
+    }
+
     $fields = $product->getFields();
     if (count($fields)) {
         $force_continue = true;
@@ -383,6 +397,10 @@ $smarty->assign([
 
 // Load modules + template
 Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
+
+if (Session::exists('store_error')) {
+    $errors[] = Session::flash('store_error');
+}
 
 if (isset($success))
     $smarty->assign([

@@ -155,6 +155,22 @@ $template->assets()->include([
 // Load modules + template
 Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
+if (Session::exists('store_error')) {
+    $errors[] = Session::flash('store_error');
+}
+
+if (isset($success))
+    $smarty->assign([
+        'SUCCESS' => $success,
+        'SUCCESS_TITLE' => $language->get('general', 'success')
+    ]);
+
+if (isset($errors) && count($errors))
+    $smarty->assign([
+        'ERRORS' => $errors,
+        'ERRORS_TITLE' => $language->get('general', 'error')
+    ]);
+
 $template->onPageLoad();
 
 $smarty->assign('WIDGETS_LEFT', $widgets->getWidgets('left'));
