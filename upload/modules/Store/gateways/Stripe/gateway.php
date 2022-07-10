@@ -154,7 +154,7 @@ class Stripe_Gateway extends GatewayBase {
                     $stripe = new \Stripe\StripeClient($secret_key);
                     $webhook = $stripe->webhookEndpoints->create([
                         'url' => rtrim(Util::getSelfURL(), '/') . URL::build('/store/listener', 'gateway=Stripe&key=' . $key),
-                        'enabled_events' => ['*']
+                        'enabled_events' => ['payment_intent.succeeded', 'charge.refunded', 'charge.failed']
                     ]);
 
                     StoreConfig::set([
