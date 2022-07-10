@@ -270,7 +270,9 @@ class Store_Module extends Module {
                         'CURRENT_VERSION' => $this->_store_language->get('admin', 'current_version_x', ['version' => Output::getClean($this->getVersion())]),
                         'NEW_VERSION' => $this->_store_language->get('admin', 'new_version_x', ['new_version' => Output::getClean($update_check->new_version)]),
                         'UPDATE' => $this->_store_language->get('admin', 'view_resource'),
-                        'UPDATE_LINK' => Output::getClean($update_check->link)
+                        'UPDATE_LINK' => Output::getClean($update_check->link),
+                        'NAMELESS_UPDATE' => $this->_store_language->get('admin', 'view_resource'),
+                        'NAMELESS_UPDATE_LINK' => Output::getClean($update_check->link)
                     ]);
                 }
             }
