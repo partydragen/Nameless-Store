@@ -44,7 +44,7 @@ if (isset($_GET['customer'])) {
             $recipient_user = $recipient->getUser();
             $username = $recipient->getUsername();
             $avatar = $recipient_user->getAvatar();
-            $style = $recipient_user->getGroupClass();
+            $style = $recipient_user->getGroupStyle();
             $identifier = Output::getClean($recipient->getIdentifier());
             $link = URL::build('/panel/users/store/', 'user=' . $recipient_user->data()->id);
         } else {
@@ -155,7 +155,7 @@ if (isset($_GET['customer'])) {
         $recipient_user = $recipient->getUser();
         $username = $recipient->getUsername();
         $avatar = $recipient_user->getAvatar();
-        $style = $recipient_user->getGroupClass();
+        $style = $recipient_user->getGroupStyle();
         $uuid = Output::getClean($recipient->getIdentifier());
         $link = URL::build('/panel/users/store/', 'user=' . $recipient_user->data()->id);
     } else {
@@ -375,7 +375,7 @@ if (isset($_GET['customer'])) {
                 $recipient_user = $recipient->getUser();
                 $username = $recipient->getUsername();
                 $avatar = $recipient_user->getAvatar();
-                $style = $recipient_user->getGroupClass();
+                $style = $recipient_user->getGroupStyle();
                 $identifier = Output::getClean($recipient->getIdentifier());
                 $link = URL::build('/panel/users/store/', 'user=' . $recipient_user->data()->id);
             } else {

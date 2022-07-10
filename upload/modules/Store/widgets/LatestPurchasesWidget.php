@@ -64,7 +64,7 @@ class LatestStorePurchasesWidget extends WidgetBase {
                         $recipient_user = $recipient->getUser();
                         $username = $recipient->getUsername();
                         $avatar = $recipient_user->getAvatar();
-                        $style = $recipient_user->getGroupClass();
+                        $style = $recipient_user->getGroupStyle();
                         $identifier = Output::getClean($recipient->getIdentifier());
                         $user_id = $recipient_user->data()->id;
                     } else {
