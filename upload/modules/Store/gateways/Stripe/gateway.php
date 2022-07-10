@@ -71,12 +71,6 @@ class Stripe_Gateway extends GatewayBase {
 
     public function handleListener(): void
     {
-
-        /*if (!isset($_GET['key']) || $_GET['key'] !== StoreConfig::get('stripe/key')) {
-            http_response_code(400);
-            ErrorHandler::logCustomError('[Stripe] No key specified during webhook receive!');
-        }*/
-
         $this->getApiContext();
 
         $webhook_secret = StoreConfig::get('stripe/hook_key');
@@ -108,7 +102,7 @@ class Stripe_Gateway extends GatewayBase {
             case 'payment_intent.succeeded':
                $data = $event->data->object;
                if (isset($data->metadata->order_id)) {
-                   $payment = new Payment();
+                   $payment = new Payment($data->charges->data[0]->payment_intent, 'payment_id');
                    $payment->handlePaymentEvent('COMPLETED', [
                        'order_id' => $data->metadata->order_id,
                        'gateway_id' => $this->getId(),
@@ -123,17 +117,27 @@ class Stripe_Gateway extends GatewayBase {
 
             case 'charge.refunded':
                 $data = $event->data->object;
-                $payment = new Payment($data->metadata->order_id, 'order_id');
+                $payment = new Payment($data->payment_intent, 'payment_id');
                 if ($payment->exists()) {
-                    $payment->handlePaymentEvent('REFUNDED', []);
+                    $payment->handlePaymentEvent('REFUNDED');
                 }
                 break;
 
             case 'charge.failed':
                 $data = $event->data->object;
-                $payment = new Payment($data->metadata->order_id, 'order_id');
+                $payment = new Payment($data->payment_intent, 'payment_id');
                 if ($payment->exists()) {
-                    $payment->handlePaymentEvent('DENIED', []);
+                    $payment->handlePaymentEvent('DENIED');
+                }
+                break;
+
+            case 'charge.dispute.closed':
+                $data = $event->data->object;
+                if ($data->status === "lost") {
+                    $payment = new Payment($data->charge, 'transaction');
+                    if ($payment->exists()) {
+                        $payment->handlePaymentEvent('REVERSED');
+                    }
                 }
                 break;
         }
@@ -149,16 +153,13 @@ class Stripe_Gateway extends GatewayBase {
 
                 $hook_key = StoreConfig::get('stripe/hook_key');
                 if (!$hook_key) {
-                    $key = md5(uniqid());
-
                     $stripe = new \Stripe\StripeClient($secret_key);
                     $webhook = $stripe->webhookEndpoints->create([
-                        'url' => rtrim(Util::getSelfURL(), '/') . URL::build('/store/listener', 'gateway=Stripe&key=' . $key),
-                        'enabled_events' => ['payment_intent.succeeded', 'charge.refunded', 'charge.failed']
+                        'url' => rtrim(Util::getSelfURL(), '/') . URL::build('/store/listener', 'gateway=Stripe'),
+                        'enabled_events' => ['payment_intent.succeeded', 'charge.refunded', 'charge.failed', 'charge.dispute.closed']
                     ]);
 
                     StoreConfig::set([
-                        'stripe/key' => $key,
                         'stripe/hook_key' => $webhook->secret
                     ]);
                 }
