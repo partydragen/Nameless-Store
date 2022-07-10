@@ -86,7 +86,7 @@ class Payment {
     /**
      * Handle payment event change
      */
-    public function handlePaymentEvent($event, $extra_data) {
+    public function handlePaymentEvent(string $event, array $extra_data = []) {
         $store_language = new Language(ROOT_PATH . '/modules/Store/language', LANGUAGE);
 
         if ($this->exists()) {

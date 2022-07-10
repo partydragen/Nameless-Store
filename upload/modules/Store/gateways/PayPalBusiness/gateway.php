@@ -223,7 +223,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                             $payment = new Payment($response->resource->sale_id, 'transaction');
                             if ($payment->exists()) {
                                 // Payment exists 
-                                $payment->handlePaymentEvent('REFUNDED', []);
+                                $payment->handlePaymentEvent('REFUNDED');
                             }
 
                             break;
@@ -232,7 +232,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                             $payment = new Payment($response->resource->id, 'transaction');
                             if ($payment->exists()) {
                                 // Payment exists 
-                                $payment->handlePaymentEvent('REVERSED', []);
+                                $payment->handlePaymentEvent('REVERSED');
                             }
 
                             break;
@@ -241,7 +241,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                             $payment = new Payment($response->resource->id, 'transaction');
                             if ($payment->exists()) {
                                 // Payment exists 
-                                $payment->handlePaymentEvent('DENIED', []);
+                                $payment->handlePaymentEvent('DENIED');
                             }
 
                             break;

@@ -175,7 +175,7 @@ class PayPal_Gateway extends GatewayBase {
                         $payment = new Payment($_POST['parent_txn_id'], 'transaction');
                         if ($payment->exists()) {
                             // Payment exists
-                            $payment->handlePaymentEvent('REFUNDED', []);
+                            $payment->handlePaymentEvent('REFUNDED');
                         }
                     break;
                     default:
@@ -183,7 +183,7 @@ class PayPal_Gateway extends GatewayBase {
                         $payment = new Payment($transaction_id, 'transaction');
                         if ($payment->exists()) {
                             // Payment exists
-                            $payment->handlePaymentEvent('REFUNDED', []);
+                            $payment->handlePaymentEvent('REFUNDED');
                         }
                     break;
                 }
