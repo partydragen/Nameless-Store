@@ -245,6 +245,53 @@ class Store_Module extends Module {
 
             if ($user->hasPermission('staffcp.store.payments'))
                 Core_Module::addUserAction($this->_store_language->get('general', 'store'), URL::build('/panel/users/store/', 'user={id}'));
+            
+            if (defined('PANEL_PAGE') && PANEL_PAGE == 'dashboard') {
+                // Dashboard graph
+                $latest_payments = $this->_db->query('SELECT id, created FROM nl2_store_payments WHERE created > ? AND status_id = 1 ORDER BY created ASC', [strtotime('-1 week')])->results();
+                
+                $cache->setCache('dashboard_graph');
+                if ($cache->isCached('payments_data')) {
+                    $output = $cache->retrieve('payments_data');
+
+                } else {
+                    $output = [];
+
+                    $output['datasets']['payments']['label'] = 'store_language/admin/payments'; // for $store_language->get('admin', 'payments');
+                    $output['datasets']['payments']['colour'] = '#4cf702';
+
+                    foreach ($latest_payments as $payment) {
+                        $date = date('d M Y', $payment->created);
+                        $date = '_' . strtotime($date);
+
+                        if (isset($output[$date]['payments'])) {
+                            $output[$date]['payments'] += 1;
+                        } else {
+                            $output[$date]['payments'] = 1;
+                        }
+                    }
+
+                    // Fill in missing dates, set payments to 0
+                    $start = strtotime('-1 week');
+                    $start = date('d M Y', $start);
+                    $start = strtotime($start);
+                    $end = strtotime(date('d M Y'));
+                    while ($start <= $end) {
+                        if (!isset($output['_' . $start]['payments'])) {
+                            $output['_' . $start]['payments'] = 0;
+                        }
+
+                        $start = strtotime('+1 day', $start);
+                    }
+
+                    // Sort by date
+                    ksort($output);
+
+                    $cache->store('payments_data', $output, 120);
+                }
+
+                Core_Module::addDataToDashboardGraph($this->_language->get('admin', 'overview'), $output);
+            }
         }
 
         // Check for module updates
