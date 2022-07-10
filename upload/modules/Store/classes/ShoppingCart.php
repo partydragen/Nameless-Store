@@ -10,8 +10,16 @@
  */
 
 class ShoppingCart {
-    private $_items,
-            $_products;
+
+    /**
+     * @var array The list of items.
+     */
+    private array $_items = [];
+
+    /**
+     * @var array<int, Object> The list of products.
+     */
+    private array $_products = [];
 
     // Constructor
     public function __construct() {
@@ -25,8 +33,18 @@ class ShoppingCart {
             $products_ids = rtrim($products_ids, ',');
             $products_ids .= ')';
 
-            // Get prodcuts
-            $this->_products = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE id in '.$products_ids.' AND disabled = 0 AND deleted = 0 ')->results();
+            // Get products
+            $products_query = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE id in '.$products_ids.' AND disabled = 0 AND deleted = 0 ')->results();
+            foreach ($products_query as $product) {
+                $this->_products[$product->id] = $product;
+            }
+
+            // Remove items if they're invalid, disabled or deleted
+            foreach ($this->_items as $item) {
+                if (!array_key_exists($item['id'], $this->_products)) {
+                    $this->remove($item['id']);
+                }
+            }
         }
     }
 
@@ -46,6 +64,7 @@ class ShoppingCart {
     // Remove product from shopping cart
     public function remove($product_id) {
         unset($_SESSION['shopping_cart'][$product_id]);
+        unset($this->_items[$product_id]);
     }
 
     // Clear the shopping cart

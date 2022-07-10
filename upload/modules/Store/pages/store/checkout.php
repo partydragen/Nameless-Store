@@ -45,7 +45,7 @@ if (isset($_GET['do'])) {
     }
     
     $product = new Product($_GET['add']);
-    if (!$product->exists()) {
+    if (!$product->exists() || $product->data()->deleted != 0 || $product->data()->disabled != 0) {
         die('Invalid product');
     }
 
