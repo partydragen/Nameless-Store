@@ -65,8 +65,11 @@ class Stripe_Gateway extends GatewayBase {
 
     public function handleReturn(): bool
     {
-        // TODO: Implement handleReturn() method.
-        return true;
+        if (isset($_GET['do']) && $_GET['do'] == 'success') {
+            return true;
+        }
+
+        return false;
     }
 
     public function handleListener(): void
