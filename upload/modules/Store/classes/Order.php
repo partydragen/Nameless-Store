@@ -80,9 +80,9 @@ class Order {
      * @param Customer $to_customer The customer who is receiving the product.
      * @param array $items The list of products along with custom fields for product
      */
-    public function create(User $user, Customer $from_customer, Customer $to_customer, array $items) {
+    public function create(?User $user, Customer $from_customer, Customer $to_customer, array $items) {
         $this->_db->insert('store_orders', [
-            'user_id' => $user->exists() ? $user->data()->id : null,
+            'user_id' => $user != null ? $user->exists() ? $user->data()->id : null : null,
             'from_customer_id' => $from_customer->data()->id,
             'to_customer_id' => $to_customer->data()->id,
             'created' => date('U'),
