@@ -24,7 +24,7 @@ class MinecraftServerService extends ServiceBase {
         unset($placeholders['{uuid}']);
 
         // Execute this action on all selected connections
-        $connections = ($action->data()->own_connections ? $action->getConnections() : $product->getConnections());
+        $connections = ($action->data()->own_connections ? $action->getConnections() : $product->getConnections($this->getId()));
         foreach ($connections as $connection) {
             // Replace existing placeholder
             $placeholders['{connection}'] = $connection->name;

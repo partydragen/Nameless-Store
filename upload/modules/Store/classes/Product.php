@@ -77,10 +77,12 @@ class Product {
     /**
      * Get the product connections.
      *
+     * @param int $service_id Service id.
+     *
      * @return array Their connections.
      */
-    public function getConnections(): array {
-        return $this->_connections ??= (function (): array {
+    public function getConnections(int $service_id = null): array {
+        $this->_connections ??= (function (): array {
             $this->_connections = [];
 
             $connections_query = $this->_db->query('SELECT nl2_store_connections.* FROM nl2_store_products_connections INNER JOIN nl2_store_connections ON connection_id = nl2_store_connections.id WHERE product_id = ? AND action_id IS NULL', [$this->data()->id]);
@@ -93,6 +95,19 @@ class Product {
 
             return $this->_connections;
         })();
+
+        if ($service_id) {
+            $connections = [];
+            foreach ($this->_connections as $connection) {
+                if ($connection->service_id == $service_id) {
+                    $connections[$connection->id] = $connection;
+                }
+            }
+
+            return $connections;
+        }
+
+        return $this->_connections;
     }
 
     /**
