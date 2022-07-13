@@ -159,7 +159,7 @@ class Product {
         return $this->_fields ??= (function (): array {
             $this->_fields = [];
 
-            $fields_query = $this->_db->query('SELECT nl2_store_fields.* FROM nl2_store_products_fields INNER JOIN nl2_store_fields ON field_id = nl2_store_fields.id WHERE product_id = ? AND deleted = 0', [$this->data()->id]);
+            $fields_query = $this->_db->query('SELECT nl2_store_fields.* FROM nl2_store_products_fields INNER JOIN nl2_store_fields ON field_id = nl2_store_fields.id WHERE product_id = ? AND deleted = 0 ORDER BY `order`', [$this->data()->id]);
             if ($fields_query->count()) {
                 $fields_query = $fields_query->results();
                 foreach ($fields_query as $field) {
