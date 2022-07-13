@@ -17,6 +17,10 @@ class PendingCommandsEndpoint extends KeyAuthEndpoint {
         if (isset($_GET['connection_id']) || isset($_GET['server_id'])) {
             $where .= ' AND connection_id = ?';
             array_push($params, (isset($_GET['connection_id']) ? $_GET['connection_id'] : $_GET['server_id']));
+
+            $api->getDb()->update('store_connections', isset($_GET['connection_id']) ? $_GET['connection_id'] : $_GET['server_id'], [
+                'last_fetch' => date('U')
+            ]);
         }
 
         // Ensure the user exists
@@ -25,7 +29,7 @@ class PendingCommandsEndpoint extends KeyAuthEndpoint {
         $customers_commands = [];
         foreach ($commands_query as $command) {
             $customers_commands[$command->customer_id][] = [
-                'id' => $command->id,
+                'id' => (int)$command->id,
                 'command' => $command->command,
                 'order_id' => (int) $command->order_id,
                 'require_online' => (boolean) $command->require_online

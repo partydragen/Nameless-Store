@@ -31,7 +31,7 @@ class PaymentInfoEndpoint extends KeyAuthEndpoint {
             }
 
             $products[] = [
-                'id' => $product->data()->id,
+                'id' => (int)$product->data()->id,
                 'name' => $product->data()->name,
                 'quantity' => 1,
                 'fields' => $fields_array

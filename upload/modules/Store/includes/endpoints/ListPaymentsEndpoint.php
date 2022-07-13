@@ -51,16 +51,16 @@ class ListPaymentsEndpoint extends KeyAuthEndpoint {
         foreach ($payments_query as $payment) {
             $customer = new Customer(null, $payment->from_customer_id);
             $customer_data = [
-                'customer_id' => $payment->from_customer_id,
-                'user_id' => $customer->exists() ? $customer->data()->user_id : null,
+                'customer_id' => (int)$payment->from_customer_id,
+                'user_id' => $customer->exists() ? (int)$customer->data()->user_id : null,
                 'username' => $customer->exists() ? $customer->data()->username : null,
                 'identifier' => $customer->exists() ? $customer->data()->identifier : null
             ];
 
             $recipient = new Customer(null, $payment->to_customer_id);
             $recipient_data = [
-                'customer_id' => $payment->to_customer_id,
-                'user_id' => $recipient->exists() ? $recipient->data()->user_id : null,
+                'customer_id' => (int)$payment->to_customer_id,
+                'user_id' => $recipient->exists() ? (int)$recipient->data()->user_id : null,
                 'username' => $recipient->exists() ? $recipient->data()->username : null,
                 'identifier' => $recipient->exists() ? $recipient->data()->identifier : null
             ];
@@ -69,22 +69,22 @@ class ListPaymentsEndpoint extends KeyAuthEndpoint {
             $products_query = $api->getDb()->query('SELECT product_id, name FROM nl2_store_orders_products LEFT JOIN nl2_store_products ON product_id=nl2_store_products.id WHERE order_id = ?', [$payment->order_id])->results();
             foreach ($products_query as $product) {
                 $products[] = [
-                    'id' => $product->product_id,
+                    'id' => (int)$product->product_id,
                     'name' => $product->name
                 ];
             }
 
             $payments_list[] = [
-                'id' => (int) $payment->id,
-                'order_id' => (int) $payment->order_id,
-                'gateway_id' => (int) $payment->gateway_id,
+                'id' => (int)$payment->id,
+                'order_id' => (int)$payment->order_id,
+                'gateway_id' => (int)$payment->gateway_id,
                 'transaction' => $payment->transaction,
                 'amount' => $payment->amount,
                 'currency' => $payment->currency,
                 'fee' => $payment->fee,
-                'status_id' => $payment->status_id,
-                'created' => (int) $payment->created,
-                'last_updated' => (int) $payment->last_updated,
+                'status_id' => (int)$payment->status_id,
+                'created' => (int)$payment->created,
+                'last_updated' => (int)$payment->last_updated,
                 'customer' => $customer_data,
                 'recipient' => $recipient_data,
                 'products' => $products
