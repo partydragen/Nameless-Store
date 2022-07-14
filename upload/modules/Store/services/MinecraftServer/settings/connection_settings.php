@@ -22,7 +22,7 @@ if ($_GET['action'] == 'new') {
 
             if ($validation->passed()) {
                 DB::getInstance()->insert('store_connections', [
-                    'name' => Output::getClean(Input::get('name')),
+                    'name' => Input::get('name'),
                     'service_id' => $service->getId()
                 ]);
 
@@ -66,7 +66,7 @@ if ($_GET['action'] == 'new') {
 
             if ($validation->passed()) {
                 DB::getInstance()->update('store_connections', $connection->id, [
-                    'name' => Output::getClean(Input::get('name'))
+                    'name' => Input::get('name')
                 ]);
 
                 Session::flash('connections_success', $store_language->get('admin', 'connection_updated_successfully'));

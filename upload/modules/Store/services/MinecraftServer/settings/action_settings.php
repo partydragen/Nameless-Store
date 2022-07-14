@@ -44,7 +44,7 @@ if ($_GET['action'] == 'new_action') {
                         'product_id' => $product->data()->id,
                         'type' => $trigger,
                         'service_id' => $service->getId(),
-                        'command' => Output::getClean(Input::get('command')),
+                        'command' => Input::get('command'),
                         'require_online' => $require_player,
                         'order' => $last_order + 1,
                         'own_connections' => (in_array(0, $selected_connections) ? 0 : 1)
@@ -132,7 +132,7 @@ if ($_GET['action'] == 'new_action') {
                     // Save to database
                     $action->update([
                         'type' => $trigger,
-                        'command' => Output::getClean(Input::get('command')),
+                        'command' => Input::get('command'),
                         'require_online' => $require_player,
                         'own_connections' => (in_array(0, $selected_connections) ? 0 : 1)
                     ]);

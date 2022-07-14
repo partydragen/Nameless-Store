@@ -37,7 +37,7 @@ if ($_GET['action'] == 'new') {
 
             if ($validation->passed()) {
                 $data = [
-                    'address' => Output::getClean(Input::get('db_address')),
+                    'address' => Input::get('db_address'),
                     'port' => (isset($_POST['db_port']) && !empty($_POST['db_port']) && is_numeric($_POST['db_port'])) ? $_POST['db_port'] : 3306,
                     'database' => Input::get('db_name'),
                     'username' => Input::get('db_username'),
@@ -45,7 +45,7 @@ if ($_GET['action'] == 'new') {
                 ];
 
                 DB::getInstance()->insert('store_connections', [
-                    'name' => Output::getClean(Input::get('name')),
+                    'name' => Input::get('name'),
                     'service_id' => $service->getId(),
                     'data' => json_encode($data)
                 ]);
@@ -126,7 +126,7 @@ if ($_GET['action'] == 'new') {
                 ];
 
                 DB::getInstance()->update('store_connections', $connection->id, [
-                    'name' => Output::getClean(Input::get('name')),
+                    'name' => Input::get('name'),
                     'data' => json_encode($data)
                 ]);
 
