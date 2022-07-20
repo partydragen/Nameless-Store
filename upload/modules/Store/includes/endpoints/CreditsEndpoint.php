@@ -10,7 +10,6 @@ class CreditsEndpoint extends KeyAuthEndpoint {
 
     public function execute(Nameless2API $api, User $user): void {
         $customer = new Customer($user);
-        $customer->addCredits($credits);
 
         $api->returnArray([
             'customer_id' => (int) $customer->data()->id,
