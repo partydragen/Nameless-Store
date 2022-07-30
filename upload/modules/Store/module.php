@@ -54,6 +54,8 @@ class Store_Module extends Module {
         $pages->add('Store', '/panel/store/fields', 'pages/panel/fields.php');
         $pages->add('Store', '/panel/users/store', 'pages/panel/users_store.php');
 
+        $pages->add('Store', '/user/store', 'pages/user/store.php');
+
         EventHandler::registerEvent('paymentPending',  $store_language->get('admin', 'payment_pending'));
         EventHandler::registerEvent('paymentCompleted', $store_language->get('admin', 'payment_completed'));
         EventHandler::registerEvent('paymentRefunded', $store_language->get('admin', 'payment_refunded'));
@@ -145,6 +147,8 @@ class Store_Module extends Module {
                 $navs[0]->add('store', $this->_store_language->get('general', 'store'), URL::build($this->_store_url), 'footer', null, $store_order, $icon);
             break;
         }
+
+        $navs[1]->add('cc_store', $this->_store_language->get('general', 'store'), URL::build('/user/store'), 'top', null, 10);
 
 		// Widgets
 		// Latest purchases

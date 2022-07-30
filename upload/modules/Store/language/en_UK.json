@@ -209,6 +209,8 @@
     "general\/store": "Store",
     "general\/summary": "Summary",
     "general\/total_price": "Total Price:",
+    "general\/my_transactions": "My transactions",
+    "general\/no_transactions": "You don't have any transactions.",
     "general\/widget_cached": "The latest purchases widget is cached for 2 minutes, your changes may not take effect immediately.",
     "general\/x_field_maximum_y": "{{field}} must be a maximum of {{max}} characters.",
     "general\/x_field_minimum_y": "{{field}} must be a minimum of {{min}} characters.",
