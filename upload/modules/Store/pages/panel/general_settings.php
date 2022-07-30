@@ -56,10 +56,18 @@ if (isset($_POST) && !empty($_POST)) {
             else
                 $player_login = 0;
 
+            // Show credits amount on all pages?
+            if (isset($_POST['show_credits_amount']) && $_POST['show_credits_amount'] == 'on')
+                $show_credits_amount = 1;
+            else
+                $show_credits_amount = 0;
+
             $configuration->set('allow_guests', $allow_guests);
             $configuration->set('player_login', $player_login);
             $configuration->set('currency', Output::getClean(Input::get('currency')));
             $configuration->set('currency_symbol', Output::getClean(Input::get('currency_symbol')));
+
+            Util::setSetting('show_credits_amount', $show_credits_amount);
 
             // Update link location
             if (isset($_POST['link_location'])) {
@@ -215,6 +223,9 @@ $currency_symbol = $configuration->get('currency_symbol');
 $cache->setCache('nav_location');
 $link_location = $cache->retrieve('store_location');
 
+$show_credits_amount = Util::getSetting('show_credits_amount', '1');
+$show_credits_amount = ($show_credits_amount === '1' || $show_credits_amount === null ? true : false);
+
 $smarty->assign([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
@@ -227,6 +238,8 @@ $smarty->assign([
     'ALLOW_GUESTS_VALUE' => ($allow_guests == 1),
     'PLAYER_LOGIN' => $store_language->get('admin', 'enable_player_login'),
     'PLAYER_LOGIN_VALUE' => ($player_login == 1),
+    'SHOW_CREDITS_AMOUNT' => $store_language->get('admin', 'show_credits_amount'),
+    'SHOW_CREDITS_AMOUNT_VALUE' => $show_credits_amount,
     'STORE_PATH' => $store_language->get('admin', 'store_path'),
     'STORE_PATH_VALUE' => $store_path,
     'CURRENCY' => $store_language->get('admin', 'currency'),

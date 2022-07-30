@@ -58,6 +58,7 @@
     "admin\/effective_on": "Effective On",
     "admin\/email": "Email",
     "admin\/enable_player_login": "Require customer to enter minecraft username when visiting store (Disabling will force user login)",
+    "admin\/show_credits_amount": "Show credits amount on all store pages?",
     "admin\/enter_amount_to_add": "Enter amount of credits to add",
     "admin\/enter_amount_to_remove": "Enter amount of credits to remove",
     "admin\/expiry_date": "Expiry Date (yyyy-mm-dd)",
@@ -173,6 +174,7 @@
     "admin\/view_resource": "View Resource",
     "admin\/viewing_payment": "Viewing payment {{payment}}",
     "admin\/viewing_payments_for_user_x": "Viewing payments for user {{user}}",
+    "admin\/limits_and_requirements": "Limits & Requirements",
     "general\/agree_t_and_c_purchase": "I agree to the {{termsLinkStart}}terms and conditions{{termsLinkEnd}} of this purchase.",
     "general\/accept_terms": "You must accept the terms and conditions",
     "general\/buy": "Buy",
@@ -211,5 +213,9 @@
     "general\/x_field_maximum_y": "{{field}} must be a maximum of {{max}} characters.",
     "general\/x_field_minimum_y": "{{field}} must be a minimum of {{min}} characters.",
     "general\/x_items_for_y": "{{items}} item(s) for {{currency_symbol}}{{amount}} {{currency}}",
+    "general/product_global_limit_reached": "This product is out of stock",
+    "general/product_user_limit_reached": "You have reached the limit for this product",
+    "general/product_requires_products": "You are missing the required {{product}} product to purchase this product",
+    "general/product_requires_groups": "You are missing the required {{group}} group to purchase this product",
     "general/product_requires_integration": "This product requires you to link your {{integration}} account, You can do this at {{linkStart}}account connections{{linkEnd}}"
 }

@@ -49,6 +49,11 @@
                                     <label class="custom-control-label" for="inputPlayerLogin">{$PLAYER_LOGIN}</label>
                                 </div>
 
+                                <div class="form-group custom-control custom-switch">
+                                    <input type="checkbox" name="show_credits_amount" id="inputShowCreditsAmount" class="custom-control-input" {if $SHOW_CREDITS_AMOUNT_VALUE} checked{/if} />
+                                    <label class="custom-control-label" for="inputShowCreditsAmount">{$SHOW_CREDITS_AMOUNT}</label>
+                                </div>
+
                                 <div class="form-group">
                                     <label for="inputStorePath">{$STORE_PATH}</label>
                                     <input type="text" class="form-control" id="inputStorePath" name="store_path" placeholder="{$STORE_PATH}" value="{$STORE_PATH_VALUE}">

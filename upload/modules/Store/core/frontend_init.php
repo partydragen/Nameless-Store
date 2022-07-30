@@ -43,6 +43,17 @@ $configuration = new Configuration('store');
 $currency = Output::getClean($configuration->get('currency'));
 $currency_symbol = Output::getClean($configuration->get('currency_symbol'));
 
+// Get user credits if user is logged in
+$credits = 0;
+if ($from_customer->exists()) {
+    $credits = $from_customer->getCredits();
+}
+
+$show_credits_amount = Util::getSetting('show_credits_amount', '1');
+if ($show_credits_amount === '1' || $show_credits_amount === null) {
+    $smarty->assign('SHOW_CREDITS_AMOUNT', true);
+}
+
 $smarty->assign([
     'SHOPPING_CART_PRODUCTS' => $shopping_cart->getProducts(),
     'X_ITEMS_FOR_Y' => $store_language->get('general', 'x_items_for_y', [
@@ -53,5 +64,8 @@ $smarty->assign([
     ]),
     'CHECKOUT_LINK' => URL::build($store->getStoreURL() . '/checkout/'),
     'CURRENCY' => $currency,
-    'CURRENCY_SYMBOL' => $currency_symbol
+    'CURRENCY_SYMBOL' => $currency_symbol,
+    'ACCOUNT' => $language->get('user', 'user_cp'),
+    'CREDITS' => $store_language->get('general', 'credits'),
+    'CREDITS_VALUE' => $credits,
 ]);
