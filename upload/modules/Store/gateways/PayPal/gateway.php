@@ -16,6 +16,10 @@ class PayPal_Gateway extends GatewayBase {
         parent::__construct($name, $settings);
     }
 
+    public function onCheckoutPageLoad(TemplateBase $template, Customer $customer): void {
+        // Not necessary
+    }
+
     public function processOrder(Order $order): void {
         $paypal_email = StoreConfig::get('paypal/email');
         if ($paypal_email == null || empty($paypal_email)) {

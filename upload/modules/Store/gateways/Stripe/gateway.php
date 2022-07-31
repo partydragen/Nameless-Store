@@ -9,16 +9,18 @@
  */
 class Stripe_Gateway extends GatewayBase {
 
-    public function __construct()
-    {
+    public function __construct() {
         $name = 'Stripe';
         $settings = ROOT_PATH . '/modules/Store/gateways/Stripe/gateway_settings/settings.php';
 
         parent::__construct($name, $settings);
     }
 
-    public function processOrder(Order $order): void
-    {
+    public function onCheckoutPageLoad(TemplateBase $template, Customer $customer): void {
+        // Not necessary
+    }
+
+    public function processOrder(Order $order): void {
         $this->getApiContext();
         if (count($this->getErrors())) {
             return;
@@ -63,8 +65,7 @@ class Stripe_Gateway extends GatewayBase {
         }
     }
 
-    public function handleReturn(): bool
-    {
+    public function handleReturn(): bool {
         if (isset($_GET['do']) && $_GET['do'] == 'success') {
             return true;
         }
@@ -72,8 +73,7 @@ class Stripe_Gateway extends GatewayBase {
         return false;
     }
 
-    public function handleListener(): void
-    {
+    public function handleListener(): void {
         $this->getApiContext();
 
         $webhook_secret = StoreConfig::get('stripe/hook_key');

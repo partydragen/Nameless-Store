@@ -243,11 +243,11 @@ if (isset($_GET['do'])) {
                 $order = new Order();
                 $order->setAmount($amount);
 
+                $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems());
+
                 // Complete order if there is nothing to pay
                 $amount_to_pay = $shopping_cart->getTotalPrice();
                 if ($amount_to_pay == 0) {
-                    $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems());
-
                     $payment = new Payment();
                     $payment->handlePaymentEvent('COMPLETED', [
                         'order_id' => $order->data()->id,
@@ -263,41 +263,15 @@ if (isset($_GET['do'])) {
                 }
 
                 $payment_method = $_POST['payment_method'];
-                if ($payment_method != 'Credits') {
-                    $gateway = $gateways->get($payment_method);
-                    if ($gateway) {
-                        // Load gateway process
-                        $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems());
-                        
-                        $gateway->processOrder($order);
-                        if (count($gateway->getErrors())) {
-                            $errors = $gateway->getErrors();
-                        }
-                    } else {
-                        $errors[] = 'Invalid Gateway';
+                $gateway = $gateways->get($payment_method);
+                if ($gateway) {
+                    // Load gateway process
+                    $gateway->processOrder($order);
+                    if (count($gateway->getErrors())) {
+                        $errors = $gateway->getErrors();
                     }
                 } else {
-                    // User is paying with credits
-                    if ($from_customer->exists() && $from_customer->getCredits() >= $amount_to_pay) {
-                        $from_customer->removeCents(Store::toCents($amount_to_pay));
-
-                        $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems());
-
-                        $payment = new Payment();
-                        $payment->handlePaymentEvent('COMPLETED', [
-                            'order_id' => $order->data()->id,
-                            'gateway_id' => 0,
-                            'amount' => $amount_to_pay,
-                            'transaction' => 'Credits',
-                            'currency' => Output::getClean($configuration->get('currency')),
-                            'fee' => 0
-                        ]);
-
-                        $shopping_cart->clear();
-                        Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
-                    } else {
-                        $errors[] = 'You don\'t have enough credits to complete this order!';
-                    }
+                    $errors[] = 'Invalid Gateway';
                 }
             } else {
                 // Errors
@@ -318,8 +292,11 @@ if (isset($_GET['do'])) {
         }
     }
 
-    $currency = Output::getClean($configuration->get('currency'));
-    $currency_symbol = Output::getClean($configuration->get('currency_symbol'));
+    foreach ($gateways->getAll() as $gateway) {
+        if ($gateway->isEnabled()) {
+            $gateway->onCheckoutPageLoad($template, $from_customer);
+        }
+    }
 
     // Load shopping list
     $shopping_cart_list = [];
@@ -333,25 +310,8 @@ if (isset($_GET['do'])) {
         ];
     }
 
-    // Get user credits if user is logged in
-    $credits = 0;
-    if ($from_customer->exists()) {
-        $credits = $from_customer->getCredits();
-    }
-
     // Load available gateways
     $payment_methods = [];
-    if ($credits > 0) {
-        $payment_methods[] = [
-            'displayname' => $store_language->get('general', 'pay_with_credits', [
-                'currency_symbol' => $currency_symbol,
-                'currency' => $currency,
-                'credits' => $credits
-            ]),
-            'name' => 'Credits'
-        ];
-    }
-    
     foreach ($gateways->getAll() as $gateway) {
         if ($gateway->isEnabled()) {
             $payment_methods[] = [
@@ -360,7 +320,7 @@ if (isset($_GET['do'])) {
             ];
         }
     }
-    
+
     $smarty->assign([
         'TOKEN' => Token::get(),
         'CHECKOUT' => $store_language->get('general', 'checkout'),

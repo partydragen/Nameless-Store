@@ -86,6 +86,13 @@ abstract class GatewayBase {
     }
 
     /**
+     * Set displayname of this gateway.
+     */
+    public function setDisplayname(string $displayname): void {
+        $this->_displayname = $displayname;
+    }
+
+    /**
      * Get if this gateway is enabled
      *
      * @return bool Check if gateway is enabled
@@ -93,6 +100,14 @@ abstract class GatewayBase {
     public function isEnabled(): bool {
         return $this->_enabled;
     }
+
+    /**
+     * Change the enabled state of this gateway.
+     */
+    public function setEnabled(bool $enabled): void {
+        $this->_enabled = $enabled;
+    }
+
 
     /**
      * Get the path to gateway settings page file
@@ -120,6 +135,14 @@ abstract class GatewayBase {
     public function getErrors(): array {
         return $this->_errors;
     }
+
+    /**
+     * Called when customer view checkout page
+     *
+     * @param Order $template The template.
+     * @param Order $customer The customer who is viewing the checkout page.
+     */
+    abstract public function onCheckoutPageLoad(TemplateBase $template, Customer $customer): void;
 
     /**
      * Process order to continue to gateway for payment.

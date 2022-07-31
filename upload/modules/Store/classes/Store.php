@@ -11,15 +11,18 @@
 
 class Store {
     private $_db,
-            $_cache,
-            $_store_language;
+            $_cache;
+
+    /**
+     * @var Language Instance of Language class for translations
+     */
+    private static Language $_store_language;
 
     // Constructor, connect to database
     public function __construct($cache, $store_language) {
         $this->_db = DB::getInstance();
 
         $this->_cache = $cache;
-        $this->_store_language = $store_language;
     }
 
     public function getStoreURL() {
@@ -92,7 +95,7 @@ class Store {
 
         $categories[] = [
             'url' => URL::build($store_url),
-            'title' => $this->_store_language->get('general', 'home'),
+            'title' => self::getLanguage()->get('general', 'home'),
             'active' => Output::getClean($active) == 'Home'
         ];
 
@@ -134,6 +137,35 @@ class Store {
         return $configuration->get('player_login');
     }
 
+    /**
+     * @return Language The current language instance for translations
+     */
+    public static function getLanguage(): Language {
+        if (!isset(self::$_store_language)) {
+            self::$_store_language = new Language(ROOT_PATH . '/modules/Store/language');
+        }
+
+        return self::$_store_language;
+    }
+    
+    public static function getStorePath(): string {
+        $configuration = new Configuration('store');
+
+        return $configuration->get('store_path');
+    }
+
+    public static function getCurrency(): string {
+        $configuration = new Configuration('store');
+
+        return $configuration->get('currency');
+    }
+
+    public static function getCurrencySymbol(): string {
+        $configuration = new Configuration('store');
+
+        return $configuration->get('currency_symbol');
+    }
+
     /*
      *  Check for Module updates
      *  Returns JSON object with information about any updates
@@ -165,7 +197,7 @@ class Store {
 
         return $update_check;
     }
-    
+
     public static function toCents($value): int {
         return (int) (string) ((float) preg_replace("/[^0-9.]/", "", $value) * 100);
     }

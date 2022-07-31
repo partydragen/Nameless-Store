@@ -16,6 +16,10 @@ class PayPal_Business_Gateway extends GatewayBase {
         parent::__construct($name, $settings);
     }
 
+    public function onCheckoutPageLoad(TemplateBase $template, Customer $customer): void {
+        // Not necessary
+    }
+
     public function processOrder(Order $order): void {
         $apiContext = $this->getApiContext();
         if (count($this->getErrors())) {

@@ -766,6 +766,22 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
+
+        if ($old_version < 143) {
+            try {
+                $gateway_exists = $this->_db->get('store_gateways', ['name', '=', 'Store Credits']);
+                if (!$gateway_exists->count()) {
+                    $this->_db->insert('store_gateways', [
+                        'name' => 'Store Credits',
+                        'displayname' => 'Store Credits',
+                        'enabled' => 1
+                    ]);
+                }
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+        }
     }
     
     private function initialise() {
@@ -913,15 +929,21 @@ class Store_Module extends Module {
             } catch (Exception $e) {
                 // Error
             }
-            
+
             $this->_db->insert('store_gateways', [
                 'name' => 'PayPal',
                 'displayname' => 'PayPal'
             ]);
-            
+
             $this->_db->insert('store_gateways', [
                 'name' => 'PayPalBusiness',
                 'displayname' => 'PayPal'
+            ]);
+
+            $this->_db->insert('store_gateways', [
+                'name' => 'Store Credits',
+                'displayname' => 'Store Credits',
+                'enabled' => 1
             ]);
         }
         
