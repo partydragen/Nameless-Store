@@ -279,7 +279,7 @@ if (isset($_GET['do'])) {
                 } else {
                     // User is paying with credits
                     if ($from_customer->exists() && $from_customer->getCredits() >= $amount_to_pay) {
-                        $from_customer->removeCredits($amount_to_pay);
+                        $from_customer->removeCents(Store::toCents($amount_to_pay));
 
                         $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems());
 

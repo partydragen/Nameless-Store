@@ -160,19 +160,19 @@ class Customer {
     /**
      * Add credits to the customer.
      *
-     * @param float $amount The amount of credits to add to their balance
+     * @param int $cents The amount of cents to add to their balance
      */
-    public function addCredits($amount) {
-        $this->_db->createQuery('UPDATE nl2_store_customers SET cents = cents + ? WHERE id = ?', [$amount * 100, $this->_data->id]);
+    public function addCents(int $cents): void {
+        $this->_db->createQuery('UPDATE nl2_store_customers SET cents = cents + ? WHERE id = ?', [$cents, $this->_data->id]);
     }
 
     /**
      * Remove credits from the customer.
      *
-     * @param float $amount The amount of credits to remove from their balance
+     * @param int $cents The amount of cents to remove from their balance
      */
-    public function removeCredits($amount) {
-        $this->_db->createQuery('UPDATE nl2_store_customers SET cents = cents - ? WHERE id = ?', [$amount * 100, $this->_data->id]);
+    public function removeCents(int $cents): void {
+        $this->_db->createQuery('UPDATE nl2_store_customers SET cents = cents - ? WHERE id = ?', [$cents, $this->_data->id]);
     }
 
     public function getPayments(): array {
@@ -197,6 +197,19 @@ class Customer {
         }
 
         return $payments_list;
+    }
+    
+    public function getPurchasedProducts(): array {
+        $products = [];
+
+        $bought_products = DB::getInstance()->query('SELECT DISTINCT(product_id) FROM `nl2_store_orders_products` INNER JOIN nl2_store_orders ON nl2_store_orders.id=nl2_store_orders_products.order_id INNER JOIN nl2_store_payments ON nl2_store_payments.order_id=nl2_store_orders_products.order_id WHERE to_customer_id = ?', [$this->data()->id]);
+        if ($bought_products->count()) {
+            foreach ($bought_products->results() as $product) {
+                $products[$product->product_id] = $product->product_id;
+            }
+        }
+        
+        return $products;
     }
     
     public function login($username, $save = true) {

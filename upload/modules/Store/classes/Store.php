@@ -165,4 +165,8 @@ class Store {
 
         return $update_check;
     }
+    
+    public static function toCents($value): int {
+        return (int) (string) ((float) preg_replace("/[^0-9.]/", "", $value) * 100);
+    }
 }
