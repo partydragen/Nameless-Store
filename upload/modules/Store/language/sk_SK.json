@@ -210,5 +210,13 @@
     "general/x_field_maximum_y": "{{field}} môže obsahovať maximálne {{max}} znakov.",
     "general/x_field_minimum_y": "{{field}} musí obsahovať aspoň {{min}} znakov.",
     "general/x_items_for_y": "{{items}} položky za {{currency_symbol}}{{amount}} {{currency}}",
-    "general/product_requires_integration": "Tento produkt vyžaduje, aby ste prepojili svoj účet {{integration}}. Môžete to urobiť na {{linkStart}}prepojeniach účtu{{linkEnd}}"
+    "general/product_requires_integration": "Tento produkt vyžaduje, aby ste prepojili svoj účet {{integration}}. Môžete to urobiť na {{linkStart}}prepojeniach účtu{{linkEnd}}",
+    "general/my_transactions": "Moje transakcie",
+    "admin/show_credits_amount": "Chcete zobraziť množstvo kreditov na všetkých stránkach obchodu?",
+    "admin/limits_and_requirements": "Limity a požiadavky",
+    "general/product_global_limit_reached": "Tento produkt je vypredaný",
+    "general/product_user_limit_reached": "Dosiahli ste limit pre tento produkt",
+    "general/product_requires_products": "Chýba vám požadovaný produkt {{product}} na zakúpenie tohto produktu",
+    "general/product_requires_groups": "Chýba vám požadovaná skupina {{group}} na zakúpenie tohto produktu",
+    "general/no_transactions": "Nemáte žiadne transakcie."
 }
