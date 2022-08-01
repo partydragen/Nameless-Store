@@ -210,5 +210,13 @@
     "general/x_field_maximum_y": "{{field}} může obsahovat maximálně {{max}} znaků.",
     "general/x_field_minimum_y": "{{field}} musí obsahovat alespoň {{min}} znaků.",
     "general/x_items_for_y": "{{items}} položek za {{currency_symbol}}{{amount}} {{currency}}",
-    "general/product_requires_integration": "Tento produkt vyžadujey abyste připojili svůj {{integration}} účet, můžete tak učinit v {{linkStart}}propojení účtů{{linkEnd}}"
+    "general/product_requires_integration": "Tento produkt vyžadujey abyste připojili svůj {{integration}} účet, můžete tak učinit v {{linkStart}}propojení účtů{{linkEnd}}",
+    "admin/show_credits_amount": "Zobrazit počet kreditů na všech stránkách obchodu?",
+    "admin/limits_and_requirements": "Limity a požadavky",
+    "general/my_transactions": "Moje transakce",
+    "general/no_transactions": "Nemáte žádné transakce.",
+    "general/product_global_limit_reached": "Tento produkt momentálně není dostupný",
+    "general/product_user_limit_reached": "Dosáhli jste limitu u tohoto produktu",
+    "general/product_requires_products": "K zakoupení tohoto produktu vám chybí požadovaný produkt {{product}}",
+    "general/product_requires_groups": "K zakoupení tohoto produktu vám chybí požadovaná skupina {{group}}"
 }
