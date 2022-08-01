@@ -53,16 +53,18 @@ class PaymentInfoEndpoint extends KeyAuthEndpoint {
         ];
 
         $return = [
-            'id' => $payment->data()->id,
-            'order_id' => $payment->data()->order_id,
-            'gateway_id' => $payment->data()->gateway_id,
+            'id' => (int) $payment->data()->id,
+            'order_id' => (int) $payment->data()->order_id,
+            'gateway_id' => (int) $payment->data()->gateway_id,
             'transaction' => $payment->data()->transaction,
             'amount' => $payment->data()->amount,
+            'amount_cents' => (int) Store::toCents($payment->data()->amount ?? 0),
             'currency' => $payment->data()->currency,
             'fee' => $payment->data()->fee,
-            'status_id' => $payment->data()->status_id,
-            'created' => $payment->data()->created,
-            'last_updated' => $payment->data()->last_updated,
+            'fee_cents' => (int) Store::toCents($payment->data()->fee ?? 0),
+            'status_id' => (int) $payment->data()->status_id,
+            'created' => (int) $payment->data()->created,
+            'last_updated' => (int) $payment->data()->last_updated,
             'customer' => $customer_array,
             'recipient' => $recipient_array,
             'products' => $products

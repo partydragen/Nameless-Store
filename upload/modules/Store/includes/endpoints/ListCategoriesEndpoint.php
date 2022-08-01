@@ -19,7 +19,7 @@ class ListCategoriesEndpoint extends KeyAuthEndpoint {
         foreach ($categories_query as $category) {
             $category_array[] = [
                 'id' => (int) $category->id,
-                'name' => Output::getClean($category->name),
+                'name' => $category->name,
                 'hidden' => (bool) $category->hidden,
                 'disabled' => (bool) $category->disabled
             ];

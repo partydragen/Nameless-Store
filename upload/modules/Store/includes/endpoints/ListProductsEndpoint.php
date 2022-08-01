@@ -27,8 +27,9 @@ class ListProductsEndpoint extends KeyAuthEndpoint {
             $products_array[] = [
                 'id' => (int) $product->id,
                 'category_id' => (int) $product->category_id,
-                'name' => Output::getClean($product->name),
+                'name' => $product->name,
                 'price' => (double) $product->price,
+                'price_cents' => (int) Store::toCents($product->price),
                 'hidden' => (bool) $product->hidden,
                 'disabled' => (bool) $product->disabled
             ];

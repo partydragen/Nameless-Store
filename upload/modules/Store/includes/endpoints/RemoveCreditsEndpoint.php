@@ -9,15 +9,21 @@ class RemoveCreditsEndpoint extends KeyAuthEndpoint {
     }
 
     public function execute(Nameless2API $api, User $user): void {
-        $api->validateParams($_POST, ['credits']);
+        if (!isset($_POST['cents']) && !isset($_POST['credits'])) {
+            $this->throwError(Nameless2API::ERROR_INVALID_POST_CONTENTS);
+        }
 
-        $credits = $_POST['credits'];
-        if (!is_numeric($credits)) {
+        $credits = $_POST['cents'] ?? $_POST['credits'];
+        if (!is_numeric($credits) || $credits <= 0) {
             $api->throwError(StoreApiErrors::ERROR_INVALID_CREDITS_AMOUNT);
         }
 
         $customer = new Customer($user);
-        $customer->removeCents(Store::toCents($credits));
+        if (isset($_POST['cents'])) {
+            $customer->removeCents($credits);
+        } else {
+            $customer->removeCents(Store::toCents($credits));
+        }
 
         $api->returnArray(['message' => 'Successfully removed credits from user']);
     }
