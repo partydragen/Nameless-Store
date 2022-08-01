@@ -80,7 +80,7 @@ class LatestStorePurchasesWidget extends WidgetBase {
 						'profile' => URL::build('/profile/' . $username),
 						'price' => Output::getClean($purchase->amount),
 						'currency' => Output::getClean($purchase->currency),
-						'currency_symbol' => '$',
+						'currency_symbol' => Output::getClean(Store::getCurrencySymbol()),
 						'uuid' => Output::getClean($purchase->identifier),
 						'date_full' => date(DATE_FORMAT, $purchase->created),
 						'date_friendly' => $timeago->inWords($purchase->created, $this->_language),
