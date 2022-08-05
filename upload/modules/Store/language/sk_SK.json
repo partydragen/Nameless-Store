@@ -218,5 +218,12 @@
     "general/product_user_limit_reached": "Dosiahli ste limit pre tento produkt",
     "general/product_requires_products": "Chýba vám požadovaný produkt {{product}} na zakúpenie tohto produktu",
     "general/product_requires_groups": "Chýba vám požadovaná skupina {{group}} na zakúpenie tohto produktu",
-    "general/no_transactions": "Nemáte žiadne transakcie."
+    "general/no_transactions": "Nemáte žiadne transakcie.",
+    "admin/allow_users_to_send_credits": "Povoliť používateľom posielať kredity iným používateľom?",
+    "general/send_credits": "Poslať kredity",
+    "general/you_have_x_credits": "(Máte {{credits}})",
+    "general/must_be_greater_then_x": "Množstvo musí byť väčšie ako {{amount}}",
+    "general/not_enough_credits": "Na toto nemáte dostatok kreditov!",
+    "general/successfully_sent_credits": "Úspešne poslaných {{amount}} kreditov používateľovi {{user}}",
+    "general/received_x_credits_from_x": "Dostal si {{amount}} kreditov od používateľa {{user}}"
 }
