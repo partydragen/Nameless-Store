@@ -126,7 +126,9 @@ if (!isset($_GET['action'])) {
                                 'options' => htmlspecialchars($options),
                                 'order' => Input::get('order'),
                                 'min' => Input::get('minimum'),
-                                'max' => Input::get('maximum')
+                                'max' => Input::get('maximum'),
+                                'default_value' => Input::get('default'),
+                                'regex' => !empty(Input::get('regex')) ? Input::get('regex') : null
                             ]);
 
                             Session::flash('fields_success', $store_language->get('admin', 'field_created_successfully'));
@@ -161,10 +163,12 @@ if (!isset($_GET['action'])) {
                 'RADIO' => $store_language->get('admin', 'radio'),
                 'FIELD_ORDER' => $store_language->get('admin', 'field_order'),
                 'ORDER_VALUE' => ((isset($_POST['order']) && $_POST['order']) ? Output::getClean(Input::get('order')) : 1),
+                'DEFAULT_VALUE' => ((isset($_POST['default']) && $_POST['default']) ? Output::getClean(Input::get('default')) : ''),
                 'MINIMUM_CHARACTERS' => $store_language->get('admin', 'minimum_characters'),
                 'MINIMUM_CHARACTERS_VALUE' => ((isset($_POST['minimum']) && $_POST['minimum']) ? Output::getClean(Input::get('minimum')) : 0),
                 'MAXIMUM_CHARACTERS' => $store_language->get('admin', 'maximum_characters'),
                 'MAXIMUM_CHARACTERS_VALUE' => ((isset($_POST['maximum']) && $_POST['maximum']) ? Output::getClean(Input::get('maximum')) : 0),
+                'REGEX_VALUE' => ((isset($_POST['regex']) && $_POST['regex']) ? Output::getClean(Input::get('regex')) : ''),
                 'REQUIRED' => $language->get('admin', 'required'),
                 'REQUIRED_VALUE' => ((isset($_POST['required'])) ? 1 : 0),
             ]);
@@ -237,7 +241,9 @@ if (!isset($_GET['action'])) {
                                 'options' => htmlspecialchars($options),
                                 'min' => Input::get('minimum'),
                                 'max' => Input::get('maximum'),
-                                'order' => Input::get('order')
+                                'order' => Input::get('order'),
+                                'default_value' => Input::get('default'),
+                                'regex' => !empty(Input::get('regex')) ? Input::get('regex') : null
                             ]);
 
                             Session::flash('fields_success', $store_language->get('admin', 'field_updated_successfully'));
@@ -279,10 +285,12 @@ if (!isset($_GET['action'])) {
                 'RADIO' => $store_language->get('admin', 'radio'),
                 'FIELD_ORDER' => $store_language->get('admin', 'field_order'),
                 'ORDER_VALUE' => $field->order,
+                'DEFAULT_VALUE' => Output::getClean($field->default_value),
                 'MINIMUM_CHARACTERS' => $store_language->get('admin', 'minimum_characters'),
                 'MINIMUM_CHARACTERS_VALUE' => $field->min,
                 'MAXIMUM_CHARACTERS' => $store_language->get('admin', 'maximum_characters'),
                 'MAXIMUM_CHARACTERS_VALUE' => $field->max,
+                'REGEX_VALUE' => Output::getClean($field->regex ?? ''),
                 'REQUIRED' => $language->get('admin', 'required'),
                 'REQUIRED_VALUE' => $field->required,
             ]);

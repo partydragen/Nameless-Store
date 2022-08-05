@@ -237,7 +237,7 @@ if (!isset($_GET['action'])) {
 
             $template->addJSScript(Input::createTinyEditor($language, 'inputDescription'));
 
-            $template_file = 'store/products_form.tpl';
+            $template_file = 'store/product_new.tpl';
         break;
         default:
             Redirect::to(URL::build('/panel/store/products'));

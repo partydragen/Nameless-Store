@@ -62,6 +62,10 @@
                                 </select>
                             </div>
                             <div class="form-group">
+                                <label for="InputDefault">Default Value</label>
+                                <input type="text" name="default" class="form-control" id="InputDefault" value="{$DEFAULT_VALUE}">
+                            </div>
+                            <div class="form-group">
                                 <label for="InputOptions">{$OPTIONS} / {$CHECKBOX} / {$RADIO} - {$OPTIONS_HELP}</label>
                                 <textarea rows="5" class="form-control" name="options" id="options" placeholder="{$OPTIONS} / {$CHECKBOX} / {$RADIO}">{$OPTIONS_VALUE}</textarea>
                             </div>
@@ -69,7 +73,7 @@
                               <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="InputOrder">{$FIELD_ORDER}</label>
-                                    <input type="number" min="1" class="form-control" id="InputOrder" name="order" value="{$ORDER_VALUE}">
+                                    <input type="number" min="0" class="form-control" id="InputOrder" name="order" value="{$ORDER_VALUE}">
                                 </div>
                               </div>
                               <div class="col-md-4">
@@ -84,6 +88,10 @@
                                     <input type="number" min="0" class="form-control" id="InputMaximum" name="maximum" value="{$MAXIMUM_CHARACTERS_VALUE}">
                                 </div>
                               </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="InputRegex">Regex</label>
+                                <input type="text" name="regex" class="form-control" id="InputRegex" value="{$REGEX_VALUE}">
                             </div>
                             <div class="form-group custom-control custom-switch">
                                 <input id="inputRequired" name="required" type="checkbox" class="custom-control-input"{if $REQUIRED_VALUE eq 1} checked{/if} />

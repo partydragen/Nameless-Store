@@ -147,7 +147,7 @@ class Store {
 
         return self::$_store_language;
     }
-    
+
     public static function getStorePath(): string {
         $configuration = new Configuration('store');
 

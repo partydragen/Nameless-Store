@@ -73,6 +73,42 @@ class Order {
     }
 
     /**
+     * Get the product fields.
+     *
+     * @return array The list of field values
+     */
+    public function getProductFields(int $product_id): array {
+        $fields = [];
+        $fields_query = $this->_db->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$this->data()->id, $product_id])->results();
+        foreach ($fields_query as $field) {
+            $fields[$field->identifier] = [
+                'identifier' => Output::getClean($field->identifier),
+                'value' => Output::getClean($field->value)
+            ];
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Get the product quantity.
+     *
+     * @return int The product quantity.
+     */
+    public function getProductQuantity(int $product_id): int {
+        $fields = $this->getProductFields($product_id);
+
+        if (array_key_exists('quantity', $fields)) {
+            $quantity = $fields['quantity']['value'];
+            if(is_numeric($quantity) && $quantity > 0) {
+                return $quantity;
+            }
+        }
+
+        return 1;
+    }
+
+    /**
      * Register the order to database.
      *
      * @param User $user The NamelessMC user buying the product.
@@ -94,7 +130,8 @@ class Order {
         foreach ($items as $item) {
             $this->_db->insert('store_orders_products', [
                 'order_id' => $last_id,
-                'product_id' => $item['id']
+                'product_id' => $item['id'],
+                'quantity' => $item['quantity']
             ]);
 
             if (isset($item['fields']) && count($item['fields'])) {

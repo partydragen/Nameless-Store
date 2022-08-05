@@ -41,7 +41,7 @@ class ShoppingCart {
 
             // Remove items if they're invalid, disabled or deleted
             foreach ($this->_items as $item) {
-                if (!array_key_exists($item['id'], $this->_products)) {
+                if (!array_key_exists($item['id'], $this->_products) || $item['quantity'] <= 0) {
                     $this->remove($item['id']);
                 }
             }
@@ -49,7 +49,7 @@ class ShoppingCart {
     }
 
     // Add product to shopping cart
-    public function add($product_id, $quantity = 1, $fields = []) {
+    public function add(int $product_id, int $quantity = 1, array $fields = []): void {
         $shopping_cart = (isset($_SESSION['shopping_cart']) ? $_SESSION['shopping_cart'] : []);
 
         $shopping_cart[$product_id] = [
@@ -62,23 +62,23 @@ class ShoppingCart {
     }
 
     // Remove product from shopping cart
-    public function remove($product_id) {
+    public function remove(int $product_id): void {
         unset($_SESSION['shopping_cart'][$product_id]);
         unset($this->_items[$product_id]);
     }
 
     // Clear the shopping cart
-    public function clear() {
+    public function clear(): void {
         unset($_SESSION['shopping_cart']);
     }
 
     // Get the items from the shopping cart
-    public function getItems() {
+    public function getItems(): array {
         return $this->_items;
     }
 
     // Get the products from the shopping cart
-    public function getProducts() {
+    public function getProducts(): array {
         return $this->_products ? $this->_products : [];
     }
 
@@ -87,7 +87,7 @@ class ShoppingCart {
         $price = 0;
 
         foreach ($this->_products as $product) {
-            $price += $product->price;
+            $price += $product->price * $this->_items[$product->id]['quantity'];
         }
 
         return $price;

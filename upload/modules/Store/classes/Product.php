@@ -273,19 +273,29 @@ class Product {
      * @return array List of required integrations.
      */
     public function getRequiredIntegrations(): array {
-        $required_integrations = [];
+        $required_integrations_list = [];
 
         $integrations = Integrations::getInstance();
         foreach ($this->getActions() as $action) {
             if ($action->getService()->getId() == 2) {
                 $integration = $integrations->getIntegration('Minecraft');
                 if ($integration != null) {
-                    $required_integrations[] = $integration;
+                    $required_integrations_list[$integration->data()->id] = $integration;
                 }
             }
         }
 
-        return $required_integrations;
+        $enabled_integrations = $integrations->getEnabledIntegrations();
+        $required_integrations = json_decode($this->data()->required_integrations, true) ?? [];
+        foreach ($required_integrations as $item) {
+            foreach ($enabled_integrations as $integration) {
+                if ($integration->data()->id == $item) {
+                    $required_integrations_list[$integration->data()->id] = $integration;
+                }
+            }
+        }
+
+        return $required_integrations_list;
     }
 
     public function delete() {

@@ -40,7 +40,7 @@ class Stripe_Gateway extends GatewayBase {
                     ],
                     'unit_amount' => $product->data()->price * 100,
                 ],
-                'quantity' => 1
+                'quantity' => $order->getProductQuantity($product->data()->id)
             ];
         }
 

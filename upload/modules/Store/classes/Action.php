@@ -142,9 +142,14 @@ class Action {
     public function execute(Order $order, Product $product, Payment $payment) {
         $placeholders = [];
 
+        $quantity = 1;
         $custom_fields = $this->_db->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$order->data()->id, $product->data()->id])->results();
         foreach ($custom_fields as $field) {
             $placeholders['{'.$field->identifier.'}'] = Output::getClean($field->value);
+
+            if ($field->identifier == 'quantity') {
+                $quantity = $field->value;
+            }
         }
 
         $customer = $order->customer();
@@ -167,7 +172,10 @@ class Action {
         $placeholders['{purchaserUuid}'] = $customer->getIdentifier();
 
         try {
-            $this->_service->executeAction($this, $order, $product, $payment, $placeholders);
+            // For each quantity
+            for($i = 0; $i < $quantity; $i++){
+                $this->_service->executeAction($this, $order, $product, $payment, $placeholders);
+            }
         } catch (Exception $e) {
 
         }

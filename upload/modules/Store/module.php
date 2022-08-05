@@ -63,7 +63,7 @@ class Store_Module extends Module {
         EventHandler::registerEvent('paymentDenied', $store_language->get('admin', 'payment_denied'));
 
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
-        
+
         // Check if module version changed
         $cache->setCache('store_module_cache');
         if (!$cache->isCached('module_version')) {
@@ -101,9 +101,6 @@ class Store_Module extends Module {
     }
 
     public function onPageLoad($user, $pages, $cache, $smarty, $navs, $widgets, $template) {
-        // Classes
-        require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
-        
         // Add link to navbar
         $cache->setCache('nav_location');
         if (!$cache->isCached('store_location')) {
@@ -166,12 +163,12 @@ class Store_Module extends Module {
                 'staffcp.store.connections' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'connections'),
                 'staffcp.store.fields' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'fields'),
             ]);
-        
+
             if ($user->hasPermission('staffcp.store')) {
                 $cache->setCache('panel_sidebar');
                 if (!$cache->isCached('store_order')) {
-                    $order = 18;
-                    $cache->store('store_order', 18);
+                    $order = 10;
+                    $cache->store('store_order', 10);
                 } else {
                     $order = $cache->retrieve('store_order');
                 }
@@ -195,7 +192,7 @@ class Store_Module extends Module {
 
                     $navs[2]->addItemToDropdown('store_configuration', 'general_settings', $this->_language->get('admin', 'general_settings'), URL::build('/panel/store/general_settings'), 'top', null, $icon, $order + 0.2);
                 }
-                
+
                 if ($user->hasPermission('staffcp.store.gateways')) {
                     if (!$cache->isCached('store_gateways_icon')) {
                         $icon = '<i class="nav-icon far fa-credit-card"></i>';
@@ -205,7 +202,7 @@ class Store_Module extends Module {
 
                     $navs[2]->addItemToDropdown('store_configuration', 'store_gateways', $this->_store_language->get('admin', 'gateways'), URL::build('/panel/store/gateways'), 'top', null, $icon, $order + 0.3);
                 }
-                
+
                 if ($user->hasPermission('staffcp.store.connections')) {
                     if (!$cache->isCached('store_connections_icon')) {
                         $icon = '<i class="nav-icon fas fa-plug"></i>';
@@ -215,7 +212,7 @@ class Store_Module extends Module {
 
                     $navs[2]->addItemToDropdown('store_configuration', 'store_connections', $this->_store_language->get('admin', 'service_connections'), URL::build('/panel/store/connections'), 'top', null, $icon, $order + 0.4);
                 }
-                
+
                 if ($user->hasPermission('staffcp.store.fields')) {
                     if (!$cache->isCached('store_fields_icon')) {
                         $icon = '<i class="nav-icon fas fa-id-card"></i>';
@@ -249,11 +246,11 @@ class Store_Module extends Module {
 
             if ($user->hasPermission('staffcp.store.payments'))
                 Core_Module::addUserAction($this->_store_language->get('general', 'store'), URL::build('/panel/users/store/', 'user={id}'));
-            
+
             if (defined('PANEL_PAGE') && PANEL_PAGE == 'dashboard') {
                 // Dashboard graph
                 $latest_payments = $this->_db->query('SELECT id, created FROM nl2_store_payments WHERE created > ? AND status_id = 1 ORDER BY created ASC', [strtotime('-1 week')])->results();
-                
+
                 $cache->setCache('dashboard_graph');
                 if ($cache->isCached('payments_data')) {
                     $output = $cache->retrieve('payments_data');
@@ -382,7 +379,7 @@ class Store_Module extends Module {
             foreach ($product->getFields() as $field) {
                 $fields[] = $field->id;
             }
-            
+
             $actions = [];
             foreach ($product->getActions() as $action) {
                 $action_connections = [];
@@ -431,7 +428,7 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
-            
+
             try {
                 $this->_db->createQuery('ALTER TABLE nl2_store_products CHANGE required_packages required_products varchar(128);');
                 $this->_db->createQuery('ALTER TABLE nl2_store_products_commands CHANGE package_id product_id int(11);');
@@ -439,7 +436,7 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
-            
+
             try {
                 $this->_db->createQuery('ALTER TABLE nl2_store_payments ADD `order_id` int(11) NOT NULL');
                 $this->_db->createQuery('ALTER TABLE nl2_store_payments ADD `fee` varchar(11) DEFAULT NULL');
@@ -449,7 +446,7 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
-            
+
             // Update nl2_store_pending_commands table
             try {
                 $this->_db->createQuery('ALTER TABLE nl2_store_pending_commands ADD `order_id` int(11) NOT NULL');
@@ -461,7 +458,7 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
-            
+
             // Update nl2_store_gateways table
             try {
                 $this->_db->createQuery('ALTER TABLE nl2_store_gateways ADD `displayname` varchar(64) NOT NULL');
@@ -478,7 +475,7 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
-            
+
             try {
                 $this->_db->createTable('store_orders', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `player_id` int(11) DEFAULT NULL, `created` int(11) NOT NULL, `ip` varchar(128) DEFAULT NULL, PRIMARY KEY (`id`)');
                 $this->_db->createTable('store_orders_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, PRIMARY KEY (`id`)');
@@ -511,7 +508,7 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
-            
+
             // Update nl2_store_payments table
             try {
                 $this->_db->createQuery('ALTER TABLE nl2_store_payments DROP COLUMN user_id;');
@@ -527,7 +524,7 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
-            
+
             try {
                 $this->_db->insert('store_settings', [
                     'name' => 'checkout_complete_content',
@@ -556,7 +553,7 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
-        
+
         if ($old_version < 110) {
             try {
                 $this->_db->createTable('store_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `type` varchar(32) NOT NULL, `name` varchar(64) NOT NULL, PRIMARY KEY (`id`)');
@@ -616,7 +613,7 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
-        
+
         if ($old_version < 120) {
             if (!$this->_db->showTables('store_fields')) {
                 try {
@@ -640,7 +637,7 @@ class Store_Module extends Module {
                 }
             }
         }
-        
+
         if ($old_version < 130) {
             $this->_db->insert('store_settings', [
                 'name' => 'player_login',
@@ -662,7 +659,7 @@ class Store_Module extends Module {
                 // Error
             }
         }
-        
+
         if ($old_version < 140) {
             try {
                 $this->_db->createQuery('RENAME TABLE nl2_store_players TO nl2_store_customers');
@@ -781,9 +778,61 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
+
+            try {
+                $this->_db->createQuery('ALTER TABLE nl2_store_products ADD `user_limit` varchar(128) DEFAULT NULL');
+                $this->_db->createQuery('ALTER TABLE nl2_store_products ADD `global_limit` varchar(128) DEFAULT NULL');
+                $this->_db->createQuery('ALTER TABLE nl2_store_products ADD `required_groups` varchar(128) DEFAULT NULL');
+                $this->_db->createQuery('ALTER TABLE nl2_store_products ADD `required_integrations` varchar(128) DEFAULT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                $this->_db->createQuery('ALTER TABLE nl2_store_orders_products ADD `quantity` int(11) NOT NULL DEFAULT \'1\'');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                $this->_db->createQuery('ALTER TABLE nl2_store_fields ADD `regex` varchar(64) DEFAULT NULL');
+                $this->_db->createQuery('ALTER TABLE nl2_store_fields ADD `default_value` varchar(64) NOT NULL DEFAULT \'\'');
+
+                $this->_db->insert('store_fields', [
+                    'identifier' => 'quantity',
+                    'description' => 'Quantity',
+                    'type' => '4',
+                    'required' => '1',
+                    'min' => '1',
+                    'max' => '2',
+                    'default_value' => '1',
+                    'order' => '0'
+                ]);
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+        }
+
+        if ($old_version < 151) {
+            try {
+                $gateway_exists = $this->_db->get('store_gateways', ['name', '=', 'Store Credits']);
+                if (!$gateway_exists->count()) {
+                    $this->_db->insert('store_gateways', [
+                        'name' => 'Store Credits',
+                        'displayname' => 'Store Credits',
+                        'enabled' => 1
+                    ]);
+                }
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
         }
     }
-    
+
     private function initialise() {
         // Generate tables
         if (!$this->_db->showTables('store_agreements')) {
@@ -793,7 +842,7 @@ class Store_Module extends Module {
                 // Error
             }
         }
-        
+
         if (!$this->_db->showTables('store_categories')) {
             try {
                 $this->_db->createTable('store_categories', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(128) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `only_subcategories` tinyint(1) NOT NULL DEFAULT \'0\', `parent_category` int(11) DEFAULT NULL, `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
@@ -801,15 +850,15 @@ class Store_Module extends Module {
                 // Error
             }
         }
-        
+
         if (!$this->_db->showTables('store_products')) {
             try {
-                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price` varchar(8) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price` varchar(8) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `global_limit` varchar(128) DEFAULT NULL, `user_limit` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `required_groups` varchar(128) DEFAULT NULL, `required_integrations` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }
         }
-        
+
         if (!$this->_db->showTables('store_products_connections')) {
             try {
                 $this->_db->createTable('store_products_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `action_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, PRIMARY KEY (`id`)');
@@ -817,7 +866,7 @@ class Store_Module extends Module {
                 // Error
             }
         }
-        
+
         if (!$this->_db->showTables('store_products_fields')) {
             try {
                 $this->_db->createTable("store_products_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `field_id` int(11) NOT NULL, PRIMARY KEY (`id`)");
@@ -825,7 +874,7 @@ class Store_Module extends Module {
                 // Error
             }
         }
-        
+
         if (!$this->_db->showTables('store_products_actions')) {
             try {
                 $this->_db->createTable('store_products_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `service_id` int(11) NOT NULL, `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `own_connections` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)');
@@ -833,7 +882,7 @@ class Store_Module extends Module {
                 // Error
             }
         }
-        
+
         if (!$this->_db->showTables('store_pending_actions')) {
             try {
                 $this->_db->createTable('store_pending_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `action_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `customer_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `status` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)');
@@ -841,7 +890,7 @@ class Store_Module extends Module {
                 // Error
             }
         }
-        
+
         if (!$this->_db->showTables('store_orders')) {
             try {
                 $this->_db->createTable('store_orders', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `from_customer_id` int(11) NOT NULL, `to_customer_id` int(11) NOT NULL, `created` int(11) NOT NULL, `ip` varchar(128) DEFAULT NULL, PRIMARY KEY (`id`)');
@@ -849,15 +898,15 @@ class Store_Module extends Module {
                 // Error
             }
         }
-        
+
         if (!$this->_db->showTables('store_orders_products')) {
             try {
-                $this->_db->createTable('store_orders_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_orders_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `quantity` int(11) NOT NULL DEFAULT \'1\', PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }
         }
-        
+
         if (!$this->_db->showTables('store_orders_products_fields')) {
             try {
                 $this->_db->createTable("store_orders_products_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `field_id` int(11) NOT NULL, `value` TEXT NOT NULL, PRIMARY KEY (`id`)");
@@ -865,7 +914,7 @@ class Store_Module extends Module {
                 // Error
             }
         }
-        
+
         if (!$this->_db->showTables('store_payments')) {
             try {
                 $this->_db->createTable('store_payments', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `payment_id` varchar(64) DEFAULT NULL, `agreement_id` varchar(64) DEFAULT NULL, `transaction` varchar(32) DEFAULT NULL, `amount` varchar(11) DEFAULT NULL, `currency` varchar(11) DEFAULT NULL, `fee` varchar(11) DEFAULT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `last_updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
@@ -873,7 +922,7 @@ class Store_Module extends Module {
                 // Error
             }
         }
-        
+
         if (!$this->_db->showTables('store_customers')) {
             try {
                 $this->_db->createTable('store_customers', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `integration_id` int(11) NOT NULL, `username` varchar(64) DEFAULT NULL, `identifier` varchar(64) DEFAULT NULL, `cents` bigint(20) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
@@ -881,7 +930,7 @@ class Store_Module extends Module {
                 // Error
             }
         }
-        
+
         if (!$this->_db->showTables('store_connections')) {
             try {
                 $this->_db->createTable('store_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `service_id` int(11) NOT NULL, `name` varchar(64) NOT NULL, `data` text DEFAULT NULL, `last_fetch` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
@@ -889,40 +938,40 @@ class Store_Module extends Module {
                 // Error
             }
         }
-        
+
         if (!$this->_db->showTables('store_settings')) {
             try {
                 $this->_db->createTable('store_settings', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `value` text, PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }
-            
+
             $this->_db->insert('store_settings', [
                 'name' => 'checkout_complete_content',
                 'value' => 'Thanks for your payment, It can take up to 15 minutes for your payment to be processed'
             ]);
-                
+
             $this->_db->insert('store_settings', [
                 'name' => 'currency',
                 'value' => 'USD'
             ]);
-                
+
             $this->_db->insert('store_settings', [
                 'name' => 'currency_symbol',
                 'value' => '$'
             ]);
-            
+
             $this->_db->insert('store_settings', [
                 'name' => 'allow_guests',
                 'value' => 0
             ]);
-            
+
             $this->_db->insert('store_settings', [
                 'name' => 'player_login',
                 'value' => 0
             ]);
         }
-        
+
         if (!$this->_db->showTables('store_gateways')) {
             try {
                 $this->_db->createTable('store_gateways', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `displayname` varchar(64) NOT NULL, `enabled` tinyint(1) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
@@ -946,20 +995,31 @@ class Store_Module extends Module {
                 'enabled' => 1
             ]);
         }
-        
+
         if (!$this->_db->showTables('store_fields')) {
             try {
-                $this->_db->createTable("store_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `identifier` varchar(32) NOT NULL, `description` varchar(255) NOT NULL, `type` int(11) NOT NULL, `required` tinyint(1) NOT NULL DEFAULT '0', `min` int(11) NOT NULL DEFAULT '0', `max` int(11) NOT NULL DEFAULT '0', `options` text NULL, `deleted` int(11) NOT NULL DEFAULT '0', `order` int(11) NOT NULL DEFAULT '1', PRIMARY KEY (`id`)");
+                $this->_db->createTable("store_fields", " `id` int(11) NOT NULL AUTO_INCREMENT, `identifier` varchar(32) NOT NULL, `description` varchar(255) NOT NULL, `type` int(11) NOT NULL, `required` tinyint(1) NOT NULL DEFAULT '0', `min` int(11) NOT NULL DEFAULT '0', `max` int(11) NOT NULL DEFAULT '0', `options` text NULL, `regex` varchar(64) DEFAULT NULL, `default_value` varchar(64) NOT NULL DEFAULT '', `deleted` int(11) NOT NULL DEFAULT '0', `order` int(11) NOT NULL DEFAULT '1', PRIMARY KEY (`id`)");
+
+                $this->_db->insert('store_fields', [
+                    'identifier' => 'quantity',
+                    'description' => 'Quantity',
+                    'type' => '4',
+                    'required' => '1',
+                    'min' => '1',
+                    'max' => '2',
+                    'default_value' => '1',
+                    'order' => '0'
+                ]);
             } catch (Exception $e) {
                 // Error
             }
         }
-        
+
         try {
             // Update main admin group permissions
             $group = $this->_db->get('groups', ['id', '=', 2])->results();
             $group = $group[0];
-            
+
             $group_permissions = json_decode($group->permissions, TRUE);
             $group_permissions['staffcp.store'] = 1;
             $group_permissions['staffcp.store.settings'] = 1;
@@ -968,7 +1028,7 @@ class Store_Module extends Module {
             $group_permissions['staffcp.store.gateways'] = 1;
             $group_permissions['staffcp.store.connections'] = 1;
             $group_permissions['staffcp.store.fields'] = 1;
-            
+
             $group_permissions = json_encode($group_permissions);
             $this->_db->update('groups', 2, ['permissions' => $group_permissions]);
         } catch (Exception $e) {

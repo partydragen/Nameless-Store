@@ -247,7 +247,6 @@ if (!isset($_GET['action'])) {
         'CONNECTIONS_LIST' => $connections_array,
         'FIELDS' => $store_language->get('admin', 'fields'),
         'FIELDS_LIST' => $fields_array,
-        'ACTIONS' => $store_language->get('admin', 'actions'),
         'NEW_ACTION' => $store_language->get('admin', 'new_action'),
         'NEW_ACTION_LINK' => URL::build('/panel/store/product/' , 'action=new_action&product=' . $product->data()->id),
         'ACTION_LIST' => $actions_array,
@@ -270,7 +269,7 @@ if (!isset($_GET['action'])) {
 
     $template->addJSScript(Input::createTinyEditor($language, 'inputDescription'));
 
-    $template_file = 'store/products_form.tpl';
+    $template_file = 'store/product.tpl';
 } else {
     switch ($_GET['action']) {
         case 'delete';
@@ -375,6 +374,141 @@ if (!isset($_GET['action'])) {
 
             Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
         break;
+        case 'actions';
+            // Get product actions
+            $actions_array = [];
+            foreach ($product->getActions() as $action) {
+                $type = 'Unknown';
+                switch ($action->data()->type) {
+                    case 1:
+                        $type = 'Purchase';
+                    break;
+                    case 2:
+                        $type = 'Refund';
+                    break;
+                    case 3:
+                        $type = 'Changeback';
+                    break;
+                }
+
+                $actions_array[] = [
+                    'id' => Output::getClean($action->data()->id),
+                    'command' => Output::getClean($action->data()->command),
+                    'type' => $type,
+                    'service' => $action->getService()->getName(),
+                    'requirePlayer' => ($action->data()->require_online ? 'Yes' : 'No'),
+                    'edit_link' => URL::build('/panel/store/product', 'action=edit_action&product=' . $product->data()->id . '&aid=' . $action->data()->id),
+                    'delete_link' => URL::build('/panel/store/product', 'action=delete_action&product=' . $product->data()->id . '&aid=' . $action->data()->id),
+                ];
+            }
+            $smarty->assign([
+                'PRODUCT_TITLE' => $store_language->get('admin', 'editing_product_x', ['product' => Output::getClean($product->data()->name)]),
+                'BACK' => $language->get('general', 'back'),
+                'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
+                'NEW_ACTION' => $store_language->get('admin', 'new_action'),
+                'NEW_ACTION_LINK' => URL::build('/panel/store/product/' , 'action=new_action&product=' . $product->data()->id),
+                'ACTION_LIST' => $actions_array,
+            ]);
+            
+            $template_file = 'store/product_actions.tpl';
+        break;
+        case 'limits_requirements';
+            // Limits and requirements
+            if (Input::exists()) {
+                $errors = [];
+
+                if (Token::check(Input::get('token'))) {
+                    $global_limit = [
+                        'limit' => $_POST['global_limit'] ?? 0,
+                        'interval' => $_POST['global_limit_interval'] ?? 1,
+                        'period' => $_POST['global_limit_period'] ?? 'no_period'
+                    ];
+
+                    $user_limit = [
+                        'limit' => $_POST['user_limit'] ?? 0,
+                        'interval' => $_POST['user_limit_interval'] ?? 1,
+                        'period' => $_POST['user_limit_period'] ?? 'no_period'
+                    ];
+
+                    $required_products = $_POST['required_products'];
+                    $required_groups = $_POST['required_groups'];
+                    $required_integrations = $_POST['required_integrations'];
+
+                    $product->update([
+                        'global_limit' => json_encode($global_limit),
+                        'user_limit' => json_encode($user_limit),
+                        'required_products' => json_encode(isset($required_products) && is_array($required_products) ? $required_products : []),
+                        'required_groups' => json_encode(isset($required_groups) && is_array($required_groups) ? $required_groups : []),
+                        'required_integrations' =>  json_encode(isset($required_integrations) && is_array($required_integrations) ? $required_integrations : [])
+                    ]);
+
+                    Session::flash('products_success', $store_language->get('admin', 'product_updated_successfully'));
+                    Redirect::to(URL::build('/panel/store/product/' , 'product=' . $product->data()->id . '&action=limits_requirements'));
+                } else {
+                    // Invalid token
+                    $errors[] = $language->get('general', 'invalid_token');
+                }
+            }
+
+            $global_limit_json = json_decode($product->data()->global_limit, true) ?? [];
+            $global_limit = [
+                'limit' => $global_limit_json['limit'] ?? 0,
+                'interval' => $global_limit_json['interval'] ?? 1,
+                'period' => $global_limit_json['period'] ?? 'no_period'
+            ];
+
+            $user_limit_json = json_decode($product->data()->user_limit, true) ?? [];
+            $user_limit = [
+                'limit' => $user_limit_json['limit'] ?? 0,
+                'interval' => $user_limit_json['interval'] ?? 1,
+                'period' => $user_limit_json['period'] ?? 'no_period'
+            ];
+
+            $products_list = [];
+            $selected_products = json_decode($product->data()->required_products, true) ?? [];
+            $products = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE id <> ? AND deleted = 0', [$product->data()->id])->results();
+            foreach ($products as $item) {
+                $products_list[] = [
+                    'id' => $item->id,
+                    'name' => Output::getClean($item->name),
+                    'selected' => in_array($item->id, $selected_products)
+                ];
+            }
+
+            $groups_list = [];
+            $selected_groups = json_decode($product->data()->required_groups, true) ?? [];
+            $groups = DB::getInstance()->query('SELECT * FROM nl2_groups')->results();
+            foreach ($groups as $item) {
+                $groups_list[] = [
+                    'id' => $item->id,
+                    'name' => Output::getClean($item->name),
+                    'selected' => in_array($item->id, $selected_groups)
+                ];
+            }
+
+            $integrations_list = [];
+            $selected_integrations = json_decode($product->data()->required_integrations, true) ?? [];
+            foreach (Integrations::getInstance()->getEnabledIntegrations() as $item) {
+                $integrations_list[] = [
+                    'id' => $item->data()->id,
+                    'name' => Output::getClean($item->getName()),
+                    'selected' => in_array($item->data()->id, $selected_integrations)
+                ];
+            }
+
+            $smarty->assign([
+                'PRODUCT_TITLE' => $store_language->get('admin', 'editing_product_x', ['product' => Output::getClean($product->data()->name)]),
+                'BACK' => $language->get('general', 'back'),
+                'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
+                'GLOBAL_LIMIT_VALUE' => $global_limit,
+                'USER_LIMIT_VALUE' => $user_limit,
+                'PRODUCTS_LIST' => $products_list,
+                'GROUPS_LIST' => $groups_list,
+                'INTEGRATIONS_LIST' => $integrations_list,
+            ]);
+            
+            $template_file = 'store/product_limits_requirements.tpl';
+        break;
         case 'remove_image';
             // Remove image from product
             $product->update([
@@ -413,7 +547,13 @@ $smarty->assign([
     'PAGE' => PANEL_PAGE,
     'TOKEN' => Token::get(),
     'SUBMIT' => $language->get('general', 'submit'),
-    'PRODUCTS' => $store_language->get('general', 'products')
+    'PRODUCTS' => $store_language->get('general', 'products'),
+    'GENERAL_SETTINGS' => $language->get('admin', 'general_settings'),
+    'GENERAL_SETTINGS_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
+    'ACTIONS' => $store_language->get('admin', 'actions'),
+    'ACTIONS_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id . '&action=actions'),
+    'LIMITS_AND_REQUIREMENTS' => $store_language->get('admin', 'limits_and_requirements'),
+    'LIMITS_AND_REQUIREMENTS_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id . '&action=limits_requirements')
 ]);
 
 $template->onPageLoad();

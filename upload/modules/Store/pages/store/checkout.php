@@ -43,13 +43,14 @@ if (isset($_GET['do'])) {
     if (!is_numeric($_GET['add'])) {
         die('Invalid product');
     }
-    
+
     $product = new Product($_GET['add']);
     if (!$product->exists() || $product->data()->deleted != 0 || $product->data()->disabled != 0) {
         die('Invalid product');
     }
 
     if ($user->isLoggedIn()) {
+        // Check for any required integrations
         foreach ($product->getRequiredIntegrations() as $integration) {
             $integrationUser = $user->getIntegration($integration->getName());
             if ($integrationUser == null || $integrationUser->data()->username == null || $integrationUser->data()->identifier == null) {
@@ -66,8 +67,9 @@ if (isset($_GET['do'])) {
     $fields = $product->getFields();
     if (count($fields)) {
         $force_continue = true;
-        
+
         // Any fields to fill?
+        $quantity = 1;
         $product_fields = [];
         foreach ($fields as $field) {
             $options = explode(',', Output::getClean($field->options));
@@ -78,7 +80,7 @@ if (isset($_GET['do'])) {
             $product_fields[] = [
                 'id' => Output::getClean($field->id),
                 'identifier' => Output::getClean($field->identifier),
-                'value' => $forced ? Output::getClean($_GET[$field->identifier]) : (isset($_POST[$field->id]) && !is_array($_POST[$field->id]) ? Output::getClean(Input::get($field->id)) : ''),
+                'value' => $forced ? Output::getClean($_GET[$field->identifier]) : (isset($_POST[$field->id]) && !is_array($_POST[$field->id]) ? Output::getClean(Input::get($field->id)) : Output::getClean($field->default_value)),
                 'description' => Output::getClean($field->description),
                 'type' => Output::getClean($field->type),
                 'required' => Output::getClean($field->required),
@@ -89,6 +91,14 @@ if (isset($_GET['do'])) {
             // Continue to next step if all fields are force loaded
             if (!$forced)
                 $force_continue = false;
+
+            if ($field->identifier == 'quantity' && !empty(Input::get($field->id))) {
+                $quantity = Input::get($field->id);
+                if (!is_numeric($quantity) || $quantity < 1) {
+                    Session::flash('store_error', $store_language->get('general', 'invalid_quantity'));
+                    Redirect::to(URL::build($store_url . '/category/' . $product->data()->category_id));
+                }
+            }
         }
 
         // Continue to next step if all fields are force loaded
@@ -119,6 +129,10 @@ if (isset($_GET['do'])) {
                         $field_validation[Validate::MAX] = $field->max;
                     }
 
+                    if ($field->regex != null) {
+                        $field_validation[Validate::REGEX] = $field->regex;
+                    }
+
                     if (count($field_validation)) {
                         $to_validate[$field->id] = $field_validation;
                     }
@@ -134,6 +148,7 @@ if (isset($_GET['do'])) {
                 if ($validation->passed()) {
                     // Validation passed
                     
+                    $quantity = 1;
                     $product_fields = [];
                     foreach ($fields as $field) {
                         // Post value exists?
@@ -142,7 +157,7 @@ if (isset($_GET['do'])) {
                         
                         $item = $_POST[$field->id];
                         $value = (!is_array($item) ? $item : implode(', ', $item));
-                            
+
                         $product_fields[] = [
                             'id' => Output::getClean($field->id),
                             'identifier' => Output::getClean($field->identifier),
@@ -150,6 +165,14 @@ if (isset($_GET['do'])) {
                             'description' => Output::getClean($field->description),
                             'type' => Output::getClean($field->type)
                         ];
+
+                        if ($field->identifier == 'quantity') {
+                            $quantity = Input::get($field->id);
+                            if (!is_numeric($quantity) || $quantity < 1) {
+                                Session::flash('store_error', $store_language->get('general', 'invalid_quantity'));
+                                Redirect::to(URL::build($store_url . '/category/' . $product->data()->category_id));
+                            }
+                        }
                     }
                     
                     $shopping_cart->add($_GET['add'], 1, $product_fields);
@@ -171,6 +194,8 @@ if (isset($_GET['do'])) {
                                 $errors[] = $store_language->get('general', 'x_field_minimum_y', ['field' => Output::getClean($fielderror->description), 'min' => $fielderror->min]);
                             } else if (strpos($item, 'maximum') !== false) {
                                 $errors[] = $store_language->get('general', 'x_field_maximum_y', ['field' => Output::getClean($fielderror->description), 'max' => $fielderror->max]);
+                            } else if (strpos($item, 'regex') !== false) {
+                                $errors[] = $store_language->get('general', 'x_field_regex', ['field' => Output::getClean($fielderror->description)]);
                             }
                         }
                     }
@@ -237,7 +262,7 @@ if (isset($_GET['do'])) {
 
                 // Create order
                 $amount = new Amount();
-                $amount->setCurrency($configuration->get('currency'));
+                $amount->setCurrency($currency);
                 $amount->setTotal($shopping_cart->getTotalPrice());
 
                 $order = new Order();
@@ -301,11 +326,28 @@ if (isset($_GET['do'])) {
     // Load shopping list
     $shopping_cart_list = [];
     foreach ($shopping_cart->getProducts() as $product) {
+        $item = $shopping_cart->getItems()[$product->id];
+
+        $fields = [];
+        foreach ($item['fields'] as $field) {
+            if ($field['identifier'] == 'quantity') {
+                continue;
+            }
+
+            $fields[] = [
+                'id' => Output::getClean($field['id']),
+                'identifier' => Output::getClean($field['identifier']),
+                'description' => Output::getClean($field['description']),
+                'value' => Output::getClean($field['value']),
+                'type' => Output::getClean($field['type'])
+            ];
+        }
+
         $shopping_cart_list[] = [
             'name' => Output::getClean($product->name),
-            'quantity' => 1,
-            'price' => Output::getClean($product->price),
-            'fields' => $shopping_cart->getItems()[$product->id]['fields'],
+            'quantity' => $item['quantity'],
+            'price' => Output::getClean($product->price) * $item['quantity'],
+            'fields' => $fields,
             'remove_link' => URL::build($store_url . '/checkout/', 'remove=' . $product->id),
         ];
     }
@@ -340,7 +382,7 @@ if (isset($_GET['do'])) {
         'PAYMENT_METHODS' => $payment_methods,
         'SHOPPING_CART_LIST' => $shopping_cart_list
     ]);
-    
+
     $template_file = 'store/checkout.tpl';
 }
 
