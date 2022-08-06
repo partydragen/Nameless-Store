@@ -218,5 +218,12 @@
     "general/product_global_limit_reached": "Tento produkt momentálně není dostupný",
     "general/product_user_limit_reached": "Dosáhli jste limitu u tohoto produktu",
     "general/product_requires_products": "K zakoupení tohoto produktu vám chybí požadovaný produkt {{product}}",
-    "general/product_requires_groups": "K zakoupení tohoto produktu vám chybí požadovaná skupina {{group}}"
+    "general/product_requires_groups": "K zakoupení tohoto produktu vám chybí požadovaná skupina {{group}}",
+    "general/send_credits": "Poslat kredity",
+    "general/must_be_greater_then_x": "Množství musí být větší než {{amount}}",
+    "admin/allow_users_to_send_credits": "Umožnit uživatelům posílat kredity jiným uživatelům?",
+    "general/you_have_x_credits": "(Máte {{credits}})",
+    "general/not_enough_credits": "K provedení této akce nemáte dostatek kreditů!",
+    "general/successfully_sent_credits": "Uživateli {{user}} bylo úspěšně posláno {{amount}} kreditů",
+    "general/received_x_credits_from_x": "Obdrželi jste {{amount}} kreditů od uživatele {{user}}"
 }
