@@ -23,7 +23,7 @@ class Store_Module extends Module {
         $name = 'Store';
         $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
         $module_version = '1.4.3';
-        $nameless_version = '2.0.0-pr13';
+        $nameless_version = '2.0.1';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
 
