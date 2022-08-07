@@ -95,7 +95,7 @@ class ListProductsEndpoint extends KeyAuthEndpoint {
                         'type' => $field->type,
                         'required' => (bool) $field->required,
                         'min' => (int) $field->min,
-                        'min' => (int) $field->min,
+                        'max' => (int) $field->max,
                         'regex' => $field->regex,
                         'default_value' => $field->default_value
                     ];
