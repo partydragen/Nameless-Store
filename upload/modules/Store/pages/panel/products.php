@@ -145,8 +145,8 @@ if (!isset($_GET['action'])) {
 
                             // Save to database
                             DB::getInstance()->insert('store_products', [
-                                'name' => Output::getClean(Input::get('name')),
-                                'description' => Output::getClean(Input::get('description')),
+                                'name' => Input::get('name'),
+                                'description' => Input::get('description'),
                                 'category_id' => $category[0]->id,
                                 'price' => $price,
                                 'hidden' => $hidden,

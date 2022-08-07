@@ -99,7 +99,7 @@
                                 </div>
                             </form>
 
-                            <center><p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a></br>Support on <a href="https://discord.gg/TtH6tpp" target="_blank">Discord</a></p></center>
+                            <center><p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a></br>Support on <a href="https://discord.gg/TtH6tpp" target="_blank">Discord</a></br>Support the development on <a href="https://partydragen.com/patreon/" target="_blank">Patreon</a></p></center>
                     </div>
                 </div>
 

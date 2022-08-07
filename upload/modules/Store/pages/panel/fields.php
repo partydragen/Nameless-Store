@@ -119,11 +119,11 @@ if (!isset($_GET['action'])) {
 
                             // Save to database
                             DB::getInstance()->insert('store_fields', [
-                                'identifier' => Output::getClean(Input::get('identifier')),
-                                'description' => Output::getClean(Input::get('description')),
+                                'identifier' => Input::get('identifier'),
+                                'description' => Input::get('description'),
                                 'type' => $type,
                                 'required' => $required,
-                                'options' => htmlspecialchars($options),
+                                'options' => $options,
                                 'order' => Input::get('order'),
                                 'min' => Input::get('minimum'),
                                 'max' => Input::get('maximum'),
@@ -234,11 +234,11 @@ if (!isset($_GET['action'])) {
 
                             // Save to database
                             DB::getInstance()->update('store_fields', $field->id, [
-                                'identifier' => Output::getClean(Input::get('identifier')),
-                                'description' => Output::getClean(Input::get('description')),
+                                'identifier' => Input::get('identifier'),
+                                'description' => Input::get('description'),
                                 'type' => $type,
                                 'required' => $required,
-                                'options' => htmlspecialchars($options),
+                                'options' => $options,
                                 'min' => Input::get('minimum'),
                                 'max' => Input::get('maximum'),
                                 'order' => Input::get('order'),

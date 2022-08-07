@@ -89,8 +89,8 @@ if (!isset($_GET['action'])) {
 
                     // Save to database
                     $product->update([
-                        'name' => Output::getClean(Input::get('name')),
-                        'description' => Output::getClean(Input::get('description')),
+                        'name' => Input::get('name'),
+                        'description' => Input::get('description'),
                         'category_id' => $category[0]->id,
                         'price' => $price,
                         'hidden' => $hidden,
@@ -158,7 +158,7 @@ if (!isset($_GET['action'])) {
 
                         if ($upload) {
                             $product->update([
-                                'image' => Output::getClean($image->getName() . '.' . $image->getMime())
+                                'image' => $image->getName() . '.' . $image->getMime()
                             ]);
 
                             Session::flash('products_success', $store_language->get('admin', 'image_updated_successfully'));

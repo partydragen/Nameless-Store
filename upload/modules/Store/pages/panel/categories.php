@@ -76,8 +76,8 @@ if (!isset($_GET['action'])) {
 
                         // Save to database
                         DB::getInstance()->insert('store_categories', [
-                            'name' => Output::getClean(Input::get('name')),
-                            'description' => Output::getClean(Input::get('description')),
+                            'name' => Input::get('name'),
+                            'description' => Input::get('description'),
                             'parent_category' => $parent_category != 0 ? $parent_category : null,
                             'only_subcategories' => $only_subcategories,
                             'hidden' => $hidden,
@@ -177,8 +177,8 @@ if (!isset($_GET['action'])) {
 
                         // Save to database
                         DB::getInstance()->update('store_categories', $category->id, [
-                            'name' => Output::getClean(Input::get('name')),
-                            'description' => Output::getClean(Input::get('description')),
+                            'name' => Input::get('name'),
+                            'description' => Input::get('description'),
                             'parent_category' => $parent_category != 0 ? $parent_category : null,
                             'only_subcategories' => $only_subcategories,
                             'hidden' => $hidden,
