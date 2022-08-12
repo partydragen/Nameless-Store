@@ -218,5 +218,12 @@
     "general/my_transactions": "Meine Transaktionen",
     "general/no_transactions": "Du hast keine Transaktionen.",
     "general/product_user_limit_reached": "Du hast das Limit für dieses Produkt erreicht",
-    "general/product_requires_groups": "Dir fehlt die erforderliche {{group}} Gruppe, um dieses Produkt zu kaufen"
+    "general/product_requires_groups": "Dir fehlt die erforderliche {{group}} Gruppe, um dieses Produkt zu kaufen",
+    "admin/allow_users_to_send_credits": "Erlaube Nutzern, Credits an andere Nutzer zu senden?",
+    "general/send_credits": "Credits senden",
+    "general/you_have_x_credits": "(Du hast {{credits}})",
+    "general/must_be_greater_then_x": "Der Betrag muss größer sein als {{amount}}",
+    "general/received_x_credits_from_x": "Du hast {{amount}} Credits von {{user}} erhalten",
+    "general/not_enough_credits": "Du hast nicht genug Credits, um das zu tun!",
+    "general/successfully_sent_credits": "Erfolgreich {{amount}} Credits an {{user}} gesendet"
 }
