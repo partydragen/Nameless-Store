@@ -263,8 +263,8 @@ $template->assets()->include([
     AssetTree::TINYMCE,
 ]);
 
-$template->addJSScript(Input::createTinyEditor($language, 'inputStoreContent'));
-$template->addJSScript(Input::createTinyEditor($language, 'inputCheckoutCompleteContent'));
+$template->addJSScript(Input::createTinyEditor($language, 'inputStoreContent', null, false, true));
+$template->addJSScript(Input::createTinyEditor($language, 'inputCheckoutCompleteContent', null, false, true));
 
 $template->onPageLoad();
 

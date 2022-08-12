@@ -235,7 +235,7 @@ if (!isset($_GET['action'])) {
                 AssetTree::TINYMCE,
             ]);
 
-            $template->addJSScript(Input::createTinyEditor($language, 'inputDescription'));
+            $template->addJSScript(Input::createTinyEditor($language, 'inputDescription', null, false, true));
 
             $template_file = 'store/product_new.tpl';
         break;
