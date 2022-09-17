@@ -162,6 +162,12 @@ class Stripe_Gateway extends GatewayBase {
                         'enabled_events' => ['payment_intent.succeeded', 'charge.refunded', 'charge.failed', 'charge.dispute.closed']
                     ]);
 
+                    if ($webhook->secret == null || empty($webhook->secret)) {
+                        ErrorHandler::logCustomError('Could not generate webhook secret for Stripe gateway');
+                        $this->addError('Somethings went wrong, Please contact administration!');
+                        return;
+                    }
+
                     StoreConfig::set([
                         'stripe/hook_key' => $webhook->secret
                     ]);
