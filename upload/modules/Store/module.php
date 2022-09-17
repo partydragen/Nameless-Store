@@ -3,7 +3,7 @@
  *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
- *  NamelessMC version 2.0.0-pr13
+ *  NamelessMC version 2.0.2
  *
  *  License: MIT
  *
@@ -23,7 +23,7 @@ class Store_Module extends Module {
         $name = 'Store';
         $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
         $module_version = '1.4.3';
-        $nameless_version = '2.0.1';
+        $nameless_version = '2.0.2';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
 
@@ -346,6 +346,7 @@ class Store_Module extends Module {
                 'name' => Output::getClean($data->name),
                 'service_id' => $data->service_id,
                 'last_fetch' => (int)$data->last_fetch,
+		'pending_actions' => (int)$this->_db->query('SELECT COUNT(*) AS c FROM nl2_store_pending_actions WHERE connection_id = ? AND status = 0', [$data->id])->first()->c,
             ];
         }
 
