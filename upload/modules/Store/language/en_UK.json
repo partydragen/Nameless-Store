@@ -176,6 +176,7 @@
     "admin\/viewing_payment": "Viewing payment {{payment}}",
     "admin\/viewing_payments_for_user_x": "Viewing payments for user {{user}}",
     "admin\/limits_and_requirements": "Limits & Requirements",
+    "admin/manage_users_credits": "Can manage users credits",
     "general\/agree_t_and_c_purchase": "I agree to the {{termsLinkStart}}terms and conditions{{termsLinkEnd}} of this purchase.",
     "general\/accept_terms": "You must accept the terms and conditions",
     "general\/buy": "Buy",

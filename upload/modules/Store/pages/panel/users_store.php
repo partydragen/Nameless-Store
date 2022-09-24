@@ -48,19 +48,21 @@ if (Input::exists()) {
         ]);
 
         if ($validation->passed()) {
-            $credits = Input::get('credits');
+            if ($user->hasPermission('staffcp.store.manage_credits')) {
+                $credits = Input::get('credits');
 
-            if (Input::get('action') == 'addCredits') {
-                $customer->addCents(Store::toCents($credits));
+                if (Input::get('action') == 'addCredits') {
+                    $customer->addCents(Store::toCents($credits));
 
-                Session::flash('users_store_success', $store_language->get('admin', 'successfully_added_credits', ['amount' => $credits]));
-            } else if (Input::get('action') == 'removeCredits') {
-                $customer->removeCents(Store::toCents($credits));
+                    Session::flash('users_store_success', $store_language->get('admin', 'successfully_added_credits', ['amount' => $credits]));
+                } else if (Input::get('action') == 'removeCredits') {
+                    $customer->removeCents(Store::toCents($credits));
 
-                Session::flash('users_store_success', $store_language->get('admin', 'successfully_removed_credits', ['amount' => $credits]));
+                    Session::flash('users_store_success', $store_language->get('admin', 'successfully_removed_credits', ['amount' => $credits]));
+                }
+
+                Redirect::to(URL::build('/panel/users/store/', 'user=' . $view_user->data()->id));
             }
-
-            Redirect::to(URL::build('/panel/users/store/', 'user=' . $view_user->data()->id));
         } else {
             $errors = $validation->errors();
         }
