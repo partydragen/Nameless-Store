@@ -225,5 +225,6 @@
     "general/must_be_greater_then_x": "Der Betrag muss größer sein als {{amount}}",
     "general/received_x_credits_from_x": "Du hast {{amount}} Credits von {{user}} erhalten",
     "general/not_enough_credits": "Du hast nicht genug Credits, um das zu tun!",
-    "general/successfully_sent_credits": "Erfolgreich {{amount}} Credits an {{user}} gesendet"
+    "general/successfully_sent_credits": "Erfolgreich {{amount}} Credits an {{user}} gesendet",
+    "admin/manage_users_credits": "Kann Guthaben der Benutzer verwalten"
 }
