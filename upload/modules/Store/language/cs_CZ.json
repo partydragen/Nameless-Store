@@ -225,5 +225,6 @@
     "general/you_have_x_credits": "(Máte {{credits}})",
     "general/not_enough_credits": "K provedení této akce nemáte dostatek kreditů!",
     "general/successfully_sent_credits": "Uživateli {{user}} bylo úspěšně posláno {{amount}} kreditů",
-    "general/received_x_credits_from_x": "Obdrželi jste {{amount}} kreditů od uživatele {{user}}"
+    "general/received_x_credits_from_x": "Obdrželi jste {{amount}} kreditů od uživatele {{user}}",
+    "admin/manage_users_credits": "Může spravovat uživatelské kredity"
 }
