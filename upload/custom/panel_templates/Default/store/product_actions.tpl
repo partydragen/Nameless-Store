@@ -85,8 +85,9 @@
                                 </table>
                             </div>
                         {else}
-                            <hr>
-                            There are no actions yet.
+                            </br>
+                            <div class="float-md-right"><a href="{$NEW_ACTION_LINK}" class="btn btn-primary">{$NEW_ACTION}</a></div>
+                            <p>There are no actions yet.</p>
                         {/if}
 
                         <center><p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a></br>Support on <a href="https://discord.gg/TtH6tpp" target="_blank">Discord</a></p></center>
