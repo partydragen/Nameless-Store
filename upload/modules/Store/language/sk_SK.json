@@ -225,5 +225,6 @@
     "general/must_be_greater_then_x": "Množstvo musí byť väčšie ako {{amount}}",
     "general/not_enough_credits": "Na toto nemáte dostatok kreditov!",
     "general/successfully_sent_credits": "Úspešne poslaných {{amount}} kreditov používateľovi {{user}}",
-    "general/received_x_credits_from_x": "Dostali ste {{amount}} kreditov od používateľa {{user}}"
+    "general/received_x_credits_from_x": "Dostali ste {{amount}} kreditov od používateľa {{user}}",
+    "admin/manage_users_credits": "Môže spravovať používateľské kredity"
 }
