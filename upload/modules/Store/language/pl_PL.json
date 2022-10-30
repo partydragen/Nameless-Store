@@ -17,10 +17,10 @@
     "admin/category_name": "Nazwa Kategorii",
     "admin/category_updated_successfully": "Kategoria zaktualizowana pomyślnie.",
     "admin/checkbox": "pole wyboru",
-    "admin/checkout_complete_content": "Zamów Kompletną zawartość",
+    "admin/checkout_complete_content": "Zamów całą zawartość",
     "admin/command": "Polecenie",
     "admin/command_required": "Polecenie jest wymagane",
-    "admin/config_not_writable": "Twój plik <strong>modules/Store/config.php</strong> nie jest nadpisywalny. Sprawdź uprawnienia na temat plików.",
+    "admin/config_not_writable": "Twój plik <strong>modules/Store/config.php</strong> nie jest nadpisywalny. Sprawdź uprawnienia strony dotyczące plików.",
     "admin/confirm_delete_connection": "Czy jesteś pewny/a, że chcesz usunąć to połączenie?",
     "admin/confirm_delete_field": "Czy jesteś pewny/a, że chcesz usunąć to pole?",
     "admin/connection": "Połączenie",
@@ -43,5 +43,7 @@
     "admin/command_max": "Upewnij się, że twoje polecenie posiada maksymalnie 500 znaków.",
     "admin/command_min": "Upewnij się, że twoje polecenie posiada przynajmniej 1 znak",
     "admin/confirm_payment_deletion": "Czy jesteś pewny/a, że chcesz usunąć płatność?",
-    "admin/current_version_x": "Obecna wersja modułu: {{version}}"
+    "admin/current_version_x": "Obecna wersja modułu: {{version}}",
+    "admin/connections_info": "Połącz swoje serwisy do sklepu, aby wykonywać specyficzne akcje",
+    "admin/description_max_100000": "Opis może mieć maksymalnie 100000 znaków."
 }
