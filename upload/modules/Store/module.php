@@ -61,6 +61,15 @@ class Store_Module extends Module {
         EventHandler::registerEvent('paymentRefunded', $store_language->get('admin', 'payment_refunded'));
         EventHandler::registerEvent('paymentReversed', $store_language->get('admin', 'payment_reversed'));
         EventHandler::registerEvent('paymentDenied', $store_language->get('admin', 'payment_denied'));
+        EventHandler::registerEvent('storeCheckoutAddProduct', 'storeCheckoutAddProduct', [], true, true);
+        EventHandler::registerEvent('storeCheckoutFieldsValidation', 'storeCheckoutFieldsValidation', [], true, true);
+
+        require_once(ROOT_PATH . '/modules/Store/hooks/CheckoutAddProductHook.php');
+        EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::globalLimit');
+        EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::userLimit');
+        EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::requiredProducts');
+        EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::requiredGroups');
+        EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::requiredIntegrations');
 
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
 
@@ -347,7 +356,7 @@ class Store_Module extends Module {
                 'name' => Output::getClean($data->name),
                 'service_id' => $data->service_id,
                 'last_fetch' => (int)$data->last_fetch,
-		'pending_actions' => (int)$this->_db->query('SELECT COUNT(*) AS c FROM nl2_store_pending_actions WHERE connection_id = ? AND status = 0', [$data->id])->first()->c,
+                'pending_actions' => (int)$this->_db->query('SELECT COUNT(*) AS c FROM nl2_store_pending_actions WHERE connection_id = ? AND status = 0', [$data->id])->first()->c,
             ];
         }
 

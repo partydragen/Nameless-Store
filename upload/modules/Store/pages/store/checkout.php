@@ -24,7 +24,6 @@ if (!$store->isPlayerSystemEnabled() || !$configuration->get('allow_guests')) {
 }
 
 $gateways = new Gateways();
-
 $store_url = $store->getStoreURL();
 
 if (isset($_GET['do'])) {
@@ -32,7 +31,7 @@ if (isset($_GET['do'])) {
         // Checkout complete page
         $checkout_complete_content = DB::getInstance()->get('store_settings', ['name', '=', 'checkout_complete_content'])->results();
         $smarty->assign('CHECKOUT_COMPLETE_CONTENT', Output::getPurified(Output::getDecoded($checkout_complete_content[0]->value)));
-        
+
         $template_file = 'store/checkout_complete.tpl';
     } else {
         // Invalid
@@ -49,62 +48,35 @@ if (isset($_GET['do'])) {
         die('Invalid product');
     }
 
-    if ($user->isLoggedIn()) {
-        // Check for any required integrations
-        foreach ($product->getRequiredIntegrations() as $integration) {
-            $integrationUser = $user->getIntegration($integration->getName());
-            if ($integrationUser == null || $integrationUser->data()->username == null || $integrationUser->data()->identifier == null) {
-                Session::flash('store_error', $store_language->get('general', 'product_requires_integration', [
-                    'integration' => Output::getClean($integration->getName()),
-                    'linkStart' => '<a href="' . URL::build('/user/connections') . '">',
-                    'linkEnd' => '</a>'
-                ]));
-                Redirect::to(URL::build($store_url . '/category/' . $product->data()->category_id));
-            }
-        }
+    // Execute event with allow modules to interact with it 
+    $addProductEvent = EventHandler::executeEvent('storeCheckoutAddProduct', [
+        'user' => $user,
+        'product' => $product,
+        'customer' => $from_customer,
+        'recipient' => $to_customer,
+        'fields' => $product->getFields()
+    ]);
+
+    // Check if the event returned any errors
+    if (isset($addProductEvent['errors']) && count($addProductEvent['errors'])) {
+        Session::flash('store_error', $addProductEvent['errors'][0]);
+        Redirect::to(URL::build($store_url . '/category/' . $product->data()->category_id));
     }
 
-    $fields = $product->getFields();
+    // Check if the product requires customer input
+    $fields = $addProductEvent['fields'];
     if (count($fields)) {
-        $force_continue = true;
-
-        // Any fields to fill?
-        $quantity = 1;
         $product_fields = [];
         foreach ($fields as $field) {
-            $options = explode(',', Output::getClean($field->options));
-
-            // Is value forced loaded?
-            $forced = isset($_GET[$field->identifier]);
-
             $product_fields[] = [
                 'id' => Output::getClean($field->id),
                 'identifier' => Output::getClean($field->identifier),
-                'value' => $forced ? Output::getClean($_GET[$field->identifier]) : (isset($_POST[$field->id]) && !is_array($_POST[$field->id]) ? Output::getClean(Input::get($field->id)) : Output::getClean($field->default_value)),
+                'value' => isset($_POST[$field->id]) && !is_array($_POST[$field->id]) ? Output::getClean(Input::get($field->id)) : Output::getClean($field->default_value),
                 'description' => Output::getClean($field->description),
                 'type' => Output::getClean($field->type),
                 'required' => Output::getClean($field->required),
-                'options' => $options,
-                'forced' => $forced
+                'options' => explode(',', Output::getClean($field->options))
             ];
-
-            // Continue to next step if all fields are force loaded
-            if (!$forced)
-                $force_continue = false;
-
-            if ($field->identifier == 'quantity' && !empty(Input::get($field->id))) {
-                $quantity = Input::get($field->id);
-                if (!is_numeric($quantity) || $quantity < 1) {
-                    Session::flash('store_error', $store_language->get('general', 'invalid_quantity'));
-                    Redirect::to(URL::build($store_url . '/category/' . $product->data()->category_id));
-                }
-            }
-        }
-
-        // Continue to next step if all fields are force loaded
-        if ($force_continue) {
-            $shopping_cart->add($_GET['add'], 1, $product_fields);
-            Redirect::to(URL::build($store_url . '/checkout/'));
         }
 
         // Deal with any input
@@ -147,18 +119,17 @@ if (isset($_GET['do'])) {
                 $validation = Validate::check($validate_post, $to_validate);
                 if ($validation->passed()) {
                     // Validation passed
-                    
                     $quantity = 1;
                     $product_fields = [];
                     foreach ($fields as $field) {
                         // Post value exists?
                         if (!isset($_POST[$field->id]))
                             continue;
-                        
+
                         $item = $_POST[$field->id];
                         $value = (!is_array($item) ? $item : implode(', ', $item));
 
-                        $product_fields[] = [
+                        $product_fields[$field->id] = [
                             'id' => Output::getClean($field->id),
                             'identifier' => Output::getClean($field->identifier),
                             'value' => $value,
@@ -174,9 +145,23 @@ if (isset($_GET['do'])) {
                             }
                         }
                     }
-                    
-                    $shopping_cart->add($_GET['add'], 1, $product_fields);
-                    Redirect::to(URL::build($store_url . '/checkout/'));
+
+                    // Execute event with allow modules to further validate the fields
+                    $fieldsValidationEvent = EventHandler::executeEvent('storeCheckoutFieldsValidation', [
+                        'user' => $user,
+                        'product' => $product,
+                        'customer' => $from_customer,
+                        'recipient' => $to_customer,
+                        'fields' => $product_fields
+                    ]);
+
+                    // Check if the event returned any errors
+                    if (isset($fieldsValidationEvent['errors']) && count($fieldsValidationEvent['errors'])) {
+                        $errors = $fieldsValidationEvent['errors'];
+                    } else {
+                        $shopping_cart->add($_GET['add'], $quantity, $product_fields);
+                        Redirect::to(URL::build($store_url . '/checkout/'));
+                    }
                 } else {
                     // Validation errors
                     foreach ($validation->errors() as $item) {
@@ -205,22 +190,21 @@ if (isset($_GET['do'])) {
                 $errors[] = $language->get('general', 'invalid_token');
             }
         }
-        
+
         $smarty->assign([
             'PRODUCT_NAME' => Output::getClean($product->data()->name),
             'PRODUCT_FIELDS' => $product_fields,
             'CONTINUE' => $store_language->get('general', 'continue'),
             'TOKEN' => Token::get()
         ]);
-        
-        $template_file = 'store/checkout_add.tpl';
 
+        $template_file = 'store/checkout_add.tpl';
     } else {
-        // No fields to fill, continue to next step
+        // No customer input to fill, continue to next step
         $shopping_cart->add($_GET['add']);
         Redirect::to(URL::build($store_url . '/checkout/'));
     }
-    
+
 } else if (isset($_GET['remove'])) {
     if (!is_numeric($_GET['remove'])) {
         die('Invalid product');
