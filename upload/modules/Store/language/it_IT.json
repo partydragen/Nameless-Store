@@ -1,1 +1,16 @@
-{}
+{
+    "admin/category_deleted_successfully": "Categoria rimossa correttamente.",
+    "admin/category_name": "Nome Categoria",
+    "admin/category_updated_successfully": "Categoria aggiornata correttamente.",
+    "admin/current_version_x": "Versione Modulo: {{version}}",
+    "admin/new_category": "Nuova Categoria",
+    "admin/new_update_available_x": "È disponibile un aggiornamento per il modulo {{module}}",
+    "admin/new_urgent_update_available_x": "È disponibile un aggiornamento urgente per il modulo {{module}}. Aggiornalo il prima possibile!",
+    "admin/new_version_x": "Nuova versione del modulo: {{new_version}}",
+    "admin/settings": "Impostazioni",
+    "admin/status": "Stato",
+    "admin/actions": "Azioni",
+    "admin/categories": "Categorie",
+    "admin/category_created_successfully": "Categoria creata correttamente.",
+    "admin/view_resource": "Vedi Risorsa"
+}
