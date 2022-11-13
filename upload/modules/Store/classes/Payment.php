@@ -105,6 +105,7 @@ class Payment {
 
                     EventHandler::executeEvent('paymentPending', [
                         'event' => 'paymentPending',
+                        'order' => $this->getOrder(),
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                         'username' => $username,
@@ -124,9 +125,10 @@ class Payment {
 
                     EventHandler::executeEvent('paymentCompleted', [
                         'event' => 'paymentCompleted',
+                        'order' => $this->getOrder(),
+                        'order_id' => $this->data()->order_id,
                         'username' => $username,
                         'content_full' => $store_language->get('general', 'completed_payment_text', ['user' => $username, 'products' => $this->getOrder()->getDescription()]),
-                        'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                     ]);
                 break;
@@ -144,6 +146,7 @@ class Payment {
 
                     EventHandler::executeEvent('paymentRefunded', [
                         'event' => 'paymentRefunded',
+                        'order' => $this->getOrder(),
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                         'username' => $username,
@@ -164,6 +167,7 @@ class Payment {
 
                     EventHandler::executeEvent('paymentReversed', [
                         'event' => 'paymentReversed',
+                        'order' => $this->getOrder(),
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                         'username' => $username,
@@ -181,6 +185,7 @@ class Payment {
 
                     EventHandler::executeEvent('paymentDenied', [
                         'event' => 'paymentDenied',
+                        'order' => $this->getOrder(),
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                         'username' => $username,
@@ -208,6 +213,7 @@ class Payment {
                     $username = $this->getOrder()->recipient()->getUsername();
                     EventHandler::executeEvent('paymentPending', [
                         'event' => 'paymentPending',
+                        'order' => $this->getOrder(),
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                         'username' => $username,
@@ -229,6 +235,7 @@ class Payment {
                     $username = $this->getOrder()->recipient()->getUsername();
                     EventHandler::executeEvent('paymentCompleted', [
                         'event' => 'paymentCompleted',
+                        'order' => $this->getOrder(),
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                         'username' => $username,
