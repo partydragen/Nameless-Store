@@ -1,7 +1,7 @@
 {
     "admin/category_deleted_successfully": "Categoria rimossa correttamente.",
     "admin/category_name": "Nome Categoria",
-    "admin/category_updated_successfully": "Categoria aggiornata correttamente.",
+    "admin/category_updated_successfully": "Categoria modificata correttamente.",
     "admin/current_version_x": "Versione Modulo: {{version}}",
     "admin/new_category": "Nuova Categoria",
     "admin/new_update_available_x": "È disponibile un aggiornamento per il modulo {{module}}",
