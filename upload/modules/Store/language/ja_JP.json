@@ -1,1 +1,9 @@
-{}
+{
+    "admin/actions": "アクション",
+    "admin/category_created_successfully": "カテゴリの作成に成功しました。",
+    "admin/category_deleted_successfully": "カテゴリの削除に成功しました。",
+    "admin/category_name": "カテゴリ名",
+    "admin/categories": "カテゴリ",
+    "admin/category_updated_successfully": "カテゴリの更新に成功しました。",
+    "admin/current_version_x": "現在のモジュールバージョン: {{version}}"
+}
