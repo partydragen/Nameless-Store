@@ -1,1 +1,16 @@
-{}
+{
+    "admin/actions": "Acties",
+    "admin/categories": "Categorieën",
+    "admin/category_created_successfully": "Categorie succesvol aangemaakt.",
+    "admin/category_deleted_successfully": "Categorie succesvol verwijderd.",
+    "admin/category_name": "Categorie naam",
+    "admin/current_version_x": "Huidige module versie: {{version}}",
+    "admin/new_category": "Nieuwe categorie",
+    "admin/new_urgent_update_available_x": "Er is een nieuwe dringende update beschikbaar voor de module {{module}}. Update zo snel mogelijk!",
+    "admin/new_version_x": "Nieuwe module versie: {{new_version}}",
+    "admin/status": "Status",
+    "admin/view_resource": "Bekijk bron",
+    "admin/category_updated_successfully": "Categorie succesvol aangepast.",
+    "admin/new_update_available_x": "Er is een nieuwe update beschikbaar voor de module {{module}}",
+    "admin/settings": "Instellingen"
+}
