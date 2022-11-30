@@ -27,8 +27,8 @@ class Stripe_Gateway extends GatewayBase {
         }
 
         $currency = $order->getAmount()->getCurrency();
-        $successRedirect = rtrim(Util::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=success');
-        $cancelRedirect = rtrim(Util::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=cancel');
+        $successRedirect = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=success');
+        $cancelRedirect = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=cancel');
 
         $products = [];
         foreach ($order->getProducts() as $product) {
@@ -158,7 +158,7 @@ class Stripe_Gateway extends GatewayBase {
                 if (!$hook_key) {
                     $stripe = new \Stripe\StripeClient($secret_key);
                     $webhook = $stripe->webhookEndpoints->create([
-                        'url' => rtrim(Util::getSelfURL(), '/') . URL::build('/store/listener', 'gateway=Stripe'),
+                        'url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/listener', 'gateway=Stripe'),
                         'enabled_events' => ['payment_intent.succeeded', 'charge.refunded', 'charge.failed', 'charge.dispute.closed']
                     ]);
 

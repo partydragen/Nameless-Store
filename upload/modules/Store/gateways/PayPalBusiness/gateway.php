@@ -39,8 +39,8 @@ class PayPal_Business_Gateway extends GatewayBase {
         $transaction->setInvoiceNumber($order->data()->id);
 
         $redirectUrls = new \PayPal\Api\RedirectUrls();
-        $redirectUrls->setReturnUrl(rtrim(Util::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=success'))
-            ->setCancelUrl(rtrim(Util::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=cancel'));
+        $redirectUrls->setReturnUrl(rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=success'))
+            ->setCancelUrl(rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=cancel'));
 
         $payment = new \PayPal\Api\Payment();
         $payment->setIntent('sale')
@@ -356,7 +356,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                     $webhookEventTypes[] = new \PayPal\Api\WebhookEventType('{"name":"BILLING.PLAN.CREATED"}');
                     $webhookEventTypes[] = new \PayPal\Api\WebhookEventType('{"name":"BILLING.PLAN.UPDATED"}');
 
-                    $webhook->setUrl(rtrim(Util::getSelfURL(), '/') . URL::build('/store/listener', 'gateway=PayPalBusiness&key=' . $key));
+                    $webhook->setUrl(rtrim(URL::getSelfURL(), '/') . URL::build('/store/listener', 'gateway=PayPalBusiness&key=' . $key));
                     $webhook->setEventTypes($webhookEventTypes);
                     $output = $webhook->create($apiContext);
                     $id = $output->getId();

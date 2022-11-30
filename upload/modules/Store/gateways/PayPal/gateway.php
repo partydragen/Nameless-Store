@@ -27,9 +27,9 @@ class PayPal_Gateway extends GatewayBase {
             return;
         }
 
-        $return_url = rtrim(Util::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPal&do=success');
-        $cancel_url = rtrim(Util::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPal&do=cancel');
-        $listener_url = rtrim(Util::getSelfURL(), '/') . URL::build('/store/listener/', 'gateway=PayPal');
+        $return_url = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPal&do=success');
+        $cancel_url = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPal&do=cancel');
+        $listener_url = rtrim(URL::getSelfURL(), '/') . URL::build('/store/listener/', 'gateway=PayPal');
 
         echo '
             <form name="pay" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
