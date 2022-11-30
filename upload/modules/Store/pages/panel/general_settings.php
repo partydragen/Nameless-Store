@@ -124,10 +124,10 @@ if (isset($errors) && count($errors))
     ]);
 
 // Can guest make purchases
-$allow_guests = $store_path = Util::getSetting('allow_guests', '0', 'Store');
+$allow_guests = Util::getSetting('allow_guests', '0', 'Store');
 
 // Require player to enter minecraft username when visiting store
-$player_login = $store_path = Util::getSetting('player_login', '0', 'Store');
+$player_login = Util::getSetting('player_login', '0', 'Store');
 
 // Store content
 $store_index_content = Output::getClean(Output::getPurified(Output::getDecoded(Util::getSetting('store_content', '', 'Store'))));
