@@ -320,8 +320,6 @@ class Store_Module extends Module {
                         'NEW_UPDATE_URGENT' => (isset($update_check->urgent) && $update_check->urgent == 'true'),
                         'CURRENT_VERSION' => $this->_store_language->get('admin', 'current_version_x', ['version' => Output::getClean($this->getVersion())]),
                         'NEW_VERSION' => $this->_store_language->get('admin', 'new_version_x', ['new_version' => Output::getClean($update_check->new_version)]),
-                        'UPDATE' => $this->_store_language->get('admin', 'view_resource'),
-                        'UPDATE_LINK' => Output::getClean($update_check->link),
                         'NAMELESS_UPDATE' => $this->_store_language->get('admin', 'view_resource'),
                         'NAMELESS_UPDATE_LINK' => Output::getClean($update_check->link)
                     ]);
@@ -842,7 +840,7 @@ class Store_Module extends Module {
                     // Convert store settings to NamelessMC settings system
                     $settings = $this->_db->query('SELECT * FROM nl2_store_settings')->results();
                     foreach ($settings as $setting) {
-                        Util::getSetting($setting->name, $setting->value, 'Store');
+                        Util::setSetting($setting->name, $setting->value, 'Store');
                     }
 
                     $this->_db->query('DROP TABLE nl2_store_settings');
