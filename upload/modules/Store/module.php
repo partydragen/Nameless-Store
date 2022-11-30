@@ -19,6 +19,7 @@ class Store_Module extends Module {
         $this->_language = $language;
         $this->_store_language = $store_language;
         $this->_cache = $cache;
+        $this->_store_url = Store::getStorePath();
 
         $name = 'Store';
         $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
@@ -26,14 +27,6 @@ class Store_Module extends Module {
         $nameless_version = '2.0.2';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
-
-        // Get variables from cache
-        $cache->setCache('store_settings');
-        if ($cache->isCached('store_url')) {
-            $this->_store_url = Output::getClean(rtrim($cache->retrieve('store_url'), '/'));
-        } else {
-            $this->_store_url = '/store';
-        }
 
         // Define URLs which belong to this module
         $pages->add('Store', $this->_store_url, 'pages/store/index.php', 'store', true);
@@ -842,6 +835,22 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
+
+        if ($old_version < 152) {
+            try {
+                if ($this->_db->showTables('store_settings')) {
+                    // Convert store settings to NamelessMC settings system
+                    $settings = $this->_db->query('SELECT * FROM nl2_store_settings')->results();
+                    foreach ($settings as $setting) {
+                        Util::getSetting($setting->name, $setting->value, 'Store');
+                    }
+
+                    $this->_db->query('DROP TABLE nl2_store_settings');
+                }
+            } catch (Exception $e) {
+                echo $e->getMessage() . '<br />';
+            }
+        }
     }
 
     private function initialise() {
@@ -950,37 +959,12 @@ class Store_Module extends Module {
             }
         }
 
-        if (!$this->_db->showTables('store_settings')) {
-            try {
-                $this->_db->createTable('store_settings', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `value` text, PRIMARY KEY (`id`)');
-            } catch (Exception $e) {
-                // Error
-            }
-
-            $this->_db->insert('store_settings', [
-                'name' => 'checkout_complete_content',
-                'value' => 'Thanks for your payment, It can take up to 15 minutes for your payment to be processed'
-            ]);
-
-            $this->_db->insert('store_settings', [
-                'name' => 'currency',
-                'value' => 'USD'
-            ]);
-
-            $this->_db->insert('store_settings', [
-                'name' => 'currency_symbol',
-                'value' => '$'
-            ]);
-
-            $this->_db->insert('store_settings', [
-                'name' => 'allow_guests',
-                'value' => 0
-            ]);
-
-            $this->_db->insert('store_settings', [
-                'name' => 'player_login',
-                'value' => 0
-            ]);
+        if (!$this->_db->get('settings', ['module', '=', 'Store'])->count()) {
+            Util::setSetting('checkout_complete_content', 'Thanks for your payment, It can take up to 15 minutes for your payment to be processed', 'Store');
+            Util::setSetting('currency', 'USD', 'Store');
+            Util::setSetting('currency_symbol', '$', 'Store');
+            Util::setSetting('allow_guests', 0, 'Store');
+            Util::setSetting('player_login', 0, 'Store');
         }
 
         if (!$this->_db->showTables('store_gateways')) {

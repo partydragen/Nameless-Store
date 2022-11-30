@@ -21,8 +21,6 @@ define('PANEL_PAGE', 'general_settings');
 $page_title = $store_language->get('general', 'store');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
-$configuration = new Configuration('store');
-
 if (isset($_POST) && !empty($_POST)) {
     $errors = [];
 
@@ -62,10 +60,19 @@ if (isset($_POST) && !empty($_POST)) {
             else
                 $show_credits_amount = 0;
 
-            $configuration->set('allow_guests', $allow_guests);
-            $configuration->set('player_login', $player_login);
-            $configuration->set('currency', Output::getClean(Input::get('currency')));
-            $configuration->set('currency_symbol', Output::getClean(Input::get('currency_symbol')));
+            // Update store path
+            if (isset($_POST['store_path']) && strlen(str_replace(' ', '', $_POST['store_path'])) > 0)
+                $store_path_input = rtrim(Output::getClean($_POST['store_path']), '/');
+            else
+                $store_path_input = '/store';
+
+            Util::setSetting('store_path', $store_path_input, 'Store');
+            Util::setSetting('allow_guests', $allow_guests, 'Store');
+            Util::setSetting('player_login', $player_login, 'Store');
+            Util::setSetting('currency', Input::get('currency'), 'Store');
+            Util::setSetting('currency_symbol', Input::get('currency_symbol'), 'Store');
+            Util::setSetting('store_content', Input::get('store_content'), 'Store');
+            Util::setSetting('checkout_complete_content', Input::get('checkout_complete_content'), 'Store');
 
             Util::setSetting('show_credits_amount', $show_credits_amount);
 
@@ -88,77 +95,8 @@ if (isset($_POST) && !empty($_POST)) {
             $cache->setCache('nav_location');
             $cache->store('store_location', $location);
 
-            // Update store content
-            try {
-                $store_index_content = DB::getInstance()->get('store_settings', ['name', '=', 'store_content'])->results();
-
-                if (count($store_index_content)) {
-                    $store_index_content = $store_index_content[0]->id;
-                    DB::getInstance()->update('store_settings', $store_index_content, [
-                        'value' => Output::getClean(Input::get('store_content'))
-                    ]);
-                } else {
-                    DB::getInstance()->insert('store_settings', [
-                        'name' => 'store_content',
-                        'value' => Output::getClean(Input::get('store_content'))
-                    ]);
-                }
-
-            } catch (Exception $e) {
-                $errors[] = $e->getMessage();
-            }
-
-            // Update checkout content
-            try {
-                $checkout_complete_content = DB::getInstance()->get('store_settings', ['name', '=', 'checkout_complete_content'])->results();
-
-                if (count($checkout_complete_content)) {
-                    $checkout_complete_content = $checkout_complete_content[0]->id;
-                    DB::getInstance()->update('store_settings', $checkout_complete_content, [
-                        'value' => Output::getClean(Input::get('checkout_complete_content'))
-                    ]);
-                } else {
-                    DB::getInstance()->insert('store_settings', [
-                        'name' => 'checkout_complete_content',
-                        'value' => Output::getClean(Input::get('checkout_complete_content'))
-                    ]);
-                }
-
-            } catch (Exception $e) {
-                $errors[] = $e->getMessage();
-            }
-
-            // Update store path
-            try {
-                $store_path = DB::getInstance()->get('store_settings', ['name', '=', 'store_path'])->results();
-
-                if (isset($_POST['store_path']) && strlen(str_replace(' ', '', $_POST['store_path'])) > 0)
-                    $store_path_input = rtrim(Output::getClean($_POST['store_path']), '/');
-                else
-                    $store_path_input = '/store';
-
-                if (count($store_path)) {
-                    $store_path = $store_path[0]->id;
-                    DB::getInstance()->update('store_settings', $store_path, [
-                        'value' => $store_path_input
-                    ]);
-                } else {
-                    DB::getInstance()->insert('store_settings', [
-                        'name' => 'store_path',
-                        'value' => $store_path_input
-                    ]);
-                }
-
-                $cache->setCache('store_settings');
-                $cache->store('store_url', $store_path_input);
-
-            } catch (Exception $e) {
-                $errors[] = $e->getMessage();
-            }
-
-            if (!count($errors))
-                $success = $store_language->get('admin', 'updated_successfully');
-
+            Session::flash('store_success', $store_language->get('admin', 'updated_successfully'));
+            Redirect::to(URL::build('/panel/store/general_settings'));
         } else {
             $errors = $validation->errors();
         }
@@ -169,6 +107,9 @@ if (isset($_POST) && !empty($_POST)) {
 
 // Load modules + template
 Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
+
+if (Session::exists('store_success'))
+    $success = Session::flash('store_success');
 
 if (isset($success))
     $smarty->assign([
@@ -183,41 +124,26 @@ if (isset($errors) && count($errors))
     ]);
 
 // Can guest make purchases
-$allow_guests = $configuration->get('allow_guests');
+$allow_guests = $store_path = Util::getSetting('allow_guests', '0', 'Store');
 
 // Require player to enter minecraft username when visiting store
-$player_login = $configuration->get('player_login');
+$player_login = $store_path = Util::getSetting('player_login', '0', 'Store');
 
 // Store content
-$store_index_content = DB::getInstance()->get('store_settings', ['name', '=', 'store_content'])->results();
-if (count($store_index_content)) {
-    $store_index_content = Output::getClean(Output::getPurified(Output::getDecoded($store_index_content[0]->value)));
-} else {
-    $store_index_content = '';
-}
+$store_index_content = Output::getClean(Output::getPurified(Output::getDecoded(Util::getSetting('store_content', '', 'Store'))));
 
 // Checkout complete content
-$checkout_complete_content = DB::getInstance()->get('store_settings', ['name', '=', 'checkout_complete_content'])->results();
-if (count($checkout_complete_content)) {
-    $checkout_complete_content = Output::getClean(Output::getPurified(Output::getDecoded($checkout_complete_content[0]->value)));
-} else {
-    $checkout_complete_content = '';
-}
+$checkout_complete_content = Output::getClean(Output::getPurified(Output::getDecoded(Util::getSetting('checkout_complete_content', '', 'Store'))));
 
 // Store Path
-$store_path = DB::getInstance()->get('store_settings', ['name', '=', 'store_path'])->results();
-if (count($store_path)) {
-    $store_path = Output::getClean($store_path[0]->value);
-} else {
-    $store_path = '/store';
-}
+$store_path = Util::getSetting('store_path', '/store', 'Store');
 
 // Currency
 $currency_list = ['USD', 'EUR', 'GBP', 'NOK', 'SEK', 'PLN', 'DKK', 'CAD', 'BRL', 'AUD'];
-$currency = $configuration->get('currency');
+$currency = Util::getSetting('currency', 'USD', 'Store');
 
 // Currency Symbol
-$currency_symbol = $configuration->get('currency_symbol');
+$currency_symbol = Util::getSetting('currency_symbol', '$', 'Store');
 
 // Retrieve Link Location from cache
 $cache->setCache('nav_location');

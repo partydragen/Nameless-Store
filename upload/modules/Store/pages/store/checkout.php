@@ -16,8 +16,7 @@ $page_title = $store_language->get('general', 'store');
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
 
-$configuration = new Configuration('store');
-if (!$store->isPlayerSystemEnabled() || !$configuration->get('allow_guests')) {
+if (!$store->isPlayerSystemEnabled() || !Util::getSetting('allow_guests', '0', 'Store')) {
     if (!$user->isLoggedIn()) {
         Redirect::to(URL::build('/login/'));
     }
@@ -29,8 +28,8 @@ $store_url = $store->getStoreURL();
 if (isset($_GET['do'])) {
     if ($_GET['do'] == 'complete') {
         // Checkout complete page
-        $checkout_complete_content = DB::getInstance()->get('store_settings', ['name', '=', 'checkout_complete_content'])->results();
-        $smarty->assign('CHECKOUT_COMPLETE_CONTENT', Output::getPurified(Output::getDecoded($checkout_complete_content[0]->value)));
+        $checkout_complete_content = Util::getSetting('checkout_complete_content', '', 'Store');
+        $smarty->assign('CHECKOUT_COMPLETE_CONTENT', Output::getPurified(Output::getDecoded($checkout_complete_content)));
 
         $template_file = 'store/checkout_complete.tpl';
     } else {
@@ -263,7 +262,7 @@ if (isset($_GET['do'])) {
                         'gateway_id' => 0,
                         'amount' => 0,
                         'transaction' => 'Free',
-                        'currency' => Output::getClean($configuration->get('currency')),
+                        'currency' => Output::getClean(Store::getCurrency()),
                         'fee' => 0
                     ]);
 

@@ -228,7 +228,6 @@ if (!isset($_GET['action'])) {
         ];
     }
 
-    $configuration = new Configuration('store');
     $smarty->assign([
         'PRODUCT_TITLE' => $store_language->get('admin', 'editing_product_x', ['product' => Output::getClean($product->data()->name)]),
         'ID' => Output::getClean($product->data()->id),
@@ -250,7 +249,7 @@ if (!isset($_GET['action'])) {
         'NEW_ACTION' => $store_language->get('admin', 'new_action'),
         'NEW_ACTION_LINK' => URL::build('/panel/store/product/' , 'action=new_action&product=' . $product->data()->id),
         'ACTION_LIST' => $actions_array,
-        'CURRENCY' => Output::getClean($configuration->get('currency')),
+        'CURRENCY' => Output::getClean(Store::getCurrency()),
         'HIDE_PRODUCT' => $store_language->get('admin', 'hide_product_from_store'),
         'HIDE_PRODUCT_VALUE' => $product->data()->hidden,
         'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),

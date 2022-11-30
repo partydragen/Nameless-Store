@@ -23,7 +23,6 @@ require_once(ROOT_PATH . '/core/templates/backend_init.php');
 require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
 
 $store = new Store($cache, $store_language);
-$configuration = new Configuration('store');
 
 if (!isset($_GET['action'])) {
     // Get all products and categories
@@ -33,8 +32,8 @@ if (!isset($_GET['action'])) {
     if ($categories->count()) {
         $categories = $categories->results();
 
-        $currency = Output::getClean($configuration->get('currency'));
-        $currency_symbol = Output::getClean($configuration->get('currency_symbol'));
+        $currency = Output::getClean(Store::getCurrency());
+        $currency_symbol = Output::getClean(Store::getCurrencySymbol());
 
         foreach ($categories as $category) {
             $new_category = [
@@ -224,7 +223,7 @@ if (!isset($_GET['action'])) {
                 'CONNECTIONS_LIST' => $connections_array,
                 'FIELDS' => $store_language->get('admin', 'fields'),
                 'FIELDS_LIST' => $fields_array,
-                'CURRENCY' => Output::getClean($configuration->get('currency')),
+                'CURRENCY' => Output::getClean(Store::getCurrency()),
                 'HIDE_PRODUCT' => $store_language->get('admin', 'hide_product_from_store'),
                 'HIDE_PRODUCT_VALUE' => ((isset($_POST['hidden'])) ? 1 : 0),
                 'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),

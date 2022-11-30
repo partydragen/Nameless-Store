@@ -39,9 +39,8 @@ if ($store->isPlayerSystemEnabled() && $to_customer->isLoggedIn()) {
     ]);
 }
 
-$configuration = new Configuration('store');
-$currency = Output::getClean($configuration->get('currency'));
-$currency_symbol = Output::getClean($configuration->get('currency_symbol'));
+$currency = Output::getClean(Store::getCurrency());
+$currency_symbol = Output::getClean(Store::getCurrencySymbol());
 
 // Get user credits if user is logged in
 $credits = 0;

@@ -22,9 +22,8 @@ require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 $timeago = new TimeAgo(TIMEZONE);
 $customer = new Customer($user);
 
-$configuration = new Configuration('store');
-$currency = Output::getClean($configuration->get('currency'));
-$currency_symbol = Output::getClean($configuration->get('currency_symbol'));
+$currency = Output::getClean(Store::getCurrency());
+$currency_symbol = Output::getClean(Store::getCurrencySymbol());
 
 $transactions_list = [];
 $transactions = DB::getInstance()->query('SELECT nl2_store_payments.* FROM nl2_store_payments INNER JOIN nl2_store_orders ON order_id=nl2_store_orders.id WHERE from_customer_id = ? ORDER BY nl2_store_payments.created DESC', [$customer->data()->id]);

@@ -26,15 +26,7 @@ class Store {
     }
 
     public function getStoreURL() {
-        // Get variables from cache
-        $this->_cache->setCache('store_settings');
-        if ($this->_cache->isCached('store_url')) {
-            $store_url = Output::getClean(rtrim($this->_cache->retrieve('store_url'), '/'));
-        } else {
-            $store_url = '/store';
-        }
-
-        return $store_url;
+        return Util::getSetting('store_path', '/store', 'Store');
     }
 
     // Get all products
@@ -131,10 +123,8 @@ class Store {
         return $categories;
     }
 
-    public function isPlayerSystemEnabled() {
-        $configuration = new Configuration('store');
-
-        return $configuration->get('player_login');
+    public function isPlayerSystemEnabled(): bool {
+        return Util::getSetting('player_login', '0', 'Store');
     }
 
     /**
@@ -149,21 +139,15 @@ class Store {
     }
 
     public static function getStorePath(): string {
-        $configuration = new Configuration('store');
-
-        return $configuration->get('store_path');
+        return Util::getSetting('store_path', '/store', 'Store');
     }
 
     public static function getCurrency(): string {
-        $configuration = new Configuration('store');
-
-        return $configuration->get('currency');
+        return Util::getSetting('currency', 'USD', 'Store');
     }
 
     public static function getCurrencySymbol(): string {
-        $configuration = new Configuration('store');
-
-        return $configuration->get('currency_symbol');
+        return Util::getSetting('currency_symbol', '$', 'Store');
     }
 
     /*
