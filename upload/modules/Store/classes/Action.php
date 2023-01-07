@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr13
+ * @version 2.0.2
  * @license MIT
  */
 class Action {
@@ -170,6 +170,16 @@ class Action {
         $placeholders['{purchaserUserId}'] = $customer->exists() ? $customer->data()->user_id ?? 0 : 0;
         $placeholders['{purchaserName}'] = $customer->getUsername();
         $placeholders['{purchaserUuid}'] = $customer->getIdentifier();
+
+        // User Integrations placeholders
+        $user = $order->recipient()->getUser();
+        foreach ($user->getIntegrations() as $integrationUser) {
+            $integrationName = strtolower($integrationUser->getIntegration()->getName());
+
+            $placeholders['{' . $integrationName . 'Username}'] = $integrationUser->data()->username;
+            $placeholders['{' . $integrationName . 'Identifier}'] = $integrationUser->data()->identifier;
+            $placeholders['{' . $integrationName . 'Verified}'] = $integrationUser->data()->verified ? true : false;
+        }
 
         try {
             // For each quantity
