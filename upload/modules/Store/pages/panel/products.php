@@ -72,7 +72,6 @@ if (!isset($_GET['action'])) {
         AssetTree::JQUERY_UI
     );
 
-
     $smarty->assign([
         'ALL_CATEGORIES' => $all_categories,
         'CURRENCY' => $currency,
@@ -250,7 +249,7 @@ if (!isset($_GET['action'])) {
                 $categories = json_decode($_POST['categories']);
                 $i = 1;
 
-                foreach($categories as $item) {
+                foreach ($categories as $item) {
                     DB::getInstance()->query('UPDATE nl2_store_categories SET `order` = ? WHERE id = ?', [$i, $item]);
                     $i++;
                 }
@@ -263,7 +262,7 @@ if (!isset($_GET['action'])) {
                 $category = $_POST['category'];
                 $i = 1;
 
-                foreach($products as $item) {
+                foreach ($products as $item) {
                     DB::getInstance()->query('UPDATE nl2_store_products SET `order` = ? WHERE id = ? AND category_id = ?', [$i, $item, $category]);
                     $i++;
                 }
