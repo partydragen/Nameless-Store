@@ -257,13 +257,12 @@ if (!isset($_GET['action'])) {
             die('Complete');
 
         case 'order_products':
-            if (isset($_POST['products']) && isset($_POST['category']) && Token::check($_POST['token'])) {
+            if (isset($_POST['products']) && Token::check($_POST['token'])) {
                 $products = json_decode($_POST['products']);
-                $category = $_POST['category'];
                 $i = 1;
 
                 foreach ($products as $item) {
-                    DB::getInstance()->query('UPDATE nl2_store_products SET `order` = ? WHERE id = ? AND category_id = ?', [$i, $item, $category]);
+                    DB::getInstance()->query('UPDATE nl2_store_products SET `order` = ? WHERE id = ?', [$i, $item]);
                     $i++;
                 }
             }
