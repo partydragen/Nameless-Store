@@ -196,7 +196,6 @@
                     ui.item.data('startPos', start_pos);
                 },
                 update: function(event, ui) {
-                    const categoryId = $(event.target).data().id;
                     const products = $(event.target).children();
                     const toSubmit = [];
                     products.each(function() {
@@ -206,7 +205,6 @@
                     const data = new URLSearchParams();
                     data.append("token", "{$TOKEN}");
                     data.append("products", JSON.stringify(toSubmit));
-                    data.append("category", categoryId);
 
                     fetch('{$REORDER_PRODUCTS_URL}', {
                         method: 'POST',
