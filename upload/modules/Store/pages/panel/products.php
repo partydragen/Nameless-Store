@@ -32,8 +32,8 @@ if (!isset($_GET['action'])) {
     if ($categories->count()) {
         $categories = $categories->results();
 
-        $currency = Output::getClean($configuration->get('currency'));
-        $currency_symbol = Output::getClean($configuration->get('currency_symbol'));
+        $currency = Output::getClean(Store::getCurrency());
+        $currency_symbol = Output::getClean(Store::getCurrencySymbol());
 
         foreach ($categories as $category) {
             $new_category = [
@@ -231,7 +231,7 @@ if (!isset($_GET['action'])) {
                 'CONNECTIONS_LIST' => $connections_array,
                 'FIELDS' => $store_language->get('admin', 'fields'),
                 'FIELDS_LIST' => $fields_array,
-                'CURRENCY' => Output::getClean($configuration->get('currency')),
+                'CURRENCY' => Output::getClean(Store::getCurency()),
                 'HIDE_PRODUCT' => $store_language->get('admin', 'hide_product_from_store'),
                 'HIDE_PRODUCT_VALUE' => ((isset($_POST['hidden'])) ? 1 : 0),
                 'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),
@@ -242,7 +242,7 @@ if (!isset($_GET['action'])) {
                 AssetTree::TINYMCE,
             ]);
 
-            $template->addJSScript(Input::createTinyEditor($language, 'inputDescription'));
+            $template->addJSScript(Input::createTinyEditor($language, 'inputDescription', null, false, true));
 
             $template_file = 'store/product_new.tpl';
             break;
