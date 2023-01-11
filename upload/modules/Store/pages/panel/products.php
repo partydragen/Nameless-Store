@@ -22,8 +22,6 @@ require_once(ROOT_PATH . '/core/templates/backend_init.php');
 require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
 
 $store = new Store($cache, $store_language);
-$configuration = new Configuration('store');
-error_log("Working hi1");
 if (!isset($_GET['action'])) {
     // Get all products and categories
     $categories = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE deleted = 0 ORDER BY `order` ASC', []);
@@ -231,7 +229,7 @@ if (!isset($_GET['action'])) {
                 'CONNECTIONS_LIST' => $connections_array,
                 'FIELDS' => $store_language->get('admin', 'fields'),
                 'FIELDS_LIST' => $fields_array,
-                'CURRENCY' => Output::getClean(Store::getCurency()),
+                'CURRENCY' => Output::getClean(Store::getCurrency()),
                 'HIDE_PRODUCT' => $store_language->get('admin', 'hide_product_from_store'),
                 'HIDE_PRODUCT_VALUE' => ((isset($_POST['hidden'])) ? 1 : 0),
                 'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),
