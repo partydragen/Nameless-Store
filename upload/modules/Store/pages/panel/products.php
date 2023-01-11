@@ -14,7 +14,6 @@ if (!$user->handlePanelPageLoad('staffcp.store.products')) {
     require_once(ROOT_PATH . '/403.php');
     die();
 }
-
 define('PAGE', 'panel');
 define('PARENT_PAGE', 'store');
 define('PANEL_PAGE', 'store_products');
@@ -23,7 +22,6 @@ require_once(ROOT_PATH . '/core/templates/backend_init.php');
 require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
 
 $store = new Store($cache, $store_language);
-
 if (!isset($_GET['action'])) {
     // Get all products and categories
     $categories = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE deleted = 0 ORDER BY `order` ASC', []);
@@ -37,6 +35,7 @@ if (!isset($_GET['action'])) {
 
         foreach ($categories as $category) {
             $new_category = [
+                'id' => Output::getClean($category->id),
                 'name' => Output::getClean(Output::getDecoded($category->name)),
                 'products' => [],
                 'edit_link' => URL::build('/panel/store/categories/', 'action=edit&id=' . Output::getClean($category->id)),
@@ -69,6 +68,10 @@ if (!isset($_GET['action'])) {
         $smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
     }
 
+    $template->assets()->include(
+        AssetTree::JQUERY_UI
+    );
+
     $smarty->assign([
         'ALL_CATEGORIES' => $all_categories,
         'CURRENCY' => $currency,
@@ -82,6 +85,8 @@ if (!isset($_GET['action'])) {
         'CONFIRM_DELETE_PRODUCT' => $store_language->get('admin', 'product_confirm_delete'),
         'YES' => $language->get('general', 'yes'),
         'NO' => $language->get('general', 'no'),
+        'REORDER_CATEGORY_URL' => URL::build('/panel/store/products', 'action=order_categories'),
+        'REORDER_PRODUCTS_URL' => URL::build('/panel/store/products', 'action=order_products'),
     ]);
 
     $template_file = 'store/products.tpl';
@@ -237,10 +242,33 @@ if (!isset($_GET['action'])) {
             $template->addJSScript(Input::createTinyEditor($language, 'inputDescription', null, false, true));
 
             $template_file = 'store/product_new.tpl';
-        break;
+            break;
+
+        case 'order_categories':
+            if (isset($_POST['categories']) && Token::check($_POST['token'])) {
+                $categories = json_decode($_POST['categories']);
+                $i = 1;
+
+                foreach ($categories as $item) {
+                    DB::getInstance()->query('UPDATE nl2_store_categories SET `order` = ? WHERE id = ?', [$i, $item]);
+                    $i++;
+                }
+            }
+            die('Complete');
+
+        case 'order_products':
+            if (isset($_POST['products']) && Token::check($_POST['token'])) {
+                $products = json_decode($_POST['products']);
+                $i = 1;
+
+                foreach ($products as $item) {
+                    DB::getInstance()->query('UPDATE nl2_store_products SET `order` = ? WHERE id = ?', [$i, $item]);
+                    $i++;
+                }
+            }
+            die('Complete');
         default:
             Redirect::to(URL::build('/panel/store/products'));
-        break;
     }
 }
 
