@@ -67,9 +67,9 @@
                                             {if count($category.products)}
                                                 {foreach from=$category.products item=product name=product_loop}
                                                     <tr data-id="{$product.id}">
-                                                        <td style="padding-left: 35px">{$product.name} <small>{$product.id_x}</small></td>
-                                                        <td><center>{$CURRENCY_SYMBOL}{$product.price} {$CURRENCY}</center></td>
-                                                        <td style="padding-right: 1.25rem">
+                                                        <td width="45%" style="padding-left: 35px">{$product.name} <small>{$product.id_x}</small></td>
+                                                        <td width="15%"><center>{$CURRENCY_SYMBOL}{$product.price} {$CURRENCY}</center></td>
+                                                        <td width="40%" style="padding-right: 1.25rem">
                                                             {if isset($product.edit_link)}
                                                                 <div class="float-md-right">
                                                                     <div class="btn btn-secondary btn-sm"><i class="fas fa-arrows-alt"></i></div>
