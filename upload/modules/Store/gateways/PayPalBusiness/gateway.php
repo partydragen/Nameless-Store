@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr13
+ * @version 2.0.3
  * @license MIT
  */
 class PayPal_Business_Gateway extends GatewayBase {
@@ -12,8 +12,11 @@ class PayPal_Business_Gateway extends GatewayBase {
     public function __construct() {
         $name = 'PayPalBusiness';
         $settings = ROOT_PATH . '/modules/Store/gateways/PayPalBusiness/gateway_settings/settings.php';
+        $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
+        $gateway_version = '1.4.3';
+        $store_version = '1.4.3';
 
-        parent::__construct($name, $settings);
+        parent::__construct($name, $settings, $author, $gateway_version, $store_version);
     }
 
     public function onCheckoutPageLoad(TemplateBase $template, Customer $customer): void {

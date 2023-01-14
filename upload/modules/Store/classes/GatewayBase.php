@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr13
+ * @version 2.0.2
  * @license MIT
  */
 abstract class GatewayBase {
@@ -18,6 +18,21 @@ abstract class GatewayBase {
      * @var string The gateway name
      */
     private string $_name;
+
+    /**
+     * @var string The gateway author
+     */
+    private string $_author;
+
+    /**
+     * @var string The gateway version
+     */
+    private string $_version;
+
+    /**
+     * @var string The gateway store version
+     */
+    private string $_store_version;
 
     /**
      * @var string The gateway displayname
@@ -39,9 +54,12 @@ abstract class GatewayBase {
      */
     private array $_errors = [];
 
-    public function __construct($name, $settings) {
+    public function __construct(string $name, string $settings, string $author = 'Unknown', string $version = 'Unknown', string $store_version = 'Unknown') {
         $this->_name = $name;
         $this->_settings = $settings;
+        $this->_author = $author;
+        $this->_version = $version;
+        $this->_store_version = $store_version;
 
         $db = DB::getInstance();
         $gateway_query = $db->query('SELECT id, displayname, enabled FROM nl2_store_gateways WHERE `name` = ?', [$name])->first();
@@ -162,4 +180,31 @@ abstract class GatewayBase {
      * Handle webhook events from gateway.
      */
     abstract public function handleListener(): void;
+
+    /**
+     * Get this gateway's author.
+     *
+     * @return string The author of this gateway.
+     */
+    public function getAuthor(): string {
+        return $this->_author;
+    }
+
+    /**
+     * Get this gateway's version.
+     *
+     * @return string The version of this gateway.
+     */
+    public function getVersion(): string {
+        return $this->_version;
+    }
+
+    /**
+     * Get this gateway's supported Store version.
+     *
+     * @return string The supported Store version of this gateway.
+     */
+    public function getStoreVersion(): string {
+        return $this->_store_version;
+    }
 }

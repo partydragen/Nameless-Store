@@ -52,7 +52,8 @@
                                 <tbody>
                                     {foreach from=$GATEWAYS_LIST item=gateway}
                                         <tr>
-                                            <td>{$gateway.name}</td>
+                                            <td><strong>{$gateway.name}</strong> <small>{$gateway.version}</small><br />
+                                            <small>{$gateway.author_x}</small></td>
                                             <td>{if $gateway.enabled}<span class="badge badge-success">{$ENABLED}</span>{else}<span class="badge badge-danger">{$DISABLED}</span>{/if}</td>
                                             <td><a href="{$gateway.edit_link}" class="btn btn-primary btn-sm float-right">{$EDIT}</a></td>
                                         </tr>

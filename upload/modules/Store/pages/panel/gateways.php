@@ -46,6 +46,10 @@ if (!isset($_GET['gateway'])) {
         foreach ($gateways->getAll() as $gateway) {
             $gateways_list[] = [
                 'name' => Output::getClean($gateway->getName()),
+                'version' => Output::getClean($gateway->getVersion()),
+                'store_version' => Output::getClean($gateway->getStoreVersion()),
+                'author' => Output::getPurified($gateway->getAuthor()),
+                'author_x' => $language->get('admin', 'author_x', ['author' => Output::getPurified($gateway->getAuthor())]),
                 'enabled' => $gateway->isEnabled(),
                 'edit_link' => URL::build('/panel/store/gateways/', 'gateway=' . Output::getClean($gateway->getName())),
             ];
