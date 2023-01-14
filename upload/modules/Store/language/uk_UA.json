@@ -1,1 +1,14 @@
-{}
+{
+    "admin/category_created_successfully": "Категорію успішно створено.",
+    "admin/category_name": "Назва категорії",
+    "admin/category_updated_successfully": "Категорію успішно оновлено.",
+    "admin/new_category": "Нова категорія",
+    "admin/new_update_available_x": "Доступне нове оновлення для модуля {{module}}",
+    "admin/categories": "Категорії",
+    "admin/category_deleted_successfully": "Категорію успішно видалено.",
+    "admin/current_version_x": "Поточна версія модуля: {{version}}",
+    "admin/new_urgent_update_available_x": "Доступне нове термінове оновлення для модуля {{module}}. Оновіть модуль якомога швидше!",
+    "admin/new_version_x": "Нова версія модуля: {{new_version}}",
+    "admin/settings": "Налаштування",
+    "admin/status": "Статус"
+}
