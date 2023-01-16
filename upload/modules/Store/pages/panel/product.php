@@ -215,6 +215,12 @@ if (!isset($_GET['action'])) {
             case 3:
                 $type = 'Changeback';
             break;
+            case 4:
+                $type = 'Renewal';
+            break;
+            case 5:
+                $type = 'Expire';
+            break;
         }
 
         $actions_array[] = [
@@ -387,6 +393,12 @@ if (!isset($_GET['action'])) {
                     break;
                     case 3:
                         $type = 'Changeback';
+                    break;
+                    case 4:
+                        $type = 'Renewal';
+                    break;
+                    case 5:
+                        $type = 'Expire';
                     break;
                 }
 

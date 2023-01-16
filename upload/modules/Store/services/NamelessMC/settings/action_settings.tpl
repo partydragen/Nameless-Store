@@ -5,6 +5,8 @@
             <option value="1" {if $TRIGGER_VALUE == 1} selected{/if}>Purchase</option>
             <option value="2" {if $TRIGGER_VALUE == 2} selected{/if}>Refund</option>
             <option value="3" {if $TRIGGER_VALUE == 3} selected{/if}>Changeback</option>
+            <option value="4" {if $TRIGGER_VALUE == 4} selected{/if}>Renewal</option>
+            <option value="5" {if $TRIGGER_VALUE == 5} selected{/if}>Expire</option>
         </select>
     </div>
     <div class="form-group">
