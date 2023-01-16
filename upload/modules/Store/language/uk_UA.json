@@ -10,5 +10,7 @@
     "admin/new_urgent_update_available_x": "Доступне нове термінове оновлення для модуля {{module}}. Оновіть модуль якомога швидше!",
     "admin/new_version_x": "Нова версія модуля: {{new_version}}",
     "admin/settings": "Налаштування",
-    "admin/status": "Статус"
+    "admin/status": "Статус",
+    "admin/all_purchases": "Всі покупки",
+    "admin/allow_guests": "Дозволити здійснювати покупки гостям?"
 }
