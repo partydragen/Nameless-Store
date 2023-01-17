@@ -31,18 +31,13 @@ if (!is_numeric($category_id[0])) {
 $category_id = $category_id[0];
 
 // Query category
-$category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ?', [$category_id]);
+$category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ? AND disabled = 0', [$category_id]);
 if (!$category->count()) {
     require_once(ROOT_PATH . '/404.php');
     die();
 }
 
 $category = $category->first();
-if ($category->disabled == 1) {
-    require_once(ROOT_PATH . '/404.php');
-    die();
-}
-
 $store_url = $store->getStoreURL();
 
 $page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/view'])->results();
@@ -87,23 +82,36 @@ $products = DB::getInstance()->query('SELECT id, name, `order`, price, descripti
 if (!$products->count()) {
     $smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
 } else {
-    $products = $products->results();
     $category_products = [];
 
-    foreach ($products as $product) {
-        $content = Output::getDecoded($product->description);
-        $content = Output::getPurified($content);
+    foreach ($products->results() as $product) {
+        $renderProductEvent = EventHandler::executeEvent('renderStoreProduct', [
+            'id' => $product->id,
+            'name' => $product->name,
+            'content' => $product->description,
+            'price' => $product->price,
+            'real_price' => $product->price,
+            'sale_active' => false,
+			'sale_discount' => 0,
+            'image' => (isset($product->image) && !is_null($product->image) ? (defined('CONFIG_PATH') ? CONFIG_PATH . '/' : '/' . 'uploads/store/' . Output::getClean(Output::getDecoded($product->image))) : null),
+            'link' => URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->id)),
+            'hidden' => false,
+        ]);
 
-        $image = (isset($product->image) && !is_null($product->image) ? (defined('CONFIG_PATH') ? CONFIG_PATH . '/' : '/' . 'uploads/store/' . Output::getClean(Output::getDecoded($product->image))) : null);
+        if ($renderProductEvent['hidden']) {
+            continue;
+        }
 
         $category_products[] = [
-            'id' => Output::getClean($product->id),
-            'name' => Output::getClean($product->name),
-            'price' => Output::getClean($product->price),
-            'real_price' => Output::getClean($product->price),
-            'description' => $content,
-            'image' => $image,
-            'link' => URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->id))
+            'id' => $product->id,
+            'name' => Output::getClean($renderProductEvent['name']),
+            'price' => Output::getClean($renderProductEvent['price']),
+            'real_price' => Output::getClean($renderProductEvent['real_price']),
+            'sale_active' => $renderProductEvent['sale_active'],
+			'sale_discount' => Output::getClean($renderProductEvent['sale_discount']),
+            'description' => $renderProductEvent['content'],
+            'image' => $renderProductEvent['image'],
+            'link' => $renderProductEvent['link']
         ];
     }
 
@@ -111,8 +119,11 @@ if (!$products->count()) {
 }
 
 // Category description
-$content = Output::getDecoded($category->description);
-$content = Output::getPurified($content);
+$renderCategoryEvent = EventHandler::executeEvent('renderStoreCategory', [
+    'id' => $category->id,
+    'name' => $category->name,
+    'content' => $category->description
+]);
 
 $smarty->assign([
     'ACTIVE_CATEGORY' => Output::getClean($category->name),
@@ -130,7 +141,9 @@ $smarty->assign([
     'HOME' => $store_language->get('general', 'home'),
     'HOME_URL' => URL::build($store_url),
     'CATEGORIES' => $store->getNavbarMenu($category->name),
-    'CONTENT' => $content,
+    'CATEGORY_ID' => $renderCategoryEvent['id'],
+    'CATEGORY_NAME' => $renderCategoryEvent['name'],
+    'CONTENT' => $renderCategoryEvent['content'],
     'TOKEN' => Token::get(),
 ]);
 

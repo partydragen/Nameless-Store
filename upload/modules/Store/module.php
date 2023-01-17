@@ -3,7 +3,7 @@
  *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
- *  NamelessMC version 2.0.2
+ *  NamelessMC version 2.0.3
  *
  *  License: MIT
  *
@@ -55,6 +55,8 @@ class Store_Module extends Module {
         EventHandler::registerEvent('paymentReversed', $store_language->get('admin', 'payment_reversed'));
         EventHandler::registerEvent('paymentDenied', $store_language->get('admin', 'payment_denied'));
         EventHandler::registerEvent('storeCheckoutAddProduct', 'storeCheckoutAddProduct', [], true, true);
+        EventHandler::registerEvent('renderStoreProduct', 'renderStoreProduct', [], true, true);
+        EventHandler::registerEvent('storeCheckoutAddProduct', 'storeCheckoutAddProduct', [], true, true);
         EventHandler::registerEvent('storeCheckoutFieldsValidation', 'storeCheckoutFieldsValidation', [], true, true);
 
         require_once(ROOT_PATH . '/modules/Store/hooks/CheckoutAddProductHook.php');
@@ -63,6 +65,16 @@ class Store_Module extends Module {
         EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::requiredProducts');
         EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::requiredGroups');
         EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::requiredIntegrations');
+        EventHandler::registerListener('renderStoreCategory', 'ContentHook::purify');
+        EventHandler::registerListener('renderStoreCategory', 'ContentHook::codeTransform', 15);
+        EventHandler::registerListener('renderStoreCategory', 'ContentHook::decode', 20);
+        EventHandler::registerListener('renderStoreCategory', 'ContentHook::renderEmojis', 10);
+        EventHandler::registerListener('renderStoreCategory', 'ContentHook::replaceAnchors', 15);
+        EventHandler::registerListener('renderStoreProduct', 'ContentHook::purify');
+        EventHandler::registerListener('renderStoreProduct', 'ContentHook::codeTransform', 15);
+        EventHandler::registerListener('renderStoreProduct', 'ContentHook::decode', 20);
+        EventHandler::registerListener('renderStoreProduct', 'ContentHook::renderEmojis', 10);
+        EventHandler::registerListener('renderStoreProduct', 'ContentHook::replaceAnchors', 15);
 
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
 
