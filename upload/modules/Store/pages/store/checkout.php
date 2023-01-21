@@ -309,7 +309,7 @@ if (isset($_GET['do'])) {
     // Load shopping list
     $shopping_cart_list = [];
     foreach ($shopping_cart->getProducts() as $product) {
-        $item = $shopping_cart->getItems()[$product->id];
+        $item = $shopping_cart->getItems()[$product->data()->id];
 
         $fields = [];
         foreach ($item['fields'] as $field) {
@@ -327,11 +327,11 @@ if (isset($_GET['do'])) {
         }
 
         $shopping_cart_list[] = [
-            'name' => Output::getClean($product->name),
+            'name' => Output::getClean($product->data()->name),
             'quantity' => $item['quantity'],
-            'price' => Output::getClean($product->price) * $item['quantity'],
+            'price' => Output::getClean($product->getRealPrice()) * $item['quantity'],
             'fields' => $fields,
-            'remove_link' => URL::build($store_url . '/checkout/', 'remove=' . $product->id),
+            'remove_link' => URL::build($store_url . '/checkout/', 'remove=' . $product->data()->id),
         ];
     }
 

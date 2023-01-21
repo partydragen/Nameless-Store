@@ -31,18 +31,13 @@ if (!is_numeric($category_id[0])) {
 $category_id = $category_id[0];
 
 // Query category
-$category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ?', [$category_id]);
+$category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ? AND disabled = 0', [$category_id]);
 if (!$category->count()) {
     require_once(ROOT_PATH . '/404.php');
     die();
 }
 
 $category = $category->first();
-if ($category->disabled == 1) {
-    require_once(ROOT_PATH . '/404.php');
-    die();
-}
-
 $store_url = $store->getStoreURL();
 
 $page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/view'])->results();
@@ -55,7 +50,7 @@ $page_title = Output::getClean($category->name);
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 
 if (Input::exists()) {
-    if (Token::check(Input::get('token'))) {
+    if (Token::check()) {
         $errors = [];
 
         if (Input::get('type') == 'store_login') {
@@ -87,23 +82,34 @@ $products = DB::getInstance()->query('SELECT id, name, `order`, price, descripti
 if (!$products->count()) {
     $smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
 } else {
-    $products = $products->results();
     $category_products = [];
 
-    foreach ($products as $product) {
-        $content = Output::getDecoded($product->description);
-        $content = Output::getPurified($content);
+    foreach ($products->results() as $item) {
+        $product = new Product(null, null, $item);
 
-        $image = (isset($product->image) && !is_null($product->image) ? (defined('CONFIG_PATH') ? CONFIG_PATH . '/' : '/' . 'uploads/store/' . Output::getClean(Output::getDecoded($product->image))) : null);
+        $renderProductEvent = EventHandler::executeEvent('renderStoreProduct', [
+            'product' => $product,
+            'name' => $product->data()->name,
+            'content' => $product->data()->description,
+            'image' => (isset($product->data()->image) && !is_null($product->data()->image) ? (defined('CONFIG_PATH') ? CONFIG_PATH . '/' : '/' . 'uploads/store/' . Output::getClean(Output::getDecoded($product->data()->image))) : null),
+            'link' => URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->data()->id)),
+            'hidden' => false,
+        ]);
+
+        if ($renderProductEvent['hidden']) {
+            continue;
+        }
 
         $category_products[] = [
-            'id' => Output::getClean($product->id),
-            'name' => Output::getClean($product->name),
-            'price' => Output::getClean($product->price),
-            'real_price' => Output::getClean($product->price),
-            'description' => $content,
-            'image' => $image,
-            'link' => URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->id))
+            'id' => $product->data()->id,
+            'name' => Output::getClean($renderProductEvent['name']),
+            'price' => Output::getClean(number_format($product->data()->price, 2, '.', '')),
+            'real_price' => Output::getClean(number_format($product->getRealPrice(), 2, '.', '')),
+            'sale_active' => $product->data()->sale_active,
+			'sale_discount' => Output::getClean(number_format($product->data()->sale_discount, 2, '.', '')),
+            'description' => $renderProductEvent['content'],
+            'image' => $renderProductEvent['image'],
+            'link' => $renderProductEvent['link']
         ];
     }
 
@@ -111,8 +117,11 @@ if (!$products->count()) {
 }
 
 // Category description
-$content = Output::getDecoded($category->description);
-$content = Output::getPurified($content);
+$renderCategoryEvent = EventHandler::executeEvent('renderStoreCategory', [
+    'id' => $category->id,
+    'name' => $category->name,
+    'content' => $category->description
+]);
 
 $smarty->assign([
     'ACTIVE_CATEGORY' => Output::getClean($category->name),
@@ -130,7 +139,9 @@ $smarty->assign([
     'HOME' => $store_language->get('general', 'home'),
     'HOME_URL' => URL::build($store_url),
     'CATEGORIES' => $store->getNavbarMenu($category->name),
-    'CONTENT' => $content,
+    'CATEGORY_ID' => $renderCategoryEvent['id'],
+    'CATEGORY_NAME' => $renderCategoryEvent['name'],
+    'CONTENT' => $renderCategoryEvent['content'],
     'TOKEN' => Token::get(),
 ]);
 

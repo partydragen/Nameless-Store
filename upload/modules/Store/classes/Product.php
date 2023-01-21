@@ -38,10 +38,14 @@ class Product {
             $data = $this->_db->get('store_products', [$field, '=', $value]);
             if ($data->count()) {
                 $this->_data = $data->first();
+                $this->_data->sale_active = false;
+                $this->_data->sale_discount = 0;
             }
         } else if ($query_data) {
             // Load data from existing query.
             $this->_data = $query_data;
+            $this->_data->sale_active = false;
+            $this->_data->sale_discount = 0;
         }
     }
 
@@ -296,6 +300,10 @@ class Product {
         }
 
         return $required_integrations_list;
+    }
+
+    public function getRealPrice() {
+        return $this->data()->sale_active == 1 ? $this->data()->price - $this->data()->sale_discount : $this->data()->price;
     }
 
     public function delete() {

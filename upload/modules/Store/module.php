@@ -3,7 +3,7 @@
  *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
- *  NamelessMC version 2.0.2
+ *  NamelessMC version 2.0.3
  *
  *  License: MIT
  *
@@ -45,6 +45,7 @@ class Store_Module extends Module {
         $pages->add('Store', '/panel/store/payments', 'pages/panel/payments.php');
         $pages->add('Store', '/panel/store/connections', 'pages/panel/connections.php');
         $pages->add('Store', '/panel/store/fields', 'pages/panel/fields.php');
+        $pages->add('Store', '/panel/store/sales', 'pages/panel/sales.php');
         $pages->add('Store', '/panel/users/store', 'pages/panel/users_store.php');
 
         $pages->add('Store', '/user/store', 'pages/user/store.php');
@@ -55,6 +56,8 @@ class Store_Module extends Module {
         EventHandler::registerEvent('paymentReversed', $store_language->get('admin', 'payment_reversed'));
         EventHandler::registerEvent('paymentDenied', $store_language->get('admin', 'payment_denied'));
         EventHandler::registerEvent('storeCheckoutAddProduct', 'storeCheckoutAddProduct', [], true, true);
+        EventHandler::registerEvent('renderStoreProduct', 'renderStoreProduct', [], true, true);
+        EventHandler::registerEvent('storeCheckoutAddProduct', 'storeCheckoutAddProduct', [], true, true);
         EventHandler::registerEvent('storeCheckoutFieldsValidation', 'storeCheckoutFieldsValidation', [], true, true);
 
         require_once(ROOT_PATH . '/modules/Store/hooks/CheckoutAddProductHook.php');
@@ -63,6 +66,19 @@ class Store_Module extends Module {
         EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::requiredProducts');
         EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::requiredGroups');
         EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::requiredIntegrations');
+        EventHandler::registerListener('renderStoreCategory', 'ContentHook::purify');
+        EventHandler::registerListener('renderStoreCategory', 'ContentHook::codeTransform', 15);
+        EventHandler::registerListener('renderStoreCategory', 'ContentHook::decode', 20);
+        EventHandler::registerListener('renderStoreCategory', 'ContentHook::renderEmojis', 10);
+        EventHandler::registerListener('renderStoreCategory', 'ContentHook::replaceAnchors', 15);
+        EventHandler::registerListener('renderStoreProduct', 'ContentHook::purify');
+        EventHandler::registerListener('renderStoreProduct', 'ContentHook::codeTransform', 15);
+        EventHandler::registerListener('renderStoreProduct', 'ContentHook::decode', 20);
+        EventHandler::registerListener('renderStoreProduct', 'ContentHook::renderEmojis', 10);
+        EventHandler::registerListener('renderStoreProduct', 'ContentHook::replaceAnchors', 15);
+
+        require_once(ROOT_PATH . '/modules/Store/hooks/PriceAdjustmentHook.php');
+        EventHandler::registerListener('renderStoreProduct', 'PriceAdjustmentHook::discounts');
 
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
 
@@ -165,6 +181,7 @@ class Store_Module extends Module {
                 'staffcp.store.connections' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'connections'),
                 'staffcp.store.fields' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'fields'),
                 'staffcp.store.manage_credits' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'manage_users_credits'),
+                'staffcp.store.sales' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'sales'),
             ]);
 
             if ($user->hasPermission('staffcp.store')) {
@@ -244,6 +261,16 @@ class Store_Module extends Module {
                         $icon = $cache->retrieve('store_payments_icon');
 
                     $navs[2]->add('store_payments', $this->_store_language->get('admin', 'payments'), URL::build('/panel/store/payments'), 'top', null, ($order + 0.7), $icon);
+                }
+
+                if ($user->hasPermission('staffcp.store.sales')) {
+                    if (!$cache->isCached('store_sales_icon')) {
+                        $icon = '<i class="nav-icon fa-solid fa-tag"></i>';
+                        $cache->store('store_sales_icon', $icon);
+                    } else
+                        $icon = $cache->retrieve('store_sales_icon');
+
+                    $navs[2]->add('store_sales', $this->_store_language->get('admin', 'sales'), URL::build('/panel/store/sales'), 'top', null, ($order + 0.7), $icon);
                 }
             }
 
@@ -835,6 +862,14 @@ class Store_Module extends Module {
         }
 
         if ($old_version < 152) {
+            if (!$this->_db->showTables('store_sales')) {
+                try {
+                    $this->_db->createTable("store_sales", " `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `effective_on` varchar(256) NOT NULL, `discount_type` int(11) NOT NULL, `discount_amount` int(11) NOT NULL, `start_date` int(11) NOT NULL, `expire_date` int(11) NOT NULL, PRIMARY KEY (`id`)");
+                } catch (Exception $e) {
+                    // Error
+                }
+            }
+
             try {
                 if ($this->_db->showTables('store_settings')) {
                     // Convert store settings to NamelessMC settings system
@@ -1003,6 +1038,14 @@ class Store_Module extends Module {
                     'default_value' => '1',
                     'order' => '0'
                 ]);
+            } catch (Exception $e) {
+                // Error
+            }
+        }
+
+        if (!$this->_db->showTables('store_sales')) {
+            try {
+                $this->_db->createTable("store_sales", " `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `effective_on` varchar(256) NOT NULL, `discount_type` int(11) NOT NULL, `discount_amount` int(11) NOT NULL, `start_date` int(11) NOT NULL, `expire_date` int(11) NOT NULL, PRIMARY KEY (`id`)");
             } catch (Exception $e) {
                 // Error
             }

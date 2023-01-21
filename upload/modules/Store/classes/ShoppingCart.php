@@ -17,7 +17,7 @@ class ShoppingCart {
     private array $_items = [];
 
     /**
-     * @var array<int, Object> The list of products.
+     * @var array<int, Product> The list of products.
      */
     private array $_products = [];
 
@@ -35,8 +35,19 @@ class ShoppingCart {
 
             // Get products
             $products_query = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE id in '.$products_ids.' AND disabled = 0 AND deleted = 0 ')->results();
-            foreach ($products_query as $product) {
-                $this->_products[$product->id] = $product;
+            foreach ($products_query as $item) {
+                $product = new Product(null, null, $item);
+
+                $renderProductEvent = EventHandler::executeEvent('renderStoreProduct', [
+                    'product' => $product,
+                    'name' => $product->data()->name,
+                    'content' => $product->data()->description,
+                    'image' => (isset($product->data()->image) && !is_null($product->data()->image) ? (defined('CONFIG_PATH') ? CONFIG_PATH . '/' : '/' . 'uploads/store/' . Output::getClean(Output::getDecoded($product->data()->image))) : null),
+                    'link' => URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->data()->id)),
+                    'hidden' => false,
+                ]);
+
+                $this->_products[$item->id] = $product;
             }
 
             // Remove items if they're invalid, disabled or deleted
@@ -86,8 +97,8 @@ class ShoppingCart {
     public function getTotalPrice() {
         $price = 0;
 
-        foreach ($this->_products as $product) {
-            $price += $product->price * $this->_items[$product->id]['quantity'];
+        foreach ($this->getProducts() as $product) {
+            $price += $product->getRealPrice() * $this->_items[$product->data()->id]['quantity'];
         }
 
         return $price;

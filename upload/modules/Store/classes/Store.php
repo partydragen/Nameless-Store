@@ -14,6 +14,11 @@ class Store {
             $_cache;
 
     /**
+     * @var array The list of the active sales.
+     */
+    private static array $_active_sales;
+
+    /**
      * @var Language Instance of Language class for translations
      */
     private static Language $_store_language;
@@ -148,6 +153,21 @@ class Store {
 
     public static function getCurrencySymbol(): string {
         return Util::getSetting('currency_symbol', '$', 'Store');
+    }
+
+    /**
+     * Get the active sales .
+     *
+     * @return Product[] The products for this order.
+     */
+    public static function getActiveSales(): array {
+        return self::$_active_sales ??= (function (): array {
+            $active_sales = [];
+
+            $sales = DB::getInstance()->query('SELECT * FROM nl2_store_sales WHERE start_date < ? AND expire_date > ? ORDER BY `expire_date` DESC', [date('U'), date('U')])->results();
+
+            return $sales;
+        })();
     }
 
     /*
