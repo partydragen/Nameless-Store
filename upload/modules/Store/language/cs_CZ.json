@@ -148,7 +148,7 @@
     "admin/select_multiple_with_ctrl": "(vyberte více držením Ctrl (Cmd na Macu))",
     "admin/service_connections": "Propojení služeb",
     "admin/settings": "Nastavení",
-    "admin/start_date": "Datum začátku (rrrr-mm-dd)",
+    "admin/start_date": "Datum začátku",
     "admin/status": "Stav",
     "admin/store_configuration": "Nastavení obchodu",
     "admin/store_content_max": "Obsah domovské stránky obchodu může obsahovat maximálně 60 000 znaků.",
@@ -226,5 +226,16 @@
     "general/not_enough_credits": "K provedení této akce nemáte dostatek kreditů!",
     "general/successfully_sent_credits": "Uživateli {{user}} bylo úspěšně posláno {{amount}} kreditů",
     "general/received_x_credits_from_x": "Obdrželi jste {{amount}} kreditů od uživatele {{user}}",
-    "admin/manage_users_credits": "Může spravovat uživatelské kredity"
+    "admin/manage_users_credits": "Může spravovat uživatelské kredity",
+    "admin/sales": "Slevy",
+    "admin/new_sale": "Nová sleva",
+    "admin/no_sales": "Nemáte žádné slevy",
+    "admin/creating_sale": "Vytváření slevy",
+    "admin/editing_sale_x": "Úprava slevy {{sale}}",
+    "admin/discount_type": "Typ slevy",
+    "admin/confirm_delete_sale": "Opravdu chcete odstranit tuto slevu?",
+    "admin/expire_date": "Datum vypršení",
+    "admin/name": "Název",
+    "admin/sale_created_successfully": "Sleva úspěšně vytvořena",
+    "admin/sale_updated_successfully": "Sleva úspěšně aktualizována"
 }
