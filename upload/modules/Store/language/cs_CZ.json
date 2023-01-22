@@ -237,5 +237,10 @@
     "admin/expire_date": "Datum vypršení",
     "admin/name": "Název",
     "admin/sale_created_successfully": "Sleva úspěšně vytvořena",
-    "admin/sale_updated_successfully": "Sleva úspěšně aktualizována"
+    "admin/sale_updated_successfully": "Sleva úspěšně aktualizována",
+    "admin/currency_format_max": "Formát měny může obsahovat maximálně {{max}} znaků.",
+    "admin/currency_format_min": "Formát měny musí obsahovat alespoň {{min}} znaků.",
+    "admin/currency_format_required": "Je vyžadován formát měny.",
+    "admin/currency_format": "Formát měny",
+    "admin/currency_format_info": "Dostupné proměnné jsou {currencyCode}, {currencySymbol} a {price}"
 }
