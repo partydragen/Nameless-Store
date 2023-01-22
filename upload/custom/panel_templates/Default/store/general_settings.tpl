@@ -55,6 +55,11 @@
                                             <input type="checkbox" name="show_credits_amount" id="inputShowCreditsAmount" class="custom-control-input" {if $SHOW_CREDITS_AMOUNT_VALUE} checked{/if} />
                                             <label class="custom-control-label" for="inputShowCreditsAmount">{$SHOW_CREDITS_AMOUNT}</label>
                                         </div>
+                                        
+                                        <div class="form-group custom-control custom-switch">
+                                            <input type="checkbox" name="user_send_credits" id="inputUserSendCredits" class="custom-control-input" {if $ALLOW_USERS_TO_SEND_CREDITS_VALUE} checked{/if} />
+                                            <label class="custom-control-label" for="inputUserSendCredits">{$ALLOW_USERS_TO_SEND_CREDITS}</label>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">

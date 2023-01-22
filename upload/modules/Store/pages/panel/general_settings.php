@@ -59,6 +59,12 @@ if (isset($_POST) && !empty($_POST)) {
                 $show_credits_amount = 1;
             else
                 $show_credits_amount = 0;
+            
+            // Allow users to send credits to other users?
+            if (isset($_POST['user_send_credits']) && $_POST['user_send_credits'] == 'on')
+                $user_send_credits = 1;
+            else
+                $user_send_credits = 0;
 
             // Update store path
             if (isset($_POST['store_path']) && strlen(str_replace(' ', '', $_POST['store_path'])) > 0)
@@ -75,6 +81,7 @@ if (isset($_POST) && !empty($_POST)) {
             Util::setSetting('checkout_complete_content', Input::get('checkout_complete_content'), 'Store');
 
             Util::setSetting('show_credits_amount', $show_credits_amount);
+            Util::setSetting('user_send_credits', $user_send_credits);
 
             // Update link location
             if (isset($_POST['link_location'])) {
@@ -166,6 +173,8 @@ $smarty->assign([
     'PLAYER_LOGIN_VALUE' => ($player_login == 1),
     'SHOW_CREDITS_AMOUNT' => $store_language->get('admin', 'show_credits_amount'),
     'SHOW_CREDITS_AMOUNT_VALUE' => $show_credits_amount,
+    'ALLOW_USERS_TO_SEND_CREDITS' => $store_language->get('admin', 'allow_users_to_send_credits'),
+    'ALLOW_USERS_TO_SEND_CREDITS_VALUE' => Util::getSetting('user_send_credits', '0'),
     'STORE_PATH' => $store_language->get('admin', 'store_path'),
     'STORE_PATH_VALUE' => $store_path,
     'CURRENCY' => $store_language->get('admin', 'currency'),
