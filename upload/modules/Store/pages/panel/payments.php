@@ -69,7 +69,15 @@ if (isset($_GET['customer'])) {
                 'status_id' => $paymentQuery->status_id,
                 'status' => $payment->getStatusHtml(),
                 'currency' => Output::getClean($paymentQuery->currency),
-                'amount' => Output::getClean($paymentQuery->amount),
+                'amount' => Store::fromCents($paymentQuery->amount_cents),
+                'amount_format' => Output::getPurified(
+                    Store::formatPrice(
+                        $paymentQuery->amount_cents,
+                        $paymentQuery->currency,
+                        $currency_symbol,
+                        STORE_CURRENCY_FORMAT,
+                    )
+                ),
                 'date' => date(DATE_FORMAT, $paymentQuery->created),
                 'link' => URL::build('/panel/store/payments', 'payment=' . Output::getClean($paymentQuery->id))
             ];
@@ -230,7 +238,15 @@ if (isset($_GET['customer'])) {
         'UUID' => $store_language->get('admin', 'uuid'),
         'UUID_VALUE' => $uuid,
         'PRICE' => $store_language->get('general', 'price'),
-        'PRICE_VALUE' => Output::getClean($payment->data()->amount),
+        'PRICE_VALUE' => Store::fromCents($payment->data()->amount_cents),
+        'PRICE_FORMAT_VALUE' => Output::getPurified(
+            Store::formatPrice(
+                $payment->data()->amount_cents,
+                $payment->data()->currency,
+                Store::getCurrencySymbol(),
+                STORE_CURRENCY_FORMAT,
+            )
+        ),
         'CURRENCY_SYMBOL' => Output::getClean(Store::getCurrencySymbol()),
         'CURRENCY_ISO' => Output::getClean($payment->data()->currency),
         'DATE_VALUE' => date(DATE_FORMAT, $payment->data()->created),
@@ -307,7 +323,7 @@ if (isset($_GET['customer'])) {
                         $payment->handlePaymentEvent('COMPLETED', [
                             'order_id' => $order->data()->id,
                             'gateway_id' => 0,
-                            'amount' => 0,
+                            'amount_cents' => 0,
                             'currency' => Store::getCurrency(),
                             'fee' => 0
                         ]);
@@ -394,7 +410,15 @@ if (isset($_GET['customer'])) {
                 'status_id' => $paymentQuery->status_id,
                 'status' => $payment->getStatusHtml(),
                 'currency_symbol' => Output::getClean(Store::getCurrencySymbol()),
-                'amount' => Output::getClean($paymentQuery->amount),
+                'amount' => Store::fromCents($paymentQuery->amount_cents),
+                'amount_format' => Output::getPurified(
+                    Store::formatPrice(
+                        $paymentQuery->amount_cents,
+                        $paymentQuery->currency,
+                        Store::getCurrencySymbol(),
+                        STORE_CURRENCY_FORMAT,
+                    )
+                ),
                 'date' => date(DATE_FORMAT, $paymentQuery->created),
                 'date_unix' => Output::getClean($paymentQuery->created),
                 'link' => URL::build('/panel/store/payments/', 'payment=' . Output::getClean($paymentQuery->id))

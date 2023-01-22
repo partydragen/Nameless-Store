@@ -93,12 +93,12 @@ class ShoppingCart {
         return $this->_products ? $this->_products : [];
     }
 
-    // Get total price to pay
-    public function getTotalPrice() {
+    // Get total price to pay in cents
+    public function getTotalPriceCents(): int {
         $price = 0;
 
         foreach ($this->getProducts() as $product) {
-            $price += $product->getRealPrice() * $this->_items[$product->data()->id]['quantity'];
+            $price += $product->getRealPriceCents() * $this->_items[$product->data()->id]['quantity'];
         }
 
         return $price;

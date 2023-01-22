@@ -23,7 +23,7 @@ class Store_Module extends Module {
 
         $name = 'Store';
         $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
-        $module_version = '1.4.3';
+        $module_version = '1.4.4';
         $nameless_version = '2.0.2';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
@@ -77,10 +77,9 @@ class Store_Module extends Module {
         EventHandler::registerListener('renderStoreProduct', 'ContentHook::renderEmojis', 10);
         EventHandler::registerListener('renderStoreProduct', 'ContentHook::replaceAnchors', 15);
 
-        require_once(ROOT_PATH . '/modules/Store/hooks/PriceAdjustmentHook.php');
-        EventHandler::registerListener('renderStoreProduct', 'PriceAdjustmentHook::discounts');
-
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
+
+        define('STORE_CURRENCY_FORMAT', Util::getSetting('currency_format', '{currencySymbol}{price} {currencyCode}', 'Store'));
 
         // Check if module version changed
         $cache->setCache('store_module_cache');
@@ -883,6 +882,30 @@ class Store_Module extends Module {
             } catch (Exception $e) {
                 echo $e->getMessage() . '<br />';
             }
+
+            try {
+                $this->_db->createQuery('UPDATE nl2_store_products SET price = price * 100');
+                $this->_db->createQuery('ALTER TABLE nl2_store_products CHANGE `price` `price_cents` int(11) NOT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                $this->_db->createQuery('UPDATE nl2_store_payments SET amount = amount * 100');
+                $this->_db->createQuery('ALTER TABLE nl2_store_payments CHANGE `amount` `amount_cents` int(11) DEFAULT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                $this->_db->createQuery('UPDATE nl2_store_payments SET fee = fee * 100');
+                $this->_db->createQuery('ALTER TABLE nl2_store_payments CHANGE `fee` `fee_cents` int(11) DEFAULT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
         }
     }
 
@@ -906,7 +929,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_products')) {
             try {
-                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price` varchar(8) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `global_limit` varchar(128) DEFAULT NULL, `user_limit` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `required_groups` varchar(128) DEFAULT NULL, `required_integrations` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price_cents` int(11) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `global_limit` varchar(128) DEFAULT NULL, `user_limit` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `required_groups` varchar(128) DEFAULT NULL, `required_integrations` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -970,7 +993,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_payments')) {
             try {
-                $this->_db->createTable('store_payments', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `payment_id` varchar(64) DEFAULT NULL, `agreement_id` varchar(64) DEFAULT NULL, `transaction` varchar(32) DEFAULT NULL, `amount` varchar(11) DEFAULT NULL, `currency` varchar(11) DEFAULT NULL, `fee` varchar(11) DEFAULT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `last_updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_payments', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `payment_id` varchar(64) DEFAULT NULL, `agreement_id` varchar(64) DEFAULT NULL, `transaction` varchar(32) DEFAULT NULL, `amount_cents` int(11) DEFAULT NULL, `currency` varchar(11) DEFAULT NULL, `fee_cents` int(11) DEFAULT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `last_updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }

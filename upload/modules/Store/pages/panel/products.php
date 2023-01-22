@@ -52,7 +52,15 @@ if (!isset($_GET['action'])) {
                         'id' => Output::getClean($product->id),
                         'id_x' => $store_language->get('admin', 'id_x', ['id' => Output::getClean($product->id)]),
                         'name' => Output::getClean($product->name),
-                        'price' => Output::getClean($product->price),
+                        'price' => Store::fromCents($product->price_cents),
+                        'price_format' => Output::getPurified(
+                            Store::formatPrice(
+                                $product->price_cents,
+                                $currency,
+                                $currency_symbol,
+                                STORE_CURRENCY_FORMAT,
+                            )
+                        ),
                         'edit_link' => URL::build('/panel/store/product/', 'product=' . Output::getClean($product->id)),
                         'delete_link' => URL::build('/panel/store/product/', 'product=' . Output::getClean($product->id) . '&action=delete')
                     ];
@@ -128,8 +136,6 @@ if (!isset($_GET['action'])) {
                         // Get price
                         if (!isset($_POST['price']) || !is_numeric($_POST['price']) || $_POST['price'] < 0.00 || $_POST['price'] > 1000 || !preg_match('/^\d+(?:\.\d{2})?$/', $_POST['price'])) {
                             $errors[] = $store_language->get('admin', 'invalid_price');
-                        } else {
-                            $price = number_format($_POST['price'], 2, '.', '');
                         }
 
                         // insert into database if there is no errors
@@ -152,7 +158,7 @@ if (!isset($_GET['action'])) {
                                 'name' => Input::get('name'),
                                 'description' => Input::get('description'),
                                 'category_id' => $category[0]->id,
-                                'price' => $price,
+                                'price_cents' => Store::toCents(Input::get('price')),
                                 'hidden' => $hidden,
                                 'disabled' => $disabled,
                                 'order' => $last_order + 1,

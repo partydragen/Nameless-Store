@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.2
+ * @version 2.0.3
  * @license MIT
  */
 class PayPal_Gateway extends GatewayBase {
@@ -39,7 +39,7 @@ class PayPal_Gateway extends GatewayBase {
               <input type="hidden" name="cmd" value="_xclick">
               <input type="hidden" name="business" value="' . $paypal_email . '" />
               <input type="hidden" name="currency_code" value="' . $order->getAmount()->getCurrency() . '" />
-              <input type="hidden" name="amount" value="' . $order->getAmount()->getTotal() . '" />
+              <input type="hidden" name="amount" value="' . Store::fromCents($order->getAmount()->getTotalCents()) . '" />
               <input type="hidden" name="item_name" value="' . $order->getDescription() . '">
               <input type="hidden" name="item_number" value="' . $order->data()->id . '">
               <input type="hidden" name="no_shipping" value="1">
@@ -68,7 +68,7 @@ class PayPal_Gateway extends GatewayBase {
                     'created' => date('U'),
                     'last_updated' => date('U'),
                     'status_id' => 0,
-                    'amount' => $_POST['mc_gross'],
+                    'amount_cents' => Store::toCents($_POST['mc_gross']),
                     'currency' => $_POST['mc_currency'],
                     'fee' => $_POST['mc_fee']
                 ]);
@@ -139,7 +139,7 @@ class PayPal_Gateway extends GatewayBase {
             $item_name = $_POST['item_name'];
             $item_number = $_POST['item_number'];
             $payment_status = $_POST['payment_status'];
-            $payment_amount = $_POST['mc_gross'];
+            $payment_amount = Store::toCents($_POST['mc_gross']);
             $payment_currency = $_POST['mc_currency'];
             $payment_fee = $_POST['mc_fee'];
             $transaction_id = $_POST['txn_id'];
@@ -159,7 +159,7 @@ class PayPal_Gateway extends GatewayBase {
                             // Payment exists
                             $data = [
                                 'transaction' => $transaction_id,
-                                'amount' => $payment_amount,
+                                'amount_cents' => $payment_amount,
                                 'currency' => $payment_currency,
                                 'fee' => $payment_fee
                             ];
@@ -169,7 +169,7 @@ class PayPal_Gateway extends GatewayBase {
                                 'order_id' => $order_id,
                                 'gateway_id' => $this->getId(),
                                 'transaction' => $transaction_id,
-                                'amount' => $payment_amount,
+                                'amount_cents' => $payment_amount,
                                 'currency' => $payment_currency,
                                 'fee' => $payment_fee
                             ];

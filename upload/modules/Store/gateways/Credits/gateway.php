@@ -36,16 +36,16 @@ class Credits_Gateway extends GatewayBase {
 
     public function processOrder(Order $order): void {
         $customer = $order->customer();
-        $amount_to_pay = $order->getAmount()->getTotal();
+        $amount_to_pay = $order->getAmount()->getTotalCents();
 
-        if ($customer->exists() && $customer->getCredits() >= $amount_to_pay) {
-            $customer->removeCents(Store::toCents($amount_to_pay));
+        if ($customer->exists() && $customer->data()->cents >= $amount_to_pay) {
+            $customer->removeCents($amount_to_pay);
 
             $payment = new Payment();
             $payment->handlePaymentEvent('COMPLETED', [
                 'order_id' => $order->data()->id,
                 'gateway_id' => $this->getId(),
-                'amount' => $amount_to_pay,
+                'amount_cents' => $amount_to_pay,
                 'transaction' => 'Credits',
                 'currency' => Store::getCurrency(),
                 'fee' => 0

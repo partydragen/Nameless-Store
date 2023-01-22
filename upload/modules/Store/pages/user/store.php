@@ -29,7 +29,7 @@ $currency_symbol = Output::getClean(Store::getCurrencySymbol());
 if (Input::exists()) {
     $errors = [];
 
-    if (Token::check() && Util::getSetting('user_send_credits')) {
+    if (Token::check()) && Util::getSetting('user_send_credits')) {
         $validation = Validate::check($_POST, [
             'to' => [
                 Validate::REQUIRED => true,
@@ -98,7 +98,15 @@ if ($transactions->count()) {
         $transactions_list[] = [
             'gateway' => Output::getClean($transaction->gateway_id),
             'transaction' => Output::getClean($transaction->transaction),
-            'amount' => Output::getClean($transaction->amount),
+            'amount' => Store::fromCents($transaction->amount_cents),
+            'amount_format' => Output::getPurified(
+                Store::formatPrice(
+                    $transaction->amount_cents,
+                    $currency,
+                    $currency_symbol,
+                    STORE_CURRENCY_FORMAT,
+                )
+            ),
             'currency' => Output::getClean($transaction->currency),
             'currency_symbol' => $currency_symbol,
             'fee' => Output::getClean($transaction->fee),
@@ -112,6 +120,14 @@ $smarty->assign([
     'STORE' => $store_language->get('general', 'store'),
     'CREDITS' => $store_language->get('general', 'credits'),
     'CREDITS_VALUE' => $customer->getCredits(),
+    'CREDITS_FORMAT_VALUE' => Output::getPurified(
+        Store::formatPrice(
+            $customer->data()->cents,
+            $currency,
+            $currency_symbol,
+            STORE_CURRENCY_FORMAT,
+        )
+    ),
     'MY_TRANSACTIONS' => $store_language->get('general', 'my_transactions'),
     'NO_TRANSACTIONS' => $store_language->get('general', 'no_transactions'),
     'TRANSACTION' => $store_language->get('admin', 'transaction'),

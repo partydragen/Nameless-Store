@@ -33,7 +33,7 @@ class PayPal_Business_Gateway extends GatewayBase {
         $payer->setPaymentMethod('paypal');
 
         $amount = new \PayPal\Api\Amount();
-        $amount->setTotal($order->getAmount()->getTotal());
+        $amount->setTotal(Store::fromCents($order->getAmount()->getTotalCents()));
         $amount->setCurrency($order->getAmount()->getCurrency());
 
         $transaction = new \PayPal\Api\Transaction();
@@ -102,7 +102,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                         'gateway_id' => $this->getId(),
                         'payment_id' => $payment->getId(),
                         'transaction' => $sale->getId(),
-                        'amount' => $transactions[0]->getAmount()->total,
+                        'amount_cents' => Store::toCents($transactions[0]->getAmount()->total),
                         'currency' => $transactions[0]->getAmount()->currency,
                         'fee' => $sale->getTransactionFee() ? $sale->getTransactionFee()->getValue() : null,
                         'created' => date('U'),
@@ -196,7 +196,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                                     // Payment exists
                                     $data = [
                                         'transaction' => $response->resource->id,
-                                        'amount' => $response->resource->amount->total,
+                                        'amount_cents' => Store::toCents($response->resource->amount->total),
                                         'currency' => $response->resource->amount->currency,
                                         'fee' => $response->resource->transaction_fee->value
                                     ];
@@ -208,7 +208,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                                         'payment_id' => $response->id,
                                         'gateway_id' => $this->getId(),
                                         'transaction' => $response->resource->id,
-                                        'amount' => $response->resource->amount->total,
+                                        'amount_cents' => Store::toCents($response->resource->amount->total),
                                         'currency' => $response->resource->amount->currency,
                                         'fee' => $response->resource->transaction_fee->value
                                     ];

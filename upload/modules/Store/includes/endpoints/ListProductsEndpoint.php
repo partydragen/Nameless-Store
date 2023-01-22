@@ -61,8 +61,8 @@ class ListProductsEndpoint extends KeyAuthEndpoint {
                 'id' => (int) $product->data()->id,
                 'category_id' => (int) $product->data()->category_id,
                 'name' => $product->data()->name,
-                'price' => (double) $product->data()->price,
-                'price_cents' => (int) Store::toCents($product->data()->price),
+                'price' => (double) Store::fromCents($product->data()->price_cents),
+                'price_cents' => (int) $product->data()->price_cents,
                 'hidden' => (bool) $product->data()->hidden,
                 'disabled' => (bool) $product->data()->disabled,
                 'global_limit' => [

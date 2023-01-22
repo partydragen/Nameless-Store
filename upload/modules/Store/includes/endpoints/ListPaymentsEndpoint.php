@@ -50,20 +50,7 @@ class ListPaymentsEndpoint extends KeyAuthEndpoint {
         $payments_list = [];
         foreach ($payments_query as $payment) {
             $customer = new Customer(null, $payment->from_customer_id);
-            $customer_data = [
-                'customer_id' => (int)$payment->from_customer_id,
-                'user_id' => $customer->exists() ? (int)$customer->data()->user_id : null,
-                'username' => $customer->exists() ? $customer->data()->username : null,
-                'identifier' => $customer->exists() ? $customer->data()->identifier : null
-            ];
-
             $recipient = new Customer(null, $payment->to_customer_id);
-            $recipient_data = [
-                'customer_id' => (int)$payment->to_customer_id,
-                'user_id' => $recipient->exists() ? (int)$recipient->data()->user_id : null,
-                'username' => $recipient->exists() ? $recipient->data()->username : null,
-                'identifier' => $recipient->exists() ? $recipient->data()->identifier : null
-            ];
 
             $products = [];
             $products_query = $api->getDb()->query('SELECT product_id, name FROM nl2_store_orders_products LEFT JOIN nl2_store_products ON product_id=nl2_store_products.id WHERE order_id = ?', [$payment->order_id])->results();
@@ -79,16 +66,26 @@ class ListPaymentsEndpoint extends KeyAuthEndpoint {
                 'order_id' => (int)$payment->order_id,
                 'gateway_id' => (int)$payment->gateway_id,
                 'transaction' => $payment->transaction,
-                'amount' => $payment->amount,
-                'amount_cents' => (int) Store::toCents($payment->amount ?? 0),
+                'amount' => Store::fromCents($payment->amount_cents),
+                'amount_cents' => (int) $payment->amount_cents ?? 0,
                 'currency' => $payment->currency,
-                'fee' => $payment->fee,
-                'fee_cents' => (int) Store::toCents($payment->fee ?? 0),
+                'fee' => (float) Store::fromCents($payment->fee_cents ?? 0),
+                'fee_cents' => (int) $payment->fee_cents ?? 0,
                 'status_id' => (int)$payment->status_id,
                 'created' => (int)$payment->created,
                 'last_updated' => (int)$payment->last_updated,
-                'customer' => $customer_data,
-                'recipient' => $recipient_data,
+                'customer' => [
+                    'customer_id' => (int)$payment->from_customer_id,
+                    'user_id' => $customer->exists() ? (int)$customer->data()->user_id : null,
+                    'username' => $customer->exists() ? $customer->data()->username : null,
+                    'identifier' => $customer->exists() ? $customer->data()->identifier : null
+                ],
+                'recipient' => [
+                    'customer_id' => (int)$payment->to_customer_id,
+                    'user_id' => $recipient->exists() ? (int)$recipient->data()->user_id : null,
+                    'username' => $recipient->exists() ? $recipient->data()->username : null,
+                    'identifier' => $recipient->exists() ? $recipient->data()->identifier : null
+                ],
                 'products' => $products
             ];
         }

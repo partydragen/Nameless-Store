@@ -73,8 +73,6 @@ if (!isset($_GET['action'])) {
                 // Get price
                 if (!isset($_POST['price']) || !is_numeric($_POST['price']) || $_POST['price'] < 0.00 || $_POST['price'] > 1000 || !preg_match('/^\d+(?:\.\d{2})?$/', $_POST['price'])) {
                     $errors[] = $store_language->get('admin', 'invalid_price');
-                } else {
-                    $price = number_format($_POST['price'], 2, '.', '');
                 }
 
                 // insert into database if there is no errors
@@ -92,7 +90,7 @@ if (!isset($_GET['action'])) {
                         'name' => Input::get('name'),
                         'description' => Input::get('description'),
                         'category_id' => $category[0]->id,
-                        'price' => $price,
+                        'price_cents' => Store::toCents(Input::get('price')),
                         'hidden' => $hidden,
                         'disabled' => $disabled
                     ]);
@@ -244,7 +242,7 @@ if (!isset($_GET['action'])) {
         'PRODUCT_DESCRIPTION' => $store_language->get('admin', 'product_description'),
         'PRODUCT_DESCRIPTION_VALUE' => Output::getPurified(Output::getDecoded($product->data()->description)),
         'PRICE' => $store_language->get('general', 'price'),
-        'PRODUCT_PRICE_VALUE' => Output::getClean($product->data()->price),
+        'PRODUCT_PRICE_VALUE' => Store::fromCents($product->data()->price_cents),
         'PRODUCT_CATEGORY_VALUE' => Output::getClean($product->data()->category_id),
         'CATEGORY' => $store_language->get('admin', 'category'),
         'CATEGORY_LIST' => $store->getAllCategories(),

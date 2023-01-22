@@ -64,7 +64,7 @@ if (Input::exists()) {
 
             if ($validation->passed()) {
                 // Attempt to load customer
-                if (!$to_customer->login(Output::getClean(Input::get('username')))) {
+                if (!$to_customer->login(Input::get('username'))) {
                     $errors[] = $language->get('user', 'invalid_mcname');
                 }
 
@@ -77,7 +77,7 @@ if (Input::exists()) {
 }
 
 // Get products
-$products = DB::getInstance()->query('SELECT id, name, `order`, price, description, image FROM nl2_store_products WHERE category_id = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', [$category_id]);
+$products = DB::getInstance()->query('SELECT id, name, `order`, price_cents, description, image FROM nl2_store_products WHERE category_id = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', [$category_id]);
 
 if (!$products->count()) {
     $smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
@@ -103,10 +103,34 @@ if (!$products->count()) {
         $category_products[] = [
             'id' => $product->data()->id,
             'name' => Output::getClean($renderProductEvent['name']),
-            'price' => Output::getClean(number_format($product->data()->price, 2, '.', '')),
-            'real_price' => Output::getClean(number_format($product->getRealPrice(), 2, '.', '')),
+            'price' => Store::fromCents($product->data()->price_cents),
+            'real_price' => Store::fromCents($product->getRealPriceCents()),
+            'sale_discount' => Store::fromCents($product->data()->sale_discount_cents),
+            'price_format' => Output::getPurified(
+                Store::formatPrice(
+                    $product->data()->price_cents,
+                    $currency,
+                    $currency_symbol,
+                    STORE_CURRENCY_FORMAT,
+                )
+            ),
+            'real_price_format' => Output::getPurified(
+                Store::formatPrice(
+                    $product->getRealPriceCents(),
+                    $currency,
+                    $currency_symbol,
+                    STORE_CURRENCY_FORMAT,
+                )
+            ),
+            'sale_discount_format' => Output::getPurified(
+                Store::formatPrice(
+                    $product->data()->sale_discount_cents,
+                    $currency,
+                    $currency_symbol,
+                    STORE_CURRENCY_FORMAT,
+                )
+            ),
             'sale_active' => $product->data()->sale_active,
-			'sale_discount' => Output::getClean(number_format($product->data()->sale_discount, 2, '.', '')),
             'description' => $renderProductEvent['content'],
             'image' => $renderProductEvent['image'],
             'link' => $renderProductEvent['link']

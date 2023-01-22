@@ -39,13 +39,13 @@ class Product {
             if ($data->count()) {
                 $this->_data = $data->first();
                 $this->_data->sale_active = false;
-                $this->_data->sale_discount = 0;
+                $this->_data->sale_discount_cents = 0;
             }
         } else if ($query_data) {
             // Load data from existing query.
             $this->_data = $query_data;
             $this->_data->sale_active = false;
-            $this->_data->sale_discount = 0;
+            $this->_data->sale_discount_cents = 0;
         }
     }
 
@@ -302,8 +302,8 @@ class Product {
         return $required_integrations_list;
     }
 
-    public function getRealPrice() {
-        return $this->data()->sale_active == 1 ? $this->data()->price - $this->data()->sale_discount : $this->data()->price;
+    public function getRealPriceCents() {
+        return $this->data()->sale_active == 1 ? $this->data()->price_cents - $this->data()->sale_discount_cents : $this->data()->price_cents;
     }
 
     public function delete() {

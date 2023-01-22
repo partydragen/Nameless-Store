@@ -246,7 +246,7 @@ if (isset($_GET['do'])) {
                 // Create order
                 $amount = new Amount();
                 $amount->setCurrency($currency);
-                $amount->setTotal($shopping_cart->getTotalPrice());
+                $amount->setTotalCents($shopping_cart->getTotalPriceCents());
 
                 $order = new Order();
                 $order->setAmount($amount);
@@ -254,13 +254,13 @@ if (isset($_GET['do'])) {
                 $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems());
 
                 // Complete order if there is nothing to pay
-                $amount_to_pay = $shopping_cart->getTotalPrice();
+                $amount_to_pay = $shopping_cart->getTotalPriceCents();
                 if ($amount_to_pay == 0) {
                     $payment = new Payment();
                     $payment->handlePaymentEvent('COMPLETED', [
                         'order_id' => $order->data()->id,
                         'gateway_id' => 0,
-                        'amount' => 0,
+                        'amount_cents' => 0,
                         'transaction' => 'Free',
                         'currency' => Output::getClean(Store::getCurrency()),
                         'fee' => 0
@@ -329,7 +329,15 @@ if (isset($_GET['do'])) {
         $shopping_cart_list[] = [
             'name' => Output::getClean($product->data()->name),
             'quantity' => $item['quantity'],
-            'price' => Output::getClean($product->getRealPrice()) * $item['quantity'],
+            'price' => Store::fromCents($product->getRealPriceCents() * $item['quantity']),
+            'price_format' => Output::getPurified(
+                Store::formatPrice(
+                    $product->getRealPriceCents() * $item['quantity'],
+                    $currency,
+                    $currency_symbol,
+                    STORE_CURRENCY_FORMAT,
+                )
+            ),
             'fields' => $fields,
             'remove_link' => URL::build($store_url . '/checkout/', 'remove=' . $product->data()->id),
         ];
@@ -355,7 +363,15 @@ if (isset($_GET['do'])) {
         'QUANTITY' => $store_language->get('general', 'quantity'),
         'PRICE' => $store_language->get('general', 'price'),
         'TOTAL_PRICE' => $store_language->get('general', 'total_price'),
-        'TOTAL_PRICE_VALUE' => $shopping_cart->getTotalPrice(),
+        'TOTAL_PRICE_VALUE' => Store::fromCents($shopping_cart->getTotalPriceCents()),
+        'TOTAL_PRICE_FORMAT_VALUE' => Output::getPurified(
+            Store::formatPrice(
+                $shopping_cart->getTotalPriceCents(),
+                $currency,
+                $currency_symbol,
+                STORE_CURRENCY_FORMAT,
+            )
+        ),
         'PAYMENT_METHOD' => $store_language->get('general', 'payment_method'),
         'PURCHASE' => $store_language->get('general', 'purchase'),
         'AGREE_T_AND_C_PURCHASE' => $store_language->get('general', 'agree_t_and_c_purchase', [

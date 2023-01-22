@@ -156,6 +156,27 @@ class Store {
     }
 
     /**
+     * Helper function to format price with currency
+     *
+     * @param $price_cents int Price
+     * @param $currencyCode string Currency code (eg GBP, USD, EUR)
+     * @param $currencySymbol string Currency symbol
+     * @param $format ?string Format
+     * @return string Formatted price with currency
+     */
+    public static function formatPrice(int $price_cents, string $currencyCode, string $currencySymbol, ?string $format = '{currencySymbol}{price} {currencyCode}'): string {
+        return str_replace([
+            '{currencyCode}',
+            '{currencySymbol}',
+            '{price}'
+        ], [
+            $currencyCode,
+            $currencySymbol,
+            sprintf('%0.2f', $price_cents / 100),
+        ], $format);
+    }
+
+    /**
      * Get the active sales .
      *
      * @return Product[] The products for this order.
@@ -204,5 +225,9 @@ class Store {
 
     public static function toCents($value): int {
         return (int) (string) ((float) preg_replace("/[^0-9.]/", "", $value) * 100);
+    }
+    
+    public static function fromCents(int $cents): string {
+        return sprintf('%0.2f', $cents / 100);
     }
 }

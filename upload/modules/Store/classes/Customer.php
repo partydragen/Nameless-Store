@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr13
+ * @version 2.0.3
  * @license MIT
  */
 class Customer {
@@ -189,7 +189,7 @@ class Customer {
                     'status_id' => $paymentQuery->status_id,
                     'status' => $payment->getStatusHtml(),
                     'currency' => Output::getPurified($paymentQuery->currency),
-                    'amount' => Output::getClean($paymentQuery->amount),
+                    'amount' => Store::fromCents($paymentQuery->amount_cents),
                     'date' => date('d M Y, H:i', $paymentQuery->created),
                     'link' => URL::build('/panel/store/payments', 'payment=' . Output::getClean($paymentQuery->id))
                 ];
