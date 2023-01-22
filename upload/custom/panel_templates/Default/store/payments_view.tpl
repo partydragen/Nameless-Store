@@ -82,7 +82,7 @@
                                             </tr>
                                             <tr>
                                                 <td><strong>{$PRICE}</strong></td>
-                                                <td>{$CURRENCY_SYMBOL}{$PRICE_VALUE} ({$CURRENCY_ISO})</td>
+                                                <td>{$PRICE_FORMAT_VALUE}</td>
                                             </tr>
                                             <tr>
                                                 <td><strong>{$DATE}</strong></td>

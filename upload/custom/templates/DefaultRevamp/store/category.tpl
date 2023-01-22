@@ -68,9 +68,9 @@
                       <span class="header">{$product.name}</span>
                       <div class="ui divider"></div>
                       {if $product.sale_active}
-                        <span style="color: #dc3545;text-decoration:line-through;">{$CURRENCY_SYMBOL}{$product.price}{$CURRENCY}</span>
+                        <span style="color: #dc3545;text-decoration:line-through;">{$product.price_format}</span>
                       {/if}
-                      {$CURRENCY_SYMBOL}{$product.real_price} {$CURRENCY}
+                      {$product.real_price_format}
                     </div>
                     <div class="ui bottom attached blue button" onClick="$('#modal{$product.id}').modal('show');">
                       {$BUY} &raquo;
@@ -80,7 +80,7 @@
 
                 <div class="ui small modal" id="modal{$product.id}">
                   <div class="header">
-                    {$product.name} | {$CURRENCY_SYMBOL}{$product.price} {$CURRENCY}
+                    {$product.name} | {$product.price_format}
                   </div>
                   <div class="{if $product.image}image {/if}content">
                     {if $product.image}
@@ -120,7 +120,7 @@
                         <div class="ui list">
                             <div class="item">
                                 <span class="text">{$CREDITS}</span>
-                                <div class="description right floated"><b>{$CURRENCY_SYMBOL}{$CREDITS_VALUE} {$CURRENCY}</b></div>
+                                <div class="description right floated"><b>{$CREDITS_FORMAT_VALUE}</b></div>
                             </div>
                         </div>
                     </div>

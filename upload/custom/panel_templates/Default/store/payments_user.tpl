@@ -62,7 +62,7 @@
                                         {foreach from=$USER_PAYMENTS item=payment}
                                             <tr>
                                                 <td><a href="{$payment.user_link}" style="{$payment.user_style}"><img src="{$payment.user_avatar}" class="rounded" style="max-width:32px;max-height:32px;" alt="{$payment.username}" /> {$payment.username}</a></td>
-                                                <td>{$payment.currency_symbol}{$payment.amount}</td>
+                                                <td>{$payment.amount_format}</td>
                                                 <td>{$payment.status}</td>
                                                 <td data-sort="{$payment.date_unix}">{$payment.date}</td>
                                                 <td><a href="{$payment.link}" class="btn btn-primary btn-sm">{$VIEW}</a></td>

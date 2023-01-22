@@ -36,7 +36,7 @@
                     {if isset($CAN_SEND_CREDITS)}<div class="res right floated"><a class="ui mini green button" data-toggle="modal" data-target="#modal-send-credits">{$SEND_CREDITS}</a></div>{/if}
                 </h3>
                 
-                <p>{$CREDITS}: {$CURRENCY_SYMBOL}{$CREDITS_VALUE} {$CURRENCY}</p>
+                <p>{$CREDITS}: {$CREDITS_FORMAT_VALUE}</p>
             </div>
             
             <div class="ui segment">
@@ -55,7 +55,7 @@
                                 {foreach from=$TRANSACTIONS_LIST item=transaction}
                                     <tr>
                                         <td>{$transaction.transaction}</td>
-                                        <td>{$transaction.currency_symbol}{$transaction.amount} {$transaction.currency}</td>
+                                        <td>{$transaction.amount_format}</td>
                                         <td><span data-toggle="tooltip" data-content="{$transaction.date_full}">{$transaction.date_friendly}</span></td>
                                     </tr>
                                 {/foreach}
