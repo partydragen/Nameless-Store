@@ -26,6 +26,11 @@ if (isset($_POST) && !empty($_POST)) {
 
     if (Token::check(Input::get('token'))) {
         $validation = Validate::check($_POST, [
+            'currency_format' => [
+                Validate::REQUIRED => true,
+                Validate::MIN => 7,
+                Validate::MAX => 64,
+            ],
             'store_content' => [
                 Validate::MAX => 60000
             ],
@@ -33,6 +38,11 @@ if (isset($_POST) && !empty($_POST)) {
                 Validate::MAX => 60000
             ]
         ])->messages([
+            'currency_format' => [
+                Validate::REQUIRED => $store_language->get('admin', 'currency_format_required'),
+                Validate::MIN => $store_language->get('admin', 'currency_format_min', ['min' => 7]),
+                Validate::MAX => $store_language->get('admin', 'currency_format_max', ['max' => 64]),
+            ],
             'store_content' => [
                 Validate::MAX => $store_language->get('admin', 'store_content_max')
             ],
@@ -78,6 +88,7 @@ if (isset($_POST) && !empty($_POST)) {
             Util::setSetting('currency', Input::get('currency'), 'Store');
             Util::setSetting('currency_symbol', Input::get('currency_symbol'), 'Store');
             Util::setSetting('store_content', Input::get('store_content'), 'Store');
+            Util::setSetting('currency_format', Input::get('currency_format'), 'Store');
             Util::setSetting('checkout_complete_content', Input::get('checkout_complete_content'), 'Store');
 
             Util::setSetting('show_credits_amount', $show_credits_amount);
@@ -177,6 +188,9 @@ $smarty->assign([
     'ALLOW_USERS_TO_SEND_CREDITS_VALUE' => Util::getSetting('user_send_credits', '0'),
     'STORE_PATH' => $store_language->get('admin', 'store_path'),
     'STORE_PATH_VALUE' => $store_path,
+    'CURRENCY_FORMAT' => $store_language->get('admin', 'currency_format'),
+    'CURRENCY_FORMAT_INFO' => $store_language->get('admin', 'currency_format_info'),
+    'CURRENCY_FORMAT_VALUE' => Util::getSetting('currency_format', '{currencySymbol}{price} {currencyCode}', 'Store'),
     'CURRENCY' => $store_language->get('admin', 'currency'),
     'CURRENCY_LIST' => $currency_list,
     'CURRENCY_VALUE' => Output::getClean($currency),

@@ -29,7 +29,7 @@ $currency_symbol = Output::getClean(Store::getCurrencySymbol());
 if (Input::exists()) {
     $errors = [];
 
-    if (Token::check()) && Util::getSetting('user_send_credits')) {
+    if (Token::check() && Util::getSetting('user_send_credits')) {
         $validation = Validate::check($_POST, [
             'to' => [
                 Validate::REQUIRED => true,

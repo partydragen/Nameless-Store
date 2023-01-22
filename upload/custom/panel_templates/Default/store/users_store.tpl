@@ -78,7 +78,7 @@
                                     <tbody>
                                         {foreach from=$PAYMENTS_LIST item=payment}
                                             <tr>
-                                                <td>{$payment.currency_symbol}{$payment.amount} {$payment.currency}</td>
+                                                <td>{$payment.amount_format}</td>
                                                 <td>{$payment.status}</td>
                                                 <td data-sort="{$payment.date_unix}">{$payment.date}</td>
                                                 <td><a href="{$payment.link}" class="btn btn-primary btn-sm float-md-right">{$VIEW}</a></td>

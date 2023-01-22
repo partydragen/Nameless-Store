@@ -190,6 +190,14 @@ class Customer {
                     'status' => $payment->getStatusHtml(),
                     'currency' => Output::getPurified($paymentQuery->currency),
                     'amount' => Store::fromCents($paymentQuery->amount_cents),
+                    'amount_format' => Output::getPurified(
+                        Store::formatPrice(
+                            $paymentQuery->amount_cents,
+                            $paymentQuery->currency,
+                            Store::getCurrencySymbol(),
+                            STORE_CURRENCY_FORMAT,
+                        )
+                    ),
                     'date' => date('d M Y, H:i', $paymentQuery->created),
                     'link' => URL::build('/panel/store/payments', 'payment=' . Output::getClean($paymentQuery->id))
                 ];

@@ -96,6 +96,12 @@
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
+                                            <label for="inputCurrencyFormat">{$CURRENCY_FORMAT}</label>
+                                            <span class="badge badge-info" data-html="true" data-toggle="popover" title="{$INFO}" data-content="{$CURRENCY_FORMAT_INFO}"><i class="fas fa-question-circle"></i></span>
+                                            <input type="text" class="form-control" id="inputCurrencyFormat" name="currency_format" placeholder="{$CURRENCY_FORMAT}" value="{$CURRENCY_FORMAT_VALUE}">
+                                        </div>
+
+                                        <div class="form-group">
                                             <label for="inputStoreContent">{$STORE_INDEX_CONTENT}</label>
                                             <textarea id="inputStoreContent" name="store_content">{$STORE_INDEX_CONTENT_VALUE}</textarea>
                                         </div>
