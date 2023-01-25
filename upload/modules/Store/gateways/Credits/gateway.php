@@ -47,8 +47,7 @@ class Credits_Gateway extends GatewayBase {
                 'gateway_id' => $this->getId(),
                 'amount_cents' => $amount_to_pay,
                 'transaction' => 'Credits',
-                'currency' => Store::getCurrency(),
-                'fee' => 0
+                'currency' => Store::getCurrency()
             ]);
 
             $shopping_cart = new ShoppingCart();

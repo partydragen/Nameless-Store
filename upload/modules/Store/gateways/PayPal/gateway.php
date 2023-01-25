@@ -70,7 +70,7 @@ class PayPal_Gateway extends GatewayBase {
                     'status_id' => 0,
                     'amount_cents' => Store::toCents($_POST['mc_gross']),
                     'currency' => $_POST['mc_currency'],
-                    'fee' => $_POST['mc_fee']
+                    'fee_cents' => Store::toCents($_POST['mc_fee'] ?? 0)
                 ]);
             }
 
@@ -161,7 +161,7 @@ class PayPal_Gateway extends GatewayBase {
                                 'transaction' => $transaction_id,
                                 'amount_cents' => $payment_amount,
                                 'currency' => $payment_currency,
-                                'fee' => $payment_fee
+                                'fee_cents' => Store::toCents($payment_fee ?? 0)
                             ];
                         } else {
                             // Register new payment
@@ -171,7 +171,7 @@ class PayPal_Gateway extends GatewayBase {
                                 'transaction' => $transaction_id,
                                 'amount_cents' => $payment_amount,
                                 'currency' => $payment_currency,
-                                'fee' => $payment_fee
+                                'fee_cents' => Store::toCents($payment_fee ?? 0)
                             ];
                         }
                         

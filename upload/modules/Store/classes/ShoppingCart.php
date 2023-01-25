@@ -103,4 +103,37 @@ class ShoppingCart {
 
         return $price;
     }
+
+    // Get total price to pay in cents
+    public function getTotalCents(): int {
+        $price = 0;
+
+        foreach ($this->getProducts() as $product) {
+            $price += $product->data()->price_cents * $this->_items[$product->data()->id]['quantity'];
+        }
+
+        return $price;
+    }
+
+    // Get total real price in cents
+    public function getTotalRealPriceCents(): int {
+        $price = 0;
+
+        foreach ($this->getProducts() as $product) {
+            $price += $product->getRealPriceCents() * $this->_items[$product->data()->id]['quantity'];
+        }
+
+        return $price;
+    }
+
+    // Get total discount in cents
+    public function getTotalDiscountCents(): int {
+        $discount = 0;
+
+        foreach ($this->getProducts() as $product) {
+            $discount += $product->data()->sale_discount_cents * $this->_items[$product->data()->id]['quantity'];
+        }
+
+        return $discount;
+    }
 }

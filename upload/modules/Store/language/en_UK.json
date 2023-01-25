@@ -233,6 +233,8 @@
     "general\/successfully_sent_credits": "Successfully sent {{amount}} credits to {{user}}",
     "general\/received_x_credits_from_x": "You have received {{amount}} credits from {{user}}",
     "general\/total_price": "Total Price:",
+    "general\/total_discount": "Total Discount:",
+    "general\/price_to_pay": "Price to pay:",
     "general\/my_transactions": "My transactions",
     "general\/no_transactions": "You don't have any transactions.",
     "general\/widget_cached": "The latest purchases widget is cached for 2 minutes, your changes may not take effect immediately.",

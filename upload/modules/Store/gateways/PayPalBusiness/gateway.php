@@ -104,7 +104,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                         'transaction' => $sale->getId(),
                         'amount_cents' => Store::toCents($transactions[0]->getAmount()->total),
                         'currency' => $transactions[0]->getAmount()->currency,
-                        'fee' => $sale->getTransactionFee() ? $sale->getTransactionFee()->getValue() : null,
+                        'fee_cents' => $sale->getTransactionFee() ? Store::toCents($sale->getTransactionFee()->getValue()) : null,
                         'created' => date('U'),
                         'last_updated' => date('U')
                     ]);
@@ -198,7 +198,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                                         'transaction' => $response->resource->id,
                                         'amount_cents' => Store::toCents($response->resource->amount->total),
                                         'currency' => $response->resource->amount->currency,
-                                        'fee' => $response->resource->transaction_fee->value
+                                        'fee_cents' => Store::toCents($response->resource->transaction_fee->value ?? 0)
                                     ];
 
                                 } else {
@@ -210,7 +210,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                                         'transaction' => $response->resource->id,
                                         'amount_cents' => Store::toCents($response->resource->amount->total),
                                         'currency' => $response->resource->amount->currency,
-                                        'fee' => $response->resource->transaction_fee->value
+                                        'fee_cents' => Store::toCents($response->resource->transaction_fee->value ?? 0)
                                     ];
                                 }
 

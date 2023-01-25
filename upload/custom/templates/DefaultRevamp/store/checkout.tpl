@@ -40,35 +40,62 @@
           </div>
         {/if}
 
-        <form class="ui form" action="" method="post" id="forms">
-          <h3>{$SHOPPING_CART}</h3>
-          <table class="ui fixed single line selectable unstackable small padded res table">
-            <thead>
+        <h3>{$SHOPPING_CART}</h3>
+        <table class="ui fixed single line selectable unstackable small padded res table">
+          <thead>
+            <tr>
+              <th>{$NAME}</th>
+              <th>{$OPTIONS}</th>
+              <th>{$QUANTITY}</th>
+              <th>{$PRICE}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {foreach from=$SHOPPING_CART_LIST item=item}
               <tr>
-                <th>{$NAME}</th>
-                <th>{$OPTIONS}</th>
-                <th>{$QUANTITY}</th>
-                <th>{$PRICE}</th>
-                <th></th>
+                <td>{$item.name}</td>
+                <td>{if count($item.fields)} {foreach from=$item.fields item=field name=fields}<strong>{$field.description}</strong>: {$field.value}{if not $smarty.foreach.fields.last}</br>{/if}{/foreach} {/if}</td>
+                <td>{$item.quantity}</td>
+                <td>{if $item.sale_active}<span style="color: #dc3545;text-decoration:line-through;">{$item.price_format}</span>{/if} {$item.real_price_format}</td>
+                <td><a href="{$item.remove_link}" class="ui icon remove red tiny button right floated"><i class="icon remove"></i></a></td>
               </tr>
-            </thead>
-            <tbody>
-              {foreach from=$SHOPPING_CART_LIST item=item}
-                <tr>
-                  <td>{$item.name}</td>
-                  <td>{if count($item.fields)} {foreach from=$item.fields item=field name=fields}<strong>{$field.description}</strong>: {$field.value}{if not $smarty.foreach.fields.last}</br>{/if}{/foreach} {/if}</td>
-                  <td>{$item.quantity}</td>
-                  <td>{$item.price_format}</td>
-                  <td><a href="{$item.remove_link}" class="ui icon remove red tiny button right floated"><i class="icon remove"></i></a></td>
-                </tr>
-              {/foreach}
-            </tbody>
-          </table>
+            {/foreach}
+          </tbody>
+        </table>
 
-          <h4>{$TOTAL_PRICE} {$TOTAL_PRICE_FORMAT_VALUE}<h4>
+        <table class="ui collapsing table">
+          <tbody>
+            <tr>
+              <td>{$TOTAL_PRICE}</td>
+              <td>{$TOTAL_PRICE_FORMAT_VALUE}</td>
+            </tr>
+            <tr>
+              <td>{$TOTAL_DISCOUNT}</td>
+              <td>{$TOTAL_DISCOUNT_FORMAT_VALUE}</td>
+            </tr>
+            <tr>
+              <td>{$PRICE_TO_PAY}</td>
+              <td>{$TOTAL_REAL_PRICE_FORMAT_VALUE}</td>
+            </tr>
+          </tbody>
+        </table>
 
-          <h3>{$PAYMENT_METHOD}</h3>
-          <hr />
+        <h3>Redeem Coupons</h3>
+        <div class="ui divider"></div>
+        <form class="ui form" action="" method="post" id="coupon">
+          <div class="field">
+              <div class="ui action input">
+                  <input type="text" name="coupons" id="coupon" placeholder="Have a coupon code? Enter it here"/>
+                  <input type="hidden" name="token" value="{$TOKEN}">
+                  <button class="ui green button">Redeen &raquo;</button>
+              </div>
+          </div>
+        </form>
+
+        <h3>{$PAYMENT_METHOD}</h3>
+        <div class="ui divider"></div>
+        <form class="ui form" action="" method="post" id="forms">
           {foreach from=$PAYMENT_METHODS item=gateway}
             <div class="field">
               <div class="ui radio checkbox">
@@ -79,7 +106,7 @@
           {/foreach}
 
           <h3>{$PURCHASE}</h3>
-          <hr />
+          <div class="ui divider"></div>
           <div class="field">
             <div class="ui checkbox" style="display:inline;">
               <input type="hidden" name="token" value="{$TOKEN}">

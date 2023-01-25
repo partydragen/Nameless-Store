@@ -116,7 +116,6 @@ class Stripe_Gateway extends GatewayBase {
                        'transaction' => $data->charges->data[0]->id,
                        'amount_cents' => $data->amount_received,
                        'currency' => $data->currency,
-                       'fee' => 0,
                    ]);
                }
                break;

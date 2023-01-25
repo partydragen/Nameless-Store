@@ -329,8 +329,18 @@ if (isset($_GET['do'])) {
         $shopping_cart_list[] = [
             'name' => Output::getClean($product->data()->name),
             'quantity' => $item['quantity'],
-            'price' => Store::fromCents($product->getRealPriceCents() * $item['quantity']),
+            'price' => Store::fromCents($product->data()->price_cents * $item['quantity']),
+            'real_price' => Store::fromCents($product->getRealPriceCents() * $item['quantity']),
+            'sale_discount' => Store::fromCents($product->data()->sale_discount_cents * $item['quantity']),
             'price_format' => Output::getPurified(
+                Store::formatPrice(
+                    $product->data()->price_cents * $item['quantity'],
+                    $currency,
+                    $currency_symbol,
+                    STORE_CURRENCY_FORMAT,
+                )
+            ),
+            'real_price_format' => Output::getPurified(
                 Store::formatPrice(
                     $product->getRealPriceCents() * $item['quantity'],
                     $currency,
@@ -338,6 +348,15 @@ if (isset($_GET['do'])) {
                     STORE_CURRENCY_FORMAT,
                 )
             ),
+            'sale_discount_format' => Output::getPurified(
+                Store::formatPrice(
+                    $product->data()->sale_discount_cents * $item['quantity'],
+                    $currency,
+                    $currency_symbol,
+                    STORE_CURRENCY_FORMAT,
+                )
+            ),
+            'sale_active' => $product->data()->sale_active,
             'fields' => $fields,
             'remove_link' => URL::build($store_url . '/checkout/', 'remove=' . $product->data()->id),
         ];
@@ -363,10 +382,30 @@ if (isset($_GET['do'])) {
         'QUANTITY' => $store_language->get('general', 'quantity'),
         'PRICE' => $store_language->get('general', 'price'),
         'TOTAL_PRICE' => $store_language->get('general', 'total_price'),
+        'TOTAL_DISCOUNT' => $store_language->get('general', 'total_discount'),
+        'PRICE_TO_PAY' => $store_language->get('general', 'price_to_pay'),
         'TOTAL_PRICE_VALUE' => Store::fromCents($shopping_cart->getTotalPriceCents()),
+        'TOTAL_REAL_PRICE_VALUE' => Store::fromCents($shopping_cart->getTotalRealPriceCents()),
+        'TOTAL_DISCOUNT_VALUE' => Store::fromCents($shopping_cart->getTotalDiscountCents()),
         'TOTAL_PRICE_FORMAT_VALUE' => Output::getPurified(
             Store::formatPrice(
-                $shopping_cart->getTotalPriceCents(),
+                $shopping_cart->getTotalCents(),
+                $currency,
+                $currency_symbol,
+                STORE_CURRENCY_FORMAT,
+            )
+        ),
+        'TOTAL_REAL_PRICE_FORMAT_VALUE' => Output::getPurified(
+            Store::formatPrice(
+                $shopping_cart->getTotalRealPriceCents(),
+                $currency,
+                $currency_symbol,
+                STORE_CURRENCY_FORMAT,
+            )
+        ),
+        'TOTAL_DISCOUNT_FORMAT_VALUE' => Output::getPurified(
+            Store::formatPrice(
+                $shopping_cart->getTotalDiscountCents(),
                 $currency,
                 $currency_symbol,
                 STORE_CURRENCY_FORMAT,

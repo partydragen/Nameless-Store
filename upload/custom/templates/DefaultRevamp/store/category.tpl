@@ -80,7 +80,7 @@
 
                 <div class="ui small modal" id="modal{$product.id}">
                   <div class="header">
-                    {$product.name} | {$product.price_format}
+                    {$product.name} | {if $product.sale_active}<span style="color: #dc3545;text-decoration:line-through;">{$product.price_format}</span>{/if} {$product.real_price_format}
                   </div>
                   <div class="{if $product.image}image {/if}content">
                     {if $product.image}
