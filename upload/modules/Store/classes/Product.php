@@ -4,17 +4,17 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr13
+ * @version 2.0.3
  * @license MIT
  */
 class Product {
 
-    private $_db;
+    private DB $_db;
 
     /**
-     * @var object|null The product data. Basically just the row from `nl2_store_products` where the product ID is the key.
+     * @var ProductData|null The product data. Basically just the row from `nl2_store_products` where the product ID is the key.
      */
-    private $_data;
+    private ?ProductData $_data;
 
     /**
      * @var array The list of connections for this product.
@@ -37,15 +37,11 @@ class Product {
         if (!$query_data && $value) {
             $data = $this->_db->get('store_products', [$field, '=', $value]);
             if ($data->count()) {
-                $this->_data = $data->first();
-                $this->_data->sale_active = false;
-                $this->_data->sale_discount_cents = 0;
+                $this->_data = new ProductData($data->first());
             }
         } else if ($query_data) {
             // Load data from existing query.
-            $this->_data = $query_data;
-            $this->_data->sale_active = false;
-            $this->_data->sale_discount_cents = 0;
+            $this->_data = new ProductData($query_data);
         }
     }
 

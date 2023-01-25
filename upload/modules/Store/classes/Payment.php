@@ -4,14 +4,22 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr13
+ * @version 2.0.3
  * @license MIT
  */
 class Payment {
 
-    private $_db,
-            $_data,
-            $_order;
+    private DB $_db;
+
+    /**
+     * @var PaymentData|null The product data. Basically just the row from `nl2_store_payments` where the payment ID is the key.
+     */
+    private ?PaymentData $_data;
+
+    /**
+     * @var Order The order this payment belong to.
+     */
+    private $_order;
 
     public function __construct($value = null, $field = 'id', $query_data = null) {
         $this->_db = DB::getInstance();
@@ -19,11 +27,11 @@ class Payment {
         if (!$query_data && $value) {
             $data = $this->_db->get('store_payments', [$field, '=', $value]);
             if ($data->count()) {
-                $this->_data = $data->first();
+                $this->_data = new PaymentData($data->first());
             }
         } else if ($query_data) {
             // Load data from existing query.
-            $this->_data = $query_data;
+            $this->_data = new PaymentData($query_data);
         }
     }
 
@@ -51,7 +59,7 @@ class Payment {
 
         $data = $this->_db->get('store_payments', ['id', '=', $last_id]);
         if ($data->count()) {
-            $this->_data = $data->first();
+            $this->_data = new PaymentData($data->first());
         }
 
         return $last_id;
