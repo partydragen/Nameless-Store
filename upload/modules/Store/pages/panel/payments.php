@@ -324,8 +324,7 @@ if (isset($_GET['customer'])) {
                             'order_id' => $order->data()->id,
                             'gateway_id' => 0,
                             'amount_cents' => 0,
-                            'currency' => Store::getCurrency(),
-                            'fee' => 0
+                            'currency' => Store::getCurrency()
                         ]);
 
                         Session::flash('store_payment_success', $store_language->get('admin', 'payment_created_successfully'));
