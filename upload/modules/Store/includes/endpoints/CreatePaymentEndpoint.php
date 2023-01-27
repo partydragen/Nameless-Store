@@ -22,8 +22,7 @@ class CreatePaymentEndpoint extends KeyAuthEndpoint {
             'gateway_id' => $_POST['gateway_id'] ?? 0,
             'amount_cents' => Store::toCents($_POST['amount']),
             'transaction' => $_POST['transaction'] ?? null,
-            'currency' => $_POST['currency'],
-            'fee' => $_POST['fee'] ?? 0,
+            'currency' => $_POST['currency']
         ]);
 
         $api->returnArray(['id' => $payment->data()->id]);

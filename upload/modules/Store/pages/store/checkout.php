@@ -262,8 +262,7 @@ if (isset($_GET['do'])) {
                         'gateway_id' => 0,
                         'amount_cents' => 0,
                         'transaction' => 'Free',
-                        'currency' => Output::getClean(Store::getCurrency()),
-                        'fee' => 0
+                        'currency' => Output::getClean(Store::getCurrency())
                     ]);
 
                     $shopping_cart->clear();
