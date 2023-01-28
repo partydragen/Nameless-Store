@@ -23,7 +23,7 @@ class CommandsExecutedEndpoint extends KeyAuthEndpoint {
         $ids = rtrim($ids, ',') . ')';
 
         // Ensure the user exists
-        $user = $api->getDb()->createQuery('UPDATE `nl2_store_pending_actions` SET `status`=1 WHERE id IN ' . $ids);
+        $user = $api->getDb()->query('UPDATE `nl2_store_pending_actions` SET `status`=1 WHERE id IN ' . $ids);
         
         $api->returnArray(['success' => true]);
     }

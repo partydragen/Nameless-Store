@@ -42,7 +42,7 @@ class Credits_Gateway extends GatewayBase {
             $customer->removeCents($amount_to_pay);
 
             $payment = new Payment();
-            $payment->handlePaymentEvent('COMPLETED', [
+            $payment->handlePaymentEvent(Payment::COMPLETED, [
                 'order_id' => $order->data()->id,
                 'gateway_id' => $this->getId(),
                 'amount_cents' => $amount_to_pay,

@@ -163,7 +163,7 @@ class Customer {
      * @param int $cents The amount of cents to add to their balance
      */
     public function addCents(int $cents): void {
-        $this->_db->createQuery('UPDATE nl2_store_customers SET cents = cents + ? WHERE id = ?', [$cents, $this->_data->id]);
+        $this->_db->query('UPDATE nl2_store_customers SET cents = cents + ? WHERE id = ?', [$cents, $this->_data->id]);
     }
 
     /**
@@ -172,7 +172,7 @@ class Customer {
      * @param int $cents The amount of cents to remove from their balance
      */
     public function removeCents(int $cents): void {
-        $this->_db->createQuery('UPDATE nl2_store_customers SET cents = cents - ? WHERE id = ?', [$cents, $this->_data->id]);
+        $this->_db->query('UPDATE nl2_store_customers SET cents = cents - ? WHERE id = ?', [$cents, $this->_data->id]);
     }
 
     public function getPayments(): array {

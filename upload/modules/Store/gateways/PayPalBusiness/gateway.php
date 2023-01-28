@@ -214,7 +214,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                                     ];
                                 }
 
-                                $payment->handlePaymentEvent('COMPLETED', $data);
+                                $payment->handlePaymentEvent(Payment::COMPLETED, $data);
                             } else if (isset($response->resource->billing_agreement_id)) {
                                 // Agreement payment
 
@@ -230,7 +230,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                             $payment = new Payment($response->resource->sale_id, 'transaction');
                             if ($payment->exists()) {
                                 // Payment exists 
-                                $payment->handlePaymentEvent('REFUNDED');
+                                $payment->handlePaymentEvent(Payment::REFUNDED);
                             }
 
                             break;
@@ -239,7 +239,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                             $payment = new Payment($response->resource->id, 'transaction');
                             if ($payment->exists()) {
                                 // Payment exists 
-                                $payment->handlePaymentEvent('REVERSED');
+                                $payment->handlePaymentEvent(Payment::REVERSED);
                             }
 
                             break;
@@ -248,7 +248,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                             $payment = new Payment($response->resource->id, 'transaction');
                             if ($payment->exists()) {
                                 // Payment exists 
-                                $payment->handlePaymentEvent('DENIED');
+                                $payment->handlePaymentEvent(Payment::DENIED);
                             }
 
                             break;
@@ -259,7 +259,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                         case 'BILLING.SUBSCRIPTION.CANCELLED':
                             $id = $response->resource->id;
 
-                            DB::getInstance()->createQuery('UPDATE `nl2_store_agreements` SET status = ?, updated = ? WHERE agreement_id = ?', [
+                            DB::getInstance()->query('UPDATE `nl2_store_agreements` SET status = ?, updated = ? WHERE agreement_id = ?', [
                                 2,
                                 date('U'),
                                 $id
@@ -269,7 +269,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                         case 'BILLING.SUBSCRIPTION.SUSPENDED':
                             $id = $response->resource->id;
 
-                            DB::getInstance()->createQuery('UPDATE `nl2_store_agreements` SET status = ?, updated = ? WHERE agreement_id = ?', [
+                            DB::getInstance()->query('UPDATE `nl2_store_agreements` SET status = ?, updated = ? WHERE agreement_id = ?', [
                                 3,
                                 date('U'),
                                 $id
@@ -279,7 +279,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                         case 'BILLING.SUBSCRIPTION.RE-ACTIVATED':
                             $id = $response->resource->id;
 
-                            DB::getInstance()->createQuery('UPDATE `nl2_store_agreements` SET status = ?, updated = ? WHERE agreement_id = ?', [
+                            DB::getInstance()->query('UPDATE `nl2_store_agreements` SET status = ?, updated = ? WHERE agreement_id = ?', [
                                 1,
                                 date('U'),
                                 $id

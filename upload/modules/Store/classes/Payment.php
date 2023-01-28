@@ -8,6 +8,11 @@
  * @license MIT
  */
 class Payment {
+    public const PENDING = 'PENDING';
+    public const COMPLETED = 'COMPLETED';
+    public const REFUNDED = 'REFUNDED';
+    public const REVERSED = 'REVERSED';
+    public const DENIED = 'DENIED';
 
     private DB $_db;
 
@@ -102,7 +107,7 @@ class Payment {
 
             $username = $this->getOrder()->recipient()->getUsername();
             switch ($event) {
-                case 'PENDING':
+                case self::PENDING:
                     // Payment pending
                     $update_array = [
                         'status_id' => 0,
@@ -120,7 +125,7 @@ class Payment {
                         'content_full' => $store_language->get('general', 'pending_payment_text', ['user' => $username]),
                     ]);
                 break;
-                case 'COMPLETED':
+                case self::COMPLETED:
                     // Payment completed
                     $update_array = [
                         'status_id' => 1,
@@ -129,7 +134,7 @@ class Payment {
 
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
 
-                    $this->executeAllActions(1);
+                    $this->executeAllActions(Action::PURCHASE);
 
                     EventHandler::executeEvent('paymentCompleted', [
                         'event' => 'paymentCompleted',
@@ -140,7 +145,7 @@ class Payment {
                         'payment_id' => $this->data()->id,
                     ]);
                 break;
-                case 'REFUNDED':
+                case self::REFUNDED:
                     // Payment refunded
                     $update_array = [
                         'status_id' => 2,
@@ -150,7 +155,7 @@ class Payment {
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
 
                     $this->deletePendingActions();
-                    $this->executeAllActions(2);
+                    $this->executeAllActions(Action::REFUND);
 
                     EventHandler::executeEvent('paymentRefunded', [
                         'event' => 'paymentRefunded',
@@ -161,7 +166,7 @@ class Payment {
                         'content_full' => $store_language->get('general', 'refunded_payment_text', ['user' => $username]),
                     ]);
                 break;
-                case 'REVERSED':
+                case self::REVERSED:
                     // Payment reversed
                     $update_array = [
                         'status_id' => 3,
@@ -171,7 +176,7 @@ class Payment {
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
 
                     $this->deletePendingActions();
-                    $this->executeAllActions(3);
+                    $this->executeAllActions(Action::CHANGEBACK);
 
                     EventHandler::executeEvent('paymentReversed', [
                         'event' => 'paymentReversed',
@@ -182,7 +187,7 @@ class Payment {
                         'content_full' => $store_language->get('general', 'reversed_payment_text', ['user' => $username]),
                     ]);
                 break;
-                case 'DENIED':
+                case self::DENIED:
                     // Payment denied
                     $update_array = [
                         'status_id' => 4,
@@ -208,7 +213,7 @@ class Payment {
         } else {
             // Register payment
             switch ($event) {
-                case 'PENDING':
+                case self::PENDING:
                     // Payment pending
                     $insert_array = [
                         'status_id' => 0,
@@ -228,7 +233,7 @@ class Payment {
                         'content_full' => $store_language->get('general', 'pending_payment_text', ['user' => $username]),
                     ]);
                 break;
-                case 'COMPLETED':
+                case self::COMPLETED:
                     // Payment completed
                     $insert_array = [
                         'status_id' => 1,
@@ -238,7 +243,7 @@ class Payment {
 
                     $this->create(array_merge($insert_array, $extra_data));
 
-                    $this->executeAllActions(1);
+                    $this->executeAllActions(Action::PURCHASE);
 
                     $username = $this->getOrder()->recipient()->getUsername();
                     EventHandler::executeEvent('paymentCompleted', [
@@ -273,7 +278,7 @@ class Payment {
      * Delete any pending actions
      */
     public function deletePendingActions() {
-        $this->_db->createQuery('DELETE FROM nl2_store_pending_actions WHERE order_id = ? AND status = 0', [$this->data()->order_id])->results();
+        $this->_db->query('DELETE FROM nl2_store_pending_actions WHERE order_id = ? AND status = 0', [$this->data()->order_id])->results();
     }
 
     public function getStatusHtml() {
@@ -305,10 +310,10 @@ class Payment {
 
     public function delete() {
         if ($this->exists()) {
-            $this->_db->createQuery('DELETE FROM `nl2_store_payments` WHERE `id` = ?', [$this->data()->id]);
-            $this->_db->createQuery('DELETE FROM `nl2_store_orders` WHERE `id` = ?', [$this->data()->order_id]);
-            $this->_db->createQuery('DELETE FROM `nl2_store_orders_products` WHERE `order_id` = ?', [$this->data()->order_id]);
-            $this->_db->createQuery('DELETE FROM `nl2_store_orders_products_fields` WHERE `order_id` = ?', [$this->data()->order_id]);
+            $this->_db->query('DELETE FROM `nl2_store_payments` WHERE `id` = ?', [$this->data()->id]);
+            $this->_db->query('DELETE FROM `nl2_store_orders` WHERE `id` = ?', [$this->data()->order_id]);
+            $this->_db->query('DELETE FROM `nl2_store_orders_products` WHERE `order_id` = ?', [$this->data()->order_id]);
+            $this->_db->query('DELETE FROM `nl2_store_orders_products_fields` WHERE `order_id` = ?', [$this->data()->order_id]);
 
             return true;
         }

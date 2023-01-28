@@ -79,6 +79,9 @@ class Store_Module extends Module {
         EventHandler::registerListener('renderStoreProduct', 'ContentHook::renderEmojis', 10);
         EventHandler::registerListener('renderStoreProduct', 'ContentHook::replaceAnchors', 15);
 
+        require_once(ROOT_PATH . '/modules/Store/hooks/PriceAdjustmentHook.php');
+        EventHandler::registerListener('renderStoreProduct', 'PriceAdjustmentHook::discounts');
+
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
 
         define('STORE_CURRENCY_FORMAT', Util::getSetting('currency_format', '{currencySymbol}{price} {currencyCode}', 'Store'));
@@ -463,26 +466,26 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_orders')) {
             // Rename Tabels
             try {
-                $this->_db->createQuery('RENAME TABLE nl2_store_packages TO nl2_store_products;');
-                $this->_db->createQuery('RENAME TABLE nl2_store_packages_commands TO nl2_store_products_commands;');
+                $this->_db->query('RENAME TABLE nl2_store_packages TO nl2_store_products;');
+                $this->_db->query('RENAME TABLE nl2_store_packages_commands TO nl2_store_products_commands;');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
 
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_products CHANGE required_packages required_products varchar(128);');
-                $this->_db->createQuery('ALTER TABLE nl2_store_products_commands CHANGE package_id product_id int(11);');
+                $this->_db->query('ALTER TABLE nl2_store_products CHANGE required_packages required_products varchar(128);');
+                $this->_db->query('ALTER TABLE nl2_store_products_commands CHANGE package_id product_id int(11);');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
 
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_payments ADD `order_id` int(11) NOT NULL');
-                $this->_db->createQuery('ALTER TABLE nl2_store_payments ADD `fee` varchar(11) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_payments ADD `order_id` int(11) NOT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_payments ADD `fee` varchar(11) DEFAULT NULL');
                 
-                $this->_db->createQuery('ALTER TABLE nl2_store_payments CHANGE payment_method gateway_id int(11);');
+                $this->_db->query('ALTER TABLE nl2_store_payments CHANGE payment_method gateway_id int(11);');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -490,11 +493,11 @@ class Store_Module extends Module {
 
             // Update nl2_store_pending_commands table
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_pending_commands ADD `order_id` int(11) NOT NULL');
-                $this->_db->createQuery('ALTER TABLE nl2_store_pending_commands ADD `command_id` int(11) NOT NULL');
-                $this->_db->createQuery('ALTER TABLE nl2_store_pending_commands ADD `product_id` int(11) NOT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_pending_commands ADD `order_id` int(11) NOT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_pending_commands ADD `command_id` int(11) NOT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_pending_commands ADD `product_id` int(11) NOT NULL');
 
-                $this->_db->createQuery('ALTER TABLE nl2_store_pending_commands DROP COLUMN payment_id;');
+                $this->_db->query('ALTER TABLE nl2_store_pending_commands DROP COLUMN payment_id;');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -502,16 +505,16 @@ class Store_Module extends Module {
 
             // Update nl2_store_gateways table
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_gateways ADD `displayname` varchar(64) NOT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_gateways ADD `displayname` varchar(64) NOT NULL');
                 
                 $this->_db->update('store_gateways', 1, [
                     'name' => 'PayPal',
                     'displayname' => 'PayPal'
                 ]);
                 
-                $this->_db->createQuery('ALTER TABLE nl2_store_gateways DROP COLUMN client_id;');
-                $this->_db->createQuery('ALTER TABLE nl2_store_gateways DROP COLUMN client_key;');
-                $this->_db->createQuery('ALTER TABLE nl2_store_gateways DROP COLUMN hook_key;');
+                $this->_db->query('ALTER TABLE nl2_store_gateways DROP COLUMN client_id;');
+                $this->_db->query('ALTER TABLE nl2_store_gateways DROP COLUMN client_key;');
+                $this->_db->query('ALTER TABLE nl2_store_gateways DROP COLUMN hook_key;');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -552,15 +555,15 @@ class Store_Module extends Module {
 
             // Update nl2_store_payments table
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_payments DROP COLUMN user_id;');
-                $this->_db->createQuery('ALTER TABLE nl2_store_payments DROP COLUMN player_id;');
+                $this->_db->query('ALTER TABLE nl2_store_payments DROP COLUMN user_id;');
+                $this->_db->query('ALTER TABLE nl2_store_payments DROP COLUMN player_id;');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
             
             try {
-                $this->_db->createQuery('DROP TABLE nl2_store_payments_packages;');
+                $this->_db->query('DROP TABLE nl2_store_payments_packages;');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -625,30 +628,30 @@ class Store_Module extends Module {
             }
             
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_products_commands DROP COLUMN server_id;');
+                $this->_db->query('ALTER TABLE nl2_store_products_commands DROP COLUMN server_id;');
             } catch (Exception $e) {
                 // Error
             }
             
             try {
-                $this->_db->createQuery('RENAME TABLE nl2_store_products_commands TO nl2_store_products_actions;');
+                $this->_db->query('RENAME TABLE nl2_store_products_commands TO nl2_store_products_actions;');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
             
             try {
-                $this->_db->createQuery('RENAME TABLE nl2_store_pending_commands TO nl2_store_pending_actions;');
+                $this->_db->query('RENAME TABLE nl2_store_pending_commands TO nl2_store_pending_actions;');
                 
-                $this->_db->createQuery('ALTER TABLE nl2_store_pending_actions CHANGE command_id action_id int(11);');
-                $this->_db->createQuery('ALTER TABLE nl2_store_pending_actions CHANGE server_id connection_id int(11);');
+                $this->_db->query('ALTER TABLE nl2_store_pending_actions CHANGE command_id action_id int(11);');
+                $this->_db->query('ALTER TABLE nl2_store_pending_actions CHANGE server_id connection_id int(11);');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
             
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_products_actions ADD `own_connections` tinyint(1) NOT NULL DEFAULT \'0\'');
+                $this->_db->query('ALTER TABLE nl2_store_products_actions ADD `own_connections` tinyint(1) NOT NULL DEFAULT \'0\'');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -703,51 +706,51 @@ class Store_Module extends Module {
 
         if ($old_version < 140) {
             try {
-                $this->_db->createQuery('RENAME TABLE nl2_store_players TO nl2_store_customers');
+                $this->_db->query('RENAME TABLE nl2_store_players TO nl2_store_customers');
                 
-                $this->_db->createQuery('ALTER TABLE nl2_store_customers CHANGE `username` `username` varchar(64) DEFAULT NULL');
-                $this->_db->createQuery('ALTER TABLE nl2_store_customers CHANGE `uuid` `identifier` varchar(64) DEFAULT NULL');
-                $this->_db->createQuery('ALTER TABLE nl2_store_customers ADD `user_id` int(11) DEFAULT NULL');
-                $this->_db->createQuery('ALTER TABLE nl2_store_customers ADD `cents` bigint(20) NOT NULL DEFAULT \'0\'');
-                $this->_db->createQuery('ALTER TABLE nl2_store_customers ADD `integration_id` int(11) NOT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_customers CHANGE `username` `username` varchar(64) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_customers CHANGE `uuid` `identifier` varchar(64) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_customers ADD `user_id` int(11) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_customers ADD `cents` bigint(20) NOT NULL DEFAULT \'0\'');
+                $this->_db->query('ALTER TABLE nl2_store_customers ADD `integration_id` int(11) NOT NULL');
 
-                $this->_db->createQuery('UPDATE nl2_store_customers SET `integration_id` = 1 WHERE id <> 0');
+                $this->_db->query('UPDATE nl2_store_customers SET `integration_id` = 1 WHERE id <> 0');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
 
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_connections DROP COLUMN type');
+                $this->_db->query('ALTER TABLE nl2_store_connections DROP COLUMN type');
                 
-                $this->_db->createQuery('ALTER TABLE nl2_store_connections ADD `service_id` int(11) NOT NULL');
-                $this->_db->createQuery('ALTER TABLE nl2_store_connections ADD `data` text DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_connections ADD `service_id` int(11) NOT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_connections ADD `data` text DEFAULT NULL');
                 
-                $this->_db->createQuery('UPDATE nl2_store_connections SET `service_id` = 2 WHERE id <> 0');
+                $this->_db->query('UPDATE nl2_store_connections SET `service_id` = 2 WHERE id <> 0');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
 
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_products_actions ADD `service_id` int(11) NOT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_products_actions ADD `service_id` int(11) NOT NULL');
                 
-                $this->_db->createQuery('UPDATE nl2_store_products_actions SET `service_id` = 2 WHERE id <> 0');
+                $this->_db->query('UPDATE nl2_store_products_actions SET `service_id` = 2 WHERE id <> 0');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
 
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_orders CHANGE `player_id` `to_customer_id` int(11)');
-                $this->_db->createQuery('ALTER TABLE nl2_store_orders ADD `from_customer_id` int(11) NOT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_orders CHANGE `player_id` `to_customer_id` int(11)');
+                $this->_db->query('ALTER TABLE nl2_store_orders ADD `from_customer_id` int(11) NOT NULL');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
 
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_pending_actions CHANGE `player_id` `customer_id` int(11)');
+                $this->_db->query('ALTER TABLE nl2_store_pending_actions CHANGE `player_id` `customer_id` int(11)');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -778,8 +781,8 @@ class Store_Module extends Module {
                         $namelessmc_customers[$order->user_id] = $customer_id;
                     }
 
-                    $this->_db->createQuery('UPDATE nl2_store_orders SET `from_customer_id` = ?, `to_customer_id` = ? WHERE id = ?', [$customer_id, $customer_id, $order->id]);
-                    $this->_db->createQuery('UPDATE nl2_store_pending_actions SET `customer_id` = ? WHERE order_id = ?', [$customer_id, $order->id]);
+                    $this->_db->query('UPDATE nl2_store_orders SET `from_customer_id` = ?, `to_customer_id` = ? WHERE id = ?', [$customer_id, $customer_id, $order->id]);
+                    $this->_db->query('UPDATE nl2_store_pending_actions SET `customer_id` = ? WHERE order_id = ?', [$customer_id, $order->id]);
                 }
 
                 print_r($namelessmc_customers);
@@ -789,7 +792,7 @@ class Store_Module extends Module {
             }
 
             try {
-                $this->_db->createQuery('UPDATE nl2_store_orders SET `from_customer_id` = to_customer_id WHERE id <> 0', []);
+                $this->_db->query('UPDATE nl2_store_orders SET `from_customer_id` = to_customer_id WHERE id <> 0', []);
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -798,7 +801,7 @@ class Store_Module extends Module {
 
         if ($old_version < 142) {
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_connections ADD `last_fetch` int(20) NOT NULL DEFAULT \'0\'');
+                $this->_db->query('ALTER TABLE nl2_store_connections ADD `last_fetch` int(20) NOT NULL DEFAULT \'0\'');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -821,25 +824,25 @@ class Store_Module extends Module {
             }
 
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_products ADD `user_limit` varchar(128) DEFAULT NULL');
-                $this->_db->createQuery('ALTER TABLE nl2_store_products ADD `global_limit` varchar(128) DEFAULT NULL');
-                $this->_db->createQuery('ALTER TABLE nl2_store_products ADD `required_groups` varchar(128) DEFAULT NULL');
-                $this->_db->createQuery('ALTER TABLE nl2_store_products ADD `required_integrations` varchar(128) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_products ADD `user_limit` varchar(128) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_products ADD `global_limit` varchar(128) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_products ADD `required_groups` varchar(128) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_products ADD `required_integrations` varchar(128) DEFAULT NULL');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
 
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_orders_products ADD `quantity` int(11) NOT NULL DEFAULT \'1\'');
+                $this->_db->query('ALTER TABLE nl2_store_orders_products ADD `quantity` int(11) NOT NULL DEFAULT \'1\'');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
 
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_fields ADD `regex` varchar(64) DEFAULT NULL');
-                $this->_db->createQuery('ALTER TABLE nl2_store_fields ADD `default_value` varchar(64) NOT NULL DEFAULT \'\'');
+                $this->_db->query('ALTER TABLE nl2_store_fields ADD `regex` varchar(64) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_fields ADD `default_value` varchar(64) NOT NULL DEFAULT \'\'');
 
                 $this->_db->insert('store_fields', [
                     'identifier' => 'quantity',
@@ -905,31 +908,31 @@ class Store_Module extends Module {
             }
 
             try {
-                $this->_db->createQuery('ALTER TABLE nl2_store_orders ADD `coupon_id` int(11) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_orders ADD `coupon_id` int(11) DEFAULT NULL');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
 
             try {
-                $this->_db->createQuery('UPDATE nl2_store_products SET price = price * 100');
-                $this->_db->createQuery('ALTER TABLE nl2_store_products CHANGE `price` `price_cents` int(11) NOT NULL');
+                $this->_db->query('UPDATE nl2_store_products SET price = price * 100');
+                $this->_db->query('ALTER TABLE nl2_store_products CHANGE `price` `price_cents` int(11) NOT NULL');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
 
             try {
-                $this->_db->createQuery('UPDATE nl2_store_payments SET amount = amount * 100');
-                $this->_db->createQuery('ALTER TABLE nl2_store_payments CHANGE `amount` `amount_cents` int(11) DEFAULT NULL');
+                $this->_db->query('UPDATE nl2_store_payments SET amount = amount * 100');
+                $this->_db->query('ALTER TABLE nl2_store_payments CHANGE `amount` `amount_cents` int(11) DEFAULT NULL');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
 
             try {
-                $this->_db->createQuery('UPDATE nl2_store_payments SET fee = fee * 100');
-                $this->_db->createQuery('ALTER TABLE nl2_store_payments CHANGE `fee` `fee_cents` int(11) DEFAULT NULL');
+                $this->_db->query('UPDATE nl2_store_payments SET fee = fee * 100');
+                $this->_db->query('ALTER TABLE nl2_store_payments CHANGE `fee` `fee_cents` int(11) DEFAULT NULL');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';

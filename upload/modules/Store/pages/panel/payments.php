@@ -320,7 +320,7 @@ if (isset($_GET['customer'])) {
 
                         // Register payment
                         $payment = new Payment();
-                        $payment->handlePaymentEvent('COMPLETED', [
+                        $payment->handlePaymentEvent(Payment::COMPLETED, [
                             'order_id' => $order->data()->id,
                             'gateway_id' => 0,
                             'amount_cents' => 0,

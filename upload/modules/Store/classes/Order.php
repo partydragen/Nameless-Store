@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr13
+ * @version 2.0.3
  * @license MIT
  */
 class Order {
@@ -111,7 +111,7 @@ class Order {
     /**
      * Register the order to database.
      *
-     * @param User $user The NamelessMC user buying the product.
+     * @param ?User $user The NamelessMC user buying the product.
      * @param Customer $from_customer The customer buying the product.
      * @param Customer $to_customer The customer who is receiving the product.
      * @param array $items The list of products along with custom fields for product
@@ -122,7 +122,7 @@ class Order {
             'from_customer_id' => $from_customer->data()->id,
             'to_customer_id' => $to_customer->data()->id,
             'created' => date('U'),
-            'ip' => Util::getRemoteAddress(),
+            'ip' => HttpUtils::getRemoteAddress(),
             'coupon_id' => $coupon != null ? $coupon->data()->id : null
         ]);
         $last_id = $this->_db->lastId();

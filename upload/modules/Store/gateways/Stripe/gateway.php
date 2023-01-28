@@ -109,7 +109,7 @@ class Stripe_Gateway extends GatewayBase {
                $data = $event->data->object;
                if (isset($data->metadata->order_id)) {
                    $payment = new Payment($data->charges->data[0]->payment_intent, 'payment_id');
-                   $payment->handlePaymentEvent('COMPLETED', [
+                   $payment->handlePaymentEvent(Payment::COMPLETED, [
                        'order_id' => $data->metadata->order_id,
                        'gateway_id' => $this->getId(),
                        'payment_id' => $data->charges->data[0]->payment_intent,
@@ -124,7 +124,7 @@ class Stripe_Gateway extends GatewayBase {
                 $data = $event->data->object;
                 $payment = new Payment($data->payment_intent, 'payment_id');
                 if ($payment->exists()) {
-                    $payment->handlePaymentEvent('REFUNDED');
+                    $payment->handlePaymentEvent(Payment::REFUNDED);
                 }
                 break;
 
@@ -132,7 +132,7 @@ class Stripe_Gateway extends GatewayBase {
                 $data = $event->data->object;
                 $payment = new Payment($data->payment_intent, 'payment_id');
                 if ($payment->exists()) {
-                    $payment->handlePaymentEvent('DENIED');
+                    $payment->handlePaymentEvent(Payment::DENIED);
                 }
                 break;
 
@@ -141,7 +141,7 @@ class Stripe_Gateway extends GatewayBase {
                 if ($data->status === "lost") {
                     $payment = new Payment($data->charge, 'transaction');
                     if ($payment->exists()) {
-                        $payment->handlePaymentEvent('REVERSED');
+                        $payment->handlePaymentEvent(Payment::REVERSED);
                     }
                 }
                 break;

@@ -8,6 +8,12 @@
  * @license MIT
  */
 class Action {
+    public const PURCHASE = 1;
+    public const REFUND = 2;
+    public const CHANGEBACK = 3;
+    public const RENEWAL = 4;
+    public const EXPIRE = 5;
+
 
     private DB $_db;
 
@@ -105,7 +111,7 @@ class Action {
             return false;
         }
 
-        $this->_db->createQuery('INSERT INTO `nl2_store_products_connections` (`product_id`, `action_id`, `connection_id`) VALUES (?, ?, ?)',
+        $this->_db->query('INSERT INTO `nl2_store_products_connections` (`product_id`, `action_id`, `connection_id`) VALUES (?, ?, ?)',
             [
                 $this->data()->product_id,
                 $this->data()->id,
@@ -126,7 +132,7 @@ class Action {
             return false;
         }
 
-        $this->_db->createQuery('DELETE FROM `nl2_store_products_connections` WHERE `action_id` = ? AND `connection_id` = ?',
+        $this->_db->query('DELETE FROM `nl2_store_products_connections` WHERE `action_id` = ? AND `connection_id` = ?',
             [
                 $this->data()->id,
                 $connection_id
@@ -193,9 +199,9 @@ class Action {
 
     public function delete() {
         if ($this->exists()) {
-            $this->_db->createQuery('DELETE FROM `nl2_store_products_actions` WHERE `id` = ?', [$this->data()->id]);
-            $this->_db->createQuery('DELETE FROM `nl2_store_products_connections` WHERE `action_id` = ?', [$this->data()->id]);
-            $this->_db->createQuery('DELETE FROM `nl2_store_pending_actions` WHERE `action_id` = ?', [$this->data()->id]);
+            $this->_db->query('DELETE FROM `nl2_store_products_actions` WHERE `id` = ?', [$this->data()->id]);
+            $this->_db->query('DELETE FROM `nl2_store_products_connections` WHERE `action_id` = ?', [$this->data()->id]);
+            $this->_db->query('DELETE FROM `nl2_store_pending_actions` WHERE `action_id` = ?', [$this->data()->id]);
 
             return true;
         }

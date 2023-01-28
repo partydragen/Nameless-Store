@@ -17,7 +17,7 @@ class CreatePaymentEndpoint extends KeyAuthEndpoint {
         }
 
         $payment = new Payment();
-        $payment->handlePaymentEvent('COMPLETED', [
+        $payment->handlePaymentEvent(Payment::COMPLETED, [
             'order_id' => $order->data()->id,
             'gateway_id' => $_POST['gateway_id'] ?? 0,
             'amount_cents' => Store::toCents($_POST['amount']),
