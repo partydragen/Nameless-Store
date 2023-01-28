@@ -251,7 +251,7 @@ if (isset($_GET['do'])) {
                 $order = new Order();
                 $order->setAmount($amount);
 
-                $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems());
+                $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems(), $shopping_cart->getCoupon());
 
                 // Complete order if there is nothing to pay
                 $amount_to_pay = $shopping_cart->getTotalPriceCents();
@@ -262,15 +262,14 @@ if (isset($_GET['do'])) {
                         'gateway_id' => 0,
                         'amount_cents' => 0,
                         'transaction' => 'Free',
-                        'currency' => Output::getClean(Store::getCurrency())
+                        'currency' => Store::getCurrency()
                     ]);
 
                     $shopping_cart->clear();
                     Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
                 }
 
-                $payment_method = $_POST['payment_method'];
-                $gateway = $gateways->get($payment_method);
+                $gateway = $gateways->get($_POST['payment_method']);
                 if ($gateway) {
                     // Load gateway process
                     $gateway->processOrder($order);
@@ -414,7 +413,7 @@ if (isset($_GET['do'])) {
         'REDEEM_COUPON' => $store_language->get('general', 'redeem_coupon'),
         'REDEEM_COUPON_HERE' => $store_language->get('general', 'redeem_coupon_here'),
         'REDEEM_COUPON_URL' => URL::build('/queries/redeem_coupon'),
-        'REDEEM_COUPON_VALUE' => '',
+        'REDEEM_COUPON_VALUE' => $shopping_cart->getCoupon() != null ? Output::getClean($shopping_cart->getCoupon()->data()->code) : '',
         'PAYMENT_METHOD' => $store_language->get('general', 'payment_method'),
         'PURCHASE' => $store_language->get('general', 'purchase'),
         'AGREE_T_AND_C_PURCHASE' => $store_language->get('general', 'agree_t_and_c_purchase', [
@@ -441,6 +440,10 @@ $smarty->assign([
 
 // Load modules + template
 Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
+
+if (Session::exists('store_success')) {
+    $success = Session::flash('store_success');
+}
 
 if (Session::exists('store_error')) {
     $errors[] = Session::flash('store_error');

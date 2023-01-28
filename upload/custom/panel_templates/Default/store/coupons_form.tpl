@@ -112,7 +112,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="InputMinimumBasket">{$MIN_BASKET}</label>
-                                        <input type="number" name="min_basket" class="form-control" id="InputMinimumBasket" step="1" min="0" value="{$MIN_BASKET_VALUE}">
+                                        <input type="number" name="min_basket" class="form-control" id="InputMinimumBasket" step="0.01" min="0.00" value="{$MIN_BASKET_VALUE}">
                                     </div>
                                 </div>
                             </div>

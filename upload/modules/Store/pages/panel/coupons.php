@@ -107,7 +107,7 @@ if (!isset($_GET['action'])) {
                                 'expire_date' => strtotime($_POST['expire_date']),
                                 'redeem_limit' => Input::get('redeem_limit'),
                                 'customer_limit' => Input::get('customer_redeem_limit'),
-                                'min_basket' => Input::get('min_basket'),
+                                'min_basket' => Store::toCents(Input::get('min_basket')),
                             ]);
 
                             Session::flash('coupons_success', $store_language->get('admin', 'coupon_created_successfully'));
@@ -158,7 +158,7 @@ if (!isset($_GET['action'])) {
                 'CUSTOMER_REDEEM_LIMIT' => $store_language->get('admin', 'customer_redeem_limit'),
                 'CUSTOMER_REDEEM_LIMIT_VALUE' => ((isset($_POST['customer_redeem_limit']) && $_POST['customer_redeem_limit']) ? Output::getClean(Input::get('customer_redeem_limit')) : '0'),
                 'MIN_BASKET' => $store_language->get('admin', 'minimum_basket'),
-                'MIN_BASKET_VALUE' => ((isset($_POST['min_basket']) && $_POST['min_basket']) ? Output::getClean(Input::get('min_basket')) : '0'),
+                'MIN_BASKET_VALUE' => ((isset($_POST['min_basket']) && $_POST['min_basket']) ? Output::getClean(Input::get('min_basket')) : '0.00'),
             ]);
 
             $template_file = 'store/coupons_form.tpl';
@@ -222,7 +222,7 @@ if (!isset($_GET['action'])) {
                                 'expire_date' => strtotime($_POST['expire_date']),
                                 'redeem_limit' => Input::get('redeem_limit'),
                                 'customer_limit' => Input::get('customer_redeem_limit'),
-                                'min_basket' => Input::get('min_basket'),
+                                'min_basket' => Store::toCents(Input::get('min_basket')),
                             ]);
 
                             Session::flash('coupons_success', $store_language->get('admin', 'coupon_updated_successfully'));
@@ -274,7 +274,7 @@ if (!isset($_GET['action'])) {
                 'CUSTOMER_REDEEM_LIMIT' => $store_language->get('admin', 'customer_redeem_limit'),
                 'CUSTOMER_REDEEM_LIMIT_VALUE' => Output::getClean($coupon->customer_limit),
                 'MIN_BASKET' => $store_language->get('admin', 'minimum_basket'),
-                'MIN_BASKET_VALUE' => Output::getClean($coupon->min_basket),
+                'MIN_BASKET_VALUE' => Store::fromCents($coupon->min_basket),
             ]);
 
             $template_file = 'store/coupons_form.tpl';

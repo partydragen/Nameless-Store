@@ -905,6 +905,13 @@ class Store_Module extends Module {
             }
 
             try {
+                $this->_db->createQuery('ALTER TABLE nl2_store_orders ADD `coupon_id` int(11) DEFAULT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
                 $this->_db->createQuery('UPDATE nl2_store_products SET price = price * 100');
                 $this->_db->createQuery('ALTER TABLE nl2_store_products CHANGE `price` `price_cents` int(11) NOT NULL');
             } catch (Exception $e) {
@@ -990,7 +997,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_orders')) {
             try {
-                $this->_db->createTable('store_orders', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `from_customer_id` int(11) NOT NULL, `to_customer_id` int(11) NOT NULL, `created` int(11) NOT NULL, `ip` varchar(128) DEFAULT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_orders', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `from_customer_id` int(11) NOT NULL, `to_customer_id` int(11) NOT NULL, `created` int(11) NOT NULL, `ip` varchar(128) DEFAULT NULL, `coupon_id` int(11) DEFAULT NULL, PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }

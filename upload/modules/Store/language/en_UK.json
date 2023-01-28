@@ -263,5 +263,9 @@
     "general/redeem": "Redeem",
     "general/redeem_coupon": "Redeem Coupon",
     "general/redeem_coupon_here": "Have a coupon code? Enter it here",
-    "general/invalid_coupon": "Invalid coupon code."
+    "general/successfully_applied_coupon": "Successfully applied coupon.",
+    "general/invalid_coupon": "Invalid coupon code.",
+    "general/redeem_limit_reached": "Redeem limit reached for this coupon.",
+    "general/customer_redeem_limit_reached": "You have reached the maximum of uses for this coupon.",
+    "general/redeem_min_basket_value": "Using this coupon requires a minimum expenditure of {{min_basket}}."
 }

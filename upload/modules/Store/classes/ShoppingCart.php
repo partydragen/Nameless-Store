@@ -21,20 +21,28 @@ class ShoppingCart {
      */
     private array $_products = [];
 
+    /**
+     * @var Coupon Coupon code
+     */
+    private ?Coupon $_coupon = null;
+
     // Constructor
     public function __construct() {
-        $this->_items = (isset($_SESSION['shopping_cart']) ? $_SESSION['shopping_cart'] : []);
+        $shopping_cart = $_SESSION['shopping_cart'] ?? [];
+        $this->_items = $_SESSION['shopping_cart']['items'] ?? [];
 
         if (count($this->_items)) {
-            $products_ids = '(';
-            foreach ($this->_items as $product) {
-                $products_ids .= (int) $product['id'] . ',';
+            // Get active coupon
+            if (isset($_SESSION['shopping_cart']['coupon_id'])) {
+                $coupon = new Coupon($_SESSION['shopping_cart']['coupon_id']);
+                if ($coupon->exists()) {
+                    $this->_coupon = $coupon;
+                }
             }
-            $products_ids = rtrim($products_ids, ',');
-            $products_ids .= ')';
 
             // Get products
-            $products_query = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE id in '.$products_ids.' AND disabled = 0 AND deleted = 0 ')->results();
+            $products_ids = implode(',', array_keys($this->_items));
+            $products_query = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE id in ('.$products_ids.') AND disabled = 0 AND deleted = 0 ')->results();
             foreach ($products_query as $item) {
                 $product = new Product(null, null, $item);
 
@@ -45,6 +53,7 @@ class ShoppingCart {
                     'image' => (isset($product->data()->image) && !is_null($product->data()->image) ? (defined('CONFIG_PATH') ? CONFIG_PATH . '/' : '/' . 'uploads/store/' . Output::getClean(Output::getDecoded($product->data()->image))) : null),
                     'link' => URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->data()->id)),
                     'hidden' => false,
+                    'shopping_cart' => $this
                 ]);
 
                 $this->_products[$item->id] = $product;
@@ -63,7 +72,7 @@ class ShoppingCart {
     public function add(int $product_id, int $quantity = 1, array $fields = []): void {
         $shopping_cart = (isset($_SESSION['shopping_cart']) ? $_SESSION['shopping_cart'] : []);
 
-        $shopping_cart[$product_id] = [
+        $shopping_cart['items'][$product_id] = [
             'id' => $product_id,
             'quantity' => $quantity,
             'fields' => $fields
@@ -74,7 +83,7 @@ class ShoppingCart {
 
     // Remove product from shopping cart
     public function remove(int $product_id): void {
-        unset($_SESSION['shopping_cart'][$product_id]);
+        unset($_SESSION['shopping_cart']['items'][$product_id]);
         unset($this->_items[$product_id]);
     }
 
@@ -91,6 +100,22 @@ class ShoppingCart {
     // Get the products from the shopping cart
     public function getProducts(): array {
         return $this->_products ? $this->_products : [];
+    }
+
+    // Set coupon for this shopping cart
+    public function setCoupon(?Coupon $coupon) {
+        $this->_coupon = $coupon;
+
+        if ($coupon != null) {
+            $_SESSION['shopping_cart']['coupon_id'] = $coupon->data()->id;
+        } else {
+            unset($_SESSION['shopping_cart']['coupon_id']);
+        }
+    }
+
+    // Get active coupon code
+    public function getCoupon(): ?Coupon {
+        return $this->_coupon;
     }
 
     // Get total price to pay in cents
