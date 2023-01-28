@@ -68,9 +68,9 @@ class Product {
     /**
      * Get the product data.
      *
-     * @return object This product data.
+     * @return ProductData This product data.
      */
-    public function data() {
+    public function data(): ?ProductData {
         return $this->_data;
     }
 
@@ -135,7 +135,7 @@ class Product {
      *
      * @return bool Returns false if they did not have this connection
      */
-    public function removeConnection($connection_id): bool {
+    public function removeConnection(int $connection_id): bool {
         if (!array_key_exists($connection_id, $this->getConnections())) {
             return false;
         }
@@ -298,7 +298,7 @@ class Product {
         return $required_integrations_list;
     }
 
-    public function getRealPriceCents() {
+    public function getRealPriceCents(): int {
         return $this->data()->sale_active == 1 ? $this->data()->price_cents - $this->data()->sale_discount_cents : $this->data()->price_cents;
     }
 

@@ -30,7 +30,7 @@ class Store {
         $this->_cache = $cache;
     }
 
-    public function getStoreURL() {
+    public function getStoreURL(): string {
         return Util::getSetting('store_path', '/store', 'Store');
     }
 

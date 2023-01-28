@@ -12,7 +12,7 @@ class PriceAdjustmentHook extends HookBase {
     // Check for discounts
     public static function discounts(array $params = []): array {
         $sales = Store::getActiveSales();
-        
+
         foreach ($sales as $sale) {
             $products = json_decode($sale->effective_on ?? []);
 

@@ -13,7 +13,7 @@ if (Input::exists()) {
         ]);
 
         if ($validation->passed()) {
-            $coupon = DB::getInstance()->query('SELECT * FROM nl2_store_sales WHERE code = ? AND start_date < ? AND expire_date > ? ', [$_POST['coupon'], date('U'), date('U')]);
+            $coupon = DB::getInstance()->query('SELECT * FROM nl2_store_coupons WHERE code = ? AND start_date < ? AND expire_date > ? ', [$_POST['coupon'], date('U'), date('U')]);
             if ($coupon->count()) {
 
             } else {

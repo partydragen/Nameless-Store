@@ -260,8 +260,8 @@
     "general/product_requires_products": "You are missing the required {{product}} product to purchase this product",
     "general/product_requires_groups": "You are missing the required {{group}} group to purchase this product",
     "general/product_requires_integration": "This product requires you to link your {{integration}} account, You can do this at {{linkStart}}account connections{{linkEnd}}",
-    "general/redeen": "Redeem",
-    "general/redeen_coupon": "Redeem Coupon",
-    "general/redeen_coupon_here": "Have a coupon code? Enter it here",
+    "general/redeem": "Redeem",
+    "general/redeem_coupon": "Redeem Coupon",
+    "general/redeem_coupon_here": "Have a coupon code? Enter it here",
     "general/invalid_coupon": "Invalid coupon code."
 }

@@ -77,13 +77,13 @@ class Payment {
     /**
      * Get the payment data.
      *
-     * @return object This payment data.
+     * @return PaymentData This payment data.
      */
-    public function data() {
+    public function data(): ?PaymentData {
         return $this->_data;
     }
 
-    public function getOrder() {
+    public function getOrder(): Order {
         if ($this->_order == null) {
             $this->_order = new Order($this->data()->order_id);
         }
