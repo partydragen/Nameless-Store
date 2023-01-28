@@ -410,6 +410,11 @@ if (isset($_GET['do'])) {
                 STORE_CURRENCY_FORMAT,
             )
         ),
+        'REDEEM' => $store_language->get('general', 'redeem'),
+        'REDEEM_COUPON' => $store_language->get('general', 'redeem_coupon'),
+        'REDEEM_COUPON_HERE' => $store_language->get('general', 'redeem_coupon_here'),
+        'REDEEM_COUPON_URL' => URL::build('/queries/redeem_coupon'),
+        'REDEEM_COUPON_VALUE' => '',
         'PAYMENT_METHOD' => $store_language->get('general', 'payment_method'),
         'PURCHASE' => $store_language->get('general', 'purchase'),
         'AGREE_T_AND_C_PURCHASE' => $store_language->get('general', 'agree_t_and_c_purchase', [

@@ -46,7 +46,9 @@ class Store_Module extends Module {
         $pages->add('Store', '/panel/store/connections', 'pages/panel/connections.php');
         $pages->add('Store', '/panel/store/fields', 'pages/panel/fields.php');
         $pages->add('Store', '/panel/store/sales', 'pages/panel/sales.php');
+        $pages->add('Store', '/panel/store/coupons', 'pages/panel/coupons.php');
         $pages->add('Store', '/panel/users/store', 'pages/panel/users_store.php');
+        $pages->add('Store', '/queries/redeem_coupon', 'queries/redeem_coupon.php');
 
         $pages->add('Store', '/user/store', 'pages/user/store.php');
 
@@ -181,6 +183,7 @@ class Store_Module extends Module {
                 'staffcp.store.fields' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'fields'),
                 'staffcp.store.manage_credits' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'manage_users_credits'),
                 'staffcp.store.sales' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'sales'),
+                'staffcp.store.coupons' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'coupons'),
             ]);
 
             if ($user->hasPermission('staffcp.store')) {
@@ -269,7 +272,17 @@ class Store_Module extends Module {
                     } else
                         $icon = $cache->retrieve('store_sales_icon');
 
-                    $navs[2]->add('store_sales', $this->_store_language->get('admin', 'sales'), URL::build('/panel/store/sales'), 'top', null, ($order + 0.7), $icon);
+                    $navs[2]->add('store_sales', $this->_store_language->get('admin', 'sales'), URL::build('/panel/store/sales'), 'top', null, ($order + 0.8), $icon);
+                }
+
+                if ($user->hasPermission('staffcp.store.coupons')) {
+                    if (!$cache->isCached('store_coupons_icon')) {
+                        $icon = '<i class="nav-icon fas fa-ticket-alt"></i>';
+                        $cache->store('store_coupons_icon', $icon);
+                    } else
+                        $icon = $cache->retrieve('store_coupons_icon');
+
+                    $navs[2]->add('store_coupons', $this->_store_language->get('admin', 'coupons'), URL::build('/panel/store/coupons'), 'top', null, ($order + 0.9), $icon);
                 }
             }
 
@@ -869,6 +882,14 @@ class Store_Module extends Module {
                 }
             }
 
+            if (!$this->_db->showTables('store_coupons')) {
+                try {
+                    $this->_db->createTable("store_coupons", " `id` int(11) NOT NULL AUTO_INCREMENT, `code` varchar(64) NOT NULL, `effective_on` varchar(256) NOT NULL, `discount_type` int(11) NOT NULL, `discount_amount` int(11) NOT NULL, `start_date` int(11) NOT NULL, `expire_date` int(11) NOT NULL, `redeem_limit` int(11) NOT NULL DEFAULT '0', `customer_limit` int(11) NOT NULL DEFAULT '0', `min_basket` int(11) NOT NULL DEFAULT '0', PRIMARY KEY (`id`)");
+                } catch (Exception $e) {
+                    // Error
+                }
+            }
+
             try {
                 if ($this->_db->showTables('store_settings')) {
                     // Convert store settings to NamelessMC settings system
@@ -1069,6 +1090,14 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_sales')) {
             try {
                 $this->_db->createTable("store_sales", " `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `effective_on` varchar(256) NOT NULL, `discount_type` int(11) NOT NULL, `discount_amount` int(11) NOT NULL, `start_date` int(11) NOT NULL, `expire_date` int(11) NOT NULL, PRIMARY KEY (`id`)");
+            } catch (Exception $e) {
+                // Error
+            }
+        }
+
+        if (!$this->_db->showTables('store_coupons')) {
+            try {
+                $this->_db->createTable("store_coupons", " `id` int(11) NOT NULL AUTO_INCREMENT, `code` varchar(64) NOT NULL, `effective_on` varchar(256) NOT NULL, `discount_type` int(11) NOT NULL, `discount_amount` int(11) NOT NULL, `start_date` int(11) NOT NULL, `expire_date` int(11) NOT NULL, `redeem_limit` int(11) NOT NULL DEFAULT '0', `customer_limit` int(11) NOT NULL DEFAULT '0', `min_basket` int(11) NOT NULL DEFAULT '0', PRIMARY KEY (`id`)");
             } catch (Exception $e) {
                 // Error
             }

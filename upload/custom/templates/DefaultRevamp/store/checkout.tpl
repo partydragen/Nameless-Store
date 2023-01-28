@@ -81,14 +81,14 @@
           </tbody>
         </table>
 
-        <h3>Redeem Coupons</h3>
+        <h3>{$REDEEM_COUPON}</h3>
         <div class="ui divider"></div>
-        <form class="ui form" action="" method="post" id="coupon">
+        <form class="ui form" action="{$REDEEM_COUPON_URL}" method="post" id="coupon">
           <div class="field">
               <div class="ui action input">
-                  <input type="text" name="coupons" id="coupon" placeholder="Have a coupon code? Enter it here"/>
+                  <input type="text" name="coupon" id="coupon" value="{$REDEEM_COUPON_VALUE}" placeholder="{$REDEEM_COUPON_HERE}"/>
                   <input type="hidden" name="token" value="{$TOKEN}">
-                  <button class="ui green button">Redeen &raquo;</button>
+                  <button class="ui green button">{$REDEEM} &raquo;</button>
               </div>
           </div>
         </form>
