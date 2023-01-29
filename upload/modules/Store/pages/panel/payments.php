@@ -220,6 +220,12 @@ if (isset($_GET['customer'])) {
         ]);
     }
 
+    $payment_method = 'Manual';
+    if ($payment->data()->gateway_id != 0) {
+        $payment_method = DB::getInstance()->query('SELECT name FROM nl2_store_gateways WHERE id = ?', [$payment->data()->gateway_id])->first();
+        $payment_method = $payment_method->name;
+    }
+
     $smarty->assign([
         'VIEWING_PAYMENT' => $store_language->get('admin', 'viewing_payment', ['payment' => Output::getClean($payment->data()->transaction)]),
         'BACK' => $language->get('general', 'back'),
@@ -232,7 +238,7 @@ if (isset($_GET['customer'])) {
         'TRANSACTION' => $store_language->get('admin', 'transaction'),
         'TRANSACTION_VALUE' => Output::getClean($payment->data()->transaction),
         'PAYMENT_METHOD' => $store_language->get('admin', 'payment_method'),
-        'PAYMENT_METHOD_VALUE' => Output::getClean($payment->data()->gateway_id),
+        'PAYMENT_METHOD_VALUE' => Output::getClean($payment_method),
         'STATUS' => $store_language->get('admin', 'status'),
         'STATUS_VALUE' => $payment->getStatusHtml(),
         'UUID' => $store_language->get('admin', 'uuid'),
