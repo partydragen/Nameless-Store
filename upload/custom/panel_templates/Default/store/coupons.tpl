@@ -64,7 +64,7 @@
                                     <tbody>
                                     {foreach from=$COUPONS_LIST item=coupon}
                                         <tr>
-                                            <td><a href="{$coupon.edit_link}">{$coupon.code}</a></td>
+                                            <td><code>{$coupon.code}</code></td>
                                             <td>{if $coupon.active}<i class="fa fa-check-circle text-success"></i>{else}<i class="fa fa-times-circle text-danger"></i>{/if}</td>
                                             <td>
                                                 <div class="float-md-right">

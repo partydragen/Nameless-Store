@@ -70,7 +70,7 @@ if (Input::exists()) {
 
                 Redirect::to(URL::build($store_url . '/category/' . $category->id));
             } else {
-                $errors[] = 'Unable to find a player with that username';
+                $errors[] = $store_language->get('general', 'unable_to_find_player');
             }
         }
     }

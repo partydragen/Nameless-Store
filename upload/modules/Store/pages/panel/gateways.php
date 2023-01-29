@@ -21,10 +21,6 @@ define('PANEL_PAGE', 'store_gateways');
 $page_title = $store_language->get('admin', 'gateways');
 
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
-require_once(ROOT_PATH . '/modules/Store/classes/Store.php');
-require_once(ROOT_PATH . '/modules/Store/classes/Gateways.php');
-require_once(ROOT_PATH . '/modules/Store/classes/GatewayBase.php');
-require_once(ROOT_PATH . '/modules/Store/classes/StoreConfig.php');
 
 $store = new Store($cache, $store_language);
 $gateways = new Gateways();
