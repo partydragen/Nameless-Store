@@ -323,7 +323,7 @@ if (isset($_GET['customer'])) {
                         $payment->handlePaymentEvent(Payment::COMPLETED, [
                             'order_id' => $order->data()->id,
                             'gateway_id' => 0,
-                            'amount_cents' => 0,
+                            'amount_cents' => Store::toCents(Input::get('price')),
                             'currency' => Store::getCurrency()
                         ]);
 
@@ -342,7 +342,8 @@ if (isset($_GET['customer'])) {
         $smarty->assign([
             'CREATE_PAYMENT' => $store_language->get('admin', 'create_payment'),
             'BACK' => $language->get('general', 'back'),
-            'BACK_LINK' => URL::build('/panel/store/payments')
+            'BACK_LINK' => URL::build('/panel/store/payments'),
+            'PRICE' => $store_language->get('admin', 'price'),
         ]);
 
         // Products to choose

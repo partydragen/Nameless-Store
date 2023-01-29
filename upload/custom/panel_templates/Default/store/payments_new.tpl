@@ -61,6 +61,10 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
+                                    <label for="InputPrice">{$PRICE}</label>
+                                    <input type="number" name="price" class="form-control" id="InputPrice" step="0.01" min="0.00" value="0.00">
+                                </div>
+                                <div class="form-group">
                                     <input type="hidden" name="token" value="{$TOKEN}">
                                     <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
                                 </div>
@@ -89,6 +93,12 @@
 </div>
 
 {include file='scripts.tpl'}
+
+<script type="text/javascript">
+    $(document).ready(() => {
+        $('#inputProducts').select2({ placeholder: "No products selected" });
+    })
+</script>
 
 </body>
 </html>
