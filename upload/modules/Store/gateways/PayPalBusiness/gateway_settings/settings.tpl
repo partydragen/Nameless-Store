@@ -3,6 +3,7 @@
                                     <div class="card-body">
                                         <h5><i class="icon fa fa-info-circle"></i> Info</h5>
                                         The values of these fields are hidden for security reasons.<br />If you are updating these settings, please enter both the client ID and the client secret together.
+                                        </br></br>Client keys can be made here <a href="https://developer.paypal.com/home">https://developer.paypal.com/home</a>
                                     </div>
                                 </div>
                                 

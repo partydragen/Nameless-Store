@@ -11,12 +11,12 @@ class Stripe_Gateway extends GatewayBase {
 
     public function __construct() {
         $name = 'Stripe';
-        $settings = ROOT_PATH . '/modules/Store/gateways/Stripe/gateway_settings/settings.php';
         $author = '<a href="https://github.com/supercrafter100/" target="_blank" rel="nofollow noopener">Supercrafter100</a>';
         $gateway_version = '1.4.3';
         $store_version = '1.4.3';
+        $settings = ROOT_PATH . '/modules/Store/gateways/Stripe/gateway_settings/settings.php';
 
-        parent::__construct($name, $settings, $author, $gateway_version, $store_version);
+        parent::__construct($name, $author, $gateway_version, $store_version, $settings);
     }
 
     public function onCheckoutPageLoad(TemplateBase $template, Customer $customer): void {

@@ -54,7 +54,7 @@ abstract class GatewayBase {
      */
     private array $_errors = [];
 
-    public function __construct(string $name, string $settings, string $author = 'Unknown', string $version = 'Unknown', string $store_version = 'Unknown') {
+    public function __construct(string $name, string $author, string $version, string $store_version, string $settings) {
         $this->_name = $name;
         $this->_settings = $settings;
         $this->_author = $author;

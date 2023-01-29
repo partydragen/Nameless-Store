@@ -11,12 +11,12 @@ class PayPal_Business_Gateway extends GatewayBase {
 
     public function __construct() {
         $name = 'PayPalBusiness';
-        $settings = ROOT_PATH . '/modules/Store/gateways/PayPalBusiness/gateway_settings/settings.php';
         $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
         $gateway_version = '1.4.3';
         $store_version = '1.4.3';
+        $settings = ROOT_PATH . '/modules/Store/gateways/PayPalBusiness/gateway_settings/settings.php';
 
-        parent::__construct($name, $settings, $author, $gateway_version, $store_version);
+        parent::__construct($name, $author, $gateway_version, $store_version, $settings);
     }
 
     public function onCheckoutPageLoad(TemplateBase $template, Customer $customer): void {
