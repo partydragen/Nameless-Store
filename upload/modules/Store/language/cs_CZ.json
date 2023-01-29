@@ -262,5 +262,10 @@
     "admin/creating_coupon": "Vytváření kupónu",
     "admin/coupon_deleted_successfully": "Kupón úspěšně odstraněn",
     "admin/redeem_limit": "Limit použití",
-    "general/redeem": "Uplatnit"
+    "general/redeem": "Uplatnit",
+    "general/customer_redeem_limit_reached": "Dosáhli jste maximálního počtu použití tohoto kupónu.",
+    "general/redeem_min_basket_value": "Použití tohoto kupónu vyžaduje minimální útratu ve výši {{min_basket}}.",
+    "general/successfully_applied_coupon": "Kupón úspěšně uplatněn.",
+    "general/redeem_limit_reached": "Byl dosažen limit uplatnění tohoto kupónu.",
+    "general/unable_to_find_player": "Nepodařilo se nalézt hráče se zadanou přezdívkou"
 }
