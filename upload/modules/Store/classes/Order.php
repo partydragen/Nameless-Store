@@ -50,6 +50,11 @@ class Order {
         return $this->_data;
     }
 
+    // Set products to keep current rendered data and to avoid to requery
+    public function setProducts(array $products) {
+        $this->_products = $products;
+    }
+
     /**
      * Get the products for this order.
      *

@@ -251,6 +251,7 @@ if (isset($_GET['do'])) {
                 $order = new Order();
                 $order->setAmount($amount);
 
+                $order->setProducts($shopping_cart->getProducts());
                 $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems(), $shopping_cart->getCoupon());
 
                 // Complete order if there is nothing to pay
