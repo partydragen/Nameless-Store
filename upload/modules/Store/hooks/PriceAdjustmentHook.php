@@ -32,6 +32,11 @@ class PriceAdjustmentHook extends HookBase {
                     $product->data()->sale_discount_cents = $sale->discount_amount;
                 }
             }
+
+            // Prevent the discount from being more than the price itself
+            if ($product->data()->sale_discount_cents >= $product->data()->price_cents) {
+                $product->data()->sale_discount_cents = $product->data()->price_cents;
+            }
         }
 
         // Handle coupon
@@ -54,11 +59,11 @@ class PriceAdjustmentHook extends HookBase {
                     $product->data()->sale_discount_cents = $coupon->data()->discount_amount;
                 }
             }
-        }
 
-        // Prevent the discount from being more than the price itself
-        if ($product->data()->sale_discount_cents >= $product->data()->price_cents) {
-            $product->data()->sale_discount_cents = $product->data()->price_cents;
+            // Prevent the discount from being more than the price itself
+            if ($product->data()->sale_discount_cents >= $product->data()->price_cents) {
+                $product->data()->sale_discount_cents = $product->data()->price_cents;
+            }
         }
 
         return $params;
