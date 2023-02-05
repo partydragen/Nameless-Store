@@ -441,13 +441,15 @@ if (!isset($_GET['action'])) {
                     $required_products = $_POST['required_products'];
                     $required_groups = $_POST['required_groups'];
                     $required_integrations = $_POST['required_integrations'];
+                    $allowed_gateways = $_POST['allowed_gateways'];
 
                     $product->update([
                         'global_limit' => json_encode($global_limit),
                         'user_limit' => json_encode($user_limit),
                         'required_products' => json_encode(isset($required_products) && is_array($required_products) ? $required_products : []),
                         'required_groups' => json_encode(isset($required_groups) && is_array($required_groups) ? $required_groups : []),
-                        'required_integrations' =>  json_encode(isset($required_integrations) && is_array($required_integrations) ? $required_integrations : [])
+                        'required_integrations' =>  json_encode(isset($required_integrations) && is_array($required_integrations) ? $required_integrations : []),
+                        'allowed_gateways' => json_encode(isset($allowed_gateways) && is_array($allowed_gateways) ? $allowed_gateways : []),
                     ]);
 
                     Session::flash('products_success', $store_language->get('admin', 'product_updated_successfully'));
@@ -504,6 +506,19 @@ if (!isset($_GET['action'])) {
                 ];
             }
 
+            $gateways = new Gateways();
+            $allowed_gateways_list = [];
+            $selected_gateways = json_decode($product->data()->allowed_gateways, true) ?? [];
+            foreach ($gateways->getAll() as $gateway) {
+                if ($gateway->isEnabled()) {
+                    $allowed_gateways_list[] = [
+                        'id' => $gateway->getId(),
+                        'name' => Output::getClean($gateway->getName()),
+                        'selected' => in_array($gateway->getId(), $selected_gateways)
+                    ];
+                }
+            }
+
             $smarty->assign([
                 'PRODUCT_TITLE' => $store_language->get('admin', 'editing_product_x', ['product' => Output::getClean($product->data()->name)]),
                 'BACK' => $language->get('general', 'back'),
@@ -513,6 +528,7 @@ if (!isset($_GET['action'])) {
                 'PRODUCTS_LIST' => $products_list,
                 'GROUPS_LIST' => $groups_list,
                 'INTEGRATIONS_LIST' => $integrations_list,
+                'ALLOWED_GATEWAYS_LIST' => $allowed_gateways_list,
             ]);
             
             $template_file = 'store/product_limits_requirements.tpl';

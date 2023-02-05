@@ -935,6 +935,15 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
+
+        if ($old_version < 153) {
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_products ADD `allowed_gateways` varchar(128) DEFAULT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+        }
     }
 
     private function initialise() {
@@ -957,7 +966,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_products')) {
             try {
-                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price_cents` int(11) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `global_limit` varchar(128) DEFAULT NULL, `user_limit` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `required_groups` varchar(128) DEFAULT NULL, `required_integrations` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price_cents` int(11) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `global_limit` varchar(128) DEFAULT NULL, `user_limit` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `required_groups` varchar(128) DEFAULT NULL, `required_integrations` varchar(128) DEFAULT NULL, `allowed_gateways` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }

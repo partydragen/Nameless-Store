@@ -307,7 +307,8 @@ if (isset($_GET['do'])) {
 
     // Load shopping list
     $shopping_cart_list = [];
-    foreach ($shopping_cart->getProducts() as $product) {
+    $products = $shopping_cart->getProducts();
+    foreach ($products as $product) {
         $item = $shopping_cart->getItems()[$product->data()->id];
 
         $fields = [];
@@ -365,6 +366,14 @@ if (isset($_GET['do'])) {
     $payment_methods = [];
     foreach ($gateways->getAll() as $gateway) {
         if ($gateway->isEnabled()) {
+            // Check of any products require certain gateways
+            foreach ($products as $product) {
+                $allowed_gateways = json_decode($product->data()->allowed_gateways, true) ?? [];
+                if (count($allowed_gateways) && !in_array($gateway->getId(), $allowed_gateways)) {
+                    continue 2;
+                }
+            }
+
             $payment_methods[] = [
                 'displayname' => Output::getClean($gateway->getDisplayname()),
                 'name' => Output::getClean($gateway->getName())

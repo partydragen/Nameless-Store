@@ -134,6 +134,18 @@
                                 </select>
                             </div>
                             <div class="form-group">
+                                <label for="inputAllowedGateways">Allowed Gateways (gateways the user is allowed to pay with)</label> <span
+                                        class="badge badge-info"><i class="fas fa-question-circle"
+                                                                    data-container="body" data-toggle="popover"
+                                                                    data-placement="top" title="Info"
+                                                                    data-content="User will only be able to pay with one of these gateways"></i></span>
+                                <select name="allowed_gateways[]" id="inputAllowedGateways" class="form-control" multiple>
+                                    {foreach from=$ALLOWED_GATEWAYS_LIST item=gateway}
+                                        <option value="{$gateway.id}"{if $gateway.selected} selected{/if}>{$gateway.name}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <input type="hidden" name="token" value="{$TOKEN}">
                                 <input type="hidden" name="type" value="settings">
                                 <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
@@ -174,6 +186,10 @@
 
     $(document).ready(() => {
         $('#inputRequiredIntegrations').select2({ placeholder: "No integrations selected" });
+    })
+
+    $(document).ready(() => {
+        $('#inputAllowedGateways').select2({ placeholder: "All enabled gateways (Leave empty to allow all gateways)" });
     })
 </script>
 

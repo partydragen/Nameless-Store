@@ -13,6 +13,7 @@ class ProductData {
     public ?string $required_products;
     public ?string $required_groups;
     public ?string $required_integrations;
+    public ?string $allowed_gateways;
     public int $payment_type;
     public bool $hidden;
     public bool $disabled;
@@ -33,6 +34,7 @@ class ProductData {
         $this->required_products = $row->required_products;
         $this->required_groups = $row->required_groups;
         $this->required_integrations = $row->required_integrations;
+        $this->allowed_gateways = $row->allowed_gateways;
         $this->payment_type = $row->payment_type;
         $this->hidden = $row->hidden;
         $this->disabled = $row->disabled;
