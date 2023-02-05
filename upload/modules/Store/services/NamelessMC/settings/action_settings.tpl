@@ -34,6 +34,10 @@
         <input type="number" class="form-control" id="inputAddCredits" name="remove_credits" value="{$REMOVE_CREDITS_VALUE}" step="0.01" min="0.00" value="0.00">
     </div>
     <div class="form-group">
+        <label for="inputAlert">Send notification to user?</label><a class="float-right btn btn-primary btn-sm" href="" data-toggle="modal" data-target="#placeholders">Placeholders</a>
+        <input type="text" class="form-control" id="inputAlert" name="alert" value="{$ALERT_VALUE}" placeholder="Send notification to user?">
+    </div>
+    <div class="form-group">
         <input type="hidden" name="token" value="{$TOKEN}">
         <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
     </div>

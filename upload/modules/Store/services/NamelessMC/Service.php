@@ -24,26 +24,43 @@ class NamelessMCService extends ServiceBase {
             // Get original recipient user
             $recipient = new Customer($recipient->getUser());
             $user = $recipient->getUser();
-
             $command = json_decode($action->data()->command, true);
+
+            // Add groups to user
             if (isset($command['add_groups']) && is_array($command['add_groups']) && count($command['add_groups'])) {
                 foreach ($command['add_groups'] as $group) {
                     $user->addGroup($group);
                 }
             }
 
+            // Remove groups from user
             if (isset($command['remove_groups']) && is_array($command['remove_groups']) && count($command['remove_groups'])) {
                 foreach ($command['remove_groups'] as $group) {
                     $user->removeGroup($group);
                 }
             }
 
+            // Add credits to user
             if (isset($command['add_credits']) && is_numeric($command['add_credits']) && $command['add_credits'] > 0) {
                 $recipient->addCents(Store::toCents($command['add_credits']));
             }
 
+            // Remove credits from user
             if (isset($command['remove_credits']) && is_numeric($command['remove_credits']) && $command['remove_credits'] > 0) {
                 $recipient->removeCents(Store::toCents($command['remove_credits']));
+            }
+
+            // Send alert to user
+            if (isset($command['alert']) && !empty($command['alert'])) {
+                $alert = str_replace(array_keys($placeholders), array_values($placeholders), $command['alert']);
+                DB::getInstance()->insert('alerts', [
+                    'user_id' => $user->data()->id,
+                    'type' => 'store',
+                    'url' => Store::getStorePath(),
+                    'content_short' => $alert,
+                    'content' => $alert,
+                    'created' => date('U')
+                ]);
             }
         }
 
