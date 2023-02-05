@@ -39,7 +39,7 @@ if (Input::exists()) {
 
                         // Check for minimum basket value
                         if ($coupon->data()->min_basket > 0) {
-                            if ($coupon->data()->min_basket > $shopping_cart->getTotalPriceCents()) {
+                            if ($coupon->data()->min_basket > $shopping_cart->getTotalCents()) {
                                 Session::flash('store_error', $store_language->get('general', 'redeem_min_basket_value', ['min_basket' => store::fromCents($coupon->data()->min_basket)]));
                                 Redirect::to(URL::build(Store::getStorePath() . '/checkout'));
                             }
