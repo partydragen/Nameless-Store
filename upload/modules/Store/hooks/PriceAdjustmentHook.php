@@ -29,7 +29,7 @@ class PriceAdjustmentHook extends HookBase {
                 } else if ($sale->discount_type == 2) {
                     // Amount discount
                     $product->data()->sale_active = true;
-                    $product->data()->sale_discount_cents = $sale->discount_amount;
+                    $product->data()->sale_discount_cents = Store::toCents($sale->discount_amount);
                 }
             }
 
@@ -56,7 +56,7 @@ class PriceAdjustmentHook extends HookBase {
                 } else if ($coupon->data()->discount_type == 2) {
                     // Amount discount
                     $product->data()->sale_active = true;
-                    $product->data()->sale_discount_cents = $coupon->data()->discount_amount;
+                    $product->data()->sale_discount_cents = Store::toCents($coupon->data()->discount_amount);
                 }
             }
 
