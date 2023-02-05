@@ -64,11 +64,11 @@ if (Input::exists()) {
 
             if ($validation->passed()) {
                 // Attempt to load customer
-                if (!$to_customer->login(Input::get('username'))) {
+                if ($to_customer->login(Input::get('username'))) {
+                    Redirect::to(URL::build($store_url . '/category/' . $category->id));
+                } else {
                     $errors[] = $language->get('user', 'invalid_mcname');
                 }
-
-                Redirect::to(URL::build($store_url . '/category/' . $category->id));
             } else {
                 $errors[] = $store_language->get('general', 'unable_to_find_player');
             }
