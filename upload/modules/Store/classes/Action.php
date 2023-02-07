@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.2
+ * @version 2.0.3
  * @license MIT
  */
 class Action {
@@ -164,7 +164,7 @@ class Action {
         $placeholders['{username}'] = $recipient->getUsername();
         $placeholders['{uuid}'] = $recipient->getIdentifier();
         $placeholders['{productId}'] = $product->data()->id;
-        $placeholders['{productPrice}'] = $product->data()->price;
+        $placeholders['{productPrice}'] = Store::fromCents($product->data()->price_cents);
         $placeholders['{productName}'] = $product->data()->name;
         $placeholders['{transaction}'] = $payment->data()->transaction;
         $placeholders['{amount}'] = $payment->data()->amount;
