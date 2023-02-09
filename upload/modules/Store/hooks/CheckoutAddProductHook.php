@@ -37,6 +37,7 @@ class CheckoutAddProductHook extends HookBase {
 
         if ($user->isLoggedIn()) {
             $product = $params['product'];
+            $recipient = $params['recipient'];
 
             $user_limit = json_decode($product->data()->user_limit, true) ?? [];
             if (isset($user_limit['limit']) && $user_limit['limit'] > 0) {
