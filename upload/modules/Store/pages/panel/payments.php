@@ -74,7 +74,7 @@ if (isset($_GET['customer'])) {
                     Store::formatPrice(
                         $paymentQuery->amount_cents,
                         $paymentQuery->currency,
-                        $currency_symbol,
+                        Store::getCurrencySymbol(),
                         STORE_CURRENCY_FORMAT,
                     )
                 ),
