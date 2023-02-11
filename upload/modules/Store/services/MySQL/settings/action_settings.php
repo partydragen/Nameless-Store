@@ -47,7 +47,7 @@ if ($_GET['action'] == 'new_action') {
 
                     // Handle selected connections if its use own connection list
                     if (!in_array(0, $selected_connections)) {
-                        $action = new Action($lastId); 
+                        $action = new Action($service, $lastId);
                         foreach ($selected_connections as $connection) {
                             $action->addConnection($connection);
                         }
