@@ -27,6 +27,7 @@ class Item {
     public function __construct(Product $product, int $quantity, array $fields) {
         $this->_product = $product;
         $this->_quantity = $quantity;
+        $this->_fields = $fields;
     }
 
     /**

@@ -141,7 +141,7 @@ class Order {
             foreach ($item->getFields() as $field) {
                 $this->_db->insert('store_orders_products_fields', [
                     'order_id' => $last_id,
-                    'product_id' => $item['id'],
+                    'product_id' => $item->getProduct()->data()->id,
                     'field_id' => $field['id'],
                     'value' => $field['value']
                 ]);
