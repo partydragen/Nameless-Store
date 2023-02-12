@@ -49,7 +49,7 @@ class Item {
     }
 
     /**
-     * Item cost after any discounts in cents. (e.g., 100 cents to charge $1.00, a zero-decimal currency)
+     * Item cost after any discounts in cents for a single quantity. (e.g., 100 cents is $1.00, a zero-decimal currency)
      *
      * @return int
      */

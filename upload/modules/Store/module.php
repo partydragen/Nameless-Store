@@ -952,7 +952,7 @@ class Store_Module extends Module {
             }
 
             try {
-                $field = $this->_db->query('SELECT id FROM store_fields WHERE identifier = \'price\'');
+                $field = $this->_db->query('SELECT id FROM nl2_store_fields WHERE identifier = \'price\'');
                 if (!$field->count()) {
                     $this->_db->insert('store_fields', [
                         'identifier' => 'price',
@@ -965,6 +965,14 @@ class Store_Module extends Module {
                         'order' => '0'
                     ]);
                 }
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_products_actions CHANGE `command` `command` text NOT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_pending_actions CHANGE `command` `command` text NOT NULL');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -1016,7 +1024,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_products_actions')) {
             try {
-                $this->_db->createTable('store_products_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `service_id` int(11) NOT NULL, `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `own_connections` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_products_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `service_id` int(11) NOT NULL, `command` text NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `own_connections` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1024,7 +1032,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_pending_actions')) {
             try {
-                $this->_db->createTable('store_pending_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `action_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `customer_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` varchar(2048) NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `status` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_pending_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `action_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `customer_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `command` text NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `status` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }

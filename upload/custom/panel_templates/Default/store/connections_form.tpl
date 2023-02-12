@@ -84,8 +84,19 @@
                                     </div>
                                 </form>
                             {/if}
-                            
-                            <center><p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a></br>Support on <a href="https://discord.gg/TtH6tpp" target="_blank">Discord</a></p></center>
+
+                            <center>
+                                <p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a></br>
+                                    <a class="ml-1" href="https://partydragen.com/suggestions/" target="_blank" data-toggle="tooltip"
+                                       data-placement="top" title="You can submit suggestions here"><i class="fa-solid fa-thumbs-up text-warning"></i></a>
+                                    <a class="ml-1" href="https://discord.gg/TtH6tpp" target="_blank" data-toggle="tooltip"
+                                       data-placement="top" title="Discord"><i class="fab fa-discord fa-fw text-discord"></i></a>
+                                    <a class="ml-1" href="https://partydragen.com/" target="_blank" data-toggle="tooltip"
+                                       data-placement="top" title="Website"><i class="fas fa-globe fa-fw text-primary"></i></a>
+                                    <a class="ml-1" href="https://www.patreon.com/partydragen" target="_blank" data-toggle="tooltip"
+                                       data-placement="top" title="Support the development on Patreon"><i class="fas fa-heart fa-fw text-danger"></i></a>
+                                </p>
+                            </center>
                         </div>
                     </div>
 
