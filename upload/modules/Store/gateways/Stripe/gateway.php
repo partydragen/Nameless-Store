@@ -34,16 +34,16 @@ class Stripe_Gateway extends GatewayBase {
         $cancelRedirect = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=cancel');
 
         $products = [];
-        foreach ($order->getProducts() as $product) {
+        foreach ($order->getItems() as $item) {
             $products[] = [
                 'price_data' => [
                     'currency' => $currency,
                     'product_data' => [
-                        'name' => $product->data()->name,
+                        'name' => $item->getProduct()->data()->name,
                     ],
-                    'unit_amount' => $product->getRealPriceCents(),
+                    'unit_amount' => $item->getSingleQuantityPrice(),
                 ],
-                'quantity' => $order->getProductQuantity($product->data()->id)
+                'quantity' => $item->getQuantity()
             ];
         }
 

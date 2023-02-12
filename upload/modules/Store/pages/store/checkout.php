@@ -136,11 +136,21 @@ if (isset($_GET['do'])) {
                             'type' => Output::getClean($field->type)
                         ];
 
+                        // Validate quantity field
                         if ($field->identifier == 'quantity') {
                             $quantity = Input::get($field->id);
                             if (!is_numeric($quantity) || $quantity < 1) {
                                 Session::flash('store_error', $store_language->get('general', 'invalid_quantity'));
-                                Redirect::to(URL::build($store_url . '/category/' . $product->data()->category_id));
+                                Redirect::to(URL::build($store_url . '/checkout/', 'add=' . $_GET['add']));
+                            }
+                        }
+
+                        // Validate price field for pay what you want where the original price is the minimum price
+                        if ($field->identifier == 'price') {
+                            $custom_price = Input::get($field->id);
+                            if (!is_numeric($custom_price) || Store::toCents($custom_price) < $product->data()->price_cents) {
+                                Session::flash('store_error', $store_language->get('general', 'price_must_be_at_least_x', ['price' => Store::fromCents($product->data()->price_cents)]));
+                                Redirect::to(URL::build($store_url . '/checkout/', 'add=' . $_GET['add']));
                             }
                         }
                     }
@@ -246,7 +256,7 @@ if (isset($_GET['do'])) {
                 // Create order
                 $amount = new Amount();
                 $amount->setCurrency($currency);
-                $amount->setTotalCents($shopping_cart->getTotalPriceCents());
+                $amount->setTotalCents($shopping_cart->getTotalRealPriceCents());
 
                 $order = new Order();
                 $order->setAmount($amount);
@@ -255,7 +265,7 @@ if (isset($_GET['do'])) {
                 $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems(), $shopping_cart->getCoupon());
 
                 // Complete order if there is nothing to pay
-                $amount_to_pay = $shopping_cart->getTotalPriceCents();
+                $amount_to_pay = $shopping_cart->getTotalRealPriceCents();
                 if ($amount_to_pay == 0) {
                     $payment = new Payment();
                     $payment->handlePaymentEvent(Payment::COMPLETED, [
@@ -307,12 +317,11 @@ if (isset($_GET['do'])) {
 
     // Load shopping list
     $shopping_cart_list = [];
-    $products = $shopping_cart->getProducts();
-    foreach ($products as $product) {
-        $item = $shopping_cart->getItems()[$product->data()->id];
+    foreach ($shopping_cart->getItems() as $item) {
+        $product = $item->getProduct();
 
         $fields = [];
-        foreach ($item['fields'] as $field) {
+        foreach ($item->getFields() as $field) {
             if ($field['identifier'] == 'quantity') {
                 continue;
             }
@@ -328,13 +337,13 @@ if (isset($_GET['do'])) {
 
         $shopping_cart_list[] = [
             'name' => Output::getClean($product->data()->name),
-            'quantity' => $item['quantity'],
-            'price' => Store::fromCents($product->data()->price_cents * $item['quantity']),
-            'real_price' => Store::fromCents($product->getRealPriceCents() * $item['quantity']),
-            'sale_discount' => Store::fromCents($product->data()->sale_discount_cents * $item['quantity']),
+            'quantity' => $item->getQuantity(),
+            'price' => Store::fromCents($item->getSubtotalPrice()),
+            'real_price' => Store::fromCents($item->getTotalPrice()),
+            'sale_discount' => Store::fromCents($item->getTotalDiscounts()),
             'price_format' => Output::getPurified(
                 Store::formatPrice(
-                    $product->data()->price_cents * $item['quantity'],
+                    $item->getSubtotalPrice(),
                     $currency,
                     $currency_symbol,
                     STORE_CURRENCY_FORMAT,
@@ -342,7 +351,7 @@ if (isset($_GET['do'])) {
             ),
             'real_price_format' => Output::getPurified(
                 Store::formatPrice(
-                    $product->getRealPriceCents() * $item['quantity'],
+                    $item->getTotalPrice(),
                     $currency,
                     $currency_symbol,
                     STORE_CURRENCY_FORMAT,
@@ -350,7 +359,7 @@ if (isset($_GET['do'])) {
             ),
             'sale_discount_format' => Output::getPurified(
                 Store::formatPrice(
-                    $product->data()->sale_discount_cents * $item['quantity'],
+                    $item->getTotalDiscounts(),
                     $currency,
                     $currency_symbol,
                     STORE_CURRENCY_FORMAT,
@@ -367,7 +376,7 @@ if (isset($_GET['do'])) {
     foreach ($gateways->getAll() as $gateway) {
         if ($gateway->isEnabled()) {
             // Check of any products require certain gateways
-            foreach ($products as $product) {
+            foreach ($shopping_cart->getProducts() as $product) {
                 $allowed_gateways = json_decode($product->data()->allowed_gateways, true) ?? [];
                 if (count($allowed_gateways) && !in_array($gateway->getId(), $allowed_gateways)) {
                     continue 2;
@@ -392,7 +401,7 @@ if (isset($_GET['do'])) {
         'TOTAL_PRICE' => $store_language->get('general', 'total_price'),
         'TOTAL_DISCOUNT' => $store_language->get('general', 'total_discount'),
         'PRICE_TO_PAY' => $store_language->get('general', 'price_to_pay'),
-        'TOTAL_PRICE_VALUE' => Store::fromCents($shopping_cart->getTotalPriceCents()),
+        'TOTAL_PRICE_VALUE' => Store::fromCents($shopping_cart->getTotalRealPriceCents()),
         'TOTAL_REAL_PRICE_VALUE' => Store::fromCents($shopping_cart->getTotalRealPriceCents()),
         'TOTAL_DISCOUNT_VALUE' => Store::fromCents($shopping_cart->getTotalDiscountCents()),
         'TOTAL_PRICE_FORMAT_VALUE' => Output::getPurified(

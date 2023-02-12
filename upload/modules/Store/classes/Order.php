@@ -13,6 +13,11 @@ class Order {
             $_data;
 
     /**
+     * @var Item[] The list of products.
+     */
+    private array $_items;
+
+    /**
      * @var Product[] The list of products.
      */
     private array $_products;
@@ -58,6 +63,15 @@ class Order {
     /**
      * Get the products for this order.
      *
+     * @return Item[] The products for this order.
+     */
+    public function getItems(): array {
+        return $this->_items;
+    }
+
+    /**
+     * Get the products for this order.
+     *
      * @return Product[] The products for this order.
      */
     public function getProducts(): array {
@@ -96,32 +110,14 @@ class Order {
     }
 
     /**
-     * Get the product quantity.
-     *
-     * @return int The product quantity.
-     */
-    public function getProductQuantity(int $product_id): int {
-        $fields = $this->getProductFields($product_id);
-
-        if (array_key_exists('quantity', $fields)) {
-            $quantity = $fields['quantity']['value'];
-            if(is_numeric($quantity) && $quantity > 0) {
-                return $quantity;
-            }
-        }
-
-        return 1;
-    }
-
-    /**
      * Register the order to database.
      *
      * @param ?User $user The NamelessMC user buying the product.
      * @param Customer $from_customer The customer buying the product.
      * @param Customer $to_customer The customer who is receiving the product.
-     * @param array $items The list of products along with custom fields for product
+     * @param array<int, Item> $items The list of items along with custom fields for product
      */
-    public function create(?User $user, Customer $from_customer, Customer $to_customer, array $items, ?Coupon $coupon = null) {
+    public function create(?User $user, Customer $from_customer, Customer $to_customer, array $items, ?Coupon $coupon = null): void {
         $this->_db->insert('store_orders', [
             'user_id' => $user != null ? $user->exists() ? $user->data()->id : null : null,
             'from_customer_id' => $from_customer->data()->id,
@@ -133,22 +129,22 @@ class Order {
         $last_id = $this->_db->lastId();
 
         // Register products and fields to order
+        $this->_items = $items;
         foreach ($items as $item) {
             $this->_db->insert('store_orders_products', [
                 'order_id' => $last_id,
-                'product_id' => $item['id'],
-                'quantity' => $item['quantity']
+                'product_id' => $item->getProduct()->data()->id,
+                'quantity' => $item->getQuantity(),
+                'amount_cents' => $item->getSingleQuantityPrice()
             ]);
 
-            if (isset($item['fields']) && count($item['fields'])) {
-                foreach ($item['fields'] as $field) {
-                    $this->_db->insert('store_orders_products_fields', [
-                        'order_id' => $last_id,
-                        'product_id' => $item['id'],
-                        'field_id' => $field['id'],
-                        'value' => $field['value']
-                    ]);
-                }
+            foreach ($item->getFields() as $field) {
+                $this->_db->insert('store_orders_products_fields', [
+                    'order_id' => $last_id,
+                    'product_id' => $item['id'],
+                    'field_id' => $field['id'],
+                    'value' => $field['value']
+                ]);
             }
         }
 

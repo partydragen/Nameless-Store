@@ -943,6 +943,32 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
+
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_orders_products ADD `amount_cents` int(11) NOT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                $field = $this->_db->query('SELECT id FROM store_fields WHERE identifier = \'price\'');
+                if (!$field->count()) {
+                    $this->_db->insert('store_fields', [
+                        'identifier' => 'price',
+                        'description' => 'Pay what you want',
+                        'type' => '4',
+                        'required' => '1',
+                        'min' => '1',
+                        'max' => '9',
+                        'default_value' => '',
+                        'order' => '0'
+                    ]);
+                }
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
         }
     }
 
@@ -1014,7 +1040,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_orders_products')) {
             try {
-                $this->_db->createTable('store_orders_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `quantity` int(11) NOT NULL DEFAULT \'1\', PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_orders_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `quantity` int(11) NOT NULL DEFAULT \'1\', `amount_cents` int(11) NOT NULL, PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }
