@@ -47,7 +47,7 @@
                         <form role="form" action="" method="post">
                             <div class="form-group">
                                 <label for="InputIdentifier">{$IDENTIFIER}</label>
-                                <input type="text" name="identifier" class="form-control" id="InputIdentifier" placeholder="{$IDENTIFIER}" value="{$IDENTIFIER_VALUE}" {if $IDENTIFIER_VALUE == 'quantity'}disabled{/if}>
+                                <input type="text" name="identifier" class="form-control" id="InputIdentifier" placeholder="{$IDENTIFIER}" value="{$IDENTIFIER_VALUE}" {if $RESERVED_FIELD}disabled{/if}>
                             </div>
                             <div class="form-group">
                                 <label for="InputName">{$DESCRIPTION}</label>
@@ -55,7 +55,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="type">{$TYPE}</label>
-                                <select class="form-control" id="type" name="type" {if $IDENTIFIER_VALUE == 'quantity'}disabled{/if}>
+                                <select class="form-control" id="type" name="type" {if $RESERVED_FIELD}disabled{/if}>
                                   {foreach from=$TYPES item=type}
                                     <option value="{$type.id}"{if $TYPE_VALUE eq {$type.id}} selected{/if}>{$type.name}</option>
                                   {/foreach}
@@ -67,7 +67,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="InputOptions">{$OPTIONS} / {$CHECKBOX} / {$RADIO} - {$OPTIONS_HELP}</label>
-                                <textarea rows="5" class="form-control" name="options" id="options" placeholder="{$OPTIONS} / {$CHECKBOX} / {$RADIO}" {if $IDENTIFIER_VALUE == 'quantity'}disabled{/if}>{$OPTIONS_VALUE}</textarea>
+                                <textarea rows="5" class="form-control" name="options" id="options" placeholder="{$OPTIONS} / {$CHECKBOX} / {$RADIO}" {if $RESERVED_FIELD}disabled{/if}>{$OPTIONS_VALUE}</textarea>
                             </div>
                             <div class="row">
                               <div class="col-md-4">

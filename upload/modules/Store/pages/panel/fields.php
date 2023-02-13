@@ -43,6 +43,7 @@ if (!isset($_GET['action'])) {
                 'description' => Output::getClean($field->description),
                 'type' => $field_types[$field->type]['name'],
                 'required' => Output::getClean($field->required),
+                'reserved' => ($field->identifier == 'quantity' || $field->identifier == 'price'),
                 'edit_link' => URL::build('/panel/store/fields/', 'action=edit&id='.$field->id),
                 'delete_link' => URL::build('/panel/store/fields/', 'action=delete&amp;id=' . $field->id)
             ];
@@ -292,6 +293,7 @@ if (!isset($_GET['action'])) {
                 'REGEX_VALUE' => Output::getClean($field->regex ?? ''),
                 'REQUIRED' => $language->get('admin', 'required'),
                 'REQUIRED_VALUE' => $field->required,
+                'RESERVED_FIELD' => ($field->identifier == 'quantity' || $field->identifier == 'price')
             ]);
         
             $template_file = 'store/fields_form.tpl';
