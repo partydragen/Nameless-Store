@@ -276,11 +276,13 @@ class Product {
         $required_integrations_list = [];
 
         $integrations = Integrations::getInstance();
-        foreach ($this->getActions() as $action) {
-            if ($action->getService()->getId() == 2) {
-                $integration = $integrations->getIntegration('Minecraft');
-                if ($integration != null) {
-                    $required_integrations_list[$integration->data()->id] = $integration;
+        if (!$store->isPlayerSystemEnabled()) {
+            foreach ($this->getActions() as $action) {
+                if ($action->getService()->getId() == 2) {
+                    $integration = $integrations->getIntegration('Minecraft');
+                    if ($integration != null) {
+                        $required_integrations_list[$integration->data()->id] = $integration;
+                    }
                 }
             }
         }
