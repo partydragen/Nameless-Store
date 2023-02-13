@@ -1,7 +1,7 @@
 # Nameless-Store
 
 ## Requirements
-- NamelessMC version 2.0.1
+- NamelessMC version 2.0.3
 
 ## Installation:
 - Upload the contents of the **upload** directory straight into your NamelessMC installation's directory
