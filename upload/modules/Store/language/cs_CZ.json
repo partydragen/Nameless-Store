@@ -267,5 +267,6 @@
     "general/redeem_min_basket_value": "Použití tohoto kupónu vyžaduje minimální útratu ve výši {{min_basket}}.",
     "general/successfully_applied_coupon": "Kupón úspěšně uplatněn.",
     "general/redeem_limit_reached": "Byl dosažen limit uplatnění tohoto kupónu.",
-    "general/unable_to_find_player": "Nepodařilo se nalézt hráče se zadanou přezdívkou"
+    "general/unable_to_find_player": "Nepodařilo se nalézt hráče se zadanou přezdívkou",
+    "general/price_must_be_at_least_x": "Cena musí být nejméně {{price}}"
 }
