@@ -107,15 +107,24 @@
             </div>
           {/foreach}
 
-          <h3>{$PURCHASE}</h3>
-          <div class="ui divider"></div>
-          <div class="field">
-            <div class="ui checkbox" style="display:inline;">
-              <input type="hidden" name="token" value="{$TOKEN}">
-              <input type="checkbox" name="t_and_c" value="1" required> <label>{$AGREE_T_AND_C_PURCHASE} <span class="right floated"><input type="submit" class="ui green button right floated" value="{$PURCHASE} &raquo;"></span></label>
+            <h3>{$PURCHASE}</h3>
+            <div class="ui divider"></div>
+            <div class="ui equal width grid">
+                <div class="column">
+                    <div class="field">
+                        <div class="ui checkbox" style="display:inline;">
+                            <input type="checkbox" name="t_and_c" value="1" required> <label>{$AGREE_T_AND_C_PURCHASE}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="field">
+                        <input type="hidden" name="token" value="{$TOKEN}">
+                        <span class="right floated"><input type="submit" class="ui green button right floated" value="{$PURCHASE} &raquo;"></span>
+                    </div>
+                </div>
             </div>
-          </div>
-          </br>
+
         </form>
 
       </div>
