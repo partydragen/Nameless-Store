@@ -171,8 +171,8 @@ class Action {
         $placeholders['{currency}'] = $payment->data()->currency;
         $placeholders['{orderId}'] = $payment->data()->order_id;
         $placeholders['{ip}'] = $order->data()->ip;
-        $placeholders['{time}'] = date('H:i', $this->data()->created);
-        $placeholders['{date}'] = date('d M Y', $this->data()->created);
+        $placeholders['{time}'] = date('H:i', $payment->data()->created);
+        $placeholders['{date}'] = date('d M Y', $payment->data()->created);
         $placeholders['{purchaserUserId}'] = $customer->exists() ? $customer->data()->user_id ?? 0 : 0;
         $placeholders['{purchaserName}'] = $customer->getUsername();
         $placeholders['{purchaserUuid}'] = $customer->getIdentifier();
