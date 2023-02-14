@@ -313,10 +313,11 @@ if (isset($_GET['customer'])) {
                     $items = [];
                     $selected_products = $_POST['products'];
                     foreach ($selected_products as $item) {
-                        $items[$item] = [
-                            'id' => $item,
-                            'quantity' => 1
-                        ];
+                        $items[] = new Item(
+                            new Product($item),
+                            1,
+                            []
+                        );
                     }
 
                     if (!count($errors) && count($items)) {
