@@ -167,7 +167,7 @@ class Action {
         $placeholders['{productPrice}'] = Store::fromCents($product->data()->price_cents);
         $placeholders['{productName}'] = $product->data()->name;
         $placeholders['{transaction}'] = $payment->data()->transaction;
-        $placeholders['{amount}'] = $payment->data()->amount;
+        $placeholders['{amount}'] = Store::fromCents($payment->data()->amount_cents ?? 0);
         $placeholders['{currency}'] = $payment->data()->currency;
         $placeholders['{orderId}'] = $payment->data()->order_id;
         $placeholders['{ip}'] = $order->data()->ip;
