@@ -56,7 +56,7 @@ class NamelessMCService extends ServiceBase {
                 DB::getInstance()->insert('alerts', [
                     'user_id' => $user->data()->id,
                     'type' => 'store',
-                    'url' => Store::getStorePath(),
+                    'url' => URL::build('/user/alerts'),
                     'content_short' => $alert,
                     'content' => $alert,
                     'created' => date('U')
