@@ -304,8 +304,7 @@ class Store_Module extends Module {
                     $output['datasets']['payments']['colour'] = '#4cf702';
 
                     foreach ($latest_payments as $payment) {
-                        $date = date('d M Y', $payment->created);
-                        $date = '_' . strtotime($date);
+                        $date = date('Y-m-d', $payment->created);
 
                         if (isset($output[$date]['payments'])) {
                             $output[$date]['payments'] += 1;
@@ -315,17 +314,7 @@ class Store_Module extends Module {
                     }
 
                     // Fill in missing dates, set payments to 0
-                    $start = strtotime('-1 week');
-                    $start = date('d M Y', $start);
-                    $start = strtotime($start);
-                    $end = strtotime(date('d M Y'));
-                    while ($start <= $end) {
-                        if (!isset($output['_' . $start]['payments'])) {
-                            $output['_' . $start]['payments'] = 0;
-                        }
-
-                        $start = strtotime('+1 day', $start);
-                    }
+                    $output = Core_Module::fillMissingGraphDays($output, 'payments');
 
                     // Sort by date
                     ksort($output);
