@@ -438,6 +438,17 @@ if (!isset($_GET['action'])) {
                         'period' => $_POST['user_limit_period'] ?? 'no_period'
                     ];
 
+                    $player_age = [
+                        'interval' => $_POST['player_age_interval'] ?? 0,
+                        'period' => $_POST['player_age_period'] ?? 'hour'
+                    ];
+
+                    $player_playtime = [
+                        'playtime' => $_POST['player_playtime'] ?? 0,
+                        'interval' => $_POST['player_playtime_interval'] ?? 1,
+                        'period' => $_POST['player_playtime_period'] ?? 'all_time'
+                    ];
+
                     $required_products = $_POST['required_products'];
                     $required_groups = $_POST['required_groups'];
                     $required_integrations = $_POST['required_integrations'];
@@ -446,6 +457,8 @@ if (!isset($_GET['action'])) {
                     $product->update([
                         'global_limit' => json_encode($global_limit),
                         'user_limit' => json_encode($user_limit),
+                        'min_player_age' => json_encode($player_age),
+                        'min_player_playtime' => json_encode($player_playtime),
                         'required_products' => json_encode(isset($required_products) && is_array($required_products) ? $required_products : []),
                         'required_groups' => json_encode(isset($required_groups) && is_array($required_groups) ? $required_groups : []),
                         'required_integrations' =>  json_encode(isset($required_integrations) && is_array($required_integrations) ? $required_integrations : []),
@@ -519,6 +532,19 @@ if (!isset($_GET['action'])) {
                 }
             }
 
+            $player_age_json = json_decode($product->data()->min_player_age, true) ?? [];
+            $player_age = [
+                'interval' => $player_age_json['interval'] ?? 0,
+                'period' => $player_age_json['period'] ?? 'hour'
+            ];
+
+            $player_playtime_json = json_decode($product->data()->min_player_playtime, true) ?? [];
+            $player_playtime = [
+                'playtime' => $player_playtime_json['playtime'] ?? 0,
+                'interval' => $player_playtime_json['interval'] ?? 1,
+                'period' => $player_playtime_json['period'] ?? 'all_time'
+            ];
+
             $smarty->assign([
                 'PRODUCT_TITLE' => $store_language->get('admin', 'editing_product_x', ['product' => Output::getClean($product->data()->name)]),
                 'BACK' => $language->get('general', 'back'),
@@ -529,6 +555,9 @@ if (!isset($_GET['action'])) {
                 'GROUPS_LIST' => $groups_list,
                 'INTEGRATIONS_LIST' => $integrations_list,
                 'ALLOWED_GATEWAYS_LIST' => $allowed_gateways_list,
+                'MCSTATISTICS_ENABLED' => Util::isModuleEnabled('MCStatistics'),
+                'PLAYER_AGE_VALUE' => $player_age,
+                'PLAYER_PLAYTIME_VALUE' => $player_playtime,
             ]);
             
             $template_file = 'store/product_limits_requirements.tpl';

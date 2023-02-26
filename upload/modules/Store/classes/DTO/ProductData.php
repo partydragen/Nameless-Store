@@ -14,6 +14,8 @@ class ProductData {
     public ?string $required_groups;
     public ?string $required_integrations;
     public ?string $allowed_gateways;
+    public ?string $min_player_age;
+    public ?string $min_player_playtime;
     public int $payment_type;
     public bool $hidden;
     public bool $disabled;
@@ -35,6 +37,8 @@ class ProductData {
         $this->required_groups = $row->required_groups;
         $this->required_integrations = $row->required_integrations;
         $this->allowed_gateways = $row->allowed_gateways;
+        $this->min_player_age = $row->min_player_age;
+        $this->min_player_playtime = $row->min_player_playtime;
         $this->payment_type = $row->payment_type;
         $this->hidden = $row->hidden;
         $this->disabled = $row->disabled;
