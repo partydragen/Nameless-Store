@@ -79,9 +79,6 @@ class Store_Module extends Module {
         EventHandler::registerListener('renderStoreProduct', 'ContentHook::renderEmojis', 10);
         EventHandler::registerListener('renderStoreProduct', 'ContentHook::replaceAnchors', 15);
 
-        require_once(ROOT_PATH . '/modules/Store/hooks/PriceAdjustmentHook.php');
-        EventHandler::registerListener('renderStoreProduct', 'PriceAdjustmentHook::discounts');
-
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
 
         define('STORE_CURRENCY_FORMAT', Util::getSetting('currency_format', '{currencySymbol}{price} {currencyCode}', 'Store'));
@@ -456,7 +453,33 @@ class Store_Module extends Module {
             ];
         }
 
-        return ['services' => $services_list, 'connections' => $connections_list, 'fields' => $fields_list, 'products' => $products_list];
+        $gateways_list = [];
+        $gateways = new Gateways();
+        foreach ($gateways->getAll() as $gateway) {
+            $gateways_list[] = [
+                'name' => $gateway->getName(),
+                'version' => $gateway->getVersion(),
+                'store_version' => $gateway->getStoreVersion(),
+                'author' => $gateway->getAuthor(),
+                'enabled' => $gateway->isEnabled()
+            ];
+        }
+
+        return [
+            'settings' => [
+                'allow_guests' => Util::getSetting('allow_guests', '0', 'Store'),
+                'player_login' => Util::getSetting('player_login', '0', 'Store'),
+                'store_path' => Util::getSetting('store_path', '/store', 'Store'),
+                'currency' => Util::getSetting('currency', 'USD', 'Store'),
+                'currency_symbol' => Util::getSetting('currency_symbol', '$', 'Store'),
+                'username_validation_method' => Util::getSetting('username_validation_method', 'nameless', 'Store'),
+            ],
+            'services' => $services_list,
+            'connections' => $connections_list,
+            'fields' => $fields_list,
+            'products' => $products_list,
+            'gateways' => $gateways_list
+        ];
     }
 
     private function initialiseUpdate($old_version) {

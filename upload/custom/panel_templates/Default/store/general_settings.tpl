@@ -108,7 +108,7 @@
                                                 <option value="nameless" {if $VALIDATION_METHOD_VALUE eq 'nameless'}selected{/if}>Nameless (Use same setting as your site)</option>
                                                 <option value="mojang" {if $VALIDATION_METHOD_VALUE eq 'mojang'}selected{/if}>Mojang (Online Mode)</option>
                                                 <option value="no_validation" {if $VALIDATION_METHOD_VALUE eq 'no_validation'}selected{/if}>No Validation (Offline - UUID wont work)</option>
-                                                <option value="mcstatistics" {if $VALIDATION_METHOD_VALUE eq 'mcstatistics'}selected{/if}>MCStatistics</option>
+                                                <option value="mcstatistics" {if $VALIDATION_METHOD_VALUE eq 'mcstatistics'}selected{/if} {if !$MCSTATISTICS_ENABLED}disabled{/if}>MCStatistics</option>
                                             </select>
                                         </div>
                                     </div>

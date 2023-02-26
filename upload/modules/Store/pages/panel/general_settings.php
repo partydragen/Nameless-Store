@@ -207,6 +207,7 @@ $smarty->assign([
     'LINK_MORE' => $language->get('admin', 'page_link_more'),
     'LINK_FOOTER' => $language->get('admin', 'page_link_footer'),
     'LINK_NONE' => $language->get('admin', 'page_link_none'),
+    'MCSTATISTICS_ENABLED' => Util::isModuleEnabled('MCStatistics'),
     'VALIDATION_METHOD_VALUE' => Util::getSetting('username_validation_method', 'nameless', 'Store'),
 ]);
 
