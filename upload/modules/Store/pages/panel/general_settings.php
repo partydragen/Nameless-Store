@@ -90,6 +90,7 @@ if (isset($_POST) && !empty($_POST)) {
             Util::setSetting('store_content', Input::get('store_content'), 'Store');
             Util::setSetting('currency_format', Input::get('currency_format'), 'Store');
             Util::setSetting('checkout_complete_content', Input::get('checkout_complete_content'), 'Store');
+            Util::setSetting('username_validation_method', Input::get('validation_method'), 'Store');
 
             Util::setSetting('show_credits_amount', $show_credits_amount);
             Util::setSetting('user_send_credits', $user_send_credits);
@@ -206,6 +207,7 @@ $smarty->assign([
     'LINK_MORE' => $language->get('admin', 'page_link_more'),
     'LINK_FOOTER' => $language->get('admin', 'page_link_footer'),
     'LINK_NONE' => $language->get('admin', 'page_link_none'),
+    'VALIDATION_METHOD_VALUE' => Util::getSetting('username_validation_method', 'nameless', 'Store'),
 ]);
 
 $template->assets()->include([

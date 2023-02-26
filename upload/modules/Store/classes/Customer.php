@@ -221,26 +221,54 @@ class Customer {
     }
     
     public function login($username, $save = true) {
-        // Online mode or offline mode?
-        $uuid_linking = $this->_db->get('settings', ['name', '=', 'uuid_linking'])->results();
-        $uuid_linking = $uuid_linking[0]->value;
+        $validation_method = Util::getSetting('username_validation_method', 'nameless', 'Store');
+        if ($validation_method == 'nameless') {
+            $validation_method = Util::getSetting('uuid_linking') ? 'mojang' : 'no_validation';
+        }
 
-        if ($uuid_linking == '1') {
-            // Online mode
-            $profile = ProfileUtils::getProfile(str_replace(' ', '%20', $username));
-            $mcname_result = $profile ? $profile->getProfileAsArray() : [];
-            if (isset($mcname_result['username'], $mcname_result['uuid']) && !empty($mcname_result['username']) && !empty($mcname_result['uuid'])) {
-                $username = Output::getClean($mcname_result['username']);
-                $uuid = $this->formatUUID(Output::getClean($mcname_result['uuid']));
+        switch ($validation_method) {
+            case 'mojang':
+                $profile = ProfileUtils::getProfile(str_replace(' ', '%20', $username));
+                $mcname_result = $profile ? $profile->getProfileAsArray() : [];
+                if (isset($mcname_result['username'], $mcname_result['uuid']) && !empty($mcname_result['username']) && !empty($mcname_result['uuid'])) {
+                    $username = $mcname_result['username'];
+                    $uuid = $this->formatUUID($mcname_result['uuid']);
 
-                if ($this->find($uuid, 'identifier')) {
+                    if ($this->find($uuid, 'identifier')) {
+                        // Customer already exist in database
+                        $this->update([
+                            'username' => $username,
+                            'identifier' => $uuid
+                        ]);
+                        $this->_isLoggedIn = true;
+
+                        if ($save)
+                            Session::put('store_customer', $this->data()->id);
+
+                        return true;
+                    } else {
+                        // Register new customer
+                        $this->create([
+                            'integration_id' => 1,
+                            'username' => $username,
+                            'identifier' => $uuid
+                        ]);
+                        $this->_isLoggedIn = true;
+
+                        if ($save)
+                            Session::put('store_customer', $this->data()->id);
+
+                        return true;
+                    }
+                } else {
+                    // Invalid Minecraft name
+                    return false;
+                }
+
+            case 'no_validation':
+                if ($this->find($username, 'username')) {
                     // Customer already exist in database
-                    $this->update([
-                        'username' => $username,
-                        'identifier' => $uuid
-                    ]);
                     $this->_isLoggedIn = true;
-
                     if ($save)
                         Session::put('store_customer', $this->data()->id);
 
@@ -250,7 +278,7 @@ class Customer {
                     $this->create([
                         'integration_id' => 1,
                         'username' => $username,
-                        'identifier' => $uuid
+                        'identifier' => null
                     ]);
                     $this->_isLoggedIn = true;
 
@@ -259,34 +287,41 @@ class Customer {
 
                     return true;
                 }
-            } else {
-                // Invalid Minecraft name
-                return false;
-            }
 
-        } else {
-            // Offline mode
-            if ($this->find($username, 'username')) {
-                // Customer already exist in database
-                $this->_isLoggedIn = true;
-                if ($save)
-                    Session::put('store_customer', $this->data()->id);
+            case 'mcstatistics':
+                if (Util::isModuleEnabled('MCStatistics')) {
+                    $player = new Player($username);
+                    if ($player->exists()) {
+                        if ($this->find($player->data()->uuid, 'identifier')) {
+                            // Customer already exist in database
+                            $this->update([
+                                'username' => $player->data()->username,
+                                'identifier' => $player->data()->uuid
+                            ]);
+                            $this->_isLoggedIn = true;
 
-                return true;
-            } else {
-                // Register new customer
-                $this->create([
-                    'integration_id' => 1,
-                    'username' => $username,
-                    'identifier' => null
-                ]);
-                $this->_isLoggedIn = true;
+                            if ($save)
+                                Session::put('store_customer', $this->data()->id);
 
-                if ($save)
-                    Session::put('store_customer', $this->data()->id);
+                            return true;
+                        } else {
+                            // Register new customer
+                            $this->create([
+                                'integration_id' => 1,
+                                'username' => $player->data()->username,
+                                'identifier' => $player->data()->uuid
+                            ]);
+                            $this->_isLoggedIn = true;
 
-                return true;
-            }
+                            if ($save)
+                                Session::put('store_customer', $this->data()->id);
+
+                            return true;
+                        }
+                    }
+                } else {
+                    return false;
+                }
         }
 
         return false;
