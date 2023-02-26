@@ -145,6 +145,43 @@
                                     {/foreach}
                                 </select>
                             </div>
+
+                            </br>
+                            <h5>MCStatistics (<a href="https://mcstatistics.org/" target="_blank">View</a>)</h5>
+                            <hr>
+                            <div class="form-group">
+                                <label for="inputPlayerAge">Minimum player age since first join (0 to disable) {if !$MCSTATISTICS_ENABLED}(MCStatistics Module not installed)){/if}</label>
+                                <div class="input-group">
+                                    <input type="number" name="player_age_interval" class="form-control" id="inputPlayerAge" value="{$PLAYER_AGE_VALUE.interval}" {if !$MCSTATISTICS_ENABLED}disabled{/if}>
+                                    <select name="player_age_period" class="form-control" {if !$MCSTATISTICS_ENABLED}disabled{/if}>
+                                        <option value="hour" {if $PLAYER_AGE_VALUE.period == 'hour'} selected{/if}>Hour</option>
+                                        <option value="day" {if $PLAYER_AGE_VALUE.period == 'day'} selected{/if}>Day</option>
+                                        <option value="week" {if $PLAYER_AGE_VALUE.period == 'week'} selected{/if}>Week</option>
+                                        <option value="month" {if $PLAYER_AGE_VALUE.period == 'month'} selected{/if}>Month</option>
+                                        <option value="year" {if $PLAYER_AGE_VALUE.period == 'year'} selected{/if}>Year</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="inputUserLimit">Minimum playtime (0 to disable) {if !$MCSTATISTICS_ENABLED}(MCStatistics Module not installed)){/if}</label>
+                                <div class="input-group">
+                                    <input type="number" name="player_playtime" class="form-control" id="inputPlayerPlaytime" value="{$PLAYER_PLAYTIME_VALUE.playtime}" {if !$MCSTATISTICS_ENABLED}disabled{/if}>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="">hours within last</span>
+                                    </div>
+                                    <input type="number" name="player_playtime_interval" class="form-control" id="inputPlaytime" value="{$PLAYER_PLAYTIME_VALUE.interval}" {if !$MCSTATISTICS_ENABLED}disabled{/if}>
+                                    <select name="player_playtime_period" class="form-control" {if !$MCSTATISTICS_ENABLED}disabled{/if}>
+                                        <option value="all_time" {if $PLAYER_PLAYTIME_VALUE.period == 'all_tive'} selected{/if}>All Time</option>
+                                        <option value="hour" {if $PLAYER_PLAYTIME_VALUE.period == 'hour'} selected{/if}>Hour</option>
+                                        <option value="day" {if $PLAYER_PLAYTIME_VALUE.period == 'day'} selected{/if}>Day</option>
+                                        <option value="week" {if $PLAYER_PLAYTIME_VALUE.period == 'week'} selected{/if}>Week</option>
+                                        <option value="month" {if $PLAYER_PLAYTIME_VALUE.period == 'month'} selected{/if}>Month</option>
+                                        <option value="year" {if $PLAYER_PLAYTIME_VALUE.period == 'year'} selected{/if}>Year</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <div class="form-group">
                                 <input type="hidden" name="token" value="{$TOKEN}">
                                 <input type="hidden" name="type" value="settings">
