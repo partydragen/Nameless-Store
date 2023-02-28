@@ -58,6 +58,7 @@ class Store_Module extends Module {
         EventHandler::registerEvent('paymentReversed', $store_language->get('admin', 'payment_reversed'));
         EventHandler::registerEvent('paymentDenied', $store_language->get('admin', 'payment_denied'));
         EventHandler::registerEvent('storeCheckoutAddProduct', 'storeCheckoutAddProduct', [], true, true);
+        EventHandler::registerEvent('renderStoreCategory', 'renderStoreCategory', [], true, true);
         EventHandler::registerEvent('renderStoreProduct', 'renderStoreProduct', [], true, true);
         EventHandler::registerEvent('storeCheckoutAddProduct', 'storeCheckoutAddProduct', [], true, true);
         EventHandler::registerEvent('storeCheckoutFieldsValidation', 'storeCheckoutFieldsValidation', [], true, true);
