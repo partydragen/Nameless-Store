@@ -12,7 +12,7 @@
     "admin/categories": "Kategorien",
     "admin/category": "Kategorie",
     "admin/category_confirm_delete": "Möchtest Du diese Kategorie wirklich löschen?</br>Achtung: Dadurch werden alle Produkte in dieser Kategorie gelöscht",
-    "admin/category_created_successfully": "Kategorie wurde erfolgreich erstellt",
+    "admin/category_created_successfully": "Kategorie wurde erfolgreich erstellt.",
     "admin/category_deleted_successfully": "Kategorie erfolgreich gelöscht.",
     "admin/category_description": "Kategoriebeschreibung",
     "admin/category_image": "Kategoriebild",
