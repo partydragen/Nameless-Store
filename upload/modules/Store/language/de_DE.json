@@ -177,7 +177,6 @@
     "general/accept_terms": "Du musst die Bedingungen und Konditionen akzeptieren",
     "general/buy": "Kaufen",
     "general/checkout": "Zur Kasse",
-    "general/completed_payment_text": "Neue Zahlung von {{user}}, der die folgenden Produkte gekauft hat {{products}}",
     "general/continue": "Fortfahren",
     "general/credits": "Credits",
     "general/choose_payment_method": "Bitte wähle deine gewünschte Zahlungsoption.",

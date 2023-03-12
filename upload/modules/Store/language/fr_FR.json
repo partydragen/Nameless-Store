@@ -177,7 +177,6 @@
     "general/accept_terms": "You must accept the terms and conditions",
     "general/buy": "Acheter",
     "general/checkout": "Caisse",
-    "general/completed_payment_text": "Nouveau paiement de {{user}} qui a acheté les produits suivants {{products}}",
     "general/continue": "Continuer",
     "general/credits": "Credits",
     "general/choose_payment_method": "Please choose your desired payment option.",

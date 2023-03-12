@@ -177,7 +177,6 @@
     "general/accept_terms": "Musíte súhlasiť s pravidlami a podmienkami",
     "general/buy": "Kúpiť",
     "general/checkout": "Platba",
-    "general/completed_payment_text": "Nová platba od uživateľa {{user}}, ktorý si zakúpil následujúce produkty: {{products}}",
     "general/continue": "Pokračovať",
     "general/credits": "Kredity",
     "general/choose_payment_method": "Vyberte požadovaný spôsob platby.",
