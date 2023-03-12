@@ -183,6 +183,10 @@
                             <td>The name of the product</td>
                         </tr>
                         <tr>
+                            <td>{gateway}</td>
+                            <td>The gateway name used for the payment</td>
+                        </tr>
+                        <tr>
                             <th><strong>Custom Fields</strong></th>
                             <th><strong></strong></th>
                         <tr>

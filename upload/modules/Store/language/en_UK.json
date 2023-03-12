@@ -211,7 +211,6 @@
     "general\/accept_terms": "You must accept the terms and conditions",
     "general\/buy": "Buy",
     "general\/checkout": "Checkout",
-    "general\/completed_payment_text": "New payment from {{user}} who bought the following products {{products}}",
     "general\/continue": "Continue",
     "general\/credits": "Credits",
     "general\/choose_payment_method": "Please choose your desired payment option.",

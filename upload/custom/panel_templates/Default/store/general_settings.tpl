@@ -124,6 +124,12 @@
                                         </div>
 
                                         <div class="form-group">
+                                            <label for="inputDiscordMessage">Custom discord message for payment complete</label>
+                                            <span class="badge badge-info" data-html="true" data-toggle="popover" title="{$INFO}" {literal}data-content="Variables available are {username}, {products}, {amount}, {currency} and {gateway}"{/literal}><i class="fas fa-question-circle"></i></span>
+                                            <textarea id="inputDiscordMessage" class="form-control" name="discord_message" rows="3">{$DISCORD_MESSAGE_VALUE}</textarea>
+                                        </div>
+
+                                        <div class="form-group">
                                             <input type="hidden" name="token" value="{$TOKEN}">
                                             <input type="submit" value="{$SUBMIT}" class="btn btn-primary">
                                         </div>

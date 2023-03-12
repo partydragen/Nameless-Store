@@ -91,6 +91,7 @@ if (isset($_POST) && !empty($_POST)) {
             Util::setSetting('currency_format', Input::get('currency_format'), 'Store');
             Util::setSetting('checkout_complete_content', Input::get('checkout_complete_content'), 'Store');
             Util::setSetting('username_validation_method', Input::get('validation_method'), 'Store');
+            Util::setSetting('discord_message', Input::get('discord_message'), 'Store');
 
             Util::setSetting('show_credits_amount', $show_credits_amount);
             Util::setSetting('user_send_credits', $user_send_credits);
@@ -201,6 +202,7 @@ $smarty->assign([
     'STORE_INDEX_CONTENT_VALUE' => $store_index_content,
     'CHECKOUT_COMPLETE_CONTENT' => $store_language->get('admin', 'checkout_complete_content'),
     'CHECKOUT_COMPLETE_CONTENT_VALUE' => $checkout_complete_content,
+    'DISCORD_MESSAGE_VALUE' => Util::getSetting('discord_message', 'New payment from {username} who bought the following products {products}', 'Store'),
     'LINK_LOCATION' => $language->get('admin', 'page_link_location'),
     'LINK_LOCATION_VALUE' => $link_location,
     'LINK_NAVBAR' => $language->get('admin', 'page_link_navbar'),

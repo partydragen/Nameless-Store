@@ -136,12 +136,21 @@ class Payment {
 
                     $this->executeAllActions(Action::PURCHASE);
 
+                    $placeholders['{username}'] = $username;
+                    $placeholders['{products}'] = $this->getOrder()->getDescription();
+                    $placeholders['{amount}'] = Store::fromCents($this->data()->amount_cents);
+                    $placeholders['{currency}'] = $this->data()->currency;
+                    $placeholders['{gateway}'] = $this->getGateway() != null ? $this->getGateway()->getName() : 'Unknown';
+
+                    $discord_message = Util::getSetting('discord_message', 'New payment from {username} who bought the following products {products}', 'Store');
+                    $discord_message = str_replace(array_keys($placeholders), array_values($placeholders), $discord_message);
+
                     EventHandler::executeEvent('paymentCompleted', [
                         'event' => 'paymentCompleted',
                         'order' => $this->getOrder(),
                         'order_id' => $this->data()->order_id,
                         'username' => $username,
-                        'content_full' => $store_language->get('general', 'completed_payment_text', ['user' => $username, 'products' => $this->getOrder()->getDescription()]),
+                        'content_full' => $discord_message,
                         'payment_id' => $this->data()->id,
                     ]);
                 break;
@@ -246,13 +255,23 @@ class Payment {
                     $this->executeAllActions(Action::PURCHASE);
 
                     $username = $this->getOrder()->recipient()->getUsername();
+
+                    $placeholders['{username}'] = $username;
+                    $placeholders['{products}'] = $this->getOrder()->getDescription();
+                    $placeholders['{amount}'] = Store::fromCents($this->data()->amount_cents);
+                    $placeholders['{currency}'] = $this->data()->currency;
+                    $placeholders['{gateway}'] = $this->getGateway() != null ? $this->getGateway()->getName() : 'Unknown';
+
+                    $discord_message = Util::getSetting('discord_message', 'New payment from {username} who bought the following products {products}', 'Store');
+                    $discord_message = str_replace(array_keys($placeholders), array_values($placeholders), $discord_message);
+
                     EventHandler::executeEvent('paymentCompleted', [
                         'event' => 'paymentCompleted',
                         'order' => $this->getOrder(),
                         'order_id' => $this->data()->order_id,
                         'payment_id' => $this->data()->id,
                         'username' => $username,
-                        'content_full' => $store_language->get('general', 'completed_payment_text', ['user' => $username, 'products' => $this->getOrder()->getDescription()]),
+                        'content_full' => $discord_message,
                     ]);
                 break;
             }
