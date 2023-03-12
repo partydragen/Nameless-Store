@@ -519,10 +519,9 @@ if (!isset($_GET['action'])) {
                 ];
             }
 
-            $gateways = new Gateways();
             $allowed_gateways_list = [];
             $selected_gateways = json_decode($product->data()->allowed_gateways, true) ?? [];
-            foreach ($gateways->getAll() as $gateway) {
+            foreach (Gateways::getInstance()->getAll() as $gateway) {
                 if ($gateway->isEnabled()) {
                     $allowed_gateways_list[] = [
                         'id' => $gateway->getId(),

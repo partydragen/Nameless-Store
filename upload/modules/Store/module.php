@@ -403,6 +403,8 @@ class Store_Module extends Module {
                 'min' => $data->min,
                 'max' => $data->max,
                 'options' => Output::getClean($data->options),
+                'regex' => $data->regex,
+                'default_value' => $data->default_value,
             ];
         }
 
@@ -455,8 +457,7 @@ class Store_Module extends Module {
         }
 
         $gateways_list = [];
-        $gateways = new Gateways();
-        foreach ($gateways->getAll() as $gateway) {
+        foreach (Gateways::getInstance()->getAll() as $gateway) {
             $gateways_list[] = [
                 'name' => $gateway->getName(),
                 'version' => $gateway->getVersion(),

@@ -23,7 +23,6 @@ $page_title = $store_language->get('admin', 'gateways');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
 $store = new Store($cache, $store_language);
-$gateways = new Gateways();
 
 if (!isset($_GET['gateway'])) {
 
@@ -39,7 +38,7 @@ if (!isset($_GET['gateway'])) {
 
     if (!isset($errors)) {
         $gateways_list = [];
-        foreach ($gateways->getAll() as $gateway) {
+        foreach (Gateways::getInstance()->getAll() as $gateway) {
             $gateways_list[] = [
                 'name' => Output::getClean($gateway->getName()),
                 'version' => Output::getClean($gateway->getVersion()),
@@ -65,7 +64,7 @@ if (!isset($_GET['gateway'])) {
 
     $template_file = 'store/gateways.tpl';
 } else {
-    $gateway = $gateways->get($_GET['gateway']);
+    $gateway = Gateways::getInstance()->get($_GET['gateway']);
 
     $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
 

@@ -20,7 +20,7 @@ if (isset($store_conf) && is_array($store_conf)) {
 }
 
 // Handle listener from gateway
-$gateways = new Gateways();
+$gateways = Gateways::getInstance();
 $gateway = $gateways->get($_GET['gateway']);
 if ($gateway) {
     $gateway->handleListener();

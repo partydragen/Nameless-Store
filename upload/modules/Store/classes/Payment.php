@@ -308,6 +308,19 @@ class Payment {
         return $status;
     }
 
+    /**
+     * Get gateway used for this payment
+     *
+     * @return GatewayBase Gateway used for this payment.
+     */
+    public function getGateway(): ?GatewayBase {
+        if ($this->exists() && $this->data()->gateway_id != 0) {
+            return Gateways::getInstance()->get($this->data()->gateway_id);
+        }
+
+        return null;
+    }
+
     public function delete() {
         if ($this->exists()) {
             $this->_db->query('DELETE FROM `nl2_store_payments` WHERE `id` = ?', [$this->data()->id]);

@@ -15,7 +15,7 @@ if (!isset($_GET['gateway'])) {
 
 require_once(ROOT_PATH . '/modules/Store/config.php');
 require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
-$gateways = new Gateways();
+$gateways = Gateways::getInstance();
 
 // Load Store config
 if (isset($store_conf) && is_array($store_conf)) {

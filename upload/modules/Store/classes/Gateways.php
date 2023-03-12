@@ -9,8 +9,8 @@
  *  Store module
  */
 
-class Gateways {
-    private $_gateways;
+class Gateways extends Instanceable {
+    private static array $_gateways;
 
     // Constructor, connect to database
     public function __construct() {
@@ -32,9 +32,19 @@ class Gateways {
     }
 
     // Get gateway by name
-    public function get($name) {
-        if (array_key_exists($name, $this->_gateways)) {
-            return $this->_gateways[$name];
+    public function get($value): ?GatewayBase {
+        if (!is_numeric($value)) {
+            // Get gateway by name
+            if (array_key_exists($value, $this->_gateways)) {
+                return $this->_gateways[$value];
+            }
+        } else {
+            // Get gateway by id
+            foreach ($this->_gateways as $gateway) {
+                if ($gateway->getId() == $value) {
+                    return $gateway;
+                }
+            }
         }
 
         return null;

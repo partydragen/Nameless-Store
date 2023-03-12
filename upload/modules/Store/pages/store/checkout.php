@@ -22,7 +22,6 @@ if (!$store->isPlayerSystemEnabled() || !Util::getSetting('allow_guests', '0', '
     }
 }
 
-$gateways = new Gateways();
 $store_url = $store->getStoreURL();
 
 if (isset($_GET['do'])) {
@@ -280,7 +279,7 @@ if (isset($_GET['do'])) {
                     Redirect::to(URL::build($store_url . '/checkout/', 'do=complete'));
                 }
 
-                $gateway = $gateways->get($_POST['payment_method']);
+                $gateway = Gateways::getInstance()->get($_POST['payment_method']);
                 if ($gateway) {
                     // Load gateway process
                     $gateway->processOrder($order);
@@ -309,7 +308,7 @@ if (isset($_GET['do'])) {
         }
     }
 
-    foreach ($gateways->getAll() as $gateway) {
+    foreach (Gateways::getInstance()->getAll() as $gateway) {
         if ($gateway->isEnabled()) {
             $gateway->onCheckoutPageLoad($template, $from_customer);
         }
@@ -373,7 +372,7 @@ if (isset($_GET['do'])) {
 
     // Load available gateways
     $payment_methods = [];
-    foreach ($gateways->getAll() as $gateway) {
+    foreach (Gateways::getInstance()->getAll() as $gateway) {
         if ($gateway->isEnabled()) {
             // Check of any products require certain gateways
             foreach ($shopping_cart->getProducts() as $product) {
