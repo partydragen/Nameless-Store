@@ -12,8 +12,8 @@ class Credits_Gateway extends GatewayBase {
     public function __construct() {
         $name = 'Store Credits';
         $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
-        $gateway_version = '1.5.3';
-        $store_version = '1.5.3';
+        $gateway_version = '1.5.4';
+        $store_version = '1.5.4';
         $settings = ROOT_PATH . '/modules/Store/gateways/Credits/gateway_settings/settings.php';
 
         parent::__construct($name, $author, $gateway_version, $store_version, $settings);
