@@ -173,6 +173,7 @@ class Action {
         $placeholders['{ip}'] = $order->data()->ip;
         $placeholders['{time}'] = date('H:i', $payment->data()->created);
         $placeholders['{date}'] = date('d M Y', $payment->data()->created);
+        $placeholders['{gateway}'] = $payment->getGateway() != null ? $payment->getGateway()->getName() : 'Unknown';
         $placeholders['{purchaserUserId}'] = $customer->exists() ? $customer->data()->user_id ?? 0 : 0;
         $placeholders['{purchaserName}'] = $customer->getUsername();
         $placeholders['{purchaserUuid}'] = $customer->getIdentifier();
