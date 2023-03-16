@@ -1,1 +1,16 @@
-{}
+{
+    "admin/current_version_x": "Nu varande modul version: {{version}}",
+    "admin/new_category": "Ny kategori",
+    "admin/new_update_available_x": "Det är en uppdatering för denna modul {{module}}",
+    "admin/settings": "Inställningar",
+    "admin/status": "Status",
+    "admin/view_resource": "Visa resurs",
+    "admin/actions": "Handlingar",
+    "admin/categories": "kategorier",
+    "admin/category_deleted_successfully": "Kategorin togs bort.",
+    "admin/category_created_successfully": "Kategorin skapades.",
+    "admin/category_name": "Kategori namn",
+    "admin/category_updated_successfully": "Kategorin uppdaterades.",
+    "admin/new_urgent_update_available_x": "Det är en brådskande uppdatering tillgänglig för denna modulen {{module}}. Snälla uppdatera den så snaras det går!",
+    "admin/new_version_x": "Ny Modul version: {{new_version}}"
+}
