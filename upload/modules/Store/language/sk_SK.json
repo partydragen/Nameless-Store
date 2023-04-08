@@ -266,5 +266,6 @@
     "general/redeem_coupon_here": "Máte kupónový kód? Zadajte ho tu",
     "admin/new_sale": "Nová zľava",
     "admin/sale_deleted_successfully": "Zľava bola úspešne zmazaná",
-    "admin/confirm_delete_coupon": "Naozaj chcete zmazať tento kupón?"
+    "admin/confirm_delete_coupon": "Naozaj chcete zmazať tento kupón?",
+    "general/price_must_be_at_least_x": "Cena musí byť aspoň {{price}}"
 }
