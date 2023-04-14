@@ -1,1 +1,16 @@
-{}
+{
+    "admin/new_category": "Новая категория",
+    "admin/new_update_available_x": "Доступно новое обновление для данного модуля {{module}}",
+    "admin/new_urgent_update_available_x": "Вышло важное обновление для модуля {{module}}. Пожалуйста, обновите модуль как только сможете!",
+    "admin/current_version_x": "Установленная версия модуля: {{version}}",
+    "admin/new_version_x": "Новая версия модуля: {{new_version}}",
+    "admin/settings": "Настройки",
+    "admin/status": "Статус",
+    "admin/view_resource": "Смотреть ресурсы",
+    "admin/actions": "Действия",
+    "admin/categories": "Категории",
+    "admin/category_created_successfully": "Категория успешно создана.",
+    "admin/category_deleted_successfully": "Категория успешно удалена.",
+    "admin/category_name": "Название категории",
+    "admin/category_updated_successfully": "Категория успешно обновлена."
+}
