@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.3
+ * @version 2.1.0
  * @license MIT
  */
 class Payment {
@@ -99,7 +99,7 @@ class Payment {
     /**
      * Handle payment event change
      */
-    public function handlePaymentEvent(string $event, array $extra_data = []) {
+    public function handlePaymentEvent(string $event, array $extra_data = []): void {
         $store_language = new Language(ROOT_PATH . '/modules/Store/language', LANGUAGE);
 
         if ($this->exists()) {
@@ -116,14 +116,13 @@ class Payment {
 
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
 
-                    EventHandler::executeEvent('paymentPending', [
-                        'event' => 'paymentPending',
-                        'order' => $this->getOrder(),
-                        'order_id' => $this->data()->order_id,
-                        'payment_id' => $this->data()->id,
-                        'username' => $username,
-                        'content_full' => $store_language->get('general', 'pending_payment_text', ['user' => $username]),
-                    ]);
+                    EventHandler::executeEvent(new PaymentPendingEvent(
+                        $this,
+                        $this->getOrder(),
+                        $this->getOrder()->customer(),
+                        $this->getOrder()->recipient()
+                    ));
+
                 break;
                 case self::COMPLETED:
                     // Payment completed
@@ -136,23 +135,12 @@ class Payment {
 
                     $this->executeAllActions(Action::PURCHASE);
 
-                    $placeholders['{username}'] = $username;
-                    $placeholders['{products}'] = $this->getOrder()->getDescription();
-                    $placeholders['{amount}'] = Store::fromCents($this->data()->amount_cents);
-                    $placeholders['{currency}'] = $this->data()->currency;
-                    $placeholders['{gateway}'] = $this->getGateway() != null ? $this->getGateway()->getName() : 'Unknown';
-
-                    $discord_message = Util::getSetting('discord_message', 'New payment from {username} who bought the following products {products}', 'Store');
-                    $discord_message = str_replace(array_keys($placeholders), array_values($placeholders), $discord_message);
-
-                    EventHandler::executeEvent('paymentCompleted', [
-                        'event' => 'paymentCompleted',
-                        'order' => $this->getOrder(),
-                        'order_id' => $this->data()->order_id,
-                        'username' => $username,
-                        'content_full' => $discord_message,
-                        'payment_id' => $this->data()->id,
-                    ]);
+                    EventHandler::executeEvent(new PaymentCompletedEvent(
+                        $this,
+                        $this->getOrder(),
+                        $this->getOrder()->customer(),
+                        $this->getOrder()->recipient()
+                    ));
                 break;
                 case self::REFUNDED:
                     // Payment refunded
@@ -166,14 +154,12 @@ class Payment {
                     $this->deletePendingActions();
                     $this->executeAllActions(Action::REFUND);
 
-                    EventHandler::executeEvent('paymentRefunded', [
-                        'event' => 'paymentRefunded',
-                        'order' => $this->getOrder(),
-                        'order_id' => $this->data()->order_id,
-                        'payment_id' => $this->data()->id,
-                        'username' => $username,
-                        'content_full' => $store_language->get('general', 'refunded_payment_text', ['user' => $username]),
-                    ]);
+                    EventHandler::executeEvent(new PaymentRefundedEvent(
+                        $this,
+                        $this->getOrder(),
+                        $this->getOrder()->customer(),
+                        $this->getOrder()->recipient()
+                    ));
                 break;
                 case self::REVERSED:
                     // Payment reversed
@@ -187,14 +173,12 @@ class Payment {
                     $this->deletePendingActions();
                     $this->executeAllActions(Action::CHANGEBACK);
 
-                    EventHandler::executeEvent('paymentReversed', [
-                        'event' => 'paymentReversed',
-                        'order' => $this->getOrder(),
-                        'order_id' => $this->data()->order_id,
-                        'payment_id' => $this->data()->id,
-                        'username' => $username,
-                        'content_full' => $store_language->get('general', 'reversed_payment_text', ['user' => $username]),
-                    ]);
+                    EventHandler::executeEvent(new PaymentReversedEvent(
+                        $this,
+                        $this->getOrder(),
+                        $this->getOrder()->customer(),
+                        $this->getOrder()->recipient()
+                    ));
                 break;
                 case self::DENIED:
                     // Payment denied
@@ -232,15 +216,12 @@ class Payment {
 
                     $this->create(array_merge($insert_array, $extra_data));
 
-                    $username = $this->getOrder()->recipient()->getUsername();
-                    EventHandler::executeEvent('paymentPending', [
-                        'event' => 'paymentPending',
-                        'order' => $this->getOrder(),
-                        'order_id' => $this->data()->order_id,
-                        'payment_id' => $this->data()->id,
-                        'username' => $username,
-                        'content_full' => $store_language->get('general', 'pending_payment_text', ['user' => $username]),
-                    ]);
+                    EventHandler::executeEvent(new PaymentPendingEvent(
+                        $this,
+                        $this->getOrder(),
+                        $this->getOrder()->customer(),
+                        $this->getOrder()->recipient()
+                    ));
                 break;
                 case self::COMPLETED:
                     // Payment completed
@@ -254,26 +235,68 @@ class Payment {
 
                     $this->executeAllActions(Action::PURCHASE);
 
-                    $username = $this->getOrder()->recipient()->getUsername();
-
-                    $placeholders['{username}'] = $username;
-                    $placeholders['{products}'] = $this->getOrder()->getDescription();
-                    $placeholders['{amount}'] = Store::fromCents($this->data()->amount_cents);
-                    $placeholders['{currency}'] = $this->data()->currency;
-                    $placeholders['{gateway}'] = $this->getGateway() != null ? $this->getGateway()->getName() : 'Unknown';
-
-                    $discord_message = Util::getSetting('discord_message', 'New payment from {username} who bought the following products {products}', 'Store');
-                    $discord_message = str_replace(array_keys($placeholders), array_values($placeholders), $discord_message);
-
-                    EventHandler::executeEvent('paymentCompleted', [
-                        'event' => 'paymentCompleted',
-                        'order' => $this->getOrder(),
-                        'order_id' => $this->data()->order_id,
-                        'payment_id' => $this->data()->id,
-                        'username' => $username,
-                        'content_full' => $discord_message,
-                    ]);
+                    EventHandler::executeEvent(new PaymentCompletedEvent(
+                        $this,
+                        $this->getOrder(),
+                        $this->getOrder()->customer(),
+                        $this->getOrder()->recipient()
+                    ));
                 break;
+                case self::REFUNDED:
+                    // Payment refunded
+                    $insert_array = [
+                        'status_id' => 2,
+                        'created' => date('U'),
+                        'last_updated' => date('U')
+                    ];
+
+                    $this->create(array_merge($insert_array, $extra_data));
+
+                    $this->executeAllActions(Action::REFUND);
+
+                    EventHandler::executeEvent(new PaymentRefundedEvent(
+                        $this,
+                        $this->getOrder(),
+                        $this->getOrder()->customer(),
+                        $this->getOrder()->recipient()
+                    ));
+                    break;
+                case self::REVERSED:
+                    // Payment reversed
+                    $insert_array = [
+                        'status_id' => 3,
+                        'created' => date('U'),
+                        'last_updated' => date('U')
+                    ];
+
+                    $this->create(array_merge($insert_array, $extra_data));
+
+                    $this->executeAllActions(Action::CHANGEBACK);
+
+                    EventHandler::executeEvent(new PaymentReversedEvent(
+                        $this,
+                        $this->getOrder(),
+                        $this->getOrder()->customer(),
+                        $this->getOrder()->recipient()
+                    ));
+                    break;
+                case self::DENIED:
+                    // Payment denied
+                    $insert_array = [
+                        'status_id' => 4,
+                        'created' => date('U'),
+                        'last_updated' => date('U')
+                    ];
+
+                    $this->create(array_merge($insert_array, $extra_data));
+
+                    EventHandler::executeEvent(new PaymentDeniedEvent(
+                        $this,
+                        $this->getOrder(),
+                        $this->getOrder()->customer(),
+                        $this->getOrder()->recipient()
+                    ));
+                    break;
             }
         }
     }
@@ -281,7 +304,7 @@ class Payment {
     /**
      * Execute all actions for the called trigger for each product in this order
      */
-    public function executeAllActions($type) {
+    public function executeAllActions($type): void {
         $order = $this->getOrder();
 
         foreach ($order->getProducts() as $product) {
@@ -296,11 +319,11 @@ class Payment {
     /**
      * Delete any pending actions
      */
-    public function deletePendingActions() {
+    public function deletePendingActions(): void {
         $this->_db->query('DELETE FROM nl2_store_pending_actions WHERE order_id = ? AND status = 0', [$this->data()->order_id])->results();
     }
 
-    public function getStatusHtml() {
+    public function getStatusHtml(): string {
         $status = '<span class="badge badge-danger">Unknown</span>';
 
         switch ($this->data()->status_id) {
@@ -340,7 +363,7 @@ class Payment {
         return null;
     }
 
-    public function delete() {
+    public function delete(): bool {
         if ($this->exists()) {
             $this->_db->query('DELETE FROM `nl2_store_payments` WHERE `id` = ?', [$this->data()->id]);
             $this->_db->query('DELETE FROM `nl2_store_orders` WHERE `id` = ?', [$this->data()->order_id]);

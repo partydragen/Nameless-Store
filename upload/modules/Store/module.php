@@ -3,7 +3,7 @@
  *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
- *  NamelessMC version 2.0.3
+ *  NamelessMC version 2.1.0
  *
  *  License: MIT
  *
@@ -52,11 +52,11 @@ class Store_Module extends Module {
 
         $pages->add('Store', '/user/store', 'pages/user/store.php');
 
-        EventHandler::registerEvent('paymentPending',  $store_language->get('admin', 'payment_pending'));
-        EventHandler::registerEvent('paymentCompleted', $store_language->get('admin', 'payment_completed'));
-        EventHandler::registerEvent('paymentRefunded', $store_language->get('admin', 'payment_refunded'));
-        EventHandler::registerEvent('paymentReversed', $store_language->get('admin', 'payment_reversed'));
-        EventHandler::registerEvent('paymentDenied', $store_language->get('admin', 'payment_denied'));
+        EventHandler::registerEvent(PaymentPendingEvent::class);
+        EventHandler::registerEvent(PaymentCompletedEvent::class);
+        EventHandler::registerEvent(PaymentRefundedEvent::class);
+        EventHandler::registerEvent(PaymentReversedEvent::class);
+        EventHandler::registerEvent(PaymentDeniedEvent::class);
         EventHandler::registerEvent('storeCheckoutAddProduct', 'storeCheckoutAddProduct', [], true, true);
         EventHandler::registerEvent('renderStoreCategory', 'renderStoreCategory', [], true, true);
         EventHandler::registerEvent('renderStoreProduct', 'renderStoreProduct', [], true, true);

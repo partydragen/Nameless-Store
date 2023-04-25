@@ -66,10 +66,10 @@ class ListPaymentsEndpoint extends KeyAuthEndpoint {
                 'order_id' => (int)$payment->order_id,
                 'gateway_id' => (int)$payment->gateway_id,
                 'transaction' => $payment->transaction,
-                'amount' => Store::fromCents($payment->amount_cents),
+                'amount' => Store::fromCents($payment->amount_cents), // Deprecated
                 'amount_cents' => (int) $payment->amount_cents ?? 0,
                 'currency' => $payment->currency,
-                'fee' => (float) Store::fromCents($payment->fee_cents ?? 0),
+                'fee' => Store::fromCents($payment->fee_cents ?? 0), // Deprecated
                 'fee_cents' => (int) $payment->fee_cents ?? 0,
                 'status_id' => (int)$payment->status_id,
                 'created' => (int)$payment->created,

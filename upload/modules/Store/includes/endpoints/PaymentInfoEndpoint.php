@@ -42,24 +42,26 @@ class PaymentInfoEndpoint extends KeyAuthEndpoint {
         $recipient = $order->recipient();
 
         $return = [
-            'id' => (int) $payment->data()->id,
-            'order_id' => (int) $payment->data()->order_id,
-            'gateway_id' => (int) $payment->data()->gateway_id,
+            'id' => $payment->data()->id,
+            'order_id' => $payment->data()->order_id,
+            'gateway_id' => $payment->data()->gateway_id,
             'transaction' => $payment->data()->transaction,
-            'amount' => Store::fromCents($payment->data()->amount_cents ?? 0),
-            'amount_cents' => (int) $payment->data()->amount_cents ?? 0,
+            'amount' => Store::fromCents($payment->data()->amount_cents ?? 0), // Deprecated
+            'amount_cents' => $payment->data()->amount_cents ?? 0,
             'currency' => $payment->data()->currency,
-            'fee' => (float) Store::fromCents($payment->data()->fee_cents ?? 0),
-            'fee_cents' => (int) $payment->data()->fee_cents ?? 0,
-            'status_id' => (int) $payment->data()->status_id,
-            'created' => (int) $payment->data()->created,
-            'last_updated' => (int) $payment->data()->last_updated,
+            'fee' => Store::fromCents($payment->data()->fee_cents ?? 0), // Deprecated
+            'fee_cents' => $payment->data()->fee_cents ?? 0,
+            'status_id' => $payment->data()->status_id,
+            'created' => $payment->data()->created,
+            'last_updated' => $payment->data()->last_updated,
             'customer' => [
+                'customer_id' => $payment->data()->from_customer_id,
                 'user_id' => $customer->exists() ? $customer->data()->user_id ?? 0 : 0,
                 'username' => $customer->getUsername(),
                 'identifier' => $customer->getIdentifier(),
             ],
             'recipient' => [
+                'customer_id' => $payment->data()->to_customer_id,
                 'user_id' => $recipient->exists() ? $recipient->data()->user_id ?? 0 : 0,
                 'username' => $recipient->getUsername(),
                 'identifier' => $recipient->getIdentifier(),

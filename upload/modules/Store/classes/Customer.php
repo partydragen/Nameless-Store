@@ -119,7 +119,7 @@ class Customer {
     /**
      * Get the customer data.
      *
-     * @return object This customer data.
+     * @return object|null This customer data.
      */
     public function data() {
         return $this->_data;
