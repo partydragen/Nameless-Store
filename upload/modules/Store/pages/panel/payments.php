@@ -328,7 +328,7 @@ if (isset($_GET['customer'])) {
 
                         // Register payment
                         $payment = new Payment();
-                        $payment->handlePaymentEvent(Payment::COMPLETED, [
+                        $payment->handlePaymentEvent(Input::get('payment_status'), [
                             'order_id' => $order->data()->id,
                             'gateway_id' => 0,
                             'amount_cents' => Store::toCents(Input::get('price')),

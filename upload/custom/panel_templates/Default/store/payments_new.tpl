@@ -65,6 +65,16 @@
                                     <input type="number" name="price" class="form-control" id="InputPrice" step="0.01" min="0.00" value="0.00">
                                 </div>
                                 <div class="form-group">
+                                    <label for="inputPaymentStatus">Payment Status</label>
+                                    <select class="form-control" name="payment_status" id="inputPaymentStatus">
+                                        <option value="COMPLETED">Completed</option>
+                                        <option value="PENDING">Pending</option>
+                                        <option value="REFUNDED">Refunded</option>
+                                        <option value="REVERSED">Reversed</option>
+                                        <option value="DENIED">Denied</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
                                     <input type="hidden" name="token" value="{$TOKEN}">
                                     <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
                                 </div>
