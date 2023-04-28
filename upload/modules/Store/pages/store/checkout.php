@@ -46,23 +46,24 @@ if (isset($_GET['do'])) {
         die('Invalid product');
     }
 
-    // Execute event with allow modules to interact with it 
-    $addProductEvent = EventHandler::executeEvent('storeCheckoutAddProduct', [
-        'user' => $user,
-        'product' => $product,
-        'customer' => $from_customer,
-        'recipient' => $to_customer,
-        'fields' => $product->getFields()
-    ]);
+    // Execute event with allow modules to interact with it
+    $event = new CheckoutAddProductEvent(
+        $user,
+        $product,
+        $from_customer,
+        $to_customer,
+        $product->getFields()
+    );
+    EventHandler::executeEvent($event);
 
     // Check if the event returned any errors
-    if (isset($addProductEvent['errors']) && count($addProductEvent['errors'])) {
-        Session::flash('store_error', $addProductEvent['errors'][0]);
+    if ($event->isCancelled()) {
+        Session::flash('store_error', $event->getCancelledReason());
         Redirect::to(URL::build($store_url . '/category/' . $product->data()->category_id));
     }
 
     // Check if the product requires customer input
-    $fields = $addProductEvent['fields'];
+    $fields = $event->fields;
     if (count($fields)) {
         $product_fields = [];
         foreach ($fields as $field) {
@@ -155,17 +156,19 @@ if (isset($_GET['do'])) {
                     }
 
                     // Execute event with allow modules to further validate the fields
-                    $fieldsValidationEvent = EventHandler::executeEvent('storeCheckoutFieldsValidation', [
-                        'user' => $user,
-                        'product' => $product,
-                        'customer' => $from_customer,
-                        'recipient' => $to_customer,
-                        'fields' => $product_fields
-                    ]);
+                    $validation_event = new CheckoutFieldsValidationEvent(
+                        $user,
+                        $product,
+                        $from_customer,
+                        $to_customer,
+                        $product_fields,
+                        $validation
+                    );
+                    EventHandler::executeEvent($validation_event);
 
                     // Check if the event returned any errors
-                    if (isset($fieldsValidationEvent['errors']) && count($fieldsValidationEvent['errors'])) {
-                        $errors = $fieldsValidationEvent['errors'];
+                    if ($validation_event->isCancelled()) {
+                        $errors[] = $validation_event->getCancelledReason();
                     } else {
                         $shopping_cart->add($_GET['add'], $quantity, $product_fields);
                         Redirect::to(URL::build($store_url . '/checkout/'));

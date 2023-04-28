@@ -3,16 +3,16 @@
  *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
- *  NamelessMC version 2.0.2
+ *  NamelessMC version 2.1.0
  *
  *  CheckoutAddProduct hooks
  */
 
 class CheckoutAddProductHook extends HookBase {
+
     // Check global product limit
-    public static function globalLimit(array $params = []): array {
-        $product = $params['product'];
-        $recipient = $params['recipient'];
+    public static function globalLimit(CheckoutAddProductEvent $event): void {
+        $product = $event->product;
 
         $global_limit = json_decode($product->data()->global_limit, true) ?? [];
         if (isset($global_limit['limit']) && $global_limit['limit'] > 0) {
@@ -24,20 +24,18 @@ class CheckoutAddProductHook extends HookBase {
             }
 
             if (count($limit->results()) >= $global_limit['limit']) {
-                $params['errors'][] = Store::getLanguage()->get('general', 'product_global_limit_reached');
+                $event->setCancelled(true, Store::getLanguage()->get('general', 'product_global_limit_reached'));
             }
         }
-
-        return $params;
     }
 
     // Check user product limit
-    public static function userLimit(array $params = []): array {
-        $user = $params['user'];
+    public static function userLimit(CheckoutAddProductEvent $event): void {
+        $user = $event->user;
 
         if ($user->isLoggedIn()) {
-            $product = $params['product'];
-            $recipient = $params['recipient'];
+            $product = $event->product;
+            $recipient = $event->recipient;
 
             $user_limit = json_decode($product->data()->user_limit, true) ?? [];
             if (isset($user_limit['limit']) && $user_limit['limit'] > 0) {
@@ -49,21 +47,19 @@ class CheckoutAddProductHook extends HookBase {
                 }
 
                 if (count($limit->results()) >= $user_limit['limit']) {
-                    $params['errors'][] = Store::getLanguage()->get('general', 'product_user_limit_reached');
+                    $event->setCancelled(true, Store::getLanguage()->get('general', 'product_user_limit_reached'));
                 }
             }
         }
-
-        return $params;
     }
 
     // Check for required products
-    public static function requiredProducts(array $params = []): array {
-        $user = $params['user'];
+    public static function requiredProducts(CheckoutAddProductEvent $event): void {
+        $user = $event->user;
 
         if ($user->isLoggedIn()) {
-            $product = $params['product'];
-            $recipient = $params['recipient'];
+            $product = $event->product;
+            $recipient = $event->recipient;
 
             $required_products = json_decode($product->data()->required_products, true) ?? [];
             if (count($required_products)) {
@@ -71,25 +67,24 @@ class CheckoutAddProductHook extends HookBase {
                 foreach ($required_products as $item) {
                     if(!array_key_exists($item, $bought_products)) {
                         $target_product = new Product($item);
- 
-                        $params['errors'][] = Store::getLanguage()->get('general', 'product_requires_products', [
+
+                        $event->setCancelled(true, Store::getLanguage()->get('general', 'product_requires_products', [
                             'product' => Output::getClean($target_product->data()->name)
-                        ]);
+                        ]));
+
                     }
                 }
             }
         }
-
-        return $params;
     }
 
     // Check for required groups
-    public static function requiredGroups(array $params = []): array {
-        $user = $params['user'];
+    public static function requiredGroups(CheckoutAddProductEvent $event): void {
+        $user = $event->user;
 
         if ($user->isLoggedIn()) {
-            $product = $params['product'];
-            $recipient = $params['recipient'];
+            $product = $event->product;
+            $recipient = $event->recipient;
 
             $required_groups = json_decode($product->data()->required_groups, true) ?? [];
             if (count($required_groups)) {
@@ -98,37 +93,32 @@ class CheckoutAddProductHook extends HookBase {
                     if(!array_key_exists($item, $user_groups)) {
                         $group = DB::getInstance()->query('SELECT name FROM nl2_groups WHERE id = ?', [$item])->first();
 
-                        $params['errors'][] = Store::getLanguage()->get('general', 'product_requires_groups', [
+                        $event->setCancelled(true, Store::getLanguage()->get('general', 'product_requires_groups', [
                             'group' => Output::getClean($group->name ?? 'Unknown')
-                        ]);
+                        ]));
                     }
                 }
             }
         }
-
-        return $params;
     }
 
     // Check for any required integrations
-    public static function requiredIntegrations(array $params = []): array {
-        $user = $params['user'];
+    public static function requiredIntegrations(CheckoutAddProductEvent $event): void {
+        $user = $event->user;
 
         if ($user->isLoggedIn()) {
-            $product = $params['product'];
-            $recipient = $params['recipient'];
+            $product = $event->product;
 
             foreach ($product->getRequiredIntegrations() as $integration) {
                 $integrationUser = $user->getIntegration($integration->getName());
                 if ($integrationUser == null || $integrationUser->data()->username == null || $integrationUser->data()->identifier == null) {
-                    $params['errors'][] = Store::getLanguage()->get('general', 'product_requires_integration', [
+                    $event->setCancelled(true, Store::getLanguage()->get('general', 'product_requires_integration', [
                         'integration' => Output::getClean($integration->getName()),
                         'linkStart' => '<a href="' . URL::build('/user/connections') . '">',
                         'linkEnd' => '</a>'
-                    ]);
+                    ]));
                 }
             }
         }
-
-        return $params;
     }
 }

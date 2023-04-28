@@ -57,28 +57,22 @@ class Store_Module extends Module {
         EventHandler::registerEvent(PaymentRefundedEvent::class);
         EventHandler::registerEvent(PaymentReversedEvent::class);
         EventHandler::registerEvent(PaymentDeniedEvent::class);
-        EventHandler::registerEvent('storeCheckoutAddProduct', 'storeCheckoutAddProduct', [], true, true);
+        EventHandler::registerEvent(CheckoutAddProductEvent::class);
+        EventHandler::registerEvent(CheckoutFieldsValidationEvent::class);
         EventHandler::registerEvent('renderStoreCategory', 'renderStoreCategory', [], true, true);
         EventHandler::registerEvent('renderStoreProduct', 'renderStoreProduct', [], true, true);
-        EventHandler::registerEvent('storeCheckoutAddProduct', 'storeCheckoutAddProduct', [], true, true);
-        EventHandler::registerEvent('storeCheckoutFieldsValidation', 'storeCheckoutFieldsValidation', [], true, true);
 
-        require_once(ROOT_PATH . '/modules/Store/hooks/CheckoutAddProductHook.php');
-        EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::globalLimit');
-        EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::userLimit');
-        EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::requiredProducts');
-        EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::requiredGroups');
-        EventHandler::registerListener('storeCheckoutAddProduct', 'CheckoutAddProductHook::requiredIntegrations');
-        EventHandler::registerListener('renderStoreCategory', 'ContentHook::purify');
-        EventHandler::registerListener('renderStoreCategory', 'ContentHook::codeTransform', 15);
-        EventHandler::registerListener('renderStoreCategory', 'ContentHook::decode', 20);
-        EventHandler::registerListener('renderStoreCategory', 'ContentHook::renderEmojis', 10);
-        EventHandler::registerListener('renderStoreCategory', 'ContentHook::replaceAnchors', 15);
-        EventHandler::registerListener('renderStoreProduct', 'ContentHook::purify');
-        EventHandler::registerListener('renderStoreProduct', 'ContentHook::codeTransform', 15);
-        EventHandler::registerListener('renderStoreProduct', 'ContentHook::decode', 20);
-        EventHandler::registerListener('renderStoreProduct', 'ContentHook::renderEmojis', 10);
-        EventHandler::registerListener('renderStoreProduct', 'ContentHook::replaceAnchors', 15);
+        EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'globalLimit']);
+        EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'userLimit']);
+        EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredProducts']);
+        EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredGroups']);
+        EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredIntegrations']);
+        EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'purify']);
+        EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'renderEmojis'], 10);
+        EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'replaceAnchors'], 15);
+        EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'purify']);
+        EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'renderEmojis'], 10);
+        EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'replaceAnchors'], 15);
 
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
 
