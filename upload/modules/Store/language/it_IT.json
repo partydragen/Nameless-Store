@@ -53,5 +53,15 @@
     "admin/description": "Descrizione",
     "admin/description_max_100000": "La descrizione non può superare i 100.000 caratteri.",
     "admin/description_updated_successfully": "Descrizione aggiornata correttamente.",
-    "admin/details": "Dettagli"
+    "admin/details": "Dettagli",
+    "admin/checkout_complete_content_max": "Il contenuto dell'indice del negozio deve contenere un massimo di 60000 caratteri.",
+    "admin/disable_category": "Disabilita questa categoria e rimuovila dallo store.",
+    "admin/disable_product": "Disabilita questo prodotto e rimuovilo dallo store.",
+    "admin/editing_action_for_x": "Modifica {{product}}",
+    "admin/editing_category_x": "Modifica la categoria {{category}}",
+    "admin/editing_connection_x": "Modifica la connessione {{connection}}",
+    "admin/editing_field_x": "Modifica parametro {{field}}",
+    "admin/editing_product_x": "Modifica prodotto {{product}}",
+    "admin/email": "Email",
+    "admin/enable_player_login": "Richiedi al cliente di inserire il nome utente Minecraft quando visita il negozio (la disattivazione forzerà l'accesso dell'utente)"
 }
