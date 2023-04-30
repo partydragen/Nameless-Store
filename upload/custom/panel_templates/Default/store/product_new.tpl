@@ -102,6 +102,25 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="inputDurability">Remove from customer after (Expire)</label>
+                                        <div class="input-group">
+                                            <input type="number" name="durability_interval" class="form-control" id="inputDurabilityInterval" value="{$DURABILITY.interval}" min="1">
+                                            <select name="durability_period" class="form-control" id="inputDurabilityPeriod">
+                                                <option value="never" {if $DURABILITY.period == 'never'} selected{/if}>Never</option>
+                                                <option value="min" {if $DURABILITY.period == 'min'} selected{/if}>Min</option>
+                                                <option value="hour" {if $DURABILITY.period == 'hour'} selected{/if}>Hour</option>
+                                                <option value="day" {if $DURABILITY.period == 'day'} selected{/if}>Day</option>
+                                                <option value="week" {if $DURABILITY.period == 'week'} selected{/if}>Week</option>
+                                                <option value="month" {if $DURABILITY.period == 'month'} selected{/if}>Month</option>
+                                                <option value="year" {if $DURABILITY.period == 'year'} selected{/if}>Year</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-group custom-control custom-switch">
                                 <input id="inputHidden" name="hidden" type="checkbox" class="custom-control-input"{if $HIDE_PRODUCT_VALUE eq 1} checked{/if} />
                                 <label class="custom-control-label" for="inputHidden">{$HIDE_PRODUCT}</label>

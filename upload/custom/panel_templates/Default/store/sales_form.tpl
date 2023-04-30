@@ -76,7 +76,7 @@
                               <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="InputDiscountAmount">{$AMOUNT}</label>
-                                    <input type="number" name="discount_amount" class="form-control" id="InputDiscountAmount" placeholder="{$AMOUNT}" value="{$AMOUNT_VALUE}">
+                                    <input type="number" name="discount_amount" class="form-control" id="InputDiscountAmount" placeholder="{$AMOUNT}" value="{$AMOUNT_VALUE}" min="0">
                                 </div>
                               </div>
                             </div>

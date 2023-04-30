@@ -152,6 +152,16 @@ if (!isset($_GET['action'])) {
                             if (isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
                             else $disabled = 0;
 
+                            // Remove from customer after (Expire)
+                            if (isset($_POST['durability_period']) && $_POST['durability_period'] != 'never') {
+                                $durability = json_encode([
+                                    'interval' => $_POST['durability_interval'] ?? 1,
+                                    'period' => $_POST['durability_period'] ?? 'never'
+                                ]);
+                            } else {
+                                $durability = null;
+                            }
+
                             // Save to database
                             DB::getInstance()->insert('store_products', [
                                 'name' => Input::get('name'),
@@ -161,6 +171,7 @@ if (!isset($_GET['action'])) {
                                 'hidden' => $hidden,
                                 'disabled' => $disabled,
                                 'order' => $last_order + 1,
+                                'durability' => $durability
                             ]);
                             $lastId = DB::getInstance()->lastId();
                             $product = new Product($lastId);
@@ -217,6 +228,12 @@ if (!isset($_GET['action'])) {
                 ];
             }
 
+            // Remove from customer after (Expire)
+            $durability = [
+                'interval' => ((isset($_POST['durability_interval']) && $_POST['durability_interval']) ? Output::getClean(Input::get('durability_interval')) : '1'),
+                'period' => ((isset($_POST['durability_period']) && $_POST['durability_period']) ? Output::getClean(Input::get('durability_period')) : 'never'),
+            ];
+
             $smarty->assign([
                 'PRODUCT_TITLE' => $store_language->get('admin', 'new_product'),
                 'BACK' => $language->get('general', 'back'),
@@ -234,6 +251,7 @@ if (!isset($_GET['action'])) {
                 'FIELDS' => $store_language->get('admin', 'fields'),
                 'FIELDS_LIST' => $fields_array,
                 'CURRENCY' => Output::getClean(Store::getCurrency()),
+                'DURABILITY' => $durability,
                 'HIDE_PRODUCT' => $store_language->get('admin', 'hide_product_from_store'),
                 'HIDE_PRODUCT_VALUE' => ((isset($_POST['hidden'])) ? 1 : 0),
                 'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),

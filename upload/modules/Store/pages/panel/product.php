@@ -84,6 +84,16 @@ if (!isset($_GET['action'])) {
                     if (isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
                     else $disabled = 0;
 
+                    // Remove from customer after (Expire)
+                    if (isset($_POST['durability_period']) && $_POST['durability_period'] != 'never') {
+                        $durability = json_encode([
+                            'interval' => $_POST['durability_interval'] ?? 1,
+                            'period' => $_POST['durability_period'] ?? 'never'
+                        ]);
+                    } else {
+                        $durability = null;
+                    }
+
                     // Save to database
                     $product->update([
                         'name' => Input::get('name'),
@@ -91,7 +101,8 @@ if (!isset($_GET['action'])) {
                         'category_id' => $category[0]->id,
                         'price_cents' => Store::toCents(Input::get('price')),
                         'hidden' => $hidden,
-                        'disabled' => $disabled
+                        'disabled' => $disabled,
+                        'durability' => $durability
                     ]);
 
                     $selected_connections = isset($_POST['connections']) && is_array($_POST['connections']) ? $_POST['connections'] : [];
@@ -231,6 +242,13 @@ if (!isset($_GET['action'])) {
         ];
     }
 
+    // Remove from customer after (Expire)
+    $durability_json = json_decode($product->data()->durability, true) ?? [];
+    $durability = [
+        'interval' => $durability_json['interval'] ?? 1,
+        'period' => $durability_json['period'] ?? 'never'
+    ];
+
     $smarty->assign([
         'PRODUCT_TITLE' => $store_language->get('admin', 'editing_product_x', ['product' => Output::getClean($product->data()->name)]),
         'ID' => Output::getClean($product->data()->id),
@@ -253,6 +271,7 @@ if (!isset($_GET['action'])) {
         'NEW_ACTION_LINK' => URL::build('/panel/store/product/' , 'action=new_action&product=' . $product->data()->id),
         'ACTION_LIST' => $actions_array,
         'CURRENCY' => Output::getClean(Store::getCurrency()),
+        'DURABILITY' => $durability,
         'HIDE_PRODUCT' => $store_language->get('admin', 'hide_product_from_store'),
         'HIDE_PRODUCT_VALUE' => $product->data()->hidden,
         'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),

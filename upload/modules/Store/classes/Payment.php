@@ -82,7 +82,7 @@ class Payment {
     /**
      * Get the payment data.
      *
-     * @return PaymentData This payment data.
+     * @return null|PaymentData This payment data.
      */
     public function data(): ?PaymentData {
         return $this->_data;
@@ -98,6 +98,10 @@ class Payment {
 
     /**
      * Handle payment event change
+     *
+     * @param string $event Payment event.
+     * @param array $extra_data Payment data to save to database.
+     * @throws Exception
      */
     public function handlePaymentEvent(string $event, array $extra_data = []): void {
         $store_language = new Language(ROOT_PATH . '/modules/Store/language', LANGUAGE);
@@ -133,7 +137,14 @@ class Payment {
 
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
 
-                    $this->executeAllActions(Action::PURCHASE);
+                    // Schedule any products for expiration?
+                    foreach ($this->getOrder()->getProducts() as $product) {
+                        if ($product->data()->durability != null) {
+                            ExpireCustomerProductTask::schedule($this->getOrder(), $product, $this);
+                        }
+                    }
+
+                    $this->executeActions(Action::PURCHASE);
 
                     EventHandler::executeEvent(new PaymentCompletedEvent(
                         $this,
@@ -152,7 +163,7 @@ class Payment {
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
 
                     $this->deletePendingActions();
-                    $this->executeAllActions(Action::REFUND);
+                    $this->executeActions(Action::REFUND);
 
                     EventHandler::executeEvent(new PaymentRefundedEvent(
                         $this,
@@ -171,7 +182,7 @@ class Payment {
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
 
                     $this->deletePendingActions();
-                    $this->executeAllActions(Action::CHANGEBACK);
+                    $this->executeActions(Action::CHANGEBACK);
 
                     EventHandler::executeEvent(new PaymentReversedEvent(
                         $this,
@@ -233,7 +244,14 @@ class Payment {
 
                     $this->create(array_merge($insert_array, $extra_data));
 
-                    $this->executeAllActions(Action::PURCHASE);
+                    // Schedule any products for expiration?
+                    foreach ($this->getOrder()->getProducts() as $product) {
+                        if ($product->data()->durability != null) {
+                            ExpireCustomerProductTask::schedule($this->getOrder(), $product, $this);
+                        }
+                    }
+
+                    $this->executeActions(Action::PURCHASE);
 
                     EventHandler::executeEvent(new PaymentCompletedEvent(
                         $this,
@@ -252,7 +270,7 @@ class Payment {
 
                     $this->create(array_merge($insert_array, $extra_data));
 
-                    $this->executeAllActions(Action::REFUND);
+                    $this->executeActions(Action::REFUND);
 
                     EventHandler::executeEvent(new PaymentRefundedEvent(
                         $this,
@@ -271,7 +289,7 @@ class Payment {
 
                     $this->create(array_merge($insert_array, $extra_data));
 
-                    $this->executeAllActions(Action::CHANGEBACK);
+                    $this->executeActions(Action::CHANGEBACK);
 
                     EventHandler::executeEvent(new PaymentReversedEvent(
                         $this,
@@ -302,30 +320,43 @@ class Payment {
     }
 
     /**
-     * Execute all actions for the called trigger for each product in this order
+     * Execute all actions for the called trigger all products or specific product.
+     *
+     * @param int $type Action type.
+     * @param Product|null $product Delete pending actions from specific product if isset.
      */
-    public function executeAllActions($type): void {
+    public function executeActions(int $type, Product $product = null): void {
         $order = $this->getOrder();
 
-        foreach ($order->getProducts() as $product) {
-            if ($product->data()->deleted == 0) {
-                foreach ($product->getActions($type) as $action) {
-                    $action->execute($order, $product, $this);
+        if ($product) {
+            foreach ($product->getActions($type) as $action) {
+                $action->execute($order, $product, $this);
+            }
+        } else {
+            foreach ($order->getProducts() as $product) {
+                if ($product->data()->deleted == 0) {
+                    foreach ($product->getActions($type) as $action) {
+                        $action->execute($order, $product, $this);
+                    }
                 }
             }
         }
     }
 
     /**
-     * Delete any pending actions
+     * Delete any pending actions for all products or specific product.
+     *
+     * @param int|null $product_id Delete pending actions from specific product if isset.
      */
-    public function deletePendingActions(): void {
-        $this->_db->query('DELETE FROM nl2_store_pending_actions WHERE order_id = ? AND status = 0', [$this->data()->order_id])->results();
+    public function deletePendingActions(int $product_id = null): void {
+        if ($product_id) {
+            $this->_db->query('DELETE FROM nl2_store_pending_actions WHERE order_id = ? AND status = 0 AND product_id = ?', [$this->data()->order_id, $product_id])->results();
+        } else {
+            $this->_db->query('DELETE FROM nl2_store_pending_actions WHERE order_id = ? AND status = 0', [$this->data()->order_id])->results();
+        }
     }
 
     public function getStatusHtml(): string {
-        $status = '<span class="badge badge-danger">Unknown</span>';
-
         switch ($this->data()->status_id) {
             case 0;
                 $status = '<span class="badge badge-warning">Pending</span>';
@@ -353,7 +384,7 @@ class Payment {
     /**
      * Get gateway used for this payment
      *
-     * @return GatewayBase Gateway used for this payment.
+     * @return null|GatewayBase Gateway used for this payment.
      */
     public function getGateway(): ?GatewayBase {
         if ($this->exists() && $this->data()->gateway_id != 0) {

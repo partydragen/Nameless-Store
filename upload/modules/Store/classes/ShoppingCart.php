@@ -46,7 +46,7 @@ class ShoppingCart {
             foreach ($products_query as $item) {
                 $product = new Product(null, null, $item);
 
-                $renderProductEvent = EventHandler::executeEvent('renderStoreProduct', [
+                EventHandler::executeEvent('renderStoreProduct', [
                     'product' => $product,
                     'name' => $product->data()->name,
                     'content' => $product->data()->description,

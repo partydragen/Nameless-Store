@@ -8,6 +8,7 @@ class ProductData {
     public int $price_cents;
     public ?string $description;
     public ?string $image;
+    public ?string $durability;
     public ?string $global_limit;
     public ?string $user_limit;
     public ?string $required_products;
@@ -31,6 +32,7 @@ class ProductData {
         $this->price_cents = $row->price_cents;
         $this->description = $row->description;
         $this->image = $row->image;
+        $this->durability = $row->durability;
         $this->global_limit = $row->global_limit;
         $this->user_limit = $row->user_limit;
         $this->required_products = $row->required_products;

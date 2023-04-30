@@ -37,6 +37,14 @@ spl_autoload_register(function ($class) {
     }
 });
 
+// Load classes
+spl_autoload_register(function ($class) {
+    $path = join(DIRECTORY_SEPARATOR, [ROOT_PATH, 'modules', 'Store', 'classes', 'Tasks', $class . '.php']);
+    if (file_exists($path)) {
+        require_once($path);
+    }
+});
+
 require_once(ROOT_PATH . '/modules/Store/hooks/CheckoutAddProductHook.php');
 require_once(ROOT_PATH . '/modules/Store/hooks/PriceAdjustmentHook.php');
 

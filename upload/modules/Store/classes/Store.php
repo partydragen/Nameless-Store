@@ -177,17 +177,13 @@ class Store {
     }
 
     /**
-     * Get the active sales .
+     * Get the active sales.
      *
-     * @return Product[] The products for this order.
+     * @return array The active sales.
      */
     public static function getActiveSales(): array {
         return self::$_active_sales ??= (function (): array {
-            $active_sales = [];
-
-            $sales = DB::getInstance()->query('SELECT * FROM nl2_store_sales WHERE start_date < ? AND expire_date > ? ORDER BY `expire_date` DESC', [date('U'), date('U')])->results();
-
-            return $sales;
+            return DB::getInstance()->query('SELECT * FROM nl2_store_sales WHERE start_date < ? AND expire_date > ? ORDER BY `expire_date` DESC', [date('U'), date('U')])->results();
         })();
     }
 

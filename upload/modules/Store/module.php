@@ -59,6 +59,7 @@ class Store_Module extends Module {
         EventHandler::registerEvent(PaymentDeniedEvent::class);
         EventHandler::registerEvent(CheckoutAddProductEvent::class);
         EventHandler::registerEvent(CheckoutFieldsValidationEvent::class);
+        EventHandler::registerEvent(CustomerProductExpiredEvent::class);
         EventHandler::registerEvent('renderStoreCategory', 'renderStoreCategory', [], true, true);
         EventHandler::registerEvent('renderStoreProduct', 'renderStoreProduct', [], true, true);
 
@@ -999,6 +1000,24 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
+
+        if ($old_version < 160) {
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_products ADD `durability` varchar(128) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_products ADD `recurring_payment_type` int(11) NOT NULL DEFAULT \'1\'');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_orders_products ADD `expire` int(11) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_orders_products ADD `task_id` int(11) DEFAULT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+        }
     }
 
     private function initialise() {
@@ -1021,7 +1040,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_products')) {
             try {
-                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price_cents` int(11) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `global_limit` varchar(128) DEFAULT NULL, `user_limit` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `required_groups` varchar(128) DEFAULT NULL, `required_integrations` varchar(128) DEFAULT NULL, `min_player_age` varchar(128) DEFAULT NULL, `min_player_playtime` varchar(128) DEFAULT NULL, `allowed_gateways` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price_cents` int(11) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `durability` varchar(128) DEFAULT NULL, `recurring_payment_type` int(11) NOT NULL DEFAULT \'1\', `global_limit` varchar(128) DEFAULT NULL, `user_limit` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `required_groups` varchar(128) DEFAULT NULL, `required_integrations` varchar(128) DEFAULT NULL, `min_player_age` varchar(128) DEFAULT NULL, `min_player_playtime` varchar(128) DEFAULT NULL, `allowed_gateways` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1069,7 +1088,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_orders_products')) {
             try {
-                $this->_db->createTable('store_orders_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `quantity` int(11) NOT NULL DEFAULT \'1\', `amount_cents` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_orders_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `quantity` int(11) NOT NULL DEFAULT \'1\', `amount_cents` int(11) NOT NULL, `expire` int(11) DEFAULT NULL, `task_id` int(11) DEFAULT NULL, PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }

@@ -31,7 +31,7 @@ if (Input::exists()) {
 
         if ($validation->passed()) {
             $trigger = Input::get('trigger');
-            if (!in_array($trigger, [1,2,3])) {
+            if (!in_array($trigger, [1,2,3,4,5])) {
                 $errors[] = 'Invalid Trigger';
             }
 

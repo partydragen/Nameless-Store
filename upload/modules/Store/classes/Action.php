@@ -145,7 +145,7 @@ class Action {
     /**
      * Execute actions for product and make placeholders
      */
-    public function execute(Order $order, Product $product, Payment $payment) {
+    public function execute(Order $order, Product $product, Payment $payment): void {
         $placeholders = [];
 
         $quantity = 1;
@@ -198,7 +198,7 @@ class Action {
         }
     }
 
-    public function delete() {
+    public function delete(): bool {
         if ($this->exists()) {
             $this->_db->query('DELETE FROM `nl2_store_products_actions` WHERE `id` = ?', [$this->data()->id]);
             $this->_db->query('DELETE FROM `nl2_store_products_connections` WHERE `action_id` = ?', [$this->data()->id]);

@@ -3,7 +3,7 @@
  *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
- *  NamelessMC version 2.0.3
+ *  NamelessMC version 2.1.0
  *
  *  Price Adjustment hooks
  */
@@ -15,7 +15,7 @@ class PriceAdjustmentHook extends HookBase {
 
         // Handle sales
         foreach ($sales as $sale) {
-            $products = json_decode($sale->effective_on ?? []);
+            $products = json_decode($sale->effective_on ?? '[]');
 
             $product = $params['product'];
             if (in_array($product->data()->id, $products)) {
@@ -42,7 +42,7 @@ class PriceAdjustmentHook extends HookBase {
         // Handle coupon
         $coupon = $params['shopping_cart']->getCoupon();
         if ($coupon != null) {
-            $products = json_decode($coupon->data()->effective_on ?? []);
+            $products = json_decode($coupon->data()->effective_on ?? '[]');
 
             $product = $params['product'];
             if (in_array($product->data()->id, $products)) {
