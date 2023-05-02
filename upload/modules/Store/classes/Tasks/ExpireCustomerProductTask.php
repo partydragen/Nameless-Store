@@ -4,11 +4,10 @@ class ExpireCustomerProductTask extends Task {
 
     public function run(): string {
         $data = $this->getData();
-        $data = $data[0];
 
-        $payment = new Payment($data->payment_id);
+        $payment = new Payment($data['payment_id']);
         if ($payment->exists()) {
-            $product = new Product($data->product_id);
+            $product = new Product($data['product_id']);
             $order = $payment->getOrder();
 
             $payment->deletePendingActions($product->data()->id);
@@ -21,6 +20,8 @@ class ExpireCustomerProductTask extends Task {
                 $order->recipient(),
                 $product
             ));
+
+            $this->setOutput(['success' => true]);
         }
 
         return Task::STATUS_COMPLETED;
@@ -46,12 +47,12 @@ class ExpireCustomerProductTask extends Task {
             $success = Queue::schedule((new ExpireCustomerProductTask())->fromNew(
                 Module::getIdFromName('Store'),
                 'Expire Customer Product',
-                [[
+                [
                     'order_id' => $order->data()->id,
                     'order_item_id' => $item->id,
                     'product_id' => $product->data()->id,
                     'payment_id' => $payment->data()->id
-                ]],
+                ],
                 $time,
                 'order_item',
                 $item->id

@@ -26,9 +26,10 @@ class ShoppingCart {
      */
     private ?Coupon $_coupon = null;
 
+    private bool $recurring_payment = false;
+
     // Constructor
     public function __construct() {
-        $shopping_cart = $_SESSION['shopping_cart'] ?? [];
         $items = $_SESSION['shopping_cart']['items'] ?? [];
 
         if (count($items)) {

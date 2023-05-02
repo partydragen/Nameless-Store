@@ -203,4 +203,8 @@ class Order {
 
         return $product_names;
     }
+
+    public function isRecurringPayment(): bool {
+        return true;
+    }
 }

@@ -7,7 +7,7 @@
  * @version 2.0.3
  * @license MIT
  */
-class Credits_Gateway extends GatewayBase {
+class Credits_Gateway extends GatewayBase implements SupportSubscriptions {
 
     public function __construct() {
         $name = 'Store Credits';
@@ -64,6 +64,22 @@ class Credits_Gateway extends GatewayBase {
 
     public function handleListener(): void {
 
+    }
+
+    public function createSubscription(): void {
+        // TODO: Implement createSubscription() method.
+    }
+
+    public function cancelSubscription(Subscription $subscription): bool {
+        // TODO: Implement cancelSubscription() method.
+
+        return false;
+    }
+
+    public function chargePayment(Subscription $subscription): bool {
+        // TODO: Implement chargePayment() method.
+
+        return false;
     }
 }
 
