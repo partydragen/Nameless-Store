@@ -120,6 +120,8 @@ class PayPal_Gateway extends GatewayBase {
         if (!($res = curl_exec($ch))) {
             // error_log("Got " . curl_error($ch) . " when processing IPN data");
             curl_close($ch);
+
+            ErrorHandler::logWarning('[Store] [PayPal Gateway] Curl error ' . curl_error($ch));
             exit;
         }
         curl_close($ch);
@@ -197,10 +199,12 @@ class PayPal_Gateway extends GatewayBase {
 
                 echo 'success';
             } else {
-                echo 'fail 2';
+                ErrorHandler::logWarning('[Store] [PayPal Gateway] Paypal email mismatch!');
+                die('Error');
             }
         } else {
-            echo 'fail';
+            ErrorHandler::logWarning('[Store] [PayPal Gateway] Could not verify payment!');
+            die('Error');
         }
     }
 }
