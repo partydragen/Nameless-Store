@@ -13,40 +13,7 @@
 // Language
 $store_language = new Language(ROOT_PATH . '/modules/Store/language', LANGUAGE);
 
-// Load classes
-spl_autoload_register(function ($class) {
-    $path = join(DIRECTORY_SEPARATOR, [ROOT_PATH, 'modules', 'Store', 'classes', $class . '.php']);
-    if (file_exists($path)) {
-        require_once($path);
-    }
-});
-
-// Load classes
-spl_autoload_register(function ($class) {
-    $path = join(DIRECTORY_SEPARATOR, [ROOT_PATH, 'modules', 'Store', 'classes', 'DTO', $class . '.php']);
-    if (file_exists($path)) {
-        require_once($path);
-    }
-});
-
-// Load classes
-spl_autoload_register(function ($class) {
-    $path = join(DIRECTORY_SEPARATOR, [ROOT_PATH, 'modules', 'Store', 'classes', 'Events', $class . '.php']);
-    if (file_exists($path)) {
-        require_once($path);
-    }
-});
-
-// Load classes
-spl_autoload_register(function ($class) {
-    $path = join(DIRECTORY_SEPARATOR, [ROOT_PATH, 'modules', 'Store', 'classes', 'Tasks', $class . '.php']);
-    if (file_exists($path)) {
-        require_once($path);
-    }
-});
-
-require_once(ROOT_PATH . '/modules/Store/hooks/CheckoutAddProductHook.php');
-require_once(ROOT_PATH . '/modules/Store/hooks/PriceAdjustmentHook.php');
+require_once(ROOT_PATH . '/modules/Store/autoload.php');
 
 require_once(ROOT_PATH . '/modules/Store/module.php');
 $module = new Store_Module($language, $store_language, $pages, $cache, $endpoints);
