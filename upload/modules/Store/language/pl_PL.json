@@ -45,5 +45,12 @@
     "admin/confirm_payment_deletion": "Czy jesteś pewny/a, że chcesz usunąć płatność?",
     "admin/current_version_x": "Obecna wersja modułu: {{version}}",
     "admin/connections_info": "Połącz swoje serwisy do sklepu, aby wykonywać specyficzne akcje",
-    "admin/description_max_100000": "Opis może mieć maksymalnie 100000 znaków."
+    "admin/description_max_100000": "Opis może mieć maksymalnie 100000 znaków.",
+    "general/home": "Strona Główna",
+    "admin/confirm_delete_sale": "Czy jesteś pewny/a, że chcesz usunąć ten produkt?",
+    "general/store": "Sklep",
+    "admin/price": "Cena",
+    "admin/product": "Produkt",
+    "admin/store_path": "Ścieżka Strony",
+    "admin/name": "Nazwa"
 }
