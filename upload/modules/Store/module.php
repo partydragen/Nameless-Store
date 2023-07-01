@@ -43,6 +43,7 @@ class Store_Module extends Module {
         $pages->add('Store', '/panel/store/product', 'pages/panel/product.php');
         $pages->add('Store', '/panel/store/categories', 'pages/panel/categories.php');
         $pages->add('Store', '/panel/store/payments', 'pages/panel/payments.php');
+        $pages->add('Store', '/panel/store/subscriptions', 'pages/panel/subscriptions.php');
         $pages->add('Store', '/panel/store/connections', 'pages/panel/connections.php');
         $pages->add('Store', '/panel/store/fields', 'pages/panel/fields.php');
         $pages->add('Store', '/panel/store/sales', 'pages/panel/sales.php');
@@ -56,6 +57,9 @@ class Store_Module extends Module {
         EventHandler::registerEvent(PaymentCompletedEvent::class);
         EventHandler::registerEvent(PaymentRefundedEvent::class);
         EventHandler::registerEvent(PaymentReversedEvent::class);
+        EventHandler::registerEvent(PaymentDeniedEvent::class);
+        EventHandler::registerEvent(SubscriptionCreatedEvent::class);
+        EventHandler::registerEvent(SubscriptionCancelledEvent::class);
         EventHandler::registerEvent(PaymentDeniedEvent::class);
         EventHandler::registerEvent(CheckoutAddProductEvent::class);
         EventHandler::registerEvent(CheckoutFieldsValidationEvent::class);
@@ -175,6 +179,7 @@ class Store_Module extends Module {
                 'staffcp.store.gateways' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'gateways'),
                 'staffcp.store.products' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'products'),
                 'staffcp.store.payments' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments'),
+                'staffcp.store.subscriptions' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'subscriptions'),
                 'staffcp.store.connections' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'connections'),
                 'staffcp.store.fields' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'fields'),
                 'staffcp.store.manage_credits' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'manage_users_credits'),
@@ -259,6 +264,16 @@ class Store_Module extends Module {
                         $icon = $cache->retrieve('store_payments_icon');
 
                     $navs[2]->add('store_payments', $this->_store_language->get('admin', 'payments'), URL::build('/panel/store/payments'), 'top', null, ($order + 0.7), $icon);
+                }
+
+                if ($user->hasPermission('staffcp.store.subscriptions')) {
+                    if (!$cache->isCached('store_subscriptions_icon')) {
+                        $icon = '<i class="nav-icon fa-solid fa-handshake"></i>';
+                        $cache->store('store_subscriptions_icon', $icon);
+                    } else
+                        $icon = $cache->retrieve('store_subscriptions_icon');
+
+                    $navs[2]->add('store_subscriptions', $this->_store_language->get('admin', 'subscriptions'), URL::build('/panel/store/subscriptions'), 'top', null, ($order + 0.7), $icon);
                 }
 
                 if ($user->hasPermission('staffcp.store.sales')) {
@@ -1004,7 +1019,6 @@ class Store_Module extends Module {
         if ($old_version < 160) {
             try {
                 $this->_db->query('ALTER TABLE nl2_store_products ADD `durability` varchar(128) DEFAULT NULL');
-                $this->_db->query('ALTER TABLE nl2_store_products ADD `recurring_payment_type` int(11) NOT NULL DEFAULT \'1\'');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -1040,7 +1054,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_products')) {
             try {
-                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price_cents` int(11) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `durability` varchar(128) DEFAULT NULL, `recurring_payment_type` int(11) NOT NULL DEFAULT \'1\', `global_limit` varchar(128) DEFAULT NULL, `user_limit` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `required_groups` varchar(128) DEFAULT NULL, `required_integrations` varchar(128) DEFAULT NULL, `min_player_age` varchar(128) DEFAULT NULL, `min_player_playtime` varchar(128) DEFAULT NULL, `allowed_gateways` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price_cents` int(11) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `durability` varchar(128) DEFAULT NULL, `global_limit` varchar(128) DEFAULT NULL, `user_limit` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `required_groups` varchar(128) DEFAULT NULL, `required_integrations` varchar(128) DEFAULT NULL, `min_player_age` varchar(128) DEFAULT NULL, `min_player_playtime` varchar(128) DEFAULT NULL, `allowed_gateways` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }

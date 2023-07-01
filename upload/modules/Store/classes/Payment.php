@@ -137,14 +137,34 @@ class Payment {
 
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
 
-                    // Schedule any products for expiration?
-                    foreach ($this->getOrder()->getProducts() as $product) {
-                        if ($product->data()->durability != null) {
-                            ExpireCustomerProductTask::schedule($this->getOrder(), $product, $this);
+                    if ($this->data()->subscription_id == null) {
+                        // This is a non-subscription payment
+                        // Schedule any products for expiration?
+                        foreach ($this->getOrder()->getProducts() as $product) {
+                            if ($product->data()->durability != null) {
+                                ExpireCustomerProductTask::schedule($this->getOrder(), $product, $this);
+                            }
+                        }
+
+                        $this->executeActions(Action::PURCHASE);
+                    } else {
+                        // Handle subscription payment
+                        // Is this a first or renewal payment?
+                        $subscription_payments = DB::getInstance()->query('SELECT count(*) AS c FROM nl2_store_payments WHERE subscription_id = ?', [$this->data()->subscription_id])->first()->c;
+                        if ($subscription_payments == 1) {
+                            foreach ($this->getOrder()->getProducts() as $product) {
+                                if ($product->data()->durability != null) {
+                                    ExpireCustomerProductTask::schedule($this->getOrder(), $product, $this);
+                                }
+                            }
+
+                            $this->executeActions(Action::PURCHASE);
+                        } else {
+
+                            // TODO extend expire task
+                            $this->executeActions(Action::RENEWAL);
                         }
                     }
-
-                    $this->executeActions(Action::PURCHASE);
 
                     EventHandler::executeEvent(new PaymentCompletedEvent(
                         $this,

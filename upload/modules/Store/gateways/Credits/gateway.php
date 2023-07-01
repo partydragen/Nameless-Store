@@ -7,7 +7,7 @@
  * @version 2.0.3
  * @license MIT
  */
-class Credits_Gateway extends GatewayBase implements SupportSubscriptions {
+class Credits_Gateway extends GatewayBase {
 
     public function __construct() {
         $name = 'Store Credits';
@@ -50,8 +50,7 @@ class Credits_Gateway extends GatewayBase implements SupportSubscriptions {
                 'currency' => Store::getCurrency()
             ]);
 
-            $shopping_cart = new ShoppingCart();
-            $shopping_cart->clear();
+            ShoppingCart::getInstance()->clear();
             Redirect::to(URL::build(Store::getStorePath() . '/checkout/', 'do=complete'));
         } else {
             $this->addError('You don\'t have enough credits to complete this order!');
@@ -64,22 +63,6 @@ class Credits_Gateway extends GatewayBase implements SupportSubscriptions {
 
     public function handleListener(): void {
 
-    }
-
-    public function createSubscription(): void {
-        // TODO: Implement createSubscription() method.
-    }
-
-    public function cancelSubscription(Subscription $subscription): bool {
-        // TODO: Implement cancelSubscription() method.
-
-        return false;
-    }
-
-    public function chargePayment(Subscription $subscription): bool {
-        // TODO: Implement chargePayment() method.
-
-        return false;
     }
 }
 

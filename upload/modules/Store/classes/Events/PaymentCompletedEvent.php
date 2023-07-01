@@ -57,6 +57,7 @@ class PaymentCompletedEvent extends AbstractEvent implements HasWebhookParams, D
         $placeholders['{amount}'] = Store::fromCents($this->payment->data()->amount_cents);
         $placeholders['{currency}'] = $this->payment->data()->currency;
         $placeholders['{gateway}'] = $this->payment->getGateway() != null ? $this->payment->getGateway()->getName() : 'Unknown';
+        $placeholders['{isSubscription}'] = $this->payment->data()->subscription_id == null ? 'false' : 'true';
 
         $discord_message = Util::getSetting('discord_message', 'New payment from {username} who bought the following products {products}', 'Store');
         $discord_message = str_replace(array_keys($placeholders), array_values($placeholders), $discord_message);

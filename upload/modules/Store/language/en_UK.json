@@ -160,6 +160,8 @@
     "admin/store_index_content": "Store Index Content",
     "admin/store_path": "Store Path",
     "admin/subscriptions": "Subscriptions",
+    "admin/no_subscriptions": "If you have subscription products, any created subscriptions will be displayed here.",
+    "admin/recurring_payment": "Recurring Payment",
     "admin/successfully_added_credits": "Successfully added {{amount}} credits to user",
     "admin/successfully_removed_credits": "Successfully removed {{amount}} credits from user",
     "admin/transaction": "Transaction ID",
@@ -211,6 +213,7 @@
     "general/agree_t_and_c_purchase": "I agree to the {{termsLinkStart}}terms and conditions{{termsLinkEnd}} of this purchase.",
     "general/accept_terms": "You must accept the terms and conditions",
     "general/buy": "Buy",
+    "general/add_to_cart": "Add to cart",
     "general/checkout": "Checkout",
     "general/continue": "Continue",
     "general/credits": "Credits",
@@ -268,5 +271,7 @@
     "general/redeem_limit_reached": "Redeem limit reached for this coupon.",
     "general/customer_redeem_limit_reached": "You have reached the maximum of uses for this coupon.",
     "general/redeem_min_basket_value": "Using this coupon requires a minimum expenditure of {{min_basket}}.",
-    "general/price_must_be_at_least_x": "Price must be at least {{price}}"
+    "general/price_must_be_at_least_x": "Price must be at least {{price}}",
+    "general/subscribe": "Subscribe",
+    "general/subscription_created": "New {{gateway}} subscription created by {{username}}"
 }

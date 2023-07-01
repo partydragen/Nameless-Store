@@ -7,7 +7,7 @@
  * @version 2.0.3
  * @license MIT
  */
-class PayPal_Business_Gateway extends GatewayBase {
+class PayPal_Business_Gateway extends GatewayBase implements SupportSubscriptions {
 
     public function __construct() {
         $name = 'PayPalBusiness';
@@ -29,34 +29,71 @@ class PayPal_Business_Gateway extends GatewayBase {
             return;
         }
 
-        $payer = new \PayPal\Api\Payer();
-        $payer->setPaymentMethod('paypal');
+        if (!$order->isSubscriptionMode()) {
+            // Single payment
+            $payer = new \PayPal\Api\Payer();
+            $payer->setPaymentMethod('paypal');
 
-        $amount = new \PayPal\Api\Amount();
-        $amount->setTotal(Store::fromCents($order->getAmount()->getTotalCents()));
-        $amount->setCurrency($order->getAmount()->getCurrency());
+            $amount = new \PayPal\Api\Amount();
+            $amount->setTotal(Store::fromCents($order->getAmount()->getTotalCents()));
+            $amount->setCurrency($order->getAmount()->getCurrency());
 
-        $transaction = new \PayPal\Api\Transaction();
-        $transaction->setAmount($amount);
-        $transaction->setDescription($order->getDescription());
-        $transaction->setInvoiceNumber($order->data()->id);
+            $transaction = new \PayPal\Api\Transaction();
+            $transaction->setAmount($amount);
+            $transaction->setDescription($order->getDescription());
+            $transaction->setInvoiceNumber($order->data()->id);
+            $transaction->setPurchaseOrder($order->data()->id);
+            $transaction->setCustom($order->data()->id);
 
-        $redirectUrls = new \PayPal\Api\RedirectUrls();
-        $redirectUrls->setReturnUrl(rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=success'))
-            ->setCancelUrl(rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=cancel'));
+            $redirectUrls = new \PayPal\Api\RedirectUrls();
+            $redirectUrls->setReturnUrl(rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=success'))
+                ->setCancelUrl(rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=cancel'));
 
-        $payment = new \PayPal\Api\Payment();
-        $payment->setIntent('sale')
-            ->setPayer($payer)
-            ->setTransactions([$transaction])
-            ->setRedirectUrls($redirectUrls);
+            $payment = new \PayPal\Api\Payment();
+            $payment->setIntent('sale')
+                ->setPayer($payer)
+                ->setTransactions([$transaction])
+                ->setRedirectUrls($redirectUrls);
 
-        try {
-            $payment->create($apiContext);
+            try {
+                $payment->create($apiContext);
 
-            Redirect::to($payment->getApprovalLink());
-        } catch (\PayPal\Exception\PayPalConnectionException $ex) {
-            ErrorHandler::logCustomError($ex->getData());
+                Redirect::to($payment->getApprovalLink());
+            } catch (\PayPal\Exception\PayPalConnectionException $ex) {
+                ErrorHandler::logCustomError($ex->getData());
+            }
+        } else {
+            // Payment subscription
+            $product = null;
+            foreach ($order->getProducts() as $item) {
+                $product = $item;
+                break;
+            }
+
+            $agreement = new \PayPal\Api\Agreement();
+            $agreement->setName($product->data()->name)
+                ->setDescription($product->data()->name)
+                ->setStartDate(date("c", strtotime("+5 mins")));
+
+
+            $agreement->setPlan($this->getPlan($product));
+
+            $payer = new \PayPal\Api\Payer();
+            $payer->setPaymentMethod('paypal');
+            $agreement->setPayer($payer);
+
+            try {
+                $agreement = $agreement->create($apiContext);
+
+                $approvalUrl = $agreement->getApprovalLink();
+
+            } catch (Exception $ex) {
+                echo "Failed to get activate";
+                exit();
+            }
+
+            header("Location:" . $approvalUrl);
+            exit();
         }
     }
 
@@ -68,13 +105,13 @@ class PayPal_Business_Gateway extends GatewayBase {
                 return false;
             }
 
+            $apiContext = $this->getApiContext();
+            if (count($this->getErrors())) {
+                return false;
+            }
+
             if (isset($_GET['paymentId'])) {
                 // Single payment successfully made
-                $apiContext = $this->getApiContext();
-                if (count($this->getErrors())) {
-                    return false;
-                }
-
                 $paymentId = $_GET['paymentId'];
                 $payment = \PayPal\Api\Payment::get($paymentId, $apiContext);
                 
@@ -97,7 +134,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                 $store_payment = new Payment($payment->getId(), 'payment_id');
                 if (!$store_payment->exists()) {
                     // Register pending payment
-                    $payment_id = $store_payment->create([
+                    $store_payment->create([
                         'order_id' => $transactions[0]->invoice_number,
                         'gateway_id' => $this->getId(),
                         'payment_id' => $payment->getId(),
@@ -137,14 +174,29 @@ class PayPal_Business_Gateway extends GatewayBase {
                     $next_billing_date = date("U", strtotime($agreement->getAgreementDetails()->getNextBillingDate()));
                 }
 
+                $payment_definitions = $agreement->getPlan()->getPaymentDefinitions();
+                $payment_definitions = $payment_definitions[0];
+
+                $order_id = $_SESSION['shopping_cart']['order_id'];
+                if ($order_id == null || !is_numeric($order_id)) {
+                    die('INVALID ORDER ID');
+                }
+
+                // Get order
+                $order = new Order($order_id);
+
                 // Save agreement to database
-                DB::getInstance()->insert('store_agreements', [
-                    'user_id' => ($user->isLoggedIn() ? $user->data()->id : null),
-                    'player_id' => $player_id,
+                DB::getInstance()->insert('store_subscriptions', [
+                    'order_id' => $order->data()->id,
+                    'gateway_id' => $this->getId(),
+                    'customer_id' => $order->customer()->data()->id,
                     'agreement_id' => $agreement->id,
-                    'status_id' => 1,
+                    'status_id' => 0,
+                    'amount_cents' => Store::toCents($payment_definitions->getAmount()->getValue()),
+                    'currency' => $payment_definitions->getAmount()->getCurrency(),
+                    'frequency' => $payment_definitions->getFrequency(),
+                    'frequency_interval' => $payment_definitions->getFrequencyInterval(),
                     'email' => $payer->getPayerInfo()->email,
-                    'payment_method' => $this->getId(),
                     'verified' => $payer->status == 'verified' ? 1 : 0,
                     'payer_id' => $payer->getPayerInfo()->payer_id,
                     'last_payment_date' => $last_payment_date,
@@ -190,7 +242,6 @@ class PayPal_Business_Gateway extends GatewayBase {
                         case 'PAYMENT.SALE.COMPLETED':
                             if (isset($response->resource->parent_payment)) {
                                 // Single payment
-
                                 $payment = new Payment($response->resource->parent_payment, 'payment_id');
                                 if ($payment->exists()) {
                                     // Payment exists
@@ -216,8 +267,26 @@ class PayPal_Business_Gateway extends GatewayBase {
 
                                 $payment->handlePaymentEvent(Payment::COMPLETED, $data);
                             } else if (isset($response->resource->billing_agreement_id)) {
-                                // Agreement payment
+                                // Subscription payment
+                                $subscription = new Subscription($response->resource->billing_agreement_id, 'agreement_id');
+                                if ($subscription->exists()) {
+                                    $payment = new Payment($response->resource->parent_payment, 'payment_id');
+                                    if (!$payment->exists()) {
+                                        // Register new payment from subscription
+                                        $data = [
+                                            'order_id' => $subscription->data()->order_id,
+                                            'payment_id' => $response->id,
+                                            'gateway_id' => $this->getId(),
+                                            'subscription_id' => $subscription->data()->id,
+                                            'transaction' => $response->resource->id,
+                                            'amount_cents' => Store::toCents($response->resource->amount->total),
+                                            'currency' => $response->resource->amount->currency,
+                                            'fee_cents' => Store::toCents($response->resource->transaction_fee->value ?? 0)
+                                        ];
 
+                                        $payment->handlePaymentEvent(Payment::COMPLETED, $data);
+                                    }
+                                }
                             } else {
                                 /// Unknown payment
                                 throw new Exception('Unknown payment type');
@@ -253,7 +322,15 @@ class PayPal_Business_Gateway extends GatewayBase {
 
                             break;
                         case 'BILLING.SUBSCRIPTION.CREATED':
-                            $id = $response->resource->id;
+                            // Subscription created
+                            $subscription = new Subscription($response->resource->id, 'agreement_id');
+                            if ($subscription->exists()) {
+                                $subscription->update([
+                                    'status_id' => 1
+                                ]);
+
+                                EventHandler::executeEvent(new SubscriptionCreatedEvent($subscription));
+                            }
 
                             break;
                         case 'BILLING.SUBSCRIPTION.CANCELLED':
@@ -332,7 +409,7 @@ class PayPal_Business_Gateway extends GatewayBase {
                         'log.LogEnabled' => true,
                         'log.FileName' => ROOT_PATH . '/cache/logs/PayPal.log',
                         'log.LogLevel' => 'FINE',
-                        'mode' => 'live',
+                        'mode' => 'sandbox',
                     ]
                 );
 
@@ -375,6 +452,91 @@ class PayPal_Business_Gateway extends GatewayBase {
         } else {
             $this->addError('Administration have not completed the configuration of this gateway!');
         }
+    }
+
+    public function createSubscription(): void {
+        // TODO: Implement createSubscription() method.
+    }
+
+    public function cancelSubscription(Subscription $subscription): bool {
+        // TODO: Implement cancelSubscription() method.
+
+        return false;
+    }
+
+    public function chargePayment(Subscription $subscription): bool {
+        // TODO: Implement chargePayment() method.
+
+        return false;
+    }
+
+    public function getPlan(Product $product): PayPal\Api\Plan {
+        $plan_query = DB::getInstance()->query('SELECT * FROM nl2_store_products_meta WHERE product_id = ? AND name = ?', [$product->data()->id, 'paypal_plan_id']);
+        if ($plan_query->count()) {
+            // Use existing plan
+            $plan = new PayPal\Api\Plan();
+            $plan->setId($plan_query->first()->value);
+        } else {
+            // Create plan
+            $plan = $this->createPlan($product);
+            $plan = $this->updatePlan($plan);
+
+            DB::getInstance()->insert('store_products_meta', [
+                'product_id' => $product->data()->id,
+                'name' => 'paypal_plan_id',
+                'value' => $plan->getId()
+            ]);
+        }
+
+        return $plan;
+    }
+
+    public function createPlan(Product $product): PayPal\Api\Plan {
+        $durability_json = json_decode($product->data()->durability, true) ?? [];
+
+        $plan = new PayPal\Api\Plan();
+        $plan->setName('Payment Order')
+            ->setDescription($product->data()->name)
+            ->setType('INFINITE');
+
+        $paymentDefinition = new PayPal\Api\PaymentDefinition();
+        $paymentDefinition->setName('Regular Payments')
+            ->setType('REGULAR')
+            ->setFrequency($durability_json['period'] ?? 'month')
+            ->setFrequencyInterval($durability_json['interval'] ?? 1)
+            ->setAmount(new PayPal\Api\Currency(array('value' => Store::fromCents($product->data()->price_cents), 'currency' => Store::getCurrency())));
+
+        $merchantPreferences = new PayPal\Api\MerchantPreferences();
+        $merchantPreferences->setReturnUrl(rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=success'))
+            ->setCancelUrl(rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=cancel'))
+            //->setAutoBillAmount("yes")
+            ->setInitialFailAmountAction("CONTINUE")
+            ->setMaxFailAttempts("0");
+
+        $plan->setPaymentDefinitions(array($paymentDefinition));
+        $plan->setMerchantPreferences($merchantPreferences);
+
+        return $plan->create($this->getApiContext());
+    }
+
+    public function updatePlan(PayPal\Api\Plan $plan): PayPal\Api\Plan {
+        $patch = new PayPal\Api\Patch();
+
+        $value = new PayPal\Common\PayPalModel('{
+	       "state":"ACTIVE"
+	     }');
+
+        $patch->setOp('replace')
+            ->setPath('/')
+            ->setValue($value);
+        $patchRequest = new PayPal\Api\PatchRequest();
+        $patchRequest->addPatch($patch);
+
+        $new_plan = new \PayPal\Api\Plan();
+        $new_plan->setId($plan->getId());
+        $new_plan->update($patchRequest, $this->getApiContext());
+
+        return $new_plan;
     }
 }
 

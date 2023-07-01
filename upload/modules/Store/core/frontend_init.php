@@ -10,7 +10,7 @@
  */
  
 $store = new Store($cache, $store_language);
-$shopping_cart = new ShoppingCart();
+$shopping_cart = ShoppingCart::getInstance();
 
 $from_customer = new Customer($user);
 if ($store->isPlayerSystemEnabled()) {

@@ -105,6 +105,14 @@
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-md-6">
+                                        <label for="inputPaymentType">{$RECURRING_PAYMENT}</label>
+                                        <select name="payment_type" class="form-control" id="inputPaymentType">
+                                            <option value="1" {if $RECURRING_PAYMENT_VALUE == 1} selected{/if}>Only charge customer once</option>
+                                            <option value="2" {if $RECURRING_PAYMENT_VALUE == 2} selected{/if}>Charge a recurring subscription</option>
+                                            <option value="3" {if $RECURRING_PAYMENT_VALUE == 3} selected{/if}>Allow one off charge & recurring subscription</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
                                         <label for="inputDurability">Remove from customer after (Expire)</label>
                                         <div class="input-group">
                                             <input type="number" name="durability_interval" class="form-control" id="inputDurabilityInterval" value="{$DURABILITY.interval}" min="1">

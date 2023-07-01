@@ -27,6 +27,11 @@ class Order {
      */
     private Amount $_amount;
 
+    /**
+     * @var bool Whenever this order is a subscription during checkout flow.
+     */
+    private bool $_subscription = false;
+
     // Constructor
     public function __construct(?string $value = null, string $field = 'id') {
         $this->_db = DB::getInstance();
@@ -51,11 +56,11 @@ class Order {
     /**
      * @return object This order's data.
      */
-    public function data() {
+    public function data(): object {
         return $this->_data;
     }
 
-    // Set products to keep current rendered data and to avoid to requery
+    // Set products to keep current rendered data and to avoid to re-query
     public function setProducts(array $products) {
         $this->_products = $products;
     }
@@ -204,7 +209,11 @@ class Order {
         return $product_names;
     }
 
-    public function isRecurringPayment(): bool {
-        return true;
+    public function setSubscriptionMode(bool $value): void {
+        $this->_subscription = $value;
+    }
+
+    public function isSubscriptionMode(): bool {
+        return $this->_subscription;
     }
 }

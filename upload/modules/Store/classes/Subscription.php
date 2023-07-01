@@ -54,9 +54,17 @@ class Subscription {
         return $this->_data;
     }
 
-    // Create subscription.
-    public function create(): bool {
-        return true;
+    /**
+     * Get gateway used for this subscription.
+     *
+     * @return null|GatewayBase Gateway used for this subscription.
+     */
+    public function getGateway(): ?GatewayBase {
+        if ($this->exists() && $this->data()->gateway_id != 0) {
+            return Gateways::getInstance()->get($this->data()->gateway_id);
+        }
+
+        return null;
     }
 
     // Cancel subscription.

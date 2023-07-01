@@ -120,7 +120,7 @@
                 <div class="column">
                     <div class="field">
                         <input type="hidden" name="token" value="{$TOKEN}">
-                        <span class="right floated"><input type="submit" class="ui green button right floated" value="{$PURCHASE} &raquo;"></span>
+                        <span class="right floated"><input type="submit" class="ui green button right floated" value="{if isset($CHECKOUT_SUBSCRIBE)}{$CHECKOUT_SUBSCRIBE}{else}{$PURCHASE}{/if} &raquo;"></span>
                     </div>
                 </div>
             </div>

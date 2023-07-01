@@ -102,7 +102,8 @@ if (!isset($_GET['action'])) {
                         'price_cents' => Store::toCents(Input::get('price')),
                         'hidden' => $hidden,
                         'disabled' => $disabled,
-                        'durability' => $durability
+                        'durability' => $durability,
+                        'payment_type' => Input::get('payment_type')
                     ]);
 
                     $selected_connections = isset($_POST['connections']) && is_array($_POST['connections']) ? $_POST['connections'] : [];
@@ -272,6 +273,8 @@ if (!isset($_GET['action'])) {
         'ACTION_LIST' => $actions_array,
         'CURRENCY' => Output::getClean(Store::getCurrency()),
         'DURABILITY' => $durability,
+        'RECURRING_PAYMENT' => $store_language->get('admin', 'recurring_payment'),
+        'RECURRING_PAYMENT_VALUE' => $product->data()->payment_type,
         'HIDE_PRODUCT' => $store_language->get('admin', 'hide_product_from_store'),
         'HIDE_PRODUCT_VALUE' => $product->data()->hidden,
         'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),
