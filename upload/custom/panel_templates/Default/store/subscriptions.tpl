@@ -49,15 +49,15 @@
                                         <th>{$USER}</th>
                                         <th>{$STATUS}</th>
                                         <th>{$AMOUNT}</th>
-                                        <th>Last billing date</th>
-                                        <th>Next billing date</th>
+                                        <th>{$LAST_PAYMENT_DATE}</th>
+                                        <th>{$NEXT_BILLING_DATE}</th>
                                         <th>{$VIEW}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {foreach from=$SUBSCRIPTIONS_LIST item=subscription}
                                         <tr>
-                                            <td><a href="{$subscription.user_link}" style="{$payment.user_style}"><img src="{$subscription.user_avatar}" class="rounded" style="max-width:32px;max-height:32px;" alt="{$subscription.username}" /> {$subscription.username}</a></td>
+                                            <td><a href="{$subscription.user_link}" style="{$subscription.user_style}"><img src="{$subscription.user_avatar}" class="rounded" style="max-width:32px;max-height:32px;" alt="{$subscription.username}" /> {$subscription.username}</a></td>
                                             <td>{$subscription.status}</td>
                                             <td>{$subscription.amount_format}</td>
                                             <td>{$subscription.last_billing_date}</td>

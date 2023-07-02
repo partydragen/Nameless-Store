@@ -285,6 +285,8 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                                         ];
 
                                         $payment->handlePaymentEvent(Payment::COMPLETED, $data);
+
+                                        $subscription->sync();
                                     }
                                 }
                             } else {
@@ -391,6 +393,13 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
     }
 
     private function getApiContext() {
+        require_once(ROOT_PATH . '/modules/Store/config.php');
+
+        // Load Store config
+        if (isset($store_conf) && is_array($store_conf)) {
+            $GLOBALS['store_config'] = $store_conf;
+        }
+
         $client_id = StoreConfig::get('paypal_business/client_id');
         $client_secret = StoreConfig::get('paypal_business/client_secret');
 
@@ -462,6 +471,34 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
         // TODO: Implement cancelSubscription() method.
 
         return false;
+    }
+
+    public function syncSubscription(Subscription $subscription): bool {
+        $apiContext = $this->getApiContext();
+        if (count($this->getErrors())) {
+            return false;
+        }
+
+        $agreement = PayPal\Api\Agreement::get($subscription->data()->agreement_id, $apiContext);
+
+        $last_payment_date = $subscription->data()->last_payment_date;
+        if ($agreement->getAgreementDetails()->getLastPaymentDate() != null) {
+            $last_payment_date = date("U", strtotime($agreement->getAgreementDetails()->getLastPaymentDate()));
+        }
+
+        $next_billing_date = $subscription->data()->next_billing_date;
+        if ($agreement->getAgreementDetails()->getNextBillingDate() != null) {
+            $next_billing_date = date("U", strtotime($agreement->getAgreementDetails()->getNextBillingDate()));
+        }
+
+        $agreement->getState()
+
+        $subscription->update([
+            'last_payment_date' => $last_payment_date,
+            'next_billing_date' => $next_billing_date,
+        ]);
+
+        return true;
     }
 
     public function chargePayment(Subscription $subscription): bool {

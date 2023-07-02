@@ -164,6 +164,7 @@ $smarty->assign([
     'ACTIVE_CATEGORY' => Output::getClean($category->name),
     'BUY' => $store_language->get('general', 'buy'),
     'ADD_TO_CART' => $store_language->get('general', 'add_to_cart'),
+    'SUBSCRIBE' => $store_language->get('general', 'subscribe'),
     'CLOSE' => $language->get('general', 'close'),
     'SALE' => $store_language->get('general', 'sale'),
     'TOKEN' => Token::get(),

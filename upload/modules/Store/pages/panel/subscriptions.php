@@ -30,8 +30,9 @@ if (!isset($_GET['subscription'])) {
     if ($subscriptions_query->count()) {
 
         $subscriptions_list = [];
-        foreach ($subscriptions_query->results() as $subscription) {
-            $customer = new Customer(null, $subscription->customer_id);
+        foreach ($subscriptions_query->results() as $item) {
+            $subscription = new Subscription(null, null, $item);
+            $customer = new Customer(null, $subscription->data()->customer_id);
 
             if ($customer->exists() && $customer->getUser()->exists()) {
                 $customer_user = $customer->getUser();
@@ -48,36 +49,28 @@ if (!isset($_GET['subscription'])) {
                 $link = URL::build('/panel/store/payments/', 'customer=' . $username);
             }
 
-            $status = '';
-            switch ($subscription->status_id) {
-                case 0;
-                    $status = '<span class="badge badge-warning">Pending</span>';
-                break;
-                case 1;
-                    $status = '<span class="badge badge-success">Active</span>';
-                break;
-                case 2;
-                    $status = '<span class="badge badge-secondary">Cancelled</span>';
-                break;
-            }
-
-            $last_payment = DB::getInstance()->query('SELECT * FROM nl2_store_payments WHERE subscription_id = ? ORDER BY id DESC', [$subscription->id]);
-
             $subscriptions_list[] = [
                 'user_link' =>  $link,
                 'user_style' => $style,
                 'user_avatar' => $avatar,
                 'username' => $username,
                 'uuid' => $identifier,
-                'status' => $status,
-                'last_billing_date' => $last_payment->count() ? date(DATE_FORMAT, $last_payment->first()->created) : 'Never',
-                'next_billing_date' => date(DATE_FORMAT, $subscription->next_billing_date),
-                'amount_format' => '$100 USD',
+                'status' => $subscription->getStatusHtml(),
+                'last_billing_date' => $subscription->data()->last_payment_date != 0 ? date(DATE_FORMAT, $subscription->data()->last_payment_date) : 'Never',
+                'next_billing_date' => date(DATE_FORMAT, $subscription->data()->next_billing_date),
+                'amount_format' => Output::getPurified(
+                    Store::formatPrice(
+                        $subscription->data()->amount_cents,
+                        $subscription->data()->currency,
+                        Store::getCurrencySymbol(),
+                        STORE_CURRENCY_FORMAT,
+                    )
+                ),
+                'link' => URL::build('/panel/store/subscriptions/', 'subscription=' . urlencode($subscription->data()->id))
             ];
         }
 
         $smarty->assign([
-            'VIEW' => $store_language->get('admin', 'view'),
             'SUBSCRIPTIONS_LIST' => $subscriptions_list
         ]);
     } else {
@@ -91,6 +84,102 @@ if (!isset($_GET['subscription'])) {
         Redirect::to(URL::build('/panel/store/subscriptions'));
     }
 
+    if (Input::exists()) {
+        $errors = [];
+
+        if (Token::check()) {
+            if (Input::get('action') == 'sync') {
+                // Sync subscription
+                if ($subscription->sync()) {
+                    Session::flash('store_subscriptions_success', $store_language->get('admin', 'subscription_updated_successfully'));
+                    Redirect::to(URL::build('/panel/store/subscriptions/', 'subscription=' . $subscription->data()->id));
+                } else {
+                    $errors[] = 'Something went wrong syncing subscription!';
+                }
+            } else if (Input::get('action') == 'cancel') {
+                // Sync subscription
+                if ($subscription->cancel()) {
+                    Session::flash('store_subscriptions_success', $store_language->get('admin', 'subscription_cancelled_successfully'));
+                    Redirect::to(URL::build('/panel/store/subscriptions/', 'subscription=' . urlencode($subscription->data()->id)));
+                } else {
+                    $errors[] = 'Something went wrong cancelling subscription!';
+                }
+            }
+
+        } else {
+            $errors[] = $language->get('general', 'invalid_token');
+        }
+    }
+
+    // Customer
+    $customer = new Customer(null, $subscription->data()->customer_id);
+    if ($customer->exists() && $customer->getUser()->exists()) {
+        $customer_user = $customer->getUser();
+        $username = $customer->getUsername();
+        $avatar = $customer_user->getAvatar();
+        $style = $customer_user->getGroupStyle();
+        $uuid = Output::getClean($customer->getIdentifier());
+        $link = URL::build('/panel/users/store/', 'user=' . $customer_user->data()->id);
+    } else {
+        $username = $customer->getUsername();
+        $avatar = AvatarSource::getAvatarFromUUID(Output::getClean($customer->getIdentifier()));
+        $style = '';
+        $uuid = Output::getClean($customer->getIdentifier());
+        $link = URL::build('/panel/store/payments/', 'customer=' . $username);
+    }
+
+    // Gateway
+    $gateway = $subscription->getGateway();
+    if ($gateway != null) {
+        $payment_method = $gateway->getName();
+    } else {
+        $payment_method = 'Unknown';
+    }
+
+    // Payments
+    $payments_list = [];
+    $payments_query = DB::getInstance()->query('SELECT * FROM nl2_store_payments WHERE subscription_id = ? ORDER BY created DESC', [$subscription->data()->id]);
+    if ($payments_query->count()) {
+        foreach ($payments_query->results() as $payment) {
+            $payments_list[] = [
+                'date' => date(DATE_FORMAT, $payment->created),
+                'link' => URL::build('/panel/store/payments', 'payment=' . urlencode($payment->id))
+            ];
+        }
+    }
+
+    $smarty->assign([
+        'VIEWING_SUBSCRIPTION' => $store_language->get('admin', 'viewing_subscription', ['subscription' => Output::getClean($subscription->data()->agreement_id)]),
+        'BACK' => $language->get('general', 'back'),
+        'BACK_LINK' => URL::build('/panel/store/subscriptions'),
+        'SYNC_SUBSCRIPTION' => $store_language->get('admin', 'sync_subscription'),
+        'CANCEL_SUBSCRIPTION' => $store_language->get('general', 'cancel_subscription'),
+        'CUSTOMER' => $store_language->get('admin', 'customer'),
+        'USERNAME' => $username,
+        'USER_LINK' => $link,
+        'AVATAR' => $avatar,
+        'STYLE' => $style,
+        'STATUS_VALUE' => $subscription->getStatusHtml(),
+        'AGREEMENT_ID' => $store_language->get('general', 'agreement_id'),
+        'AGREEMENT_ID_VALUE' => Output::getClean($subscription->data()->agreement_id),
+        'PAYMENT_METHOD' => $store_language->get('admin', 'payment_method'),
+        'PAYMENT_METHOD_VALUE' => Output::getClean($payment_method),
+        "FREQUENCY"  => $store_language->get('general', 'frequency'),
+        "FREQUENCY_VALUE" => Output::getClean($subscription->data()->frequency_interval . ' ' . ucfirst(strtolower($subscription->data()->frequency))),
+        'AMOUNT_VALUE' => Store::fromCents($subscription->data()->amount_cents),
+        'AMOUNT_FORMAT_VALUE' => Output::getPurified(
+            Store::formatPrice(
+                $subscription->data()->amount_cents,
+                $subscription->data()->currency,
+                Store::getCurrencySymbol(),
+                STORE_CURRENCY_FORMAT,
+            )
+        ),
+        'LAST_PAYMENT_DATE_VALUE' => $subscription->data()->last_payment_date != 0 ? date(DATE_FORMAT, $subscription->data()->last_payment_date) : 'Never',
+        'NEXT_BILLING_DATE_VALUE' => date(DATE_FORMAT, $subscription->data()->next_billing_date),
+        'PAYMENTS'  => $store_language->get('admin', 'payments'),
+        'PAYMENTS_LIST' => $payments_list
+    ]);
 
     $template_file = 'store/subscription.tpl';
 }
@@ -98,7 +187,7 @@ if (!isset($_GET['subscription'])) {
 $smarty->assign([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
-    'STORE' => $store_language->get('admin', 'store'),
+    'STORE' => $store_language->get('general', 'store'),
     'PAGE' => PANEL_PAGE,
     'TOKEN' => Token::get(),
     'SUBMIT' => $language->get('general', 'submit'),
@@ -106,7 +195,9 @@ $smarty->assign([
     'USER' => $store_language->get('admin', 'user'),
     'AMOUNT' => $store_language->get('admin', 'amount'),
     'STATUS' => $store_language->get('admin', 'status'),
-    'DATE' => $store_language->get('admin', 'date'),
+    'LAST_PAYMENT_DATE' => $store_language->get('general', 'last_payment_date'),
+    'NEXT_BILLING_DATE' => $store_language->get('general', 'next_billing_date'),
+    'VIEW' => $store_language->get('admin', 'view'),
 ]);
 
 if (Session::exists('store_subscriptions_success')) {

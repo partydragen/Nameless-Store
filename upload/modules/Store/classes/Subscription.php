@@ -16,12 +16,17 @@ class Subscription {
      */
     private ?SubscriptionData $_data;
 
-    public function __construct(string $value, string $field = 'id') {
+    public function __construct($value = null, $field = 'id', $query_data = null) {
         $this->_db = DB::getInstance();
 
-        $data = $this->_db->get('store_subscriptions', [$field, '=', $value]);
-        if ($data->count()) {
-            $this->_data = new SubscriptionData($data->first());
+        if (!$query_data && $value) {
+            $data = $this->_db->get('store_subscriptions', [$field, '=', $value]);
+            if ($data->count()) {
+                $this->_data = new SubscriptionData($data->first());
+            }
+        } else if ($query_data) {
+            // Load data from existing query.
+            $this->_data = new SubscriptionData($query_data);
         }
     }
 
@@ -77,6 +82,16 @@ class Subscription {
         return false;
     }
 
+    // Sync subscription.
+    public function sync(): bool {
+        $gateway = Gateways::getInstance()->get($this->data()->gateway_id);
+        if ($gateway instanceof SupportSubscriptions) {
+            return $gateway->syncSubscription($this);
+        }
+
+        return false;
+    }
+
     // Charge payment from customer.
     public function chargePayment(): bool {
         $gateway = Gateways::getInstance()->get($this->data()->gateway_id);
@@ -94,5 +109,24 @@ class Subscription {
         ]);
 
         EventHandler::executeEvent(new SubscriptionCancelledEvent($this));
+    }
+
+    public function getStatusHtml(): string {
+        switch ($this->data()->status_id) {
+            case 0;
+                $status = '<span class="badge badge-warning">Pending</span>';
+                break;
+            case 1;
+                $status = '<span class="badge badge-success">Active</span>';
+                break;
+            case 2;
+                $status = '<span class="badge badge-secondary">Cancelled</span>';
+                break;
+            default:
+                $status = '<span class="badge badge-danger">Unknown</span>';
+                break;
+        }
+
+        return $status;
     }
 }

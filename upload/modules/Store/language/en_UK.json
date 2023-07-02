@@ -161,6 +161,10 @@
     "admin/store_path": "Store Path",
     "admin/subscriptions": "Subscriptions",
     "admin/no_subscriptions": "If you have subscription products, any created subscriptions will be displayed here.",
+    "admin/viewing_subscription": "Viewing subscription {{subscription}}",
+    "admin/sync_subscription": "Sync Subscription",
+    "admin/subscription_updated_successfully": "Subscription updated successfully",
+    "admin/subscription_cancelled_successfully": "Subscription cancelled successfully",
     "admin/recurring_payment": "Recurring Payment",
     "admin/successfully_added_credits": "Successfully added {{amount}} credits to user",
     "admin/successfully_removed_credits": "Successfully removed {{amount}} credits from user",
@@ -171,6 +175,7 @@
     "admin/unlimited_usage": "Unlimited Usage",
     "admin/updated_successfully": "Updated successfully.",
     "admin/upload_new_image": "Upload New Image",
+    "admin/customer": "Customer",
     "admin/user": "User",
     "admin/user_dont_exist": "User does not exists",
     "admin/uses": "Uses",
@@ -273,5 +278,10 @@
     "general/redeem_min_basket_value": "Using this coupon requires a minimum expenditure of {{min_basket}}.",
     "general/price_must_be_at_least_x": "Price must be at least {{price}}",
     "general/subscribe": "Subscribe",
-    "general/subscription_created": "New {{gateway}} subscription created by {{username}}"
+    "general/subscription_created": "New {{gateway}} subscription created by {{username}}",
+    "general/cancel_subscription": "Cancel Subscription",
+    "general/agreement_id": "Agreement ID",
+    "general/frequency": "Frequency",
+    "general/last_payment_date": "Last payment date",
+    "general/next_billing_date": "Next billing date"
 }
