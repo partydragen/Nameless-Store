@@ -7,16 +7,14 @@
  * @version 2.0.0-pre13
  * @license MIT
  */
-require_once(ROOT_PATH . '/modules/Store/classes/StoreConfig.php');
 
 if (Input::exists()) {
     if (Token::check()) {
         if (isset($_POST['publishable_key']) && isset($_POST['secret_key']) && strlen($_POST['publishable_key']) && strlen($_POST['secret_key'])) {
-            $settings = [];
-            $settings['stripe/publishable_key'] = $_POST['publishable_key'];
-            $settings['stripe/secret_key'] = $_POST['secret_key'];
-
-            StoreConfig::set($settings);
+            StoreConfig::set('stripe', [
+                'publishable_key' => $_POST['publishable_key'],
+                'secret_key' => $_POST['secret_key']
+            ]);
         }
 
         // Is this gateway enabled

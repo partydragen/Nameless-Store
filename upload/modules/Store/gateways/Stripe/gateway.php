@@ -79,7 +79,7 @@ class Stripe_Gateway extends GatewayBase {
     public function handleListener(): void {
         $this->getApiContext();
 
-        $webhook_secret = StoreConfig::get('stripe/hook_key');
+        $webhook_secret = StoreConfig::get('stripe.hook_key');
         if (!$webhook_secret) {
             ErrorHandler::logCustomError('No webhook secret found. Is it set up?');
             return;
@@ -149,14 +149,14 @@ class Stripe_Gateway extends GatewayBase {
     }
 
     private function getApiContext() {
-        $secret_key = StoreConfig::get('stripe/secret_key');
+        $secret_key = StoreConfig::get('stripe.secret_key');
 
         if ($secret_key) {
             try {
                 require_once(ROOT_PATH . '/modules/Store/gateways/Stripe/vendor/autoload.php');
                 \Stripe\Stripe::setApiKey($secret_key);
 
-                $hook_key = StoreConfig::get('stripe/hook_key');
+                $hook_key = StoreConfig::get('stripe.hook_key');
                 if (!$hook_key) {
                     $stripe = new \Stripe\StripeClient($secret_key);
                     $webhook = $stripe->webhookEndpoints->create([
@@ -170,8 +170,8 @@ class Stripe_Gateway extends GatewayBase {
                         return;
                     }
 
-                    StoreConfig::set([
-                        'stripe/hook_key' => $webhook->secret
+                    StoreConfig::set('stripe', [
+                        'hook_key' => $webhook->secret
                     ]);
                 }
             } catch (Exception $e) {

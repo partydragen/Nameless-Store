@@ -13,14 +13,8 @@ if (!isset($_GET['gateway'])) {
     die('Invalid');
 }
 
-require_once(ROOT_PATH . '/modules/Store/config.php');
 require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
 $gateways = Gateways::getInstance();
-
-// Load Store config
-if (isset($store_conf) && is_array($store_conf)) {
-    $GLOBALS['store_config'] = $store_conf;
-}
 
 // Handle return from gateway
 $gateway = $gateways->get($_GET['gateway']);

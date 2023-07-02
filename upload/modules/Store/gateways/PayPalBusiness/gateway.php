@@ -213,7 +213,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
     }
 
     public function handleListener(): void {
-        if (isset($_GET['key']) && $_GET['key'] == StoreConfig::get('paypal_business/key')) {
+        if (isset($_GET['key']) && $_GET['key'] == StoreConfig::get('paypal_business.key')) {
             $this->getApiContext();
             
             $bodyReceived = file_get_contents('php://input');
@@ -223,7 +223,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
             $signatureVerification->setAuthAlgo($headers['PAYPAL-AUTH-ALGO']);
             $signatureVerification->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
             $signatureVerification->setCertUrl($headers['PAYPAL-CERT-URL']);
-            $signatureVerification->setWebhookId(StoreConfig::get('paypal_business/hook_key'));
+            $signatureVerification->setWebhookId(StoreConfig::get('paypal_business.hook_key'));
             $signatureVerification->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
             $signatureVerification->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
             $signatureVerification->setRequestBody($bodyReceived);
@@ -393,15 +393,8 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
     }
 
     private function getApiContext() {
-        require_once(ROOT_PATH . '/modules/Store/config.php');
-
-        // Load Store config
-        if (isset($store_conf) && is_array($store_conf)) {
-            $GLOBALS['store_config'] = $store_conf;
-        }
-
-        $client_id = StoreConfig::get('paypal_business/client_id');
-        $client_secret = StoreConfig::get('paypal_business/client_secret');
+        $client_id = StoreConfig::get('paypal_business.client_id');
+        $client_secret = StoreConfig::get('paypal_business.client_secret');
 
         if ($client_id && $client_secret) {
             try {
@@ -422,7 +415,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                     ]
                 );
 
-                $hook_key = StoreConfig::get('paypal_business/hook_key');
+                $hook_key = StoreConfig::get('paypal_business.hook_key');
                 if (!$hook_key) {
                     $key = md5(uniqid());
 
@@ -449,8 +442,11 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                     $webhook->setEventTypes($webhookEventTypes);
                     $output = $webhook->create($apiContext);
                     $id = $output->getId();
-                    
-                    StoreConfig::set(['paypal_business/key' => $key, 'paypal_business/hook_key' => $id]);
+
+                    StoreConfig::set('paypal_business', [
+                        'key' => $key,
+                        'hook_key' => $id
+                    ]);
                 }
                 
                 return $apiContext;
@@ -491,7 +487,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
             $next_billing_date = date("U", strtotime($agreement->getAgreementDetails()->getNextBillingDate()));
         }
 
-        $agreement->getState()
+        $agreement->getState();
 
         $subscription->update([
             'last_payment_date' => $last_payment_date,

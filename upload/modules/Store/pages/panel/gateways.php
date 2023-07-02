@@ -30,7 +30,11 @@ if (!isset($_GET['gateway'])) {
     $config_path = ROOT_PATH . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'Store' . DIRECTORY_SEPARATOR . 'config.php';
     if (!file_exists($config_path)) {
         if (is_writable(ROOT_PATH . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'Store')) {
-            StoreConfig::set(['installed' => true]);
+            $store_conf = [
+                'installed' => true
+            ];
+
+            StoreConfig::write($store_conf);
         } else {
             $errors = [$store_language->get('admin', 'unavailable_generate_config')];
         }

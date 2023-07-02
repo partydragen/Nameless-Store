@@ -8,17 +8,15 @@
  *
  *  Store module
  */
-require_once(ROOT_PATH . '/modules/Store/classes/StoreConfig.php');
 
 if (Input::exists()) {
     if (Token::check()) {
 
         if (isset($_POST['client_id']) && isset($_POST['client_secret']) && strlen($_POST['client_secret']) && strlen($_POST['client_secret'])) {
-            $settings = [];
-            $settings['paypal_business/client_id'] = $_POST['client_id'];
-            $settings['paypal_business/client_secret'] = $_POST['client_secret'];
-
-            StoreConfig::set($settings);
+            StoreConfig::set('paypal_business', [
+                'client_id' => $_POST['client_id'],
+                'client_secret' => $_POST['client_secret']
+            ]);
         }
         
         // Is this gateway enabled

@@ -24,7 +24,7 @@ class PayPal_Gateway extends GatewayBase {
     }
 
     public function processOrder(Order $order): void {
-        $paypal_email = StoreConfig::get('paypal/email');
+        $paypal_email = StoreConfig::get('paypal.email');
         if ($paypal_email == null || empty($paypal_email)) {
             $this->addError('Administration have not completed the configuration of this gateway!');
             return;
@@ -146,7 +146,7 @@ class PayPal_Gateway extends GatewayBase {
             $payer_email = $_POST['payer_email'];
             $order_id = $_POST['custom'];
 
-            $paypal_email = StoreConfig::get('paypal/email');
+            $paypal_email = StoreConfig::get('paypal.email');
 
             if ($paypal_email == $receiver_email) {
 
