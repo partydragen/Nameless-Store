@@ -20,6 +20,7 @@ class SubscriptionCreatedEvent extends AbstractEvent implements HasWebhookParams
         return [
             'id' => $this->subscription->data()->id,
             'gateway_id' => $this->subscription->data()->gateway_id,
+            'status_id' => $this->subscription->data()->status_id,
             'amount_cents' => $this->subscription->data()->amount_cents ?? 0,
             'currency' => $this->subscription->data()->currency,
             'frequency' => $this->subscription->data()->frequency,

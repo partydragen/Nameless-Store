@@ -336,13 +336,11 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
 
                             break;
                         case 'BILLING.SUBSCRIPTION.CANCELLED':
-                            $id = $response->resource->id;
-
-                            DB::getInstance()->query('UPDATE `nl2_store_agreements` SET status = ?, updated = ? WHERE agreement_id = ?', [
-                                2,
-                                date('U'),
-                                $id
-                            ]);
+                            // Subscription cancelled
+                            $subscription = new Subscription($response->resource->id, 'agreement_id');
+                            if ($subscription->exists()) {
+                                $subscription->cancelled();
+                            }
 
                             break;
                         case 'BILLING.SUBSCRIPTION.SUSPENDED':
@@ -464,9 +462,17 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
     }
 
     public function cancelSubscription(Subscription $subscription): bool {
-        // TODO: Implement cancelSubscription() method.
+        $apiContext = $this->getApiContext();
+        if (count($this->getErrors())) {
+            return false;
+        }
 
-        return false;
+        $agreementStateDescriptor = new PayPal\Api\AgreementStateDescriptor();
+        $agreementStateDescriptor->setNote("Cancelled the agreement");
+
+        $agreement = PayPal\Api\Agreement::get($subscription->data()->agreement_id, $apiContext);
+        $agreement->cancel($agreementStateDescriptor, $apiContext);
+        return true;
     }
 
     public function syncSubscription(Subscription $subscription): bool {

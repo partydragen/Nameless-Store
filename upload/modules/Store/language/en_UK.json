@@ -279,6 +279,7 @@
     "general/price_must_be_at_least_x": "Price must be at least {{price}}",
     "general/subscribe": "Subscribe",
     "general/subscription_created": "New {{gateway}} subscription created by {{username}}",
+    "general/subscription_cancelled": "{{gateway}} subscription by {{username}} cancelled",
     "general/cancel_subscription": "Cancel Subscription",
     "general/agreement_id": "Agreement ID",
     "general/frequency": "Frequency",
