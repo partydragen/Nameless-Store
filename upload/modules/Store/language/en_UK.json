@@ -160,6 +160,7 @@
     "admin/store_index_content": "Store Index Content",
     "admin/store_path": "Store Path",
     "admin/subscriptions": "Subscriptions",
+    "admin/subscription": "Subscription",
     "admin/no_subscriptions": "If you have subscription products, any created subscriptions will be displayed here.",
     "admin/viewing_subscription": "Viewing subscription {{subscription}}",
     "admin/sync_subscription": "Sync Subscription",

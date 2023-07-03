@@ -79,6 +79,7 @@ if (isset($_GET['customer'])) {
                     )
                 ),
                 'date' => date(DATE_FORMAT, $paymentQuery->created),
+                'is_subscription' => $paymentQuery->subscription_id != null,
                 'link' => URL::build('/panel/store/payments', 'payment=' . Output::getClean($paymentQuery->id))
             ];
         }
@@ -274,6 +275,14 @@ if (isset($_GET['customer'])) {
         'WARNING' => $language->get('general', 'warning')
     ]);
 
+    if ($payment->data()->subscription_id != null) {
+        $smarty->assign([
+            'SUBSCRIPTION' => $store_language->get('admin', 'subscription'),
+            'SUBSCRIPTION_VALUE' => Output::getClean($payment->data()->subscription_id),
+            'SUBSCRIPTION_LINK' => URL::build('/panel/store/subscriptions/', 'subscription=' . $payment->data()->subscription_id),
+        ]);
+    }
+
     $template_file = 'store/payments_view.tpl';
 
 } else if (isset($_GET['action'])) {
@@ -429,6 +438,7 @@ if (isset($_GET['customer'])) {
                 ),
                 'date' => date(DATE_FORMAT, $paymentQuery->created),
                 'date_unix' => Output::getClean($paymentQuery->created),
+                'is_subscription' => $paymentQuery->subscription_id != null,
                 'link' => URL::build('/panel/store/payments/', 'payment=' . Output::getClean($paymentQuery->id))
             ];
         }

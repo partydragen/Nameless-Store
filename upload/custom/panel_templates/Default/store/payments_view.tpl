@@ -84,6 +84,12 @@
                                                 <td><strong>{$PRICE}</strong></td>
                                                 <td>{$PRICE_FORMAT_VALUE}</td>
                                             </tr>
+                                            {if isset($SUBSCRIPTION)}
+                                            <tr>
+                                                <td><strong>{$SUBSCRIPTION}</strong></td>
+                                                <td><a href="{$SUBSCRIPTION_LINK}">{$SUBSCRIPTION_VALUE}</a></td>
+                                            </tr>
+                                            {/if}
                                             <tr>
                                                 <td><strong>{$DATE}</strong></td>
                                                 <td>{$DATE_VALUE}</td>

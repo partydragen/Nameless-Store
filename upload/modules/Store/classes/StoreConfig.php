@@ -1,6 +1,6 @@
 <?php
 /**
- * Provides static methods to get and set configuration values from the `core/config.php` file.
+ * Provides static methods to get and set configuration values from the `modules/Store/config.php` file.
  *
  * @package NamelessMC\Core
  * @author Samerton
@@ -12,8 +12,7 @@ class StoreConfig {
     private static ?array $_config_cache = null;
 
     /**
-     * @return bool Whether `/core` folder is writable to create `config.php` file in,
-     * or if the file exists and is writable.
+     * @return bool Whether `modules/Store/config.php` file exists and is writable.
      */
     public static function writeable(): bool {
         clearstatcache();
@@ -28,7 +27,7 @@ class StoreConfig {
     }
 
     /**
-     * Read `core/config.php` file and load into cache
+     * Read `modules/Store/config.php` file and load into cache
      *
      * @return array The entire config array
      */
@@ -56,7 +55,7 @@ class StoreConfig {
     }
 
     /**
-     * Overwrite new `core/config.php` file.
+     * Overwrite new `modules/Store/config.php` file.
      *
      * @param array $config New config array to store.
      */
@@ -72,7 +71,7 @@ class StoreConfig {
     }
 
     /**
-     * Get a config value from `core/config.php` file.
+     * Get a config value from `modules/Store/config.php` file.
      *
      * @param string $path `.` seperated path of key to get from config file.
      * @param mixed $fallback Value to return if option is not present in config file. If set to null, false is returned.
@@ -105,7 +104,7 @@ class StoreConfig {
     }
 
     /**
-     * Write a value to `core/config.php` file.
+     * Write a value to `modules/Store/config.php` file.
      *
      * @param string $key `.` seperated path of key to set.
      * @param mixed $value Value to set under $key.
@@ -130,7 +129,7 @@ class StoreConfig {
     }
 
     /**
-     * Write multiple values to `core/config.php` file.
+     * Write multiple values to `modules/Store/config.php` file.
      *
      * @param array $values Array of key/value pairs
      */
