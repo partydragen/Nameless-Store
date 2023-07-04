@@ -38,17 +38,22 @@ class ShoppingCart extends Instanceable {
 
     // Constructor
     public function __construct() {
-        $items = $_SESSION['shopping_cart']['items'] ?? [];
+        if (!Session::exists('shopping_cart')) {
+            return;
+        }
+        $shopping_cart = Session::get('shopping_cart');
 
+        // Get current mode
+        if (isset($shopping_cart['subscription_mode'])) {
+            $this->_subscription_mode = $_SESSION['shopping_cart']['subscription_mode'];
+        }
+
+        // Get items mode
+        $items = $shopping_cart['items'] ?? [];
         if (count($items)) {
-            // get current mode
-            if (isset($_SESSION['shopping_cart']['subscription_mode'])) {
-                $this->_subscription_mode = $_SESSION['shopping_cart']['subscription_mode'];
-            }
-
             // Get active coupon
-            if (isset($_SESSION['shopping_cart']['coupon_id'])) {
-                $coupon = new Coupon($_SESSION['shopping_cart']['coupon_id']);
+            if (isset($shopping_cart['coupon_id'])) {
+                $coupon = new Coupon($shopping_cart['coupon_id']);
                 if ($coupon->exists()) {
                     $this->_coupon = $coupon;
                 }
