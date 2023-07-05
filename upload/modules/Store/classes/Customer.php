@@ -366,7 +366,7 @@ class Customer {
 
     public function getUsername(): string {
         if ($this->exists()) {
-            return Output::getClean($this->_data->username ?? 'Unknown');
+            return Output::getClean($this->_data->username ?? $this->getUser()->exists() ? $this->getUser()->data()->username : 'Unknown');
         }
 
         return 'Unknown';
