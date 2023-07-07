@@ -267,5 +267,6 @@
     "admin/coupon_updated_successfully": "Gutschein erfolgreich geändert",
     "admin/customer_redeem_limit": "Kundeneinlösungslimit",
     "general/unable_to_find_player": "Es konnte kein Spieler mit diesem Benutzernamen gefunden werden",
-    "general/price_must_be_at_least_x": "Der Preis muss mindestens {{price}} sein"
+    "general/price_must_be_at_least_x": "Der Preis muss mindestens {{price}} sein",
+    "admin/customer_product_expired": "Kundenprodukt Abgelaufen"
 }

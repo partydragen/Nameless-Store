@@ -130,6 +130,10 @@ class Payment {
                 break;
                 case self::COMPLETED:
                     // Payment completed
+                    if ($this->data()->status_id == 1) {
+                        return;
+                    }
+
                     $update_array = [
                         'status_id' => 1,
                         'last_updated' => date('U')
@@ -175,6 +179,10 @@ class Payment {
                 break;
                 case self::REFUNDED:
                     // Payment refunded
+                    if ($this->data()->status_id == 2) {
+                        return;
+                    }
+
                     $update_array = [
                         'status_id' => 2,
                         'last_updated' => date('U')
@@ -194,6 +202,10 @@ class Payment {
                 break;
                 case self::REVERSED:
                     // Payment reversed
+                    if ($this->data()->status_id == 3) {
+                        return;
+                    }
+
                     $update_array = [
                         'status_id' => 3,
                         'last_updated' => date('U')
@@ -213,6 +225,10 @@ class Payment {
                 break;
                 case self::DENIED:
                     // Payment denied
+                    if ($this->data()->status_id == 4) {
+                        return;
+                    }
+
                     $update_array = [
                         'status_id' => 4,
                         'last_updated' => date('U')

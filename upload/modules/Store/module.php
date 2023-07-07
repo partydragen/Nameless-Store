@@ -24,7 +24,7 @@ class Store_Module extends Module {
         $name = 'Store';
         $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
         $module_version = '1.6.1';
-        $nameless_version = '2.0.3';
+        $nameless_version = '2.1.1';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
 
@@ -78,6 +78,8 @@ class Store_Module extends Module {
         EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'purify']);
         EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'renderEmojis'], 10);
         EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'replaceAnchors'], 15);
+
+        EventHandler::registerListener('renderStoreProduct', [PriceAdjustmentHook::class, 'discounts']);
 
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
 
@@ -302,38 +304,44 @@ class Store_Module extends Module {
 
             if (defined('PANEL_PAGE') && PANEL_PAGE == 'dashboard') {
                 // Dashboard graph
-                $latest_payments = $this->_db->query('SELECT id, created FROM nl2_store_payments WHERE created > ? AND status_id = 1 ORDER BY created ASC', [strtotime('-1 week')])->results();
-
                 $cache->setCache('dashboard_graph');
                 if ($cache->isCached('payments_data')) {
-                    $output = $cache->retrieve('payments_data');
+                    $data = $cache->retrieve('payments_data');
 
                 } else {
-                    $output = [];
+                    $payments = DB::getInstance()->query(
+                        <<<SQL
+                            SELECT DATE_FORMAT(FROM_UNIXTIME(`created`), '%Y-%m-%d') d, COUNT(*) c
+                            FROM nl2_store_payments
+                            WHERE status_id = 1 AND `created` > ? AND `created` < UNIX_TIMESTAMP()
+                            GROUP BY DATE_FORMAT(FROM_UNIXTIME(`created`), '%Y-%m-%d')
+                        SQL,
+                        [strtotime('7 days ago')],
+                    );
 
-                    $output['datasets']['payments']['label'] = 'store_language/admin/payments'; // for $store_language->get('admin', 'payments');
-                    $output['datasets']['payments']['colour'] = '#4cf702';
+                    // Output array
+                    $data = [];
 
-                    foreach ($latest_payments as $payment) {
-                        $date = date('Y-m-d', $payment->created);
+                    $data['datasets']['payments']['label'] = 'store_language/admin/payments'; // for $store_language->get('admin', 'payments');
+                    $data['datasets']['payments']['colour'] = '#4cf702';
 
-                        if (isset($output[$date]['payments'])) {
-                            $output[$date]['payments'] += 1;
-                        } else {
-                            $output[$date]['payments'] = 1;
+                    if ($payments->count()) {
+                        foreach ($payments->results() as $day) {
+                            $data['_' . $day->d] = ['payments' => $day->c];
                         }
                     }
 
-                    // Fill in missing dates, set payments to 0
-                    $output = Core_Module::fillMissingGraphDays($output, 'payments');
+                    $payments = null;
+
+                    $data = Core_Module::fillMissingGraphDays($data, 'payments');
 
                     // Sort by date
-                    ksort($output);
+                    ksort($data);
 
-                    $cache->store('payments_data', $output, 120);
+                    $cache->store('payments_data', $data, 120);
                 }
 
-                Core_Module::addDataToDashboardGraph($this->_language->get('admin', 'overview'), $output);
+                Core_Module::addDataToDashboardGraph($this->_language->get('admin', 'overview'), $data);
             }
         }
 
