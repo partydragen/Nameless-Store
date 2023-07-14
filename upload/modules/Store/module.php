@@ -365,8 +365,8 @@ class Store_Module extends Module {
         $services_list = [];
         foreach (Services::getInstance()->getAll() as $service) {
             $services_list[] = [
-                'id' => Output::getClean($service->getId()),
-                'name' => Output::getClean($service->getName()),
+                'id' => $service->getId(),
+                'name' => $service->getName(),
             ];
         }
 
@@ -376,7 +376,7 @@ class Store_Module extends Module {
         foreach ($connections_query as $data) {
             $connections_list[] = [
                 'id' => (int)$data->id,
-                'name' => Output::getClean($data->name),
+                'name' => $data->name,
                 'service_id' => $data->service_id,
                 'last_fetch' => (int)$data->last_fetch,
                 'pending_actions' => (int)$this->_db->query('SELECT COUNT(*) AS c FROM nl2_store_pending_actions WHERE connection_id = ? AND status = 0', [$data->id])->first()->c,
@@ -389,12 +389,12 @@ class Store_Module extends Module {
         foreach ($fields_query as $data) {
             $fields_list[] = [
                 'id' => $data->id,
-                'identifier' => Output::getClean($data->identifier),
+                'identifier' => $data->identifier,
                 'type' => $data->type,
                 'required' => $data->required,
                 'min' => $data->min,
                 'max' => $data->max,
-                'options' => Output::getClean($data->options),
+                'options' => $data->options,
                 'regex' => $data->regex,
                 'default_value' => $data->default_value,
             ];
@@ -438,8 +438,8 @@ class Store_Module extends Module {
 
             $products_list[] = [
                 'id' => $product->data()->id,
-                'name' => Output::getClean($product->data()->name),
-                'price' => Output::getClean($product->data()->price),
+                'name' => $product->data()->name,
+                'price_cents' => $product->data()->price_cents,
                 'hidden' => $product->data()->hidden,
                 'disabled' => $product->data()->disabled,
                 'connections' => $connections,
