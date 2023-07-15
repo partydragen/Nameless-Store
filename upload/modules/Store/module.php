@@ -75,8 +75,6 @@ class Store_Module extends Module {
         EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'renderEmojis'], 10);
         EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'replaceAnchors'], 15);
 
-        EventHandler::registerListener('renderStoreProduct', [PriceAdjustmentHook::class, 'discounts']);
-
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
 
         define('STORE_CURRENCY_FORMAT', Util::getSetting('currency_format', '{currencySymbol}{price} {currencyCode}', 'Store'));
