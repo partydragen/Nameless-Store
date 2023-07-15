@@ -1,14 +1,12 @@
 <?php
-/*
- *  Made by Partydragen
- *  https://partydragen.com/resources/resource/5-store-module/
- *  https://partydragen.com/
+/**
+ *  Gateways class
  *
- *  License: MIT
- *
- *  Store module
+ * @package Modules\Store
+ * @author Partydragen
+ * @version 2.2.0
+ * @license MIT
  */
-
 class Gateways extends Instanceable {
     private static array $_gateways;
 

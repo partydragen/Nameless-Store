@@ -1,14 +1,12 @@
 <?php
-/*
- *  Made by Partydragen
- *  https://partydragen.com/resources/resource/5-store-module/
- *  https://partydragen.com/
+/**
+ * Main store class.
  *
- *  License: MIT
- *
- *  Store module
+ * @package Modules\Store
+ * @author Partydragen
+ * @version 2.2.0
+ * @license MIT
  */
-
 class Store {
     private $_db,
             $_cache;

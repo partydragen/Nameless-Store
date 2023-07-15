@@ -66,7 +66,7 @@ if (!isset($_GET['subscription'])) {
                         STORE_CURRENCY_FORMAT,
                     )
                 ),
-                'link' => URL::build('/panel/store/subscriptions/', 'subscription=' . urlencode($subscription->data()->id))
+                'link' => URL::build('/panel/store/subscriptions/', 'subscription=' . $subscription->data()->id)
             ];
         }
 
@@ -143,7 +143,7 @@ if (!isset($_GET['subscription'])) {
         foreach ($payments_query->results() as $payment) {
             $payments_list[] = [
                 'date' => date(DATE_FORMAT, $payment->created),
-                'link' => URL::build('/panel/store/payments', 'payment=' . urlencode($payment->id))
+                'link' => URL::build('/panel/store/payments', 'payment=' . $payment->id)
             ];
         }
     }

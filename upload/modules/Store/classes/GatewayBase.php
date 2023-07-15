@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.2
+ * @version 2.2.0
  * @license MIT
  */
 abstract class GatewayBase {

@@ -2,9 +2,9 @@
 /**
  * Provides static methods to get and set configuration values from the `modules/Store/config.php` file.
  *
- * @package NamelessMC\Core
- * @author Samerton
- * @version 2.0.0
+ * @package Modules\Store
+ * @author Partydragen
+ * @version 2.2.0
  * @license MIT
  */
 class StoreConfig {

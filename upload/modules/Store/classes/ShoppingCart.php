@@ -1,14 +1,12 @@
 <?php
-/*
- *  Made by Partydragen
- *  https://partydragen.com/resources/resource/5-store-module/
- *  https://partydragen.com/
+/**
+ * ShoppingCart class used during checkout flow.
  *
- *  License: MIT
- *
- *  Store module - ShoppingCart class
+ * @package Modules\Store
+ * @author Partydragen
+ * @version 2.2.0
+ * @license MIT
  */
-
 class ShoppingCart extends Instanceable {
 
     /**

@@ -89,11 +89,10 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
 
             } catch (Exception $ex) {
                 echo "Failed to get activate";
-                exit();
+                return;
             }
 
-            header("Location:" . $approvalUrl);
-            exit();
+            Redirect::to($approvalUrl);
         }
     }
 
@@ -179,7 +178,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
 
                 $order_id = $_SESSION['shopping_cart']['order_id'];
                 if ($order_id == null || !is_numeric($order_id)) {
-                    die('INVALID ORDER ID');
+                    throw new Exception('Invalid order id');
                 }
 
                 // Get order

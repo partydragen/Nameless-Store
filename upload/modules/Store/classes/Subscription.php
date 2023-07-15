@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.1.0
+ * @version 2.2.0
  * @license MIT
  */
 class Subscription {
@@ -37,7 +37,7 @@ class Subscription {
      */
     public function update(array $fields = []): void {
         if (!$this->_db->update('store_subscriptions', $this->data()->id, $fields)) {
-            throw new Exception('There was a problem updating product');
+            throw new Exception('There was a problem updating subscription');
         }
     }
 
