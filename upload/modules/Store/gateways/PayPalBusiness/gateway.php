@@ -255,7 +255,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                                     // Register new payment
                                     $data = [
                                         'order_id' => $response->resource->invoice_number,
-                                        'payment_id' => $response->id,
+                                        'payment_id' => $response->resource->parent_payment,
                                         'gateway_id' => $this->getId(),
                                         'transaction' => $response->resource->id,
                                         'amount_cents' => Store::toCents($response->resource->amount->total),
@@ -269,7 +269,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                                 // Subscription payment
                                 $subscription = new Subscription($response->resource->billing_agreement_id, 'agreement_id');
                                 if ($subscription->exists()) {
-                                    $payment = new Payment($response->resource->parent_payment, 'payment_id');
+                                    $payment = new Payment($response->resource->id, 'transaction');
                                     if (!$payment->exists()) {
                                         // Register new payment from subscription
                                         $data = [

@@ -145,12 +145,6 @@ class Store_Module extends Module {
         else
             $icon = $cache->retrieve('store_icon');
 
-        $cache->setCache('store_settings');
-        if ($cache->isCached('navbar_position'))
-            $navbar_pos = $cache->retrieve('navbar_position');
-        else
-            $navbar_pos = 'top';
-
         switch ($link_location) {
             case 1:
                 // Navbar
