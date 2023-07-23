@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.3
+ * @version 2.1.1
  * @license MIT
  */
 class Customer {
@@ -366,7 +366,7 @@ class Customer {
 
     public function getUsername(): string {
         if ($this->exists()) {
-            return Output::getClean($this->_data->username ?? $this->getUser()->exists() ? $this->getUser()->data()->username : 'Unknown');
+            return Output::getClean($this->_data->username ?? ($this->getUser()->exists() ? $this->getUser()->data()->username : 'Unknown'));
         }
 
         return 'Unknown';
