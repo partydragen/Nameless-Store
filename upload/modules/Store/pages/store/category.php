@@ -166,7 +166,7 @@ $smarty->assign([
     'CATEGORIES' => $store->getNavbarMenu($category->name),
     'CATEGORY_ID' => $renderCategoryEvent['id'],
     'CATEGORY_NAME' => $renderCategoryEvent['name'],
-    'CONTENT' => $renderCategoryEvent['content'],
+    'CONTENT' => str_replace('{credits}', $from_customer->getCredits(), $renderCategoryEvent['content']),
     'TOKEN' => Token::get(),
 ]);
 
