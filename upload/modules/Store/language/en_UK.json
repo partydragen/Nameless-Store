@@ -169,6 +169,8 @@
     "admin/unlimited_usage": "Unlimited Usage",
     "admin/updated_successfully": "Updated successfully.",
     "admin/upload_new_image": "Upload New Image",
+    "admin/customer": "Customer",
+    "admin/recipient": "Recipient",
     "admin/user": "User",
     "admin/user_dont_exist": "User does not exists",
     "admin/uses": "Uses",

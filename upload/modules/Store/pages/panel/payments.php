@@ -157,21 +157,38 @@ if (isset($_GET['customer'])) {
 
     $order = $payment->getOrder();
 
+    // Customer
+    $customer = $order->customer();
+    if ($customer->exists() && $customer->getUser()->exists()) {
+        $customer_user = $customer->getUser();
+        $customer_username = $customer->getUsername();
+        $customer_avatar = $customer_user->getAvatar();
+        $customer_style = $customer_user->getGroupStyle();
+        $customer_uuid = Output::getClean($customer->getIdentifier());
+        $customer_link = URL::build('/panel/users/store/', 'user=' . $customer_user->data()->id);
+    } else {
+        $customer_username = $customer->getUsername();
+        $customer_avatar = AvatarSource::getAvatarFromUUID(Output::getClean($customer->getIdentifier()));
+        $customer_style = '';
+        $customer_uuid = Output::getClean($customer->getIdentifier());
+        $customer_link = URL::build('/panel/store/payments/', 'customer=' . $customer_username);
+    }
+
     // Recipient
     $recipient = $order->recipient();
     if ($recipient->exists() && $recipient->getUser()->exists()) {
         $recipient_user = $recipient->getUser();
-        $username = $recipient->getUsername();
-        $avatar = $recipient_user->getAvatar();
-        $style = $recipient_user->getGroupStyle();
-        $uuid = Output::getClean($recipient->getIdentifier());
-        $link = URL::build('/panel/users/store/', 'user=' . $recipient_user->data()->id);
+        $recipient_username = $recipient->getUsername();
+        $recipient_avatar = $recipient_user->getAvatar();
+        $recipient_style = $recipient_user->getGroupStyle();
+        $recipient_uuid = Output::getClean($recipient->getIdentifier());
+        $recipient_link = URL::build('/panel/users/store/', 'user=' . $recipient_user->data()->id);
     } else {
-        $username = $recipient->getUsername();
-        $avatar = AvatarSource::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
-        $style = '';
-        $uuid = Output::getClean($recipient->getIdentifier());
-        $link = URL::build('/panel/store/payments/', 'customer=' . $username);
+        $recipient_username = $recipient->getUsername();
+        $recipient_avatar = AvatarSource::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
+        $recipient_style = '';
+        $recipient_uuid = Output::getClean($recipient->getIdentifier());
+        $recipient_link = URL::build('/panel/store/payments/', 'customer=' . $recipient_username);
     }
 
     // Get Products
@@ -231,11 +248,18 @@ if (isset($_GET['customer'])) {
         'VIEWING_PAYMENT' => $store_language->get('admin', 'viewing_payment', ['payment' => Output::getClean($payment->data()->transaction)]),
         'BACK' => $language->get('general', 'back'),
         'BACK_LINK' => URL::build('/panel/store/payments'),
+        'CUSTOMER' => $store_language->get('admin', 'customer'),
+        'CUSTOMER_USERNAME' => $customer_username,
+        'CUSTOMER_LINK' => $customer_link,
+        'CUSTOMER_AVATAR' => $customer_avatar,
+        'CUSTOMER_STYLE' => $customer_style,
+        'RECIPIENT' => $store_language->get('admin', 'recipient'),
+        'RECIPIENT_USERNAME' => $recipient_username,
+        'RECIPIENT_LINK' => $recipient_link,
+        'RECIPIENT_AVATAR' => $recipient_avatar,
+        'RECIPIENT_STYLE' => $recipient_style,
         'IGN' => $store_language->get('admin', 'ign'),
-        'IGN_VALUE' => $username,
-        'USER_LINK' => $link,
-        'AVATAR' => $avatar,
-        'STYLE' => $style,
+        'IGN_VALUE' => $recipient_username,
         'TRANSACTION' => $store_language->get('admin', 'transaction'),
         'TRANSACTION_VALUE' => Output::getClean($payment->data()->transaction),
         'PAYMENT_METHOD' => $store_language->get('admin', 'payment_method'),
@@ -243,7 +267,7 @@ if (isset($_GET['customer'])) {
         'STATUS' => $store_language->get('admin', 'status'),
         'STATUS_VALUE' => $payment->getStatusHtml(),
         'UUID' => $store_language->get('admin', 'uuid'),
-        'UUID_VALUE' => $uuid,
+        'UUID_VALUE' => $recipient_uuid,
         'PRICE' => $store_language->get('general', 'price'),
         'PRICE_VALUE' => Store::fromCents($payment->data()->amount_cents),
         'PRICE_FORMAT_VALUE' => Output::getPurified(
@@ -484,7 +508,6 @@ $smarty->assign([
     'PAGE' => PANEL_PAGE,
     'TOKEN' => Token::get(),
     'SUBMIT' => $language->get('general', 'submit'),
-    'STORE' => $store_language->get('general', 'store'),
     'PAYMENTS' => $store_language->get('admin', 'payments'),
     'USER' => $store_language->get('admin', 'user'),
     'AMOUNT' => $store_language->get('admin', 'amount'),

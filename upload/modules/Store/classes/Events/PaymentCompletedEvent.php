@@ -50,9 +50,12 @@ class PaymentCompletedEvent extends AbstractEvent implements HasWebhookParams, D
     }
 
     public function toDiscordWebhook(): DiscordWebhookBuilder {
-        $username = $this->order->recipient()->getUsername();
+        $customer_username = $this->order->customer()->getUsername();
+        $recipient_username = $this->order->recipient()->getUsername();
 
-        $placeholders['{username}'] = $username;
+        $placeholders['{username}'] = $recipient_username;
+        $placeholders['{customerUsername}'] = $customer_username;
+        $placeholders['{recipientUsername}'] = $recipient_username;
         $placeholders['{products}'] = $this->order->getDescription();
         $placeholders['{amount}'] = Store::fromCents($this->payment->data()->amount_cents);
         $placeholders['{currency}'] = $this->payment->data()->currency;
@@ -62,7 +65,7 @@ class PaymentCompletedEvent extends AbstractEvent implements HasWebhookParams, D
         $discord_message = str_replace(array_keys($placeholders), array_values($placeholders), $discord_message);
 
         return DiscordWebhookBuilder::make()
-            ->setUsername($username)
+            ->setUsername($recipient_username)
             ->addEmbed(function (DiscordEmbed $embed) use ($discord_message) {
                 return $embed
                     ->setDescription($discord_message);
