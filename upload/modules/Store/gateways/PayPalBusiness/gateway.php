@@ -12,8 +12,8 @@ class PayPal_Business_Gateway extends GatewayBase {
     public function __construct() {
         $name = 'PayPalBusiness';
         $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
-        $gateway_version = '1.6.1';
-        $store_version = '1.6.1';
+        $gateway_version = '1.6.2';
+        $store_version = '1.6.2';
         $settings = ROOT_PATH . '/modules/Store/gateways/PayPalBusiness/gateway_settings/settings.php';
 
         parent::__construct($name, $author, $gateway_version, $store_version, $settings);
