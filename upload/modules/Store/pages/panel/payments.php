@@ -244,6 +244,19 @@ if (isset($_GET['customer'])) {
         $payment_method = $payment->data()->gateway_id == 0 ? 'Manual' : 'Unknown';
     }
 
+    // Coupon used for this payment?
+    if ($order->data()->coupon_id != null) {
+        $coupon = new Coupon($order->data()->coupon_id);
+        if ($coupon->exists()) {
+            $smarty->assign([
+                'COUPON' => $store_language->get('general', 'coupon'),
+                'COUPON_ID' => Output::getClean($coupon->data()->id),
+                'COUPON_CODE' => Output::getClean($coupon->data()->code),
+                'COUPON_LINK' => URL::build('/panel/store/coupons', 'action=edit&id=' . $coupon->data()->id)
+            ]);
+        }
+    }
+
     $smarty->assign([
         'VIEWING_PAYMENT' => $store_language->get('admin', 'viewing_payment', ['payment' => Output::getClean($payment->data()->transaction)]),
         'BACK' => $language->get('general', 'back'),

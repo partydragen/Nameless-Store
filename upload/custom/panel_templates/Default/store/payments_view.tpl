@@ -96,6 +96,12 @@
                                                 <td><strong>{$DATE}</strong></td>
                                                 <td>{$DATE_VALUE}</td>
                                             </tr>
+                                            {if isset($COUPON)}
+                                            <tr>
+                                                <td><strong>{$COUPON}</strong></td>
+                                                <td><a href="{$COUPON_LINK}">{$COUPON_CODE}</a></td>
+                                            </tr>
+                                            {/if}
                                         </tbody>
                                     </table>
                                 </div>
