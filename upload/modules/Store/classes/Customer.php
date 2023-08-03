@@ -358,6 +358,10 @@ class Customer {
 
     public function getIdentifier(): string {
         if ($this->exists()) {
+            if (strlen($this->_data->identifier) == 32) {
+                return Output::getClean($this->formatUUID($this->_data->identifier));
+            }
+
             return Output::getClean($this->_data->identifier ?? 'none');
         }
 
