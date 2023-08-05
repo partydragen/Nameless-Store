@@ -268,5 +268,8 @@
     "general/redeem_limit_reached": "Byl dosažen limit uplatnění tohoto kupónu.",
     "general/unable_to_find_player": "Nepodařilo se nalézt hráče se zadanou přezdívkou",
     "general/price_must_be_at_least_x": "Cena musí být nejméně {{price}}",
-    "admin/customer_product_expired": "Produkt zákazníka vypršel"
+    "admin/customer_product_expired": "Produkt zákazníka vypršel",
+    "admin/customer": "Zákazník",
+    "admin/recipient": "Příjemce",
+    "general/coupon": "Kupon"
 }
