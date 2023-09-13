@@ -378,6 +378,7 @@ class Store_Module extends Module {
                 'service_id' => $data->service_id,
                 'last_fetch' => (int)$data->last_fetch,
                 'pending_actions' => (int)$this->_db->query('SELECT COUNT(*) AS c FROM nl2_store_pending_actions WHERE connection_id = ? AND status = 0', [$data->id])->first()->c,
+                'completed_actions' => (int)$this->_db->query('SELECT COUNT(*) AS c FROM nl2_store_pending_actions WHERE connection_id = ? AND status = 1', [$data->id])->first()->c,
             ];
         }
 

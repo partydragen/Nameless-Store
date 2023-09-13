@@ -57,6 +57,7 @@
                                             <th>{$CONNECTION_ID}</th>
                                             <th>{$NAME}</th>
                                             <th>Service Name</th>
+                                            <th>{$QUEUED_ACTIONS}</th>
                                             <th class="float-md-right">{$ACTIONS}</th>
                                         </tr>
                                     </thead>
@@ -71,6 +72,7 @@
                                             {/if}</td>
                                             <td>{$connection.name}</td>
                                             <td>{$connection.service}</td>
+                                            <td>{$connection.queued_actions}</td>
                                             <td class="float-md-right">
                                                 <a href="{$connection.edit_link}" class="btn btn-warning btn-sm"><i class="fa fa-fw fa-edit"></i></a>
                                                 <a href="#" onclick="showDeleteModal({$connection.id})" class="btn btn-danger btn-sm"><i class="fa fa-fw fa-trash"></i></a>

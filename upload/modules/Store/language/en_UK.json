@@ -210,6 +210,8 @@
     "admin/currency_format_max": "Currency format must be a maximum of {{max}} characters.",
     "admin/currency_format_min": "Currency format must be a minimum of {{min}} characters.",
     "admin/currency_format_required": "Currency format is required.",
+    "admin/queued_actions": "Queued Actions",
+    "admin/queued_actions_results": "{{pending_actions}} Pending, {{completed_actions}} Completed",
     "general/agree_t_and_c_purchase": "I agree to the {{termsLinkStart}}terms and conditions{{termsLinkEnd}} of this purchase.",
     "general/accept_terms": "You must accept the terms and conditions",
     "general/buy": "Buy",
