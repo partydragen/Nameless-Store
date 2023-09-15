@@ -271,5 +271,7 @@
     "admin/customer_product_expired": "Kundenprodukt Abgelaufen",
     "admin/customer": "Kunde",
     "admin/recipient": "Empfänger",
-    "general/coupon": "Coupon"
+    "general/coupon": "Coupon",
+    "admin/queued_actions": "Aktionen in der Warteschlange",
+    "admin/queued_actions_results": "{{pending_actions}} Ausstehend, {{completed_actions}} Erledigt"
 }
