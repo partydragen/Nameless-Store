@@ -276,7 +276,7 @@ class Product {
         $required_integrations_list = [];
 
         $integrations = Integrations::getInstance();
-        if (Util::getSetting('player_login', '0', 'Store')) {
+        if (!Settings::get('player_login', '0', 'Store')) {
             foreach ($this->getActions() as $action) {
                 if ($action->getService()->getId() == 2) {
                     $integration = $integrations->getIntegration('Minecraft');
