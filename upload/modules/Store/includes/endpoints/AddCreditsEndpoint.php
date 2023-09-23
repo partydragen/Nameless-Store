@@ -10,7 +10,7 @@ class AddCreditsEndpoint extends KeyAuthEndpoint {
 
     public function execute(Nameless2API $api, User $user): void {
         if (!isset($_POST['cents']) && !isset($_POST['credits'])) {
-            $this->throwError(Nameless2API::ERROR_INVALID_POST_CONTENTS);
+            $api->throwError(Nameless2API::ERROR_INVALID_POST_CONTENTS);
         }
 
         $credits = $_POST['cents'] ?? $_POST['credits'];

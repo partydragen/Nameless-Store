@@ -12,8 +12,8 @@ class Stripe_Gateway extends GatewayBase {
     public function __construct() {
         $name = 'Stripe';
         $author = '<a href="https://github.com/supercrafter100/" target="_blank" rel="nofollow noopener">Supercrafter100</a>';
-        $gateway_version = '1.6.1';
-        $store_version = '1.6.1';
+        $gateway_version = '1.6.2';
+        $store_version = '1.6.2';
         $settings = ROOT_PATH . '/modules/Store/gateways/Stripe/gateway_settings/settings.php';
 
         parent::__construct($name, $author, $gateway_version, $store_version, $settings);

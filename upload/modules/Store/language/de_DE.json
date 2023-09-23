@@ -268,5 +268,10 @@
     "admin/customer_redeem_limit": "Kundeneinlösungslimit",
     "general/unable_to_find_player": "Es konnte kein Spieler mit diesem Benutzernamen gefunden werden",
     "general/price_must_be_at_least_x": "Der Preis muss mindestens {{price}} sein",
-    "admin/customer_product_expired": "Kundenprodukt Abgelaufen"
+    "admin/customer_product_expired": "Kundenprodukt Abgelaufen",
+    "admin/customer": "Kunde",
+    "admin/recipient": "Empfänger",
+    "general/coupon": "Coupon",
+    "admin/queued_actions": "Aktionen in der Warteschlange",
+    "admin/queued_actions_results": "{{pending_actions}} Ausstehend, {{completed_actions}} Erledigt"
 }

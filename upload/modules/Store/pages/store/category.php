@@ -160,7 +160,7 @@ $smarty->assign([
     'CATEGORIES' => $store->getNavbarMenu($category->name),
     'CATEGORY_ID' => $renderCategoryEvent['id'],
     'CATEGORY_NAME' => $renderCategoryEvent['name'],
-    'CONTENT' => $renderCategoryEvent['content'],
+    'CONTENT' => str_replace('{credits}', $from_customer->getCredits(), $renderCategoryEvent['content']),
     'ACTIVE_CATEGORY' => Output::getClean($category->name),
     'BUY' => $store_language->get('general', 'buy'),
     'ADD_TO_CART' => $store_language->get('general', 'add_to_cart'),
