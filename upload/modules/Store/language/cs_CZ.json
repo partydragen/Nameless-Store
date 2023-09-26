@@ -271,5 +271,7 @@
     "admin/customer_product_expired": "Produkt zákazníka vypršel",
     "admin/customer": "Zákazník",
     "admin/recipient": "Příjemce",
-    "general/coupon": "Kupon"
+    "general/coupon": "Kupon",
+    "admin/queued_actions": "Akce ve frontě",
+    "admin/queued_actions_results": "{{pending_actions}} čeká, {{completed_actions}} dokončeno"
 }
