@@ -3,7 +3,6 @@
  *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
- *  NamelessMC version 2.1.0
  *  NamelessMC version 2.1.2
  *
  *  License: MIT
@@ -23,7 +22,6 @@ class Store_Module extends Module {
         $this->_store_url = Store::getStorePath();
 
         $name = 'Store';
-        $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
         $author = '<a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a>';
         $module_version = '1.6.3';
         $nameless_version = '2.1.2';
@@ -1027,6 +1025,27 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
+
+        if ($old_version < 163) {
+            try {
+                $field = $this->_db->query('SELECT id FROM nl2_store_fields WHERE identifier = \'price\'');
+                if (!$field->count()) {
+                    $this->_db->insert('store_fields', [
+                        'identifier' => 'price',
+                        'description' => 'Pay what you want',
+                        'type' => '4',
+                        'required' => '1',
+                        'min' => '1',
+                        'max' => '9',
+                        'default_value' => '',
+                        'order' => '0'
+                    ]);
+                }
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+        }
     }
 
     private function initialise() {
@@ -1180,6 +1199,17 @@ class Store_Module extends Module {
                     'max' => '2',
                     'default_value' => '1',
                     'order' => '0'
+                ]);
+
+                $this->_db->insert('store_fields', [
+                    'identifier' => 'price',
+                    'description' => 'Pay what you want',
+                    'type' => '4',
+                    'required' => '1',
+                    'min' => '1',
+                    'max' => '9',
+                    'default_value' => '',
+                    'order' => '1'
                 ]);
             } catch (Exception $e) {
                 // Error
