@@ -11,7 +11,7 @@ class PayPal_Business_Gateway extends GatewayBase {
 
     public function __construct() {
         $name = 'PayPalBusiness';
-        $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
+        $author = '<a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a>';
         $gateway_version = '1.6.2';
         $store_version = '1.6.2';
         $settings = ROOT_PATH . '/modules/Store/gateways/PayPalBusiness/gateway_settings/settings.php';
