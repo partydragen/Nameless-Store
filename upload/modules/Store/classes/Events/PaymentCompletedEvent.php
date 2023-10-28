@@ -21,6 +21,15 @@ class PaymentCompletedEvent extends AbstractEvent implements HasWebhookParams, D
     }
 
     public function webhookParams(): array {
+        $products_list = [];
+        foreach ($this->order->getProducts() as $product) {
+            $products_list[] = [
+                'id' => $product->data()->id,
+                'name' => $product->data()->name,
+                'fields' => $this->order->getProductFields($product->data()->id)
+            ];
+        }
+
         return [
             'id' => $this->payment->data()->id,
             'order_id' => $this->payment->data()->order_id,
@@ -45,7 +54,8 @@ class PaymentCompletedEvent extends AbstractEvent implements HasWebhookParams, D
                 'user_id' => $this->recipient->exists() ? $this->recipient->data()->user_id ?? 0 : 0,
                 'username' => $this->recipient->getUsername(),
                 'identifier' => $this->recipient->getIdentifier(),
-            ]
+            ],
+            'products' => $products_list
         ];
     }
 
