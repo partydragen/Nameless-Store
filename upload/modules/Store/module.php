@@ -1046,6 +1046,18 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
+
+        if ($old_version < 170) {
+            try {
+                $this->_db->insert('store_categories', [
+                    'name' => 'Home',
+                    'description' => Settings::get('store_content', '', 'Store'),
+                    'order' => 0
+                ]);
+            } catch (Exception $e) {
+                echo $e->getMessage() . '<br />';
+            }
+        }
     }
 
     private function initialise() {
@@ -1061,6 +1073,12 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_categories')) {
             try {
                 $this->_db->createTable('store_categories', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(128) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `only_subcategories` tinyint(1) NOT NULL DEFAULT \'0\', `parent_category` int(11) DEFAULT NULL, `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
+
+                $this->_db->insert('store_categories', [
+                    'name' => 'Home',
+                    'description' => '',
+                    'order' => 0
+                ]);
             } catch (Exception $e) {
                 // Error
             }

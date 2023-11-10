@@ -31,9 +31,6 @@ if (isset($_POST) && !empty($_POST)) {
                 Validate::MIN => 7,
                 Validate::MAX => 64,
             ],
-            'store_content' => [
-                Validate::MAX => 60000
-            ],
             'checkout_complete_content' => [
                 Validate::MAX => 60000
             ]
@@ -42,9 +39,6 @@ if (isset($_POST) && !empty($_POST)) {
                 Validate::REQUIRED => $store_language->get('admin', 'currency_format_required'),
                 Validate::MIN => $store_language->get('admin', 'currency_format_min', ['min' => 7]),
                 Validate::MAX => $store_language->get('admin', 'currency_format_max', ['max' => 64]),
-            ],
-            'store_content' => [
-                Validate::MAX => $store_language->get('admin', 'store_content_max')
             ],
             'checkout_complete_content' => [
                 Validate::MAX => $store_language->get('admin', 'checkout_complete_content_max')
@@ -87,7 +81,6 @@ if (isset($_POST) && !empty($_POST)) {
             Util::setSetting('player_login', $player_login, 'Store');
             Util::setSetting('currency', Input::get('currency'), 'Store');
             Util::setSetting('currency_symbol', Input::get('currency_symbol'), 'Store');
-            Util::setSetting('store_content', Input::get('store_content'), 'Store');
             Util::setSetting('currency_format', Input::get('currency_format'), 'Store');
             Util::setSetting('checkout_complete_content', Input::get('checkout_complete_content'), 'Store');
             Util::setSetting('username_validation_method', Input::get('validation_method'), 'Store');
@@ -149,9 +142,6 @@ $allow_guests = Util::getSetting('allow_guests', '0', 'Store');
 // Require player to enter minecraft username when visiting store
 $player_login = Util::getSetting('player_login', '0', 'Store');
 
-// Store content
-$store_index_content = Output::getClean(Output::getPurified(Output::getDecoded(Util::getSetting('store_content', '', 'Store'))));
-
 // Checkout complete content
 $checkout_complete_content = Output::getClean(Output::getPurified(Output::getDecoded(Util::getSetting('checkout_complete_content', '', 'Store'))));
 
@@ -198,8 +188,6 @@ $smarty->assign([
     'CURRENCY_VALUE' => Output::getClean($currency),
     'CURRENCY_SYMBOL' => $store_language->get('admin', 'currency_symbol'),
     'CURRENCY_SYMBOL_VALUE' => Output::getClean($currency_symbol),
-    'STORE_INDEX_CONTENT' => $store_language->get('admin', 'store_index_content'),
-    'STORE_INDEX_CONTENT_VALUE' => $store_index_content,
     'CHECKOUT_COMPLETE_CONTENT' => $store_language->get('admin', 'checkout_complete_content'),
     'CHECKOUT_COMPLETE_CONTENT_VALUE' => $checkout_complete_content,
     'DISCORD_MESSAGE_VALUE' => Util::getSetting('discord_message', 'New payment from {username} who bought the following products {products}', 'Store'),

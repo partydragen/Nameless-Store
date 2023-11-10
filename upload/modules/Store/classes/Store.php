@@ -90,12 +90,6 @@ class Store {
         $store_url = $this->getStoreURL();
         $categories = [];
 
-        $categories[] = [
-            'url' => URL::build($store_url),
-            'title' => self::getLanguage()->get('general', 'home'),
-            'active' => Output::getClean($active) == 'Home'
-        ];
-
         $categories_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE parent_category IS NULL AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC')->results();
         if (count($categories_query)) {
             foreach ($categories_query as $item) {
