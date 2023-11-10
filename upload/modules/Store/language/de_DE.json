@@ -151,8 +151,6 @@
     "admin/start_date": "Start Datum",
     "admin/status": "Status",
     "admin/store_configuration": "Store Configuration",
-    "admin/store_content_max": "Der Inhalt des Marktindex darf maximal 60000 Zeichen lang sein.",
-    "admin/store_index_content": "Inhalt des Store-Index",
     "admin/store_path": "Shoppfad",
     "admin/subscriptions": "Abonnements",
     "admin/successfully_added_credits": "Erfolgreich {{amount}} Guthaben zum Benutzer hinzugefügt",

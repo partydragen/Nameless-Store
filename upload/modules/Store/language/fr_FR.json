@@ -151,8 +151,6 @@
     "admin/start_date": "Start Date (yyyy-mm-dd)",
     "admin/status": "Status",
     "admin/store_configuration": "Store Configuration",
-    "admin/store_content_max": "Le contenu de l'index du magasin doit comporter au maximum 60 000 caractères.",
-    "admin/store_index_content": "Store Index Content",
     "admin/store_path": "Store Path",
     "admin/subscriptions": "Subscriptions",
     "admin/successfully_added_credits": "Successfully added {{amount}} credits to user",
