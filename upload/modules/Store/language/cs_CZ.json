@@ -151,8 +151,6 @@
     "admin/start_date": "Datum začátku",
     "admin/status": "Stav",
     "admin/store_configuration": "Nastavení obchodu",
-    "admin/store_content_max": "Obsah domovské stránky obchodu může obsahovat maximálně 60 000 znaků.",
-    "admin/store_index_content": "Obsah domovské stránky obchodu",
     "admin/store_path": "Cesta k obchodu",
     "admin/subscriptions": "Předplatná",
     "admin/successfully_added_credits": "Uživateli úspěšně přidáno {{amount}} kreditů",
