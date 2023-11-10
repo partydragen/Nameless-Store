@@ -77,7 +77,7 @@ class Store_Module extends Module {
 
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
 
-        define('STORE_CURRENCY_FORMAT', Util::getSetting('currency_format', '{currencySymbol}{price} {currencyCode}', 'Store'));
+        define('STORE_CURRENCY_FORMAT', Settings::get('currency_format', '{currencySymbol}{price} {currencyCode}', 'Store'));
 
         // Check if module version changed
         $cache->setCache('store_module_cache');
@@ -460,12 +460,12 @@ class Store_Module extends Module {
 
         return [
             'settings' => [
-                'allow_guests' => Util::getSetting('allow_guests', '0', 'Store'),
-                'player_login' => Util::getSetting('player_login', '0', 'Store'),
-                'store_path' => Util::getSetting('store_path', '/store', 'Store'),
-                'currency' => Util::getSetting('currency', 'USD', 'Store'),
-                'currency_symbol' => Util::getSetting('currency_symbol', '$', 'Store'),
-                'username_validation_method' => Util::getSetting('username_validation_method', 'nameless', 'Store'),
+                'allow_guests' => Settings::get('allow_guests', '0', 'Store'),
+                'player_login' => Settings::get('player_login', '0', 'Store'),
+                'store_path' => Settings::get('store_path', '/store', 'Store'),
+                'currency' => Settings::get('currency', 'USD', 'Store'),
+                'currency_symbol' => Settings::get('currency_symbol', '$', 'Store'),
+                'username_validation_method' => Settings::get('username_validation_method', 'nameless', 'Store'),
             ],
             'services' => $services_list,
             'connections' => $connections_list,
@@ -914,7 +914,7 @@ class Store_Module extends Module {
                     // Convert store settings to NamelessMC settings system
                     $settings = $this->_db->query('SELECT * FROM nl2_store_settings')->results();
                     foreach ($settings as $setting) {
-                        Util::setSetting($setting->name, $setting->value, 'Store');
+                        Settings::set($setting->name, $setting->value, 'Store');
                     }
 
                     $this->_db->query('DROP TABLE nl2_store_settings');
@@ -1173,11 +1173,11 @@ class Store_Module extends Module {
         }
 
         if (!$this->_db->get('settings', ['module', '=', 'Store'])->count()) {
-            Util::setSetting('checkout_complete_content', 'Thanks for your payment, It can take up to 15 minutes for your payment to be processed', 'Store');
-            Util::setSetting('currency', 'USD', 'Store');
-            Util::setSetting('currency_symbol', '$', 'Store');
-            Util::setSetting('allow_guests', 0, 'Store');
-            Util::setSetting('player_login', 0, 'Store');
+            Settings::set('checkout_complete_content', 'Thanks for your payment, It can take up to 15 minutes for your payment to be processed', 'Store');
+            Settings::set('currency', 'USD', 'Store');
+            Settings::set('currency_symbol', '$', 'Store');
+            Settings::set('allow_guests', 0, 'Store');
+            Settings::set('player_login', 0, 'Store');
         }
 
         if (!$this->_db->showTables('store_gateways')) {

@@ -31,7 +31,7 @@ class Store {
     }
 
     public function getStoreURL(): string {
-        return Util::getSetting('store_path', '/store', 'Store');
+        return Settings::get('store_path', '/store', 'Store');
     }
 
     // Get all products
@@ -123,7 +123,7 @@ class Store {
     }
 
     public function isPlayerSystemEnabled(): bool {
-        return Util::getSetting('player_login', '0', 'Store');
+        return Settings::get('player_login', '0', 'Store');
     }
 
     /**
@@ -138,15 +138,15 @@ class Store {
     }
 
     public static function getStorePath(): string {
-        return Util::getSetting('store_path', '/store', 'Store');
+        return Settings::get('store_path', '/store', 'Store');
     }
 
     public static function getCurrency(): string {
-        return Util::getSetting('currency', 'USD', 'Store');
+        return Settings::get('currency', 'USD', 'Store');
     }
 
     public static function getCurrencySymbol(): string {
-        return Util::getSetting('currency_symbol', '$', 'Store');
+        return Settings::get('currency_symbol', '$', 'Store');
     }
 
     /**
@@ -186,8 +186,8 @@ class Store {
      *  Returns JSON object with information about any updates
      */
     public static function updateCheck() {
-        $current_version = Util::getSetting('nameless_version');
-        $uid = Util::getSetting('unique_id');
+        $current_version = Settings::get('nameless_version');
+        $uid = Settings::get('unique_id');
 
         $enabled_modules = Module::getModules();
         foreach ($enabled_modules as $enabled_item) {

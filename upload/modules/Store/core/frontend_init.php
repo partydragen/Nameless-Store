@@ -48,7 +48,7 @@ if ($from_customer->exists()) {
     $cents = $from_customer->data()->cents;
 }
 
-$show_credits_amount = Util::getSetting('show_credits_amount', '1');
+$show_credits_amount = Settings::get('show_credits_amount', '1');
 if ($show_credits_amount === '1' || $show_credits_amount === null) {
     $smarty->assign('SHOW_CREDITS_AMOUNT', true);
 }
