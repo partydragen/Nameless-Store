@@ -42,12 +42,14 @@
           {$CONTENT}
             
           {if isset($NO_PRODUCTS)}
-            <div class="ui icon message">
-              <i class="info icon"></i>
-              <div class="content">
-                <p>{$NO_PRODUCTS}</p>
+            {if empty($CONTENT)}
+              <div class="ui icon message">
+                <i class="info icon"></i>
+                <div class="content">
+                  <p>{$NO_PRODUCTS}</p>
+                </div>
               </div>
-            </div>
+            {/if}
           {else}
             <div class="ui centered stackable grid">
               {foreach from=$PRODUCTS item=product}
