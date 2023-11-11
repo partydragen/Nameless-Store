@@ -271,5 +271,6 @@
     "general/redeem_limit_reached": "Redeem limit reached for this coupon.",
     "general/customer_redeem_limit_reached": "You have reached the maximum of uses for this coupon.",
     "general/redeem_min_basket_value": "Using this coupon requires a minimum expenditure of {{min_basket}}.",
-    "general/price_must_be_at_least_x": "Price must be at least {{price}}"
+    "general/price_must_be_at_least_x": "Price must be at least {{price}}",
+    "general/most_purchases": "Most purchases"
 }

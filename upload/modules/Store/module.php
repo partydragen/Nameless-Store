@@ -79,6 +79,10 @@ class Store_Module extends Module {
 
         define('STORE_CURRENCY_FORMAT', Settings::get('currency_format', '{currencySymbol}{price} {currencyCode}', 'Store'));
 
+        if (Util::isModuleEnabled('Members')) {
+            MemberListManager::getInstance()->registerListProvider(new MostPurchasesMemberListProvider($this->_store_language));
+        }
+
         // Check if module version changed
         $cache->setCache('store_module_cache');
         if (!$cache->isCached('module_version')) {
