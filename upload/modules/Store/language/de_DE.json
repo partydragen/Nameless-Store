@@ -271,5 +271,8 @@
     "admin/recipient": "Empfänger",
     "general/coupon": "Coupon",
     "admin/queued_actions": "Aktionen in der Warteschlange",
-    "admin/queued_actions_results": "{{pending_actions}} Ausstehend, {{completed_actions}} Erledigt"
+    "admin/queued_actions_results": "{{pending_actions}} Ausstehend, {{completed_actions}} Erledigt",
+    "general/most_credits": "Meiste Guthaben",
+    "general/most_purchases": "Meiste Käufe",
+    "general/most_money_spent": "Meiste Geld ausgegeben"
 }
