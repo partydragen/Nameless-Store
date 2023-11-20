@@ -369,6 +369,7 @@ if (isset($_GET['customer'])) {
                             'order_id' => $order->data()->id,
                             'gateway_id' => 0,
                             'amount_cents' => Store::toCents(Input::get('price')),
+                            'transaction' => 'Manual',
                             'currency' => Store::getCurrency()
                         ]);
 
