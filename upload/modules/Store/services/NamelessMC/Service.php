@@ -62,6 +62,20 @@ class NamelessMCService extends ServiceBase {
                     'created' => date('U')
                 ]);
             }
+
+            // Add trophies to user
+            if (isset($command['add_trophies']) && is_array($command['add_trophies']) && count($command['add_trophies']) && Util::isModuleEnabled('Trophies')) {
+                $user_trophies = new UserTrophies($user);
+
+                foreach ($command['add_trophies'] as $trophy) {
+                    $trophy = new Trophy($_POST['trophy']);
+                    if ($trophy->exists()) {
+                        if (!$user_trophies->hasTrophy($trophy)) {
+                            $user_trophies->rewardTrophy($trophy);
+                        }
+                    }
+                }
+            }
         }
 
         // Action executed
