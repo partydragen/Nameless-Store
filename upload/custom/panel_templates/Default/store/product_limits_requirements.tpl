@@ -109,6 +109,10 @@
                                     {/foreach}
                                 </select>
                             </div>
+                            <div class="form-group custom-control custom-switch">
+                                <input id="inputOnlyRequireOneProduct" name="require_one_product" type="checkbox" class="custom-control-input"{if $REQUIRE_ONE_PRODUCT_VALUE eq 1} checked{/if} />
+                                <label class="custom-control-label" for="inputOnlyRequireOneProduct">Only require one of the required products</label>
+                            </div>
                             <div class="form-group">
                                 <label for="inputRequiredGroups">Required Groups</label> <span
                                         class="badge badge-info"><i class="fas fa-question-circle"
