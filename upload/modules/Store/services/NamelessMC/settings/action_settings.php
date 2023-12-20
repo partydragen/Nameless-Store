@@ -132,7 +132,8 @@ if (!$action->exists()) {
         'REMOVE_GROUPS_VALUE' => ((isset($_POST['remove_groups']) && is_array($_POST['remove_groups'])) ? $_POST['remove_groups'] : []),
         'ADD_CREDITS_VALUE' => ((isset($_POST['add_credits']) && $_POST['add_credits']) ? Output::getClean($_POST['add_credits']) : '0.00'),
         'REMOVE_CREDITS_VALUE' => ((isset($_POST['remove_credits']) && $_POST['remove_credits']) ? Output::getClean($_POST['remove_credits']) : '0.00'),
-        'ALERT_VALUE' => ((isset($_POST['alert']) && $_POST['alert']) ? Output::getClean($_POST['alert']) : '')
+        'ALERT_VALUE' => ((isset($_POST['alert']) && $_POST['alert']) ? Output::getClean($_POST['alert']) : ''),
+        'ADD_TROPHIES_VALUE' => ((isset($_POST['add_trophies']) && is_array($_POST['add_trophies'])) ? $_POST['add_trophies'] : []),
     ]);
 } else {
     // Updating action
