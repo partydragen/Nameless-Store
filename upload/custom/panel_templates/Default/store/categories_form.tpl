@@ -63,6 +63,15 @@
                                     {/foreach}
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label for="inputURL">{$PRETTY_URL}</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">{$URL_LABEL}</span>
+                                    </div>
+                                    <input type="text" class="form-control" name="pretty_url" id="inputURL" placeholder="{$PRETTY_URL}" value="{$PRETTY_URL_VALUE}">
+                                </div>
+                            </div>
                             <div class="form-group custom-control custom-switch">
                                 <input id="inputOnlySubCategories" name="only_subcategories" type="checkbox" class="custom-control-input"{if $ONLY_SUBCATEGORIES_VALUE eq 1} checked{/if} />
                                 <label class="custom-control-label" for="inputOnlySubCategories">{$ONLY_SUBCATEGORIES}</label>

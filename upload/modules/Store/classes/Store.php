@@ -93,7 +93,7 @@ class Store {
         $categories_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE parent_category IS NULL AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC')->results();
         if (count($categories_query)) {
             foreach ($categories_query as $item) {
-                $subcategories_query = DB::getInstance()->query('SELECT id, `name` FROM nl2_store_categories WHERE parent_category = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', [$item->id])->results();
+                $subcategories_query = DB::getInstance()->query('SELECT id, `name`, `url` FROM nl2_store_categories WHERE parent_category = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', [$item->id])->results();
 
                 $subcategories = [];
                 $sub_active = false;
@@ -102,7 +102,7 @@ class Store {
                         $sub_active = Output::getClean($active) == Output::getClean($subcategory->name);
 
                         $subcategories[] = [
-                            'url' => URL::build($store_url . '/category/' . Output::getClean($subcategory->id)),
+                            'url' => URL::build($store_url . '/category/' . (empty($subcategory->url) ? $subcategory->id : $subcategory->url)),
                             'title' => Output::getClean($subcategory->name),
                             'active' => $sub_active
                         ];
@@ -110,7 +110,7 @@ class Store {
                 }
 
                 $categories[$item->id] = [
-                    'url' => URL::build($store_url . '/category/' . Output::getClean($item->id)),
+                    'url' => URL::build($store_url . '/category/' . (empty($item->url) ? $item->id : $item->url)),
                     'title' => Output::getClean($item->name),
                     'subcategories' => $subcategories,
                     'active' => !$sub_active && Output::getClean($active) == Output::getClean($item->name),

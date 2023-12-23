@@ -23,21 +23,21 @@ if (!strlen($category_id)) {
     die();
 }
 
-$category_id = explode('-', $category_id);
-if (!is_numeric($category_id[0])) {
-    require_once(ROOT_PATH . '/404.php');
-    die();
+if (is_numeric($category_id)) {
+    // Query category by id
+    $category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ? AND disabled = 0', [$category_id]);
+} else {
+    // Query category by url
+    $category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE url = ? AND disabled = 0', [$category_id]);
 }
-$category_id = $category_id[0];
 
-// Query category
-$category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ? AND disabled = 0', [$category_id]);
 if (!$category->count()) {
     require_once(ROOT_PATH . '/404.php');
     die();
 }
 
 $category = $category->first();
+$category_id = $category->id;
 $store_url = $store->getStoreURL();
 
 $page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/view'])->results();
