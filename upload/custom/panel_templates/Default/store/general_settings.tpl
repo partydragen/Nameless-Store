@@ -81,11 +81,21 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="link_location">{$CURRENCY}</label>
-                                            <select class="form-control" id="currency" name="currency">
-                                                {foreach from=$CURRENCY_LIST item=currency}
-                                                    <option value="{$currency}"{if $CURRENCY_VALUE eq {$currency}} selected{/if}>{$currency}</option>
-                                                {/foreach}
-                                            </select>
+                                            <div class="input-group">
+                                                <select class="form-control" id="currency" name="currency">
+                                                    {foreach from=$CURRENCY_LIST item=currency}
+                                                        <option value="{$currency}"{if $CURRENCY_VALUE eq {$currency}} selected{/if}>{$currency}</option>
+                                                    {/foreach}
+
+                                                    {if !empty($CUSTOM_CURRENCY_VALUE)}
+                                                        <option value="USD" selected>Custom</option>
+                                                    {/if}
+                                                </select>
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">OR</span>
+                                                </div>
+                                                <input type="text" name="custom_currency" class="form-control" id="inputCustomCurrency" value="{$CUSTOM_CURRENCY_VALUE}" placeholder="Custom code (Use at own risk)">
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">

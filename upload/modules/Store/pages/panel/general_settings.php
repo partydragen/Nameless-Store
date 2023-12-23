@@ -21,6 +21,9 @@ define('PANEL_PAGE', 'general_settings');
 $page_title = $store_language->get('general', 'store');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
+// Supported currency
+$currency_list = ['USD', 'EUR', 'GBP', 'NOK', 'SEK', 'PLN', 'DKK', 'CAD', 'BRL', 'AUD'];
+
 if (isset($_POST) && !empty($_POST)) {
     $errors = [];
 
@@ -33,7 +36,11 @@ if (isset($_POST) && !empty($_POST)) {
             ],
             'checkout_complete_content' => [
                 Validate::MAX => 60000
-            ]
+            ],
+            'custom_currency' => [
+                Validate::MIN => 3,
+                Validate::MAX => 3,
+            ],
         ])->messages([
             'currency_format' => [
                 Validate::REQUIRED => $store_language->get('admin', 'currency_format_required'),
@@ -76,10 +83,13 @@ if (isset($_POST) && !empty($_POST)) {
             else
                 $store_path_input = '/store';
 
+            $custom_currency = strtoupper(Input::get('custom_currency'));
+            $currency = empty($custom_currency) ? Input::get('currency') : $custom_currency;
+
             Settings::set('store_path', $store_path_input, 'Store');
             Settings::set('allow_guests', $allow_guests, 'Store');
             Settings::set('player_login', $player_login, 'Store');
-            Settings::set('currency', Input::get('currency'), 'Store');
+            Settings::set('currency', $currency, 'Store');
             Settings::set('currency_symbol', Input::get('currency_symbol'), 'Store');
             Settings::set('currency_format', Input::get('currency_format'), 'Store');
             Settings::set('checkout_complete_content', Input::get('checkout_complete_content'), 'Store');
@@ -149,7 +159,6 @@ $checkout_complete_content = Output::getClean(Output::getPurified(Output::getDec
 $store_path = Settings::get('store_path', '/store', 'Store');
 
 // Currency
-$currency_list = ['USD', 'EUR', 'GBP', 'NOK', 'SEK', 'PLN', 'DKK', 'CAD', 'BRL', 'AUD'];
 $currency = Settings::get('currency', 'USD', 'Store');
 
 // Currency Symbol
@@ -186,6 +195,7 @@ $smarty->assign([
     'CURRENCY' => $store_language->get('admin', 'currency'),
     'CURRENCY_LIST' => $currency_list,
     'CURRENCY_VALUE' => Output::getClean($currency),
+    'CUSTOM_CURRENCY_VALUE' => in_array($currency, $currency_list) ? null : $currency,
     'CURRENCY_SYMBOL' => $store_language->get('admin', 'currency_symbol'),
     'CURRENCY_SYMBOL_VALUE' => Output::getClean($currency_symbol),
     'CHECKOUT_COMPLETE_CONTENT' => $store_language->get('admin', 'checkout_complete_content'),
