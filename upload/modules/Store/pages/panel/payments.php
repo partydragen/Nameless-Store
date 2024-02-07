@@ -417,102 +417,28 @@ if (isset($_GET['customer'])) {
         $template_file = 'store/payments_new.tpl';
     }
 } else {
-    $payments = $store->getAllPayments();
-
-    if (count($payments)) {
-        $template_payments = [];
-
-        foreach ($payments as $paymentQuery) {
-            $payment = new Payment(null, null, $paymentQuery);
-
-            // Recipient
-            if ($paymentQuery->to_customer_id) {
-                $recipient = new Customer(null, $paymentQuery->to_customer_id, 'id');
-            } else {
-                $recipient = new Customer(null, $paymentQuery->user_id, 'user_id');
-            }
-
-            if ($recipient->exists() && $recipient->getUser()->exists()) {
-                $recipient_user = $recipient->getUser();
-                $username = $recipient->getUsername();
-                $avatar = $recipient_user->getAvatar();
-                $style = $recipient_user->getGroupStyle();
-                $identifier = Output::getClean($recipient->getIdentifier());
-                $link = URL::build('/panel/users/store/', 'user=' . $recipient_user->data()->id);
-            } else {
-                $username = $recipient->getUsername();
-                $avatar = AvatarSource::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
-                $style = '';
-                $identifier = Output::getClean($recipient->getIdentifier());
-                $link = URL::build('/panel/store/payments/', 'customer=' . $username);
-            }
-
-            $template_payments[] = [
-                'user_link' =>  $link,
-                'user_style' => $style,
-                'user_avatar' => $avatar,
-                'username' => $username,
-                'uuid' => $identifier,
-                'status_id' => $paymentQuery->status_id,
-                'status' => $payment->getStatusHtml(),
-                'currency_symbol' => Output::getClean(Store::getCurrencySymbol()),
-                'amount' => Store::fromCents($paymentQuery->amount_cents),
-                'amount_format' => Output::getPurified(
-                    Store::formatPrice(
-                        $paymentQuery->amount_cents,
-                        $paymentQuery->currency,
-                        Store::getCurrencySymbol(),
-                        STORE_CURRENCY_FORMAT,
-                    )
-                ),
-                'date' => date(DATE_FORMAT, $paymentQuery->created),
-                'date_unix' => Output::getClean($paymentQuery->created),
-                'link' => URL::build('/panel/store/payments/', 'payment=' . Output::getClean($paymentQuery->id))
-            ];
-        }
-
-        $smarty->assign([
-            'VIEW' => $store_language->get('admin', 'view'),
-            'ALL_PAYMENTS' => $template_payments
-        ]);
-
-        if (!defined('TEMPLATE_STORE_SUPPORT')) {
-            $template->assets()->include([
-                AssetTree::DATATABLES
-            ]);
-
-            $template->addJSScript('
-                $(document).ready(function() {
-                    $(\'.dataTables-payments\').dataTable({
-                        responsive: true,
-                        order: [[ 3, "desc" ]],
-                        language: {
-                            "lengthMenu": "' . $language->get('table', 'display_records_per_page') . '",
-                            "zeroRecords": "' . $language->get('table', 'nothing_found') . '",
-                            "info": "' . $language->get('table', 'page_x_of_y') . '",
-                            "infoEmpty": "' . $language->get('table', 'no_records') . '",
-                            "infoFiltered": "' . $language->get('table', 'filtered') . '",
-                            "search": "' . $language->get('general', 'search') . '",
-                            "paginate": {
-                                "next": "' . $language->get('general', 'next') . '",
-                                "previous": "' . $language->get('general', 'previous') . '"
-                            }
-                        }
-                    });
-                });
-            ');
-        }
-
-    } else
-        $smarty->assign('NO_PAYMENTS', $store_language->get('admin', 'no_payments'));
+    // View all payments
+    $template->assets()->include([
+        AssetTree::DATATABLES
+    ]);
 
     $smarty->assign([
+        'VIEW' => $store_language->get('admin', 'view'),
         'CREATE_PAYMENT' => $store_language->get('admin', 'create_payment'),
-        'CREATE_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'action=create')
+        'CREATE_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'action=create'),
+        'QUERY_PAYMENTS_LINK' => URL::build('/queries/payments'),
+        'VIEW_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'payment='),
+        'DISPLAY_RECORDS_PER_PAGE' => $language->get('table', 'display_records_per_page'),
+        'NOTHING_FOUND' => $language->get('table', 'nothing_found'),
+        'PAGE_X_OF_Y' => $language->get('table', 'page_x_of_y'),
+        'NO_RECORDS' => $language->get('table', 'no_records'),
+        'FILTERED' => $language->get('table', 'filtered'),
+        'SEARCH' => $language->get('general', 'search'),
+        'NEXT' => $language->get('general', 'next'),
+        'PREVIOUS' => $language->get('general', 'previous')
     ]);
 
     $template_file = 'store/payments.tpl';
-
 }
 
 $smarty->assign([

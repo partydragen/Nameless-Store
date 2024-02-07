@@ -48,6 +48,7 @@ class Store_Module extends Module {
         $pages->add('Store', '/panel/store/sales', 'pages/panel/sales.php');
         $pages->add('Store', '/panel/store/coupons', 'pages/panel/coupons.php');
         $pages->add('Store', '/panel/users/store', 'pages/panel/users_store.php');
+        $pages->add('Store', '/queries/payments', 'queries/payments.php');
         $pages->add('Store', '/queries/redeem_coupon', 'queries/redeem_coupon.php');
 
         $pages->add('Store', '/user/store', 'pages/user/store.php');

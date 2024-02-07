@@ -53,24 +53,14 @@
                                 <table class="table table-striped dataTables-payments" style="width:100%">
                                     <thead>
                                         <tr>
+                                            <th></th>
                                             <th>{$USER}</th>
                                             <th>{$AMOUNT}</th>
                                             <th>{$STATUS}</th>
                                             <th>{$DATE}</th>
-                                            <th>{$VIEW}</th>
+                                            <th><div class="float-right">{$VIEW}</div></th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        {foreach from=$ALL_PAYMENTS item=payment}
-                                            <tr>
-                                                <td><a href="{$payment.user_link}" style="{$payment.user_style}"><img src="{$payment.user_avatar}" class="rounded" style="max-width:32px;max-height:32px;" alt="{$payment.username}" /> {$payment.username}</a></td>
-                                                <td>{$payment.amount_format}</td>
-                                                <td>{$payment.status}</td>
-                                                <td data-sort="{$payment.date_unix}">{$payment.date}</td>
-                                                <td><a href="{$payment.link}" class="btn btn-primary btn-sm">{$VIEW}</a></td>
-                                            </tr>
-                                        {/foreach}
-                                    </tbody>
                                 </table>
                             </div>
                         {/if}
@@ -108,6 +98,50 @@
 </div>
 
 {include file='scripts.tpl'}
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        var paymentsTable = $('.dataTables-payments').DataTable({
+            columnDefs: [
+                { targets: [0], sClass: "hide" }
+            ],
+            responsive: true,
+            processing: true,
+            serverSide: true,
+            ajax: "{$QUERY_PAYMENTS_LINK}",
+            columns: [
+                { data: "id", hidden: true },
+                {
+                    data: "username", "orderable": false,
+                    render: function(data, type, row) {
+                        return '<a href="' + row.user_profile + '" style="' + row.user_style + '"><img src="' + row.user_avatar + '" alt="" style="padding-right: 5px; max-height: 30px;"> ' + row.username  + '</a>';
+                    }
+                },
+                { data: "amount" },
+                { data: "status", "orderable": false },
+                { data: "date" },
+                {
+                    data: "view", "orderable": false,
+                    render: function(data, type, row) {
+                        return '<a href="{$VIEW_PAYMENT_LINK}' + row.id + '" class="btn btn-primary btn-sm float-right">{$VIEW}</a>';
+                    }
+                },
+            ],
+            language: {
+                "lengthMenu": "{$DISPLAY_RECORDS_PER_PAGE}",
+                "zeroRecords": "{$NOTHING_FOUND}",
+                "info": "{$PAGE_X_OF_Y}",
+                "infoEmpty": "{$NO_RECORDS}",
+                "infoFiltered": "{$FILTERED}",
+                "search": "{$SEARCH}",
+                "paginate": {
+                    "next": "{$NEXT}",
+                    "previous": "{$PREVIOUS}"
+                }
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
