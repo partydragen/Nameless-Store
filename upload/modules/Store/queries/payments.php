@@ -8,7 +8,7 @@ if (!$user->isLoggedIn() || !$user->hasPermission('staffcp.store.payments')) {
 
 $total = DB::getInstance()->query('SELECT COUNT(*) as `total` FROM nl2_store_payments', [])->first()->total;
 
-$query = 'SELECT nl2_store_payments.*, identifier, username, order_id, nl2_store_orders.user_id, to_customer_id FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id LEFT JOIN nl2_store_customers ON to_customer_id=nl2_store_customers.id';
+$query = 'SELECT nl2_store_payments.*, order_id, nl2_store_orders.user_id, to_customer_id FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id';
 $limit = '';
 $order = ' ORDER BY created DESC';
 $params = [];
