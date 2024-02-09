@@ -273,6 +273,8 @@ if (isset($_GET['customer'])) {
         'RECIPIENT_STYLE' => $recipient_style,
         'IGN' => $store_language->get('admin', 'ign'),
         'IGN_VALUE' => $recipient_username,
+        'ORDER_ID' => $store_language->get('admin', 'order_id'),
+        'ORDER_ID_VALUE' => Output::getClean($payment->data()->order_id),
         'TRANSACTION' => $store_language->get('admin', 'transaction'),
         'TRANSACTION_VALUE' => Output::getClean($payment->data()->transaction),
         'PAYMENT_METHOD' => $store_language->get('admin', 'payment_method'),

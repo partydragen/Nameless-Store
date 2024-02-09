@@ -77,6 +77,10 @@
                                                 <td>{$STATUS_VALUE}</td>
                                             </tr>
                                             <tr>
+                                                <td><strong>{$ORDER_ID}</strong></td>
+                                                <td>{$ORDER_ID_VALUE}</td>
+                                            </tr>
+                                            <tr>
                                                 <td><strong>{$TRANSACTION}</strong></td>
                                                 <td>{$TRANSACTION_VALUE}</td>
                                             </tr>

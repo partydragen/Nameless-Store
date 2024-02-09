@@ -161,6 +161,7 @@
     "admin/successfully_added_credits": "Successfully added {{amount}} credits to user",
     "admin/successfully_removed_credits": "Successfully removed {{amount}} credits from user",
     "admin/transaction": "Transaction ID",
+    "admin/order_id": "Order ID",
     "admin/unable_to_create_image_directory": "Unable to create the <strong>\/uploads\/store<\/strong> directory to store images.",
     "admin/unable_to_upload_image": "Unable to upload image: {{error}}",
     "admin/unavailable_generate_config": "Unavailable to generate config.php file in directory <strong>modules\/Store<\/strong>, directory is not writable. Please check file permissions.",
