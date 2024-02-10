@@ -1079,6 +1079,25 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
+
+        if ($old_version < 171) {
+            try {
+                $this->_db->query('ALTER TABLE `nl2_store_orders` ADD INDEX `nl2_store_orders_idx_to_customer_id` (`to_customer_id`)');
+                $this->_db->query('ALTER TABLE `nl2_store_orders` ADD INDEX `nl2_store_orders_idx_from_customer_id` (`from_customer_id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_orders_products` ADD INDEX `nl2_store_orders_products_idx_order_id` (`order_id`)');
+                $this->_db->query('ALTER TABLE `nl2_store_orders_products` ADD INDEX `nl2_store_orders_products_idx_product_id` (`product_id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_payments` ADD INDEX `nl2_store_payments_idx_order_id` (`order_id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_customers` ADD INDEX `nl2_store_customers_idx_user_id` (`user_id`)');
+
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+            die();
+        }
     }
 
     private function initialise() {
@@ -1148,6 +1167,9 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_orders')) {
             try {
                 $this->_db->createTable('store_orders', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `from_customer_id` int(11) NOT NULL, `to_customer_id` int(11) NOT NULL, `created` int(11) NOT NULL, `ip` varchar(128) DEFAULT NULL, `coupon_id` int(11) DEFAULT NULL, PRIMARY KEY (`id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_orders` ADD INDEX `nl2_store_orders_idx_to_customer_id` (`to_customer_id`)');
+                $this->_db->query('ALTER TABLE `nl2_store_orders` ADD INDEX `nl2_store_orders_idx_from_customer_id` (`from_customer_id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1156,6 +1178,9 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_orders_products')) {
             try {
                 $this->_db->createTable('store_orders_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `quantity` int(11) NOT NULL DEFAULT \'1\', `amount_cents` int(11) NOT NULL, `expire` int(11) DEFAULT NULL, `task_id` int(11) DEFAULT NULL, PRIMARY KEY (`id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_orders_products` ADD INDEX `nl2_store_orders_products_idx_order_id` (`order_id`)');
+                $this->_db->query('ALTER TABLE `nl2_store_orders_products` ADD INDEX `nl2_store_orders_products_idx_product_id` (`product_id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1172,6 +1197,8 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_payments')) {
             try {
                 $this->_db->createTable('store_payments', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `payment_id` varchar(64) DEFAULT NULL, `agreement_id` varchar(64) DEFAULT NULL, `transaction` varchar(32) DEFAULT NULL, `amount_cents` int(11) DEFAULT NULL, `currency` varchar(11) DEFAULT NULL, `fee_cents` int(11) DEFAULT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `last_updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_payments` ADD INDEX `nl2_store_payments_idx_order_id` (`order_id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1180,6 +1207,8 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_customers')) {
             try {
                 $this->_db->createTable('store_customers', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `integration_id` int(11) NOT NULL, `username` varchar(64) DEFAULT NULL, `identifier` varchar(64) DEFAULT NULL, `cents` bigint(20) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_customers` ADD INDEX `nl2_store_customers_idx_user_id` (`user_id`)');
             } catch (Exception $e) {
                 // Error
             }
