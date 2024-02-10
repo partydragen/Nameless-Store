@@ -446,7 +446,7 @@ if (isset($_GET['customer'])) {
 $smarty->assign([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
-    'STORE' => $store_language->get('admin', 'store'),
+    'STORE' => $store_language->get('general', 'store'),
     'PAGE' => PANEL_PAGE,
     'TOKEN' => Token::get(),
     'SUBMIT' => $language->get('general', 'submit'),
