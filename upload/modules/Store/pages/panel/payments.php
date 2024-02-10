@@ -140,7 +140,7 @@ if (isset($_GET['customer'])) {
         if (Token::check(Input::get('token'))) {
             if (Input::get('action') == 'delete_payment') {
                 // Delete payment only if payment is manual
-                if ($payment->data()->gateway_id == 0) {
+                if ($payment->data()->gateway_id == 0 || (defined('DEBUGGING') && DEBUGGING)) {
                     $payment->delete();
 
                     Session::flash('store_payment_success', $store_language->get('admin', 'payment_deleted_successfully'));
@@ -230,7 +230,7 @@ if (isset($_GET['customer'])) {
     }
 
     // Allow manual payment deletion
-    if ($payment->data()->gateway_id == 0) {
+    if ($payment->data()->gateway_id == 0 || (defined('DEBUGGING') && DEBUGGING)) {
         $smarty->assign([
             'DELETE_PAYMENT' => $language->get('admin', 'delete'),
             'CONFIRM_DELETE_PAYMENT' => $store_language->get('admin', 'confirm_payment_deletion'),
