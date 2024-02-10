@@ -5,12 +5,13 @@ header('Content-type: application/json;charset=utf-8');
 if (!$user->isLoggedIn() || !$user->hasPermission('staffcp.store.payments')) {
     die(json_encode('Unauthenticated'));
 }
+$sortColumns = ['id' => 'id', 'amount_cents' => 'amount', 'created' => 'date'];
 
 $total = DB::getInstance()->query('SELECT COUNT(*) as `total` FROM nl2_store_payments', [])->first()->total;
 
 $query = 'SELECT nl2_store_payments.*, order_id, nl2_store_orders.user_id, to_customer_id FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id';
 $limit = '';
-$order = ' ORDER BY created DESC';
+$order = '';
 $params = [];
 $where = '';
 
@@ -23,6 +24,32 @@ if (isset($_GET['search']) && $_GET['search']['value'] != '') {
 
     $customers = implode(',', $customers_list);
     $where .= ' WHERE to_customer_id IN ('.$customers.')';
+}
+
+if (isset($_GET['order']) && count($_GET['order'])) {
+    $orderBy = [];
+
+    for ($i = 0, $j = count($_GET['order']); $i < $j; $i++) {
+        $column = (int)$_GET['order'][$i]['column'];
+        $requestColumn = $_GET['columns'][$column];
+
+        $column = array_search($requestColumn['data'], $sortColumns);
+        if ($column) {
+            $dir = $_GET['order'][$i]['dir'] === 'asc' ?
+                'DESC' :
+                'ASC';
+
+            $orderBy[] = '`' . $column . '` ' . $dir;
+        }
+    }
+
+    if (count($orderBy)) {
+        $order .= ' ORDER BY ' . implode(', ', $orderBy);
+    } else {
+        $order .= ' ORDER BY created DESC';
+    }
+} else {
+    $order .= ' ORDER BY created DESC';
 }
 
 if (isset($_GET['start']) && $_GET['length'] != -1) {
