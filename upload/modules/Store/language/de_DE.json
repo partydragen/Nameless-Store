@@ -276,5 +276,6 @@
     "general/most_purchases": "Meiste Käufe",
     "general/most_money_spent": "Meiste Geld ausgegeben",
     "admin/pretty_url": "Schöne URL",
-    "admin/pretty_url_regex_error": "Schöne URL darf nur Buchstaben, Zahlen und Bindestriche enthalten"
+    "admin/pretty_url_regex_error": "Schöne URL darf nur Buchstaben, Zahlen und Bindestriche enthalten",
+    "admin/order_id": "Bestell-ID"
 }
