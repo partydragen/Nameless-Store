@@ -182,6 +182,8 @@ class Store_Module extends Module {
                 'staffcp.store.gateways' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'gateways'),
                 'staffcp.store.products' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'products'),
                 'staffcp.store.payments' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments'),
+                'staffcp.store.payments.create' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments') . ' &raquo; ' . $this->_store_language->get('admin', 'create_payment'),
+                'staffcp.store.payments.delete' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments') . ' &raquo; ' . $this->_store_language->get('admin', 'delete_payment'),
                 'staffcp.store.connections' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'connections'),
                 'staffcp.store.fields' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'fields'),
                 'staffcp.store.manage_credits' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'manage_users_credits'),
@@ -1091,12 +1093,10 @@ class Store_Module extends Module {
                 $this->_db->query('ALTER TABLE `nl2_store_payments` ADD INDEX `nl2_store_payments_idx_order_id` (`order_id`)');
 
                 $this->_db->query('ALTER TABLE `nl2_store_customers` ADD INDEX `nl2_store_customers_idx_user_id` (`user_id`)');
-
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
-            die();
         }
     }
 

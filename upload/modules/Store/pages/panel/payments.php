@@ -140,7 +140,7 @@ if (isset($_GET['customer'])) {
         if (Token::check(Input::get('token'))) {
             if (Input::get('action') == 'delete_payment') {
                 // Delete payment only if payment is manual
-                if ($payment->data()->gateway_id == 0 || (defined('DEBUGGING') && DEBUGGING)) {
+                if ($user->hasPermission('staffcp.store.payments.delete') && ($payment->data()->gateway_id == 0 || (defined('DEBUGGING') && DEBUGGING))) {
                     $payment->delete();
 
                     Session::flash('store_payment_success', $store_language->get('admin', 'payment_deleted_successfully'));
@@ -230,7 +230,7 @@ if (isset($_GET['customer'])) {
     }
 
     // Allow manual payment deletion
-    if ($payment->data()->gateway_id == 0 || (defined('DEBUGGING') && DEBUGGING)) {
+    if ($user->hasPermission('staffcp.store.payments.delete') && ($payment->data()->gateway_id == 0 || (defined('DEBUGGING') && DEBUGGING))) {
         $smarty->assign([
             'DELETE_PAYMENT' => $language->get('admin', 'delete'),
             'CONFIRM_DELETE_PAYMENT' => $store_language->get('admin', 'confirm_payment_deletion'),
@@ -318,6 +318,10 @@ if (isset($_GET['customer'])) {
 } else if (isset($_GET['action'])) {
     if ($_GET['action'] == 'create') {
         // Create payment
+        if (!$user->hasPermission('staffcp.store.payments.create')) {
+            Redirect::to(URL::build('/panel/store/payments'));
+        }
+
         if (Input::exists()) {
             $errors = [];
 
@@ -426,8 +430,6 @@ if (isset($_GET['customer'])) {
 
     $smarty->assign([
         'VIEW' => $store_language->get('admin', 'view'),
-        'CREATE_PAYMENT' => $store_language->get('admin', 'create_payment'),
-        'CREATE_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'action=create'),
         'QUERY_PAYMENTS_LINK' => URL::build('/queries/payments'),
         'VIEW_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'payment='),
         'DISPLAY_RECORDS_PER_PAGE' => $language->get('table', 'display_records_per_page'),
@@ -439,6 +441,13 @@ if (isset($_GET['customer'])) {
         'NEXT' => $language->get('general', 'next'),
         'PREVIOUS' => $language->get('general', 'previous')
     ]);
+
+    if ($user->hasPermission('staffcp.store.payments.create')) {
+        $smarty->assign([
+            'CREATE_PAYMENT' => $store_language->get('admin', 'create_payment'),
+            'CREATE_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'action=create'),
+        ]);
+    }
 
     $template_file = 'store/payments.tpl';
 }

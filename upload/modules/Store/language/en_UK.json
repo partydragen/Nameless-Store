@@ -38,6 +38,7 @@
     "admin/connection_updated_successfully": "Connection updated successfully.",
     "admin/connections_info": "Connect your services to your store to execute specific actions",
     "admin/create_payment": "Create Payment",
+    "admin/delete_payment": "Delete Payment",
     "admin/creating_field": "Creating new field",
     "admin/creating_new_connection": "Creating new connection",
     "admin/currency": "Currency",
