@@ -61,14 +61,6 @@
                                         </colgroup>
                                         <tbody>
                                             <tr>
-                                                <td><strong>{$CUSTOMER}</strong></td>
-                                                <td><img src="{$CUSTOMER_AVATAR}" class="rounded" style="max-height:32px;max-width:32px;" alt="{$CUSTOMER_USERNAME}"> <a style="{$CUSTOMER_STYLE}" href="{$CUSTOMER_LINK}">{$CUSTOMER_USERNAME}</a></td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>{$RECIPIENT}</strong></td>
-                                                <td><img src="{$RECIPIENT_AVATAR}" class="rounded" style="max-height:32px;max-width:32px;" alt="{$RECIPIENT_USERNAME}"> <a style="{$RECIPIENT_STYLE}" href="{$RECIPIENT_LINK}">{$RECIPIENT_USERNAME}</a></td>
-                                            </tr>
-                                            <tr>
                                                 <td><strong>{$IGN}</strong></td>
                                                 <td><img src="{$RECIPIENT_AVATAR}" class="rounded" style="max-height:32px;max-width:32px;" alt="{$IGN_VALUE}"> <a style="{$RECIPIENT_STYLE}" href="{$RECIPIENT_LINK}">{$IGN_VALUE}</a></td>
                                             </tr>
@@ -186,6 +178,25 @@
                     </div>
                     
                     <div class="col-md-3">
+
+                        <div class="card shadow mb-4">
+                            <div class="card-body">
+                                <h5 style="display:inline">{$CUSTOMER}</h5>
+                                <hr>
+
+                                {$CUSTOMER}: <span class="float-right"><img src="{$CUSTOMER_AVATAR}" class="rounded" style="max-height:32px;max-width:32px;" alt="{$CUSTOMER_USERNAME}"> <a style="{$CUSTOMER_STYLE}" href="{$CUSTOMER_LINK}">{$CUSTOMER_USERNAME}</a></span>
+                            </div>
+                        </div>
+
+                        <div class="card shadow mb-4">
+                            <div class="card-body">
+                                <h5 style="display:inline">{$RECIPIENT}</h5>
+                                <hr>
+
+                                {$RECIPIENT}: <span class="float-right"><img src="{$RECIPIENT_AVATAR}" class="rounded" style="max-height:32px;max-width:32px;" alt="{$RECIPIENT_USERNAME}"> <a style="{$RECIPIENT_STYLE}" href="{$RECIPIENT_LINK}">{$RECIPIENT_USERNAME}</a></span>
+                            </div>
+                        </div>
+
                         <div class="card shadow mb-4">
                             <div class="card-body">
                                 <h5 style="display:inline">{$PRODUCTS}</h5>
