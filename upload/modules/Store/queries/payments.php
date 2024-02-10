@@ -14,11 +14,26 @@ $order = ' ORDER BY created DESC';
 $params = [];
 $where = '';
 
+if (isset($_GET['search']) && $_GET['search']['value'] != '') {
+    $customers_list = [0];
+    $customers = DB::getInstance()->query('SELECT nl2_store_customers.id FROM `nl2_store_customers` LEFT JOIN nl2_users ON nl2_users.id=user_id WHERE nl2_users.username LIKE ? OR nl2_store_customers.username LIKE ?', ['%' . $_GET['search']['value'] . '%', '%' . $_GET['search']['value'] . '%']);
+    foreach ($customers->results() as $customer) {
+        $customers_list[] = $customer->id;
+    }
+
+    $customers = implode(',', $customers_list);
+    $where .= ' WHERE to_customer_id IN ('.$customers.')';
+}
+
 if (isset($_GET['start']) && $_GET['length'] != -1) {
     $limit .= ' LIMIT ' . (int)$_GET['start'] . ', ' . (int)$_GET['length'];
 } else {
     // default 10
     $limit .= ' LIMIT 10';
+}
+
+if (strlen($where) > 0) {
+    $totalFiltered = DB::getInstance()->query('SELECT COUNT(*) as `total` FROM nl2_store_payments LEFT JOIN nl2_store_orders ON order_id=nl2_store_orders.id' . $where, $params)->first()->total;
 }
 
 $data = [];
