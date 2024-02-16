@@ -142,7 +142,7 @@
     "admin/product_name": "Název produktu",
     "admin/product_updated_successfully": "Produkt úspěšně upraven.",
     "admin/products": "Produkty",
-    "admin/purchase_hook_info": "Nová platba v obchodě",
+    "admin/purchase_hook_info": "Nový nákup v obchodě",
     "admin/radio": "Výběr z možností",
     "admin/remove_credits": "Odebrat kredity",
     "admin/select_multiple_with_ctrl": "(vyberte více držením Ctrl (Cmd na Macu))",
@@ -276,5 +276,7 @@
     "general/most_money_spent": "Nejvíce utracených peněz",
     "general/most_credits": "Nejvíce kreditů",
     "admin/pretty_url": "Pěkné adresy",
-    "admin/pretty_url_regex_error": "Pěkné adresy mohou obsahovat pouze písmena, čísla a pomlčky"
+    "admin/pretty_url_regex_error": "Pěkné adresy mohou obsahovat pouze písmena, čísla a pomlčky",
+    "admin/order_id": "ID objednávky",
+    "admin/delete_payment": "Odstranit platbu"
 }
