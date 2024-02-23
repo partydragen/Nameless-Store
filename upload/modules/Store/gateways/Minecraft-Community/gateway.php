@@ -13,7 +13,7 @@ class Minecraft_Community_Gateway extends GatewayBase {
         $name = 'Minecraft-Community';
         $author = '<a href="https://mccommunity.net/" target="_blank" rel="nofollow noopener">Minecraft Community</a>';
         $gateway_version = '1.0.0';
-        $store_version = '1.7.0';
+        $store_version = '1.7.1';
         $settings = ROOT_PATH . '/modules/Store/gateways/Minecraft-Community/gateway_settings/settings.php';
 
         parent::__construct($name, $author, $gateway_version, $store_version, $settings);
