@@ -70,7 +70,7 @@ if (!isset($_GET['action'])) {
                 }
 
                 // Get price
-                if (!isset($_POST['price']) || !is_numeric($_POST['price']) || $_POST['price'] < 0.00 || $_POST['price'] > 1000 || !preg_match('/^\d+(?:\.\d{2})?$/', $_POST['price'])) {
+                if (!isset($_POST['price']) || !is_numeric($_POST['price']) || $_POST['price'] < 0.00 || $_POST['price'] > 20000000 || !preg_match('/^\d+(?:\.\d{2})?$/', $_POST['price'])) {
                     $errors[] = $store_language->get('admin', 'invalid_price');
                 }
 
@@ -480,12 +480,16 @@ if (!isset($_GET['action'])) {
                     $required_integrations = $_POST['required_integrations'];
                     $allowed_gateways = $_POST['allowed_gateways'];
 
+                    if (isset($_POST['require_one_product']) && $_POST['require_one_product'] == 'on') $require_one_product = 1;
+                    else $require_one_product = 0;
+
                     $product->update([
                         'global_limit' => json_encode($global_limit),
                         'user_limit' => json_encode($user_limit),
                         'min_player_age' => json_encode($player_age),
                         'min_player_playtime' => json_encode($player_playtime),
                         'required_products' => json_encode(isset($required_products) && is_array($required_products) ? $required_products : []),
+                        'require_one_product' => $require_one_product,
                         'required_groups' => json_encode(isset($required_groups) && is_array($required_groups) ? $required_groups : []),
                         'required_integrations' =>  json_encode(isset($required_integrations) && is_array($required_integrations) ? $required_integrations : []),
                         'allowed_gateways' => json_encode(isset($allowed_gateways) && is_array($allowed_gateways) ? $allowed_gateways : []),
@@ -577,6 +581,7 @@ if (!isset($_GET['action'])) {
                 'GLOBAL_LIMIT_VALUE' => $global_limit,
                 'USER_LIMIT_VALUE' => $user_limit,
                 'PRODUCTS_LIST' => $products_list,
+                'REQUIRE_ONE_PRODUCT_VALUE' => $product->data()->require_one_product,
                 'GROUPS_LIST' => $groups_list,
                 'INTEGRATIONS_LIST' => $integrations_list,
                 'ALLOWED_GATEWAYS_LIST' => $allowed_gateways_list,

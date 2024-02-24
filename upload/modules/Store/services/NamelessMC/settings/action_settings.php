@@ -68,7 +68,16 @@ if (Input::exists()) {
             if (isset($_POST['alert']) && !empty($_POST['alert'])) {
                 $command['alert'] = Input::get('alert');
             }
-                
+
+            // Add trophies to user
+            if (isset($_POST['add_trophies']) && is_array($_POST['add_trophies']) && count($_POST['add_trophies'])) {
+                $trophies = [];
+                foreach ($_POST['add_trophies'] as $trophy) {
+                    $trophies[] = (int) $trophy;
+                }
+                $command['add_trophies'] = $trophies;
+            }
+
             if (!count($command)) {
                 $errors[] = 'You need at least one action';
             }
@@ -123,7 +132,8 @@ if (!$action->exists()) {
         'REMOVE_GROUPS_VALUE' => ((isset($_POST['remove_groups']) && is_array($_POST['remove_groups'])) ? $_POST['remove_groups'] : []),
         'ADD_CREDITS_VALUE' => ((isset($_POST['add_credits']) && $_POST['add_credits']) ? Output::getClean($_POST['add_credits']) : '0.00'),
         'REMOVE_CREDITS_VALUE' => ((isset($_POST['remove_credits']) && $_POST['remove_credits']) ? Output::getClean($_POST['remove_credits']) : '0.00'),
-        'ALERT_VALUE' => ((isset($_POST['alert']) && $_POST['alert']) ? Output::getClean($_POST['alert']) : '')
+        'ALERT_VALUE' => ((isset($_POST['alert']) && $_POST['alert']) ? Output::getClean($_POST['alert']) : ''),
+        'ADD_TROPHIES_VALUE' => ((isset($_POST['add_trophies']) && is_array($_POST['add_trophies'])) ? $_POST['add_trophies'] : []),
     ]);
 } else {
     // Updating action
@@ -135,7 +145,8 @@ if (!$action->exists()) {
         'REMOVE_GROUPS_VALUE' => ((isset($command['remove_groups']) && is_array($command['remove_groups'])) ? $command['remove_groups'] : []),
         'ADD_CREDITS_VALUE' => ((isset($command['add_credits']) && $command['add_credits']) ? Output::getClean($command['add_credits']) : '0.00'),
         'REMOVE_CREDITS_VALUE' => ((isset($command['remove_credits']) && $command['remove_credits']) ? Output::getClean($command['remove_credits']) : '0.00'),
-        'ALERT_VALUE' => ((isset($command['alert']) && $command['alert']) ? Output::getClean($command['alert']) : '')
+        'ALERT_VALUE' => ((isset($command['alert']) && $command['alert']) ? Output::getClean($command['alert']) : ''),
+        'ADD_TROPHIES_VALUE' => ((isset($command['add_trophies']) && is_array($command['add_trophies'])) ? $command['add_trophies'] : []),
     ]);
 }
 
@@ -153,3 +164,26 @@ $template->addJSScript('
         $(\'#inputRemoveGroups\').select2({ placeholder: "No groups selected" });
     })
 ');
+
+// Trophies Module integration
+if (Util::isModuleEnabled('Trophies')) {
+    $trophies_list = [];
+
+    $trophies = DB::getInstance()->query('SELECT id, title FROM nl2_trophies');
+    foreach ($trophies->results() as $trophy) {
+        $trophies_list[] = [
+            'id' => $trophy->id,
+            'title' => Output::getClean($trophy->title)
+        ];
+    }
+
+    $smarty->assign([
+        'TROPHIES_LIST' => $trophies_list
+    ]);
+
+    $template->addJSScript('
+        $(document).ready(() => {
+            $(\'#inputAddTrophies\').select2({ placeholder: "No trophies selected" });
+        })
+    ');
+}

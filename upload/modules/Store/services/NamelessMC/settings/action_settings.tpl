@@ -38,6 +38,18 @@
         <input type="text" class="form-control" id="inputAlert" name="alert" value="{$ALERT_VALUE}" placeholder="Send notification to user?">
     </div>
     <div class="form-group">
+        <label for="inputAddTrophies">Reward trophies to user?</label>
+        {if isset($TROPHIES_LIST)}
+            <select name="add_trophies[]" id="inputAddTrophies" class="form-control" multiple>
+                {foreach from=$TROPHIES_LIST item=item}
+                    <option value="{$item.id}"{if in_array($item.id, $ADD_TROPHIES_VALUE)} selected{/if}>{$item.id} - {$item.title}</option>
+                {/foreach}
+            </select>
+        {else}
+            <input type="text" class="form-control" id="inputTrophies" name="trophies" value="Trophies module not installed or enabled" readonly>
+        {/if}
+    </div>
+    <div class="form-group">
         <input type="hidden" name="token" value="{$TOKEN}">
         <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
     </div>

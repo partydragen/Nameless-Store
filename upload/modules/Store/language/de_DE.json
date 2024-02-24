@@ -150,9 +150,7 @@
     "admin/settings": "Einstellungen",
     "admin/start_date": "Start Datum",
     "admin/status": "Status",
-    "admin/store_configuration": "Store Configuration",
-    "admin/store_content_max": "Der Inhalt des Marktindex darf maximal 60000 Zeichen lang sein.",
-    "admin/store_index_content": "Inhalt des Store-Index",
+    "admin/store_configuration": "Store Konfiguration",
     "admin/store_path": "Shoppfad",
     "admin/subscriptions": "Abonnements",
     "admin/successfully_added_credits": "Erfolgreich {{amount}} Guthaben zum Benutzer hinzugefügt",
@@ -273,5 +271,12 @@
     "admin/recipient": "Empfänger",
     "general/coupon": "Coupon",
     "admin/queued_actions": "Aktionen in der Warteschlange",
-    "admin/queued_actions_results": "{{pending_actions}} Ausstehend, {{completed_actions}} Erledigt"
+    "admin/queued_actions_results": "{{pending_actions}} Ausstehend, {{completed_actions}} Erledigt",
+    "general/most_credits": "Meiste Guthaben",
+    "general/most_purchases": "Meiste Käufe",
+    "general/most_money_spent": "Meiste Geld ausgegeben",
+    "admin/pretty_url": "Schöne URL",
+    "admin/pretty_url_regex_error": "Schöne URL darf nur Buchstaben, Zahlen und Bindestriche enthalten",
+    "admin/order_id": "Bestell-ID",
+    "admin/delete_payment": "Zahlung löschen"
 }

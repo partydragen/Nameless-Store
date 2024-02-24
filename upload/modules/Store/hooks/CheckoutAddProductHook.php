@@ -56,15 +56,24 @@ class CheckoutAddProductHook extends HookBase {
 
         $required_products = json_decode($product->data()->required_products, true) ?? [];
         if (count($required_products)) {
+            $has_bought = [];
             $bought_products = $recipient->getPurchasedProducts();
             foreach ($required_products as $item) {
-                if(!array_key_exists($item, $bought_products)) {
-                    $target_product = new Product($item);
+                if (array_key_exists($item, $bought_products)) {
+                    $has_bought[] = $item;
+                }
+            }
 
-                    $event->setCancelled(true, Store::getLanguage()->get('general', 'product_requires_products', [
-                        'product' => Output::getClean($target_product->data()->name)
-                    ]));
+            // Check if user only need one or all of the required products.
+            if ($product->data()->require_one_product ? count($has_bought) < 1 : count($has_bought) != count($required_products)) {
+                foreach ($required_products as $item) {
+                    if (!array_key_exists($item, $bought_products)) {
+                        $target_product = new Product($item);
 
+                        $event->setCancelled(true, Store::getLanguage()->get('general', 'product_requires_products', [
+                            'product' => Output::getClean($target_product->data()->name)
+                        ]));
+                    }
                 }
             }
         }

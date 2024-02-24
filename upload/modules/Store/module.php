@@ -3,7 +3,7 @@
  *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
- *  NamelessMC version 2.1.0
+ *  NamelessMC version 2.1.2
  *
  *  License: MIT
  *
@@ -22,9 +22,9 @@ class Store_Module extends Module {
         $this->_store_url = Store::getStorePath();
 
         $name = 'Store';
-        $author = '<a href="https://partydragen.com/" target="_blank" rel="nofollow noopener">Partydragen</a>';
-        $module_version = '1.6.2';
-        $nameless_version = '2.1.1';
+        $author = '<a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a>';
+        $module_version = '1.7.1';
+        $nameless_version = '2.1.2';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
 
@@ -49,6 +49,7 @@ class Store_Module extends Module {
         $pages->add('Store', '/panel/store/sales', 'pages/panel/sales.php');
         $pages->add('Store', '/panel/store/coupons', 'pages/panel/coupons.php');
         $pages->add('Store', '/panel/users/store', 'pages/panel/users_store.php');
+        $pages->add('Store', '/queries/payments', 'queries/payments.php');
         $pages->add('Store', '/queries/redeem_coupon', 'queries/redeem_coupon.php');
 
         $pages->add('Store', '/user/store', 'pages/user/store.php');
@@ -81,7 +82,13 @@ class Store_Module extends Module {
 
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
 
-        define('STORE_CURRENCY_FORMAT', Util::getSetting('currency_format', '{currencySymbol}{price} {currencyCode}', 'Store'));
+        define('STORE_CURRENCY_FORMAT', Settings::get('currency_format', '{currencySymbol}{price} {currencyCode}', 'Store'));
+
+        if (Util::isModuleEnabled('Members')) {
+            MemberListManager::getInstance()->registerListProvider(new MostPurchasesMemberListProvider($this->_store_language));
+            MemberListManager::getInstance()->registerListProvider(new MostSpentMemberListProvider($this->_store_language));
+            MemberListManager::getInstance()->registerListProvider(new MostCreditsMemberListProvider($this->_store_language));
+        }
 
         // Check if module version changed
         $cache->setCache('store_module_cache');
@@ -174,6 +181,8 @@ class Store_Module extends Module {
                 'staffcp.store.products' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'products'),
                 'staffcp.store.payments' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments'),
                 'staffcp.store.subscriptions' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'subscriptions'),
+                'staffcp.store.payments.create' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments') . ' &raquo; ' . $this->_store_language->get('admin', 'create_payment'),
+                'staffcp.store.payments.delete' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments') . ' &raquo; ' . $this->_store_language->get('admin', 'delete_payment'),
                 'staffcp.store.connections' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'connections'),
                 'staffcp.store.fields' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'fields'),
                 'staffcp.store.manage_credits' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'manage_users_credits'),
@@ -469,12 +478,12 @@ class Store_Module extends Module {
 
         return [
             'settings' => [
-                'allow_guests' => Util::getSetting('allow_guests', '0', 'Store'),
-                'player_login' => Util::getSetting('player_login', '0', 'Store'),
-                'store_path' => Util::getSetting('store_path', '/store', 'Store'),
-                'currency' => Util::getSetting('currency', 'USD', 'Store'),
-                'currency_symbol' => Util::getSetting('currency_symbol', '$', 'Store'),
-                'username_validation_method' => Util::getSetting('username_validation_method', 'nameless', 'Store'),
+                'allow_guests' => Settings::get('allow_guests', '0', 'Store'),
+                'player_login' => Settings::get('player_login', '0', 'Store'),
+                'store_path' => Settings::get('store_path', '/store', 'Store'),
+                'currency' => Settings::get('currency', 'USD', 'Store'),
+                'currency_symbol' => Settings::get('currency_symbol', '$', 'Store'),
+                'username_validation_method' => Settings::get('username_validation_method', 'nameless', 'Store'),
             ],
             'services' => $services_list,
             'connections' => $connections_list,
@@ -923,7 +932,7 @@ class Store_Module extends Module {
                     // Convert store settings to NamelessMC settings system
                     $settings = $this->_db->query('SELECT * FROM nl2_store_settings')->results();
                     foreach ($settings as $setting) {
-                        Util::setSetting($setting->name, $setting->value, 'Store');
+                        Settings::set($setting->name, $setting->value, 'Store');
                     }
 
                     $this->_db->query('DROP TABLE nl2_store_settings');
@@ -1033,6 +1042,70 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
+
+        if ($old_version < 163) {
+            try {
+                $field = $this->_db->query('SELECT id FROM nl2_store_fields WHERE identifier = \'price\'');
+                if (!$field->count()) {
+                    $this->_db->insert('store_fields', [
+                        'identifier' => 'price',
+                        'description' => 'Pay what you want',
+                        'type' => '4',
+                        'required' => '1',
+                        'min' => '1',
+                        'max' => '9',
+                        'default_value' => '',
+                        'order' => '0'
+                    ]);
+                }
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+        }
+
+        if ($old_version < 170) {
+            try {
+                $this->_db->insert('store_categories', [
+                    'name' => 'Home',
+                    'description' => Settings::get('store_content', '', 'Store'),
+                    'order' => 0
+                ]);
+            } catch (Exception $e) {
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_products ADD `require_one_product` tinyint(1) NOT NULL DEFAULT \'0\'');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_categories ADD `url` varchar(255) DEFAULT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+        }
+
+        if ($old_version < 171) {
+            try {
+                $this->_db->query('ALTER TABLE `nl2_store_orders` ADD INDEX `nl2_store_orders_idx_to_customer_id` (`to_customer_id`)');
+                $this->_db->query('ALTER TABLE `nl2_store_orders` ADD INDEX `nl2_store_orders_idx_from_customer_id` (`from_customer_id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_orders_products` ADD INDEX `nl2_store_orders_products_idx_order_id` (`order_id`)');
+                $this->_db->query('ALTER TABLE `nl2_store_orders_products` ADD INDEX `nl2_store_orders_products_idx_product_id` (`product_id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_payments` ADD INDEX `nl2_store_payments_idx_order_id` (`order_id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_customers` ADD INDEX `nl2_store_customers_idx_user_id` (`user_id`)');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+        }
     }
 
     private function initialise() {
@@ -1047,7 +1120,13 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_categories')) {
             try {
-                $this->_db->createTable('store_categories', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(128) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `only_subcategories` tinyint(1) NOT NULL DEFAULT \'0\', `parent_category` int(11) DEFAULT NULL, `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_categories', ' `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(128) NOT NULL, `description` mediumtext, `url` varchar(255) DEFAULT NULL, `image` varchar(128) DEFAULT NULL, `only_subcategories` tinyint(1) NOT NULL DEFAULT \'0\', `parent_category` int(11) DEFAULT NULL, `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
+
+                $this->_db->insert('store_categories', [
+                    'name' => 'Home',
+                    'description' => '',
+                    'order' => 0
+                ]);
             } catch (Exception $e) {
                 // Error
             }
@@ -1055,7 +1134,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_products')) {
             try {
-                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price_cents` int(11) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `durability` varchar(128) DEFAULT NULL, `global_limit` varchar(128) DEFAULT NULL, `user_limit` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `required_groups` varchar(128) DEFAULT NULL, `required_integrations` varchar(128) DEFAULT NULL, `min_player_age` varchar(128) DEFAULT NULL, `min_player_playtime` varchar(128) DEFAULT NULL, `allowed_gateways` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price_cents` int(11) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `durability` varchar(128) DEFAULT NULL, `recurring_payment_type` int(11) NOT NULL DEFAULT \'1\', `global_limit` varchar(128) DEFAULT NULL, `user_limit` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `require_one_product` tinyint(1) NOT NULL DEFAULT \'0\', `required_groups` varchar(128) DEFAULT NULL, `required_integrations` varchar(128) DEFAULT NULL, `min_player_age` varchar(128) DEFAULT NULL, `min_player_playtime` varchar(128) DEFAULT NULL, `allowed_gateways` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1096,6 +1175,9 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_orders')) {
             try {
                 $this->_db->createTable('store_orders', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `from_customer_id` int(11) NOT NULL, `to_customer_id` int(11) NOT NULL, `created` int(11) NOT NULL, `ip` varchar(128) DEFAULT NULL, `coupon_id` int(11) DEFAULT NULL, PRIMARY KEY (`id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_orders` ADD INDEX `nl2_store_orders_idx_to_customer_id` (`to_customer_id`)');
+                $this->_db->query('ALTER TABLE `nl2_store_orders` ADD INDEX `nl2_store_orders_idx_from_customer_id` (`from_customer_id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1104,6 +1186,9 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_orders_products')) {
             try {
                 $this->_db->createTable('store_orders_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `product_id` int(11) NOT NULL, `quantity` int(11) NOT NULL DEFAULT \'1\', `amount_cents` int(11) NOT NULL, `expire` int(11) DEFAULT NULL, `task_id` int(11) DEFAULT NULL, PRIMARY KEY (`id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_orders_products` ADD INDEX `nl2_store_orders_products_idx_order_id` (`order_id`)');
+                $this->_db->query('ALTER TABLE `nl2_store_orders_products` ADD INDEX `nl2_store_orders_products_idx_product_id` (`product_id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1120,6 +1205,8 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_payments')) {
             try {
                 $this->_db->createTable('store_payments', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `payment_id` varchar(64) DEFAULT NULL, `agreement_id` varchar(64) DEFAULT NULL, `transaction` varchar(32) DEFAULT NULL, `amount_cents` int(11) DEFAULT NULL, `currency` varchar(11) DEFAULT NULL, `fee_cents` int(11) DEFAULT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `last_updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_payments` ADD INDEX `nl2_store_payments_idx_order_id` (`order_id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1128,6 +1215,8 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_customers')) {
             try {
                 $this->_db->createTable('store_customers', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `integration_id` int(11) NOT NULL, `username` varchar(64) DEFAULT NULL, `identifier` varchar(64) DEFAULT NULL, `cents` bigint(20) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_customers` ADD INDEX `nl2_store_customers_idx_user_id` (`user_id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1142,11 +1231,11 @@ class Store_Module extends Module {
         }
 
         if (!$this->_db->get('settings', ['module', '=', 'Store'])->count()) {
-            Util::setSetting('checkout_complete_content', 'Thanks for your payment, It can take up to 15 minutes for your payment to be processed', 'Store');
-            Util::setSetting('currency', 'USD', 'Store');
-            Util::setSetting('currency_symbol', '$', 'Store');
-            Util::setSetting('allow_guests', 0, 'Store');
-            Util::setSetting('player_login', 0, 'Store');
+            Settings::set('checkout_complete_content', 'Thanks for your payment, It can take up to 15 minutes for your payment to be processed', 'Store');
+            Settings::set('currency', 'USD', 'Store');
+            Settings::set('currency_symbol', '$', 'Store');
+            Settings::set('allow_guests', 0, 'Store');
+            Settings::set('player_login', 0, 'Store');
         }
 
         if (!$this->_db->showTables('store_gateways')) {
@@ -1186,6 +1275,17 @@ class Store_Module extends Module {
                     'max' => '2',
                     'default_value' => '1',
                     'order' => '0'
+                ]);
+
+                $this->_db->insert('store_fields', [
+                    'identifier' => 'price',
+                    'description' => 'Pay what you want',
+                    'type' => '4',
+                    'required' => '1',
+                    'min' => '1',
+                    'max' => '9',
+                    'default_value' => '',
+                    'order' => '1'
                 ]);
             } catch (Exception $e) {
                 // Error

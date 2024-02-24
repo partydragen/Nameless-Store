@@ -142,7 +142,7 @@
     "admin/product_name": "Název produktu",
     "admin/product_updated_successfully": "Produkt úspěšně upraven.",
     "admin/products": "Produkty",
-    "admin/purchase_hook_info": "Nová platba v obchodě",
+    "admin/purchase_hook_info": "Nový nákup v obchodě",
     "admin/radio": "Výběr z možností",
     "admin/remove_credits": "Odebrat kredity",
     "admin/select_multiple_with_ctrl": "(vyberte více držením Ctrl (Cmd na Macu))",
@@ -151,8 +151,6 @@
     "admin/start_date": "Datum začátku",
     "admin/status": "Stav",
     "admin/store_configuration": "Nastavení obchodu",
-    "admin/store_content_max": "Obsah domovské stránky obchodu může obsahovat maximálně 60 000 znaků.",
-    "admin/store_index_content": "Obsah domovské stránky obchodu",
     "admin/store_path": "Cesta k obchodu",
     "admin/subscriptions": "Předplatná",
     "admin/successfully_added_credits": "Uživateli úspěšně přidáno {{amount}} kreditů",
@@ -271,5 +269,14 @@
     "admin/customer_product_expired": "Produkt zákazníka vypršel",
     "admin/customer": "Zákazník",
     "admin/recipient": "Příjemce",
-    "general/coupon": "Kupon"
+    "general/coupon": "Kupon",
+    "admin/queued_actions": "Akce ve frontě",
+    "admin/queued_actions_results": "{{pending_actions}} čeká, {{completed_actions}} dokončeno",
+    "general/most_purchases": "Nejvíce nákupů",
+    "general/most_money_spent": "Nejvíce utracených peněz",
+    "general/most_credits": "Nejvíce kreditů",
+    "admin/pretty_url": "Pěkné adresy",
+    "admin/pretty_url_regex_error": "Pěkné adresy mohou obsahovat pouze písmena, čísla a pomlčky",
+    "admin/order_id": "ID objednávky",
+    "admin/delete_payment": "Odstranit platbu"
 }

@@ -29,7 +29,7 @@ class Store {
     }
 
     public function getStoreURL(): string {
-        return Util::getSetting('store_path', '/store', 'Store');
+        return Settings::get('store_path', '/store', 'Store');
     }
 
     // Get all products
@@ -88,16 +88,10 @@ class Store {
         $store_url = $this->getStoreURL();
         $categories = [];
 
-        $categories[] = [
-            'url' => URL::build($store_url),
-            'title' => self::getLanguage()->get('general', 'home'),
-            'active' => Output::getClean($active) == 'Home'
-        ];
-
         $categories_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE parent_category IS NULL AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC')->results();
         if (count($categories_query)) {
             foreach ($categories_query as $item) {
-                $subcategories_query = DB::getInstance()->query('SELECT id, `name` FROM nl2_store_categories WHERE parent_category = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', [$item->id])->results();
+                $subcategories_query = DB::getInstance()->query('SELECT id, `name`, `url` FROM nl2_store_categories WHERE parent_category = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', [$item->id])->results();
 
                 $subcategories = [];
                 $sub_active = false;
@@ -106,7 +100,7 @@ class Store {
                         $sub_active = Output::getClean($active) == Output::getClean($subcategory->name);
 
                         $subcategories[] = [
-                            'url' => URL::build($store_url . '/category/' . Output::getClean($subcategory->id)),
+                            'url' => URL::build($store_url . '/category/' . (empty($subcategory->url) ? $subcategory->id : $subcategory->url)),
                             'title' => Output::getClean($subcategory->name),
                             'active' => $sub_active
                         ];
@@ -114,7 +108,7 @@ class Store {
                 }
 
                 $categories[$item->id] = [
-                    'url' => URL::build($store_url . '/category/' . Output::getClean($item->id)),
+                    'url' => URL::build($store_url . '/category/' . (empty($item->url) ? $item->id : $item->url)),
                     'title' => Output::getClean($item->name),
                     'subcategories' => $subcategories,
                     'active' => !$sub_active && Output::getClean($active) == Output::getClean($item->name),
@@ -127,7 +121,7 @@ class Store {
     }
 
     public function isPlayerSystemEnabled(): bool {
-        return Util::getSetting('player_login', '0', 'Store');
+        return Settings::get('player_login', '0', 'Store');
     }
 
     /**
@@ -142,15 +136,15 @@ class Store {
     }
 
     public static function getStorePath(): string {
-        return Util::getSetting('store_path', '/store', 'Store');
+        return Settings::get('store_path', '/store', 'Store');
     }
 
     public static function getCurrency(): string {
-        return Util::getSetting('currency', 'USD', 'Store');
+        return Settings::get('currency', 'USD', 'Store');
     }
 
     public static function getCurrencySymbol(): string {
-        return Util::getSetting('currency_symbol', '$', 'Store');
+        return Settings::get('currency_symbol', '$', 'Store');
     }
 
     /**
@@ -190,8 +184,8 @@ class Store {
      *  Returns JSON object with information about any updates
      */
     public static function updateCheck() {
-        $current_version = Util::getSetting('nameless_version');
-        $uid = Util::getSetting('unique_id');
+        $current_version = Settings::get('nameless_version');
+        $uid = Settings::get('unique_id');
 
         $enabled_modules = Module::getModules();
         foreach ($enabled_modules as $enabled_item) {

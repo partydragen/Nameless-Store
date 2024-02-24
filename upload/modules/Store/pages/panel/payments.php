@@ -141,7 +141,7 @@ if (isset($_GET['customer'])) {
         if (Token::check(Input::get('token'))) {
             if (Input::get('action') == 'delete_payment') {
                 // Delete payment only if payment is manual
-                if ($payment->data()->gateway_id == 0) {
+                if ($user->hasPermission('staffcp.store.payments.delete') && ($payment->data()->gateway_id == 0 || (defined('DEBUGGING') && DEBUGGING))) {
                     $payment->delete();
 
                     Session::flash('store_payment_success', $store_language->get('admin', 'payment_deleted_successfully'));
@@ -231,7 +231,7 @@ if (isset($_GET['customer'])) {
     }
 
     // Allow manual payment deletion
-    if ($payment->data()->gateway_id == 0) {
+    if ($user->hasPermission('staffcp.store.payments.delete') && ($payment->data()->gateway_id == 0 || (defined('DEBUGGING') && DEBUGGING))) {
         $smarty->assign([
             'DELETE_PAYMENT' => $language->get('admin', 'delete'),
             'CONFIRM_DELETE_PAYMENT' => $store_language->get('admin', 'confirm_payment_deletion'),
@@ -274,6 +274,8 @@ if (isset($_GET['customer'])) {
         'RECIPIENT_STYLE' => $recipient_style,
         'IGN' => $store_language->get('admin', 'ign'),
         'IGN_VALUE' => $recipient_username,
+        'ORDER_ID' => $store_language->get('admin', 'order_id'),
+        'ORDER_ID_VALUE' => Output::getClean($payment->data()->order_id),
         'TRANSACTION' => $store_language->get('admin', 'transaction'),
         'TRANSACTION_VALUE' => Output::getClean($payment->data()->transaction),
         'PAYMENT_METHOD' => $store_language->get('admin', 'payment_method'),
@@ -325,6 +327,10 @@ if (isset($_GET['customer'])) {
 } else if (isset($_GET['action'])) {
     if ($_GET['action'] == 'create') {
         // Create payment
+        if (!$user->hasPermission('staffcp.store.payments.create')) {
+            Redirect::to(URL::build('/panel/store/payments'));
+        }
+
         if (Input::exists()) {
             $errors = [];
 
@@ -378,6 +384,7 @@ if (isset($_GET['customer'])) {
                             'order_id' => $order->data()->id,
                             'gateway_id' => 0,
                             'amount_cents' => Store::toCents(Input::get('price')),
+                            'transaction' => 'Manual',
                             'currency' => Store::getCurrency()
                         ]);
 
@@ -425,109 +432,39 @@ if (isset($_GET['customer'])) {
         $template_file = 'store/payments_new.tpl';
     }
 } else {
-    $payments = $store->getAllPayments();
-
-    if (count($payments)) {
-        $template_payments = [];
-
-        foreach ($payments as $paymentQuery) {
-            $payment = new Payment(null, null, $paymentQuery);
-
-            // Recipient
-            if ($paymentQuery->to_customer_id) {
-                $recipient = new Customer(null, $paymentQuery->to_customer_id, 'id');
-            } else {
-                $recipient = new Customer(null, $paymentQuery->user_id, 'user_id');
-            }
-
-            if ($recipient->exists() && $recipient->getUser()->exists()) {
-                $recipient_user = $recipient->getUser();
-                $username = $recipient->getUsername();
-                $avatar = $recipient_user->getAvatar();
-                $style = $recipient_user->getGroupStyle();
-                $identifier = Output::getClean($recipient->getIdentifier());
-                $link = URL::build('/panel/users/store/', 'user=' . $recipient_user->data()->id);
-            } else {
-                $username = $recipient->getUsername();
-                $avatar = AvatarSource::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
-                $style = '';
-                $identifier = Output::getClean($recipient->getIdentifier());
-                $link = URL::build('/panel/store/payments/', 'customer=' . $username);
-            }
-
-            $template_payments[] = [
-                'user_link' =>  $link,
-                'user_style' => $style,
-                'user_avatar' => $avatar,
-                'username' => $username,
-                'uuid' => $identifier,
-                'status_id' => $paymentQuery->status_id,
-                'status' => $payment->getStatusHtml(),
-                'currency_symbol' => Output::getClean(Store::getCurrencySymbol()),
-                'amount' => Store::fromCents($paymentQuery->amount_cents),
-                'amount_format' => Output::getPurified(
-                    Store::formatPrice(
-                        $paymentQuery->amount_cents,
-                        $paymentQuery->currency,
-                        Store::getCurrencySymbol(),
-                        STORE_CURRENCY_FORMAT,
-                    )
-                ),
-                'date' => date(DATE_FORMAT, $paymentQuery->created),
-                'date_unix' => Output::getClean($paymentQuery->created),
-                'is_subscription' => $paymentQuery->subscription_id != null,
-                'link' => URL::build('/panel/store/payments/', 'payment=' . Output::getClean($paymentQuery->id))
-            ];
-        }
-
-        $smarty->assign([
-            'VIEW' => $store_language->get('admin', 'view'),
-            'ALL_PAYMENTS' => $template_payments
-        ]);
-
-        if (!defined('TEMPLATE_STORE_SUPPORT')) {
-            $template->assets()->include([
-                AssetTree::DATATABLES
-            ]);
-
-            $template->addJSScript('
-                $(document).ready(function() {
-                    $(\'.dataTables-payments\').dataTable({
-                        responsive: true,
-                        order: [[ 3, "desc" ]],
-                        language: {
-                            "lengthMenu": "' . $language->get('table', 'display_records_per_page') . '",
-                            "zeroRecords": "' . $language->get('table', 'nothing_found') . '",
-                            "info": "' . $language->get('table', 'page_x_of_y') . '",
-                            "infoEmpty": "' . $language->get('table', 'no_records') . '",
-                            "infoFiltered": "' . $language->get('table', 'filtered') . '",
-                            "search": "' . $language->get('general', 'search') . '",
-                            "paginate": {
-                                "next": "' . $language->get('general', 'next') . '",
-                                "previous": "' . $language->get('general', 'previous') . '"
-                            }
-                        }
-                    });
-                });
-            ');
-        }
-
-    } else
-        $smarty->assign('NO_PAYMENTS', $store_language->get('admin', 'no_payments'));
-
-    $smarty->assign([
-        'CREATE_PAYMENT' => $store_language->get('admin', 'create_payment'),
-        'CREATE_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'action=create')
+    // View all payments
+    $template->assets()->include([
+        AssetTree::DATATABLES
     ]);
 
-    $template_file = 'store/payments.tpl';
+    $smarty->assign([
+        'VIEW' => $store_language->get('admin', 'view'),
+        'QUERY_PAYMENTS_LINK' => URL::build('/queries/payments'),
+        'VIEW_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'payment='),
+        'DISPLAY_RECORDS_PER_PAGE' => $language->get('table', 'display_records_per_page'),
+        'NOTHING_FOUND' => $language->get('table', 'nothing_found'),
+        'PAGE_X_OF_Y' => $language->get('table', 'page_x_of_y'),
+        'NO_RECORDS' => $language->get('table', 'no_records'),
+        'FILTERED' => $language->get('table', 'filtered'),
+        'SEARCH' => $language->get('general', 'search'),
+        'NEXT' => $language->get('general', 'next'),
+        'PREVIOUS' => $language->get('general', 'previous')
+    ]);
 
+    if ($user->hasPermission('staffcp.store.payments.create')) {
+        $smarty->assign([
+            'CREATE_PAYMENT' => $store_language->get('admin', 'create_payment'),
+            'CREATE_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'action=create'),
+        ]);
+    }
+
+    $template_file = 'store/payments.tpl';
 }
 
 $smarty->assign([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
-    'STORE' => $store_language->get('admin', 'store'),
+    'STORE' => $store_language->get('general', 'store'),
     'PAGE' => PANEL_PAGE,
     'TOKEN' => Token::get(),
     'SUBMIT' => $language->get('general', 'submit'),

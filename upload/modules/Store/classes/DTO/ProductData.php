@@ -14,6 +14,7 @@ class ProductData {
     public ?string $required_products;
     public ?string $required_groups;
     public ?string $required_integrations;
+    public bool $require_one_product;
     public ?string $allowed_gateways;
     public ?string $min_player_age;
     public ?string $min_player_playtime;
@@ -38,6 +39,7 @@ class ProductData {
         $this->required_products = $row->required_products;
         $this->required_groups = $row->required_groups;
         $this->required_integrations = $row->required_integrations;
+        $this->require_one_product = $row->require_one_product;
         $this->allowed_gateways = $row->allowed_gateways;
         $this->min_player_age = $row->min_player_age;
         $this->min_player_playtime = $row->min_player_playtime;

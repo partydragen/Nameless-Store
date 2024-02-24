@@ -81,11 +81,21 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="link_location">{$CURRENCY}</label>
-                                            <select class="form-control" id="currency" name="currency">
-                                                {foreach from=$CURRENCY_LIST item=currency}
-                                                    <option value="{$currency}"{if $CURRENCY_VALUE eq {$currency}} selected{/if}>{$currency}</option>
-                                                {/foreach}
-                                            </select>
+                                            <div class="input-group">
+                                                <select class="form-control" id="currency" name="currency">
+                                                    {foreach from=$CURRENCY_LIST item=currency}
+                                                        <option value="{$currency}"{if $CURRENCY_VALUE eq {$currency}} selected{/if}>{$currency}</option>
+                                                    {/foreach}
+
+                                                    {if !empty($CUSTOM_CURRENCY_VALUE)}
+                                                        <option value="USD" selected>Custom</option>
+                                                    {/if}
+                                                </select>
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">OR</span>
+                                                </div>
+                                                <input type="text" name="custom_currency" class="form-control" id="inputCustomCurrency" value="{$CUSTOM_CURRENCY_VALUE}" placeholder="Custom code (Use at own risk)">
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -114,11 +124,6 @@
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="inputStoreContent">{$STORE_INDEX_CONTENT}</label>
-                                            <textarea id="inputStoreContent" name="store_content">{$STORE_INDEX_CONTENT_VALUE}</textarea>
-                                        </div>
-
-                                        <div class="form-group">
                                             <label for="inputCheckoutCompleteContent">{$CHECKOUT_COMPLETE_CONTENT}</label>
                                             <textarea id="inputCheckoutCompleteContent" name="checkout_complete_content">{$CHECKOUT_COMPLETE_CONTENT_VALUE}</textarea>
                                         </div>
@@ -138,7 +143,7 @@
                             </form>
 
                         <center>
-                            <p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a></br>
+                            <p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a></br>
                                 <a class="ml-1" href="https://partydragen.com/suggestions/" target="_blank" data-toggle="tooltip"
                                    data-placement="top" title="You can submit suggestions here"><i class="fa-solid fa-thumbs-up text-warning"></i></a>
                                 <a class="ml-1" href="https://discord.gg/TtH6tpp" target="_blank" data-toggle="tooltip"

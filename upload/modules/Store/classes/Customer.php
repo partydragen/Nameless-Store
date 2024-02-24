@@ -221,9 +221,9 @@ class Customer {
     }
     
     public function login($username, $save = true) {
-        $validation_method = Util::getSetting('username_validation_method', 'nameless', 'Store');
+        $validation_method = Settings::get('username_validation_method', 'nameless', 'Store');
         if ($validation_method == 'nameless') {
-            $validation_method = Util::getSetting('uuid_linking') ? 'mojang' : 'no_validation';
+            $validation_method = Settings::get('uuid_linking') ? 'mojang' : 'no_validation';
         }
 
         switch ($validation_method) {

@@ -21,6 +21,15 @@ class PaymentCompletedEvent extends AbstractEvent implements HasWebhookParams, D
     }
 
     public function webhookParams(): array {
+        $products_list = [];
+        foreach ($this->order->getProducts() as $product) {
+            $products_list[] = [
+                'id' => $product->data()->id,
+                'name' => $product->data()->name,
+                'fields' => $this->order->getProductFields($product->data()->id)
+            ];
+        }
+
         return [
             'id' => $this->payment->data()->id,
             'order_id' => $this->payment->data()->order_id,
@@ -45,7 +54,8 @@ class PaymentCompletedEvent extends AbstractEvent implements HasWebhookParams, D
                 'user_id' => $this->recipient->exists() ? $this->recipient->data()->user_id ?? 0 : 0,
                 'username' => $this->recipient->getUsername(),
                 'identifier' => $this->recipient->getIdentifier(),
-            ]
+            ],
+            'products' => $products_list
         ];
     }
 
@@ -62,7 +72,7 @@ class PaymentCompletedEvent extends AbstractEvent implements HasWebhookParams, D
         $placeholders['{gateway}'] = $this->payment->getGateway() != null ? $this->payment->getGateway()->getName() : 'Unknown';
         $placeholders['{isSubscription}'] = $this->payment->data()->subscription_id == null ? 'false' : 'true';
 
-        $discord_message = Util::getSetting('discord_message', 'New payment from {username} who bought the following products {products}', 'Store');
+        $discord_message = Settings::get('discord_message', 'New payment from {username} who bought the following products {products}', 'Store');
         $discord_message = str_replace(array_keys($placeholders), array_values($placeholders), $discord_message);
 
         return DiscordWebhookBuilder::make()

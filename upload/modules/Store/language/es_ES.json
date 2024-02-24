@@ -16,7 +16,6 @@
     "admin/customer_product_expired": "Producto del cliente caducado",
     "admin/product_confirm_delete": "¿Está seguro de que desea eliminar este producto?",
     "admin/select_multiple_with_ctrl": "(seleccionar varios manteniendo presionado Ctrl (Cmd en Mac))",
-    "admin/store_content_max": "El contenido del índice de la tienda debe tener un máximo de 60000 caracteres.",
     "admin/viewing_payments_for_user_x": "Viendo pagos del usuario {{user}}",
     "general/widget_cached": "El widget de las últimas compras está en caché durante 2 minutos. Es posible que tus cambios no se apliquen de inmediato.",
     "general/x_field_minimum_y": "{{field}} debe tener como mínimo {{min}} caracteres.",
@@ -234,7 +233,6 @@
     "admin/start_date": "Fecha de inicio",
     "admin/expire_date": "Fecha de caducidad",
     "admin/store_configuration": "Configuración de la tienda",
-    "admin/store_index_content": "Contenido del índice de la tienda",
     "admin/store_path": "Ruta de la tienda",
     "admin/subscriptions": "Suscripciones",
     "admin/successfully_added_credits": "Se agregaron {{amount}} créditos al usuario con éxito",
@@ -268,5 +266,15 @@
     "general/must_be_greater_then_x": "El monto debe ser mayor a {{amount}}",
     "general/successfully_sent_credits": "Créditos enviados exitosamente: {{amount}} a {{user}}",
     "general/my_transactions": "Mis transacciones",
-    "general/no_transactions": "No tienes ninguna transacción."
+    "general/no_transactions": "No tienes ninguna transacción.",
+    "admin/pretty_url": "URL amigable",
+    "admin/pretty_url_regex_error": "La URL amigable solo puede contener letras, números y guiones",
+    "admin/customer": "Cliente",
+    "admin/recipient": "Destinatario",
+    "general/coupon": "Cupón",
+    "general/most_purchases": "La mayoría de las compras",
+    "general/most_credits": "Más créditos",
+    "general/most_money_spent": "Más dinero gastado",
+    "admin/queued_actions": "Acciones en cola",
+    "admin/queued_actions_results": "{{pending_actions}} Pendientes, {{completed_actions}} Completadas"
 }

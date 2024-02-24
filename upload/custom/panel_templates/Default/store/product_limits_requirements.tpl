@@ -109,6 +109,10 @@
                                     {/foreach}
                                 </select>
                             </div>
+                            <div class="form-group custom-control custom-switch">
+                                <input id="inputOnlyRequireOneProduct" name="require_one_product" type="checkbox" class="custom-control-input"{if $REQUIRE_ONE_PRODUCT_VALUE eq 1} checked{/if} />
+                                <label class="custom-control-label" for="inputOnlyRequireOneProduct">Only require one of the required products</label>
+                            </div>
                             <div class="form-group">
                                 <label for="inputRequiredGroups">Required Groups</label> <span
                                         class="badge badge-info"><i class="fas fa-question-circle"
@@ -190,7 +194,7 @@
                         </form>
 
                         <center>
-                            <p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a></br>
+                            <p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a></br>
                                 <a class="ml-1" href="https://partydragen.com/suggestions/" target="_blank" data-toggle="tooltip"
                                    data-placement="top" title="You can submit suggestions here"><i class="fa-solid fa-thumbs-up text-warning"></i></a>
                                 <a class="ml-1" href="https://discord.gg/TtH6tpp" target="_blank" data-toggle="tooltip"
