@@ -373,7 +373,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
             case 'past_due':
             case 'unpaid':
             case 'trialing':
-                $status_id = Subscription::COMPLETED;
+                $status_id = Subscription::ACTIVE;
                 break;
             case 'incomplete_expired':
             case 'canceled':

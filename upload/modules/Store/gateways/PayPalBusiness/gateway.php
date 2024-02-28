@@ -331,7 +331,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                             $subscription = new Subscription($response->resource->id, 'agreement_id');
                             if ($subscription->exists()) {
                                 $subscription->update([
-                                    'status_id' => Subscription::COMPLETED
+                                    'status_id' => Subscription::ACTIVE
                                 ]);
 
                                 EventHandler::executeEvent(new SubscriptionCreatedEvent($subscription));
@@ -362,7 +362,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                             $subscription = new Subscription($response->resource->id, 'agreement_id');
                             if ($subscription->exists()) {
                                 $subscription->update([
-                                    'status_id' => Subscription::COMPLETED,
+                                    'status_id' => Subscription::ACTIVE,
                                     'updated' => date('U')
                                 ]);
                             }
