@@ -199,11 +199,13 @@ class PayPal_Gateway extends GatewayBase {
 
                 echo 'success';
             } else {
-                ErrorHandler::logWarning('[Store] [PayPal Gateway] Paypal email mismatch!');
+                http_response_code(500);
+                $this->logError('Paypal email mismatch!');
                 die('Error');
             }
         } else {
-            ErrorHandler::logWarning('[Store] [PayPal Gateway] Could not verify payment!');
+            http_response_code(500);
+            $this->logError('Could not verify payment!');
             die('Error');
         }
     }

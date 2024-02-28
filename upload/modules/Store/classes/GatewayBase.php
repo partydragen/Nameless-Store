@@ -154,6 +154,10 @@ abstract class GatewayBase {
         return $this->_errors;
     }
 
+    public function logError(string $error): void {
+        ErrorHandler::logWarning('[Store] [' . $this->getName() . '] ' . $error);
+    }
+
     /**
      * Called when customer view checkout page
      *

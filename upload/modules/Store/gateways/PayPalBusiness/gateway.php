@@ -60,7 +60,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
 
                 Redirect::to($payment->getApprovalLink());
             } catch (\PayPal\Exception\PayPalConnectionException $ex) {
-                ErrorHandler::logCustomError($ex->getData());
+                $this->logError($ex->getData());
             }
         } else {
             // Payment subscription
@@ -99,7 +99,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
     public function handleReturn(): bool {
         if (isset($_GET['do']) && $_GET['do'] == 'success') {
             if (!isset($_GET['paymentId']) && !isset($_GET['token'])) {
-                ErrorHandler::logCustomError('Unknown payment id');
+                $this->logError('Unknown payment id');
                 $this->addError('There was a error processing this order');
                 return false;
             }
@@ -121,7 +121,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                     $result = $payment->execute($execution, $apiContext);
                     $payment = \PayPal\Api\Payment::get($paymentId, $apiContext);
                 } catch (Exception $e) {
-                    ErrorHandler::logCustomError('Message: ' . $e->getMessage());
+                    $this->logError('Message: ' . $e->getMessage());
                     $this->addError('There was a error processing this order');
                     return false;
                 }
@@ -155,7 +155,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                 try {
                     $agreement->execute($token, $apiContext);
                 } catch (Exception $ex) {
-                    ErrorHandler::logCustomError('Message: Failed to get activate: ' . $ex);
+                    $this->logError('Message: Failed to get activate: ' . $ex);
                     $this->addError('There was a error processing this order');
                     return false;
                 }
@@ -287,11 +287,15 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
 
                                         $subscription->sync();
                                     }
+                                } else {
+                                    http_response_code(503);
+                                    $this->logError('Could not handle payment for invalid subscription ' . $response->resource->billing_agreement_id);
                                 }
                             } else {
-                                /// Unknown payment
+                                // Unknown payment
+                                http_response_code(500);
+                                $this->logError('Unknown payment type');
                                 throw new Exception('Unknown payment type');
-                                die('Unknown payment type');
                             }
 
                             break;
@@ -372,7 +376,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                             break;
                         default:
                             // Error
-                            ErrorHandler::logCustomError('[PayPal] Unknown event type ' . $response->event_type);
+                            $this->logError('Unknown event type ' . $response->event_type);
                             break;
                     }
                 } else {
@@ -384,14 +388,14 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
 
             } catch (\PayPal\Exception\PayPalInvalidCredentialException $e) {
                 // Error verifying webhook
-                ErrorHandler::logCustomError('[PayPal] ' . $e->errorMessage());
+                $this->logError($e->errorMessage());
             } catch (Exception $e) {
-                ErrorHandler::logCustomError('[PayPal] ' . $e->getMessage());
+                $this->logError($e->getMessage());
             }
         }
     }
 
-    private function getApiContext() {
+    private function getApiContext(): ?\PayPal\Rest\ApiContext {
         $client_id = StoreConfig::get('paypal_business.client_id');
         $client_secret = StoreConfig::get('paypal_business.client_secret');
 
@@ -450,16 +454,19 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                 
                 return $apiContext;
             } catch (Exception $e) {
-                ErrorHandler::logCustomError($e->getData());
+                $this->logError($e->getData());
                 $this->addError('PayPal integration incorrectly configured!');
             }
         } else {
+            $this->logError('Client ID and Client secret not setup');
             $this->addError('Administration have not completed the configuration of this gateway!');
         }
+
+        return null;
     }
 
     public function createSubscription(): void {
-        // TODO: Implement createSubscription() method.
+
     }
 
     public function cancelSubscription(Subscription $subscription): bool {

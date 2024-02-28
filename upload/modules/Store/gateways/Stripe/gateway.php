@@ -66,7 +66,8 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                 $session = $stripe->checkout->sessions->create($json);
                 Redirect::to($session->url);
             } catch (\Stripe\Exception\ApiErrorException $e) {
-                ErrorHandler::logCustomError($e->getMessage());
+                $this->logError($e->getMessage());
+                $this->addError('Somethings went wrong, Please contact administration!');
             }
 
             return;
@@ -112,7 +113,8 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
             $session = $stripe->checkout->sessions->create($json);
             Redirect::to($session->url);
         } catch (\Stripe\Exception\ApiErrorException $e) {
-            ErrorHandler::logCustomError($e->getMessage());
+            $this->logError($e->getMessage());
+            $this->addError('Somethings went wrong, Please contact administration!');
         }
     }
 
@@ -129,7 +131,8 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
 
         $webhook_secret = StoreConfig::get('stripe.hook_key');
         if (!$webhook_secret) {
-            ErrorHandler::logCustomError('No webhook secret found. Is it set up?');
+            http_response_code(500);
+            $this->logError('No webhook secret found. Is it set up?');
             return;
         }
 
@@ -147,7 +150,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
             );
         } catch (\UnexpectedValueException | \Stripe\Exception\SignatureVerificationException $e) {
             http_response_code(400);
-            ErrorHandler::logCustomError($e->getMessage());
+            $this->logError($e->getMessage());
             return;
         }
 
@@ -239,7 +242,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                    ]);
                 } else {
                     http_response_code(503);
-                    ErrorHandler::logCustomError('[Stripe] Received subscription updated event for unknown subscription');
+                    $this->logError('Received subscription updated event for unknown subscription');
                 }
                 break;
 
@@ -278,14 +281,14 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                         ]);
                     } else {
                         http_response_code(503);
-                        ErrorHandler::logCustomError('[Stripe] Received invoice paid event for unknown subscription');
+                        $this->logError('Received invoice paid event for unknown subscription');
                     }
                 }
                 break;
         }
     }
 
-    private function getApiContext() {
+    private function getApiContext(): ?\Stripe\StripeClient {
         $secret_key = StoreConfig::get('stripe.secret_key');
 
         if ($secret_key) {
@@ -301,9 +304,9 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                     ]);
 
                     if ($webhook->secret == null || empty($webhook->secret)) {
-                        ErrorHandler::logCustomError('Could not generate webhook secret for Stripe gateway');
+                        $this->logError('Could not generate webhook secret');
                         $this->addError('Somethings went wrong, Please contact administration!');
-                        return;
+                        return null;
                     }
 
                     StoreConfig::set('stripe', [
@@ -313,7 +316,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
 
                 return $stripe;
             } catch (Exception $e) {
-                ErrorHandler::logCustomError($e->getMessage());
+                $this->logError($e->getMessage());
                 $this->addError('Stripe integration incorrectly configured!');
             }
         } else {
@@ -337,7 +340,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
             $stripe->subscriptions->cancel($subscription->data()->agreement_id);
             return true;
         } catch (\Stripe\Exception\ApiErrorException $e) {
-            ErrorHandler::logCustomError($e->getMessage());
+            $this->logError($e->getMessage());
             return false;
         }
     }
