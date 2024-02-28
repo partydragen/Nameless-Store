@@ -9,6 +9,12 @@
  */
 class Subscription {
 
+    public const PENDING = 0;
+    public const COMPLETED = 1;
+    public const CANCELLED = 2;
+    public const PAUSED = 3;
+    public const UNKNOWN = 4;
+
     private DB $_db;
 
     /**
