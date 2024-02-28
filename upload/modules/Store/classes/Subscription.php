@@ -110,7 +110,7 @@ class Subscription {
 
     public function cancelled(): void {
         $this->update([
-            'status_id' => 2,
+            'status_id' => self::CANCELLED,
             'updated' => date('U')
         ]);
 

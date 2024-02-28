@@ -190,7 +190,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                     'gateway_id' => $this->getId(),
                     'customer_id' => $order->customer()->data()->id,
                     'agreement_id' => $agreement->id,
-                    'status_id' => 0,
+                    'status_id' => Subscription::PENDING,
                     'amount_cents' => Store::toCents($payment_definitions->getAmount()->getValue()),
                     'currency' => $payment_definitions->getAmount()->getCurrency(),
                     'frequency' => $payment_definitions->getFrequency(),
@@ -327,7 +327,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                             $subscription = new Subscription($response->resource->id, 'agreement_id');
                             if ($subscription->exists()) {
                                 $subscription->update([
-                                    'status_id' => 1
+                                    'status_id' => Subscription::COMPLETED
                                 ]);
 
                                 EventHandler::executeEvent(new SubscriptionCreatedEvent($subscription));
@@ -343,23 +343,25 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
 
                             break;
                         case 'BILLING.SUBSCRIPTION.SUSPENDED':
-                            $id = $response->resource->id;
-
-                            DB::getInstance()->query('UPDATE `nl2_store_agreements` SET status = ?, updated = ? WHERE agreement_id = ?', [
-                                3,
-                                date('U'),
-                                $id
-                            ]);
+                            // Subscription suspended
+                            $subscription = new Subscription($response->resource->id, 'agreement_id');
+                            if ($subscription->exists()) {
+                                $subscription->update([
+                                    'status_id' => Subscription::PAUSED,
+                                    'updated' => date('U')
+                                ]);
+                            }
 
                             break;
                         case 'BILLING.SUBSCRIPTION.RE-ACTIVATED':
-                            $id = $response->resource->id;
-
-                            DB::getInstance()->query('UPDATE `nl2_store_agreements` SET status = ?, updated = ? WHERE agreement_id = ?', [
-                                1,
-                                date('U'),
-                                $id
-                            ]);
+                            // Subscription re-activated
+                            $subscription = new Subscription($response->resource->id, 'agreement_id');
+                            if ($subscription->exists()) {
+                                $subscription->update([
+                                    'status_id' => Subscription::COMPLETED,
+                                    'updated' => date('U')
+                                ]);
+                            }
 
                             break;
                         case 'BILLING.PLAN.CREATED':
@@ -492,8 +494,6 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
             $next_billing_date = date("U", strtotime($agreement->getAgreementDetails()->getNextBillingDate()));
         }
 
-        $agreement->getState();
-
         $subscription->update([
             'last_payment_date' => $last_payment_date,
             'next_billing_date' => $next_billing_date,
@@ -503,8 +503,6 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
     }
 
     public function chargePayment(Subscription $subscription): bool {
-        // TODO: Implement chargePayment() method.
-
         return false;
     }
 
@@ -530,7 +528,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
     }
 
     public function createPlan(Product $product): PayPal\Api\Plan {
-        $durability_json = json_decode($product->data()->durability, true) ?? [];
+        $duration_json = json_decode($product->data()->durability, true) ?? [];
 
         $plan = new PayPal\Api\Plan();
         $plan->setName('Payment Order')
@@ -540,8 +538,8 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
         $paymentDefinition = new PayPal\Api\PaymentDefinition();
         $paymentDefinition->setName('Regular Payments')
             ->setType('REGULAR')
-            ->setFrequency($durability_json['period'] ?? 'month')
-            ->setFrequencyInterval($durability_json['interval'] ?? 1)
+            ->setFrequency($duration_json['period'] ?? 'month')
+            ->setFrequencyInterval($duration_json['interval'] ?? 1)
             ->setAmount(new PayPal\Api\Currency(array('value' => Store::fromCents($product->data()->price_cents), 'currency' => Store::getCurrency())));
 
         $merchantPreferences = new PayPal\Api\MerchantPreferences();

@@ -384,7 +384,7 @@ if (isset($_GET['do'])) {
 
             // Check of any products require certain gateways
             foreach ($shopping_cart->getProducts() as $product) {
-                $allowed_gateways = json_decode($product->data()->allowed_gateways, true) ?? [];
+                $allowed_gateways = json_decode($product->data()->allowed_gateways ?? '[]', true);
                 if (count($allowed_gateways) && !in_array($gateway->getId(), $allowed_gateways)) {
                     continue 2;
                 }

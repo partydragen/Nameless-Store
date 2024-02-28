@@ -33,9 +33,9 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
         $successRedirect = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=success');
         $cancelRedirect = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=cancel');
 
+        $products = [];
         if (!$order->isSubscriptionMode()) {
             // Single payment
-            $products = [];
             foreach ($order->getItems() as $item) {
                 $products[] = [
                     'price_data' => [
@@ -68,50 +68,51 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
             } catch (\Stripe\Exception\ApiErrorException $e) {
                 ErrorHandler::logCustomError($e->getMessage());
             }
-        } else {
-            // Payment subscription
-            $products = [];
-            foreach ($order->getItems() as $item) {
-                $product = $item->getProduct();
-                $durability_json = json_decode($product->data()->durability, true) ?? [];
 
-                $products[] = [
-                    'price_data' => [
-                        'currency' => $currency,
-                        'product_data' => [
-                            'name' => $product->data()->name,
-                        ],
-                        'unit_amount' => $item->getSingleQuantityPrice(),
-                        'recurring' => [
-                            'interval' => $durability_json['period'] ?? 'month',
-                            'interval_count' => $durability_json['interval'] ?? 1
-                        ]
+            return;
+        }
+
+        // Payment subscription
+        foreach ($order->getItems() as $item) {
+            $product = $item->getProduct();
+            $duration_json = json_decode($product->data()->durability, true) ?? [];
+
+            $products[] = [
+                'price_data' => [
+                    'currency' => $currency,
+                    'product_data' => [
+                        'name' => $product->data()->name,
                     ],
-                    'quantity' => $item->getQuantity()
-                ];
-            }
+                    'unit_amount' => $item->getSingleQuantityPrice(),
+                    'recurring' => [
+                        'interval' => $duration_json['period'] ?? 'month',
+                        'interval_count' => $duration_json['interval'] ?? 1
+                    ]
+                ],
+                'quantity' => $item->getQuantity()
+            ];
+        }
 
-            try {
-                $json = [
-                    'mode' => 'subscription',
-                    'line_items' => $products,
-                    'success_url' => $successRedirect,
-                    'cancel_url' => $cancelRedirect,
+        try {
+            $json = [
+                'mode' => 'subscription',
+                'line_items' => $products,
+                'success_url' => $successRedirect,
+                'cancel_url' => $cancelRedirect,
+                'metadata' => [
+                    'order_id' => $order->data()->id
+                ],
+                'subscription_data' => [
                     'metadata' => [
                         'order_id' => $order->data()->id
                     ],
-                    'subscription_data' => [
-                        'metadata' => [
-                            'order_id' => $order->data()->id
-                        ],
-                    ]
-                ];
+                ]
+            ];
 
-                $session = $stripe->checkout->sessions->create($json);
-                Redirect::to($session->url);
-            } catch (\Stripe\Exception\ApiErrorException $e) {
-                ErrorHandler::logCustomError($e->getMessage());
-            }
+            $session = $stripe->checkout->sessions->create($json);
+            Redirect::to($session->url);
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            ErrorHandler::logCustomError($e->getMessage());
         }
     }
 
@@ -234,6 +235,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                    $subscription->update([
                        'status_id' => $this->subscriptionStatus($data->status),
                        'next_billing_date' => $data->current_period_end,
+                       'updated' => date('U')
                    ]);
                 } else {
                     http_response_code(503);

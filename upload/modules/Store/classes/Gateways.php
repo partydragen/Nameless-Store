@@ -8,7 +8,7 @@
  * @license MIT
  */
 class Gateways extends Instanceable {
-    private static array $_gateways;
+    private array $_gateways = [];
 
     // Constructor, connect to database
     public function __construct() {
@@ -25,7 +25,7 @@ class Gateways extends Instanceable {
     }
 
     // Get all gateways
-    public function getAll() {
+    public function getAll(): array {
         return $this->_gateways;
     }
 

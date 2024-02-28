@@ -288,7 +288,7 @@ class Product {
         }
 
         $enabled_integrations = $integrations->getEnabledIntegrations();
-        $required_integrations = json_decode($this->data()->required_integrations, true) ?? [];
+        $required_integrations = json_decode($this->data()->required_integrations ?? '[]', true);
         foreach ($required_integrations as $item) {
             foreach ($enabled_integrations as $integration) {
                 if ($integration->data()->id == $item) {

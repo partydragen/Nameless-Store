@@ -40,10 +40,10 @@ class ExpireCustomerProductTask extends Task {
         $hasBeenScheduled = DB::getInstance()->query('SELECT COUNT(*) c FROM nl2_queue WHERE `task` = \'ExpireCustomerProductTask\' AND entity_id = ?', [$item_id])->first()->c;
 
         if (!$hasBeenScheduled) {
-            $durability = json_decode($product->data()->durability, true) ?? [];
+            $duration_json = json_decode($product->data()->durability, true) ?? [];
             $item = DB::getInstance()->query('SELECT id FROM nl2_store_orders_products WHERE order_id = ? AND product_id = ?', [$order->data()->id, $product->data()->id])->first();
 
-            $time = strtotime('+' . $durability['interval'] . ' ' . $durability['period']);
+            $time = strtotime('+' . $duration_json['interval'] . ' ' . $duration_json['period']);
             $success = Queue::schedule((new ExpireCustomerProductTask())->fromNew(
                 Module::getIdFromName('Store'),
                 'Expire Customer Product',
