@@ -145,7 +145,9 @@ class Action {
     /**
      * Execute actions for product and make placeholders
      */
-    public function execute(Order $order, Product $product, Payment $payment): void {
+    public function execute(Order $order, Item $item, Payment $payment): void {
+        $product = $item->getProduct();
+
         $placeholders = [];
 
         $quantity = 1;

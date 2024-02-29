@@ -13,7 +13,6 @@
 class Store_Module extends Module {
     private DB $_db;
     private $_store_language, $_language, $_cache, $_store_url;
-
     public function __construct($language, $store_language, $pages, $cache, $endpoints) {
         $this->_db = DB::getInstance();
         $this->_language = $language;

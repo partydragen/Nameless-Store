@@ -10,6 +10,11 @@
 class Item {
 
     /**
+     * @var int Get the item id.
+     */
+    private int $_item_id;
+
+    /**
      * @var Product The product for this item.
      */
     private Product $_product;
@@ -20,18 +25,39 @@ class Item {
     private int $_quantity;
 
     /**
-     * @var array The custom fields for this item.
+     * @var ?array The custom fields for this item.
      */
-    private array $_fields = [];
+    private ?array $_fields;
 
-    public function __construct(Product $product, int $quantity, array $fields) {
-        $this->_product = $product;
-        $this->_quantity = $quantity;
-        $this->_fields = $fields;
+    public function __construct(int $item_id, Product $product = null, int $quantity = null, array $fields = null) {
+        $this->_item_id = $item_id;
+
+        if ($product != null) {
+            $this->_product = $product;
+            $this->_quantity = $quantity;
+            $this->_fields = $fields;
+        } else {
+            $item_query = $this->_db->query('SELECT nl2_store_products.*, nl2_store_orders_products.quantity, nl2_store_orders_products.id AS item_id FROM nl2_store_orders_products INNER JOIN nl2_store_products ON nl2_store_products.id=product_id WHERE nl2_store_orders_products.id = ?', [$item_id]);
+            if ($item_query->count()) {
+                $item_query = $item_query->first();
+
+                $this->_product = new Product(null, null, $item_query);
+                $this->_quantity = $item_query->quantity;
+            }
+        }
     }
 
     /**
      * Get the product for this item.
+     *
+     * @return int
+     */
+    public function getId(): int {
+        return $this->_item_id;
+    }
+
+    /**
+     * Get the item id.
      *
      * @return Product
      */
@@ -104,6 +130,20 @@ class Item {
      */
     public function getFields(): array {
         return $this->_fields;
+    }
+
+    public function getFields(): array {
+        return $this->_fields ??= (function (): array {
+            $fields_query = $this->_db->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$this->data()->id, $product_id])->results();
+            foreach ($fields_query as $field) {
+                $fields[$field->identifier] = [
+                    'identifier' => Output::getClean($field->identifier),
+                    'value' => Output::getClean($field->value)
+                ];
+            }
+
+            return $items;
+        })();
     }
 
     /**

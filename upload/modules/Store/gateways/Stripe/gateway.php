@@ -36,7 +36,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
         $products = [];
         if (!$order->isSubscriptionMode()) {
             // Single payment
-            foreach ($order->getItems() as $item) {
+            foreach ($order->items()->getItems() as $item) {
                 $products[] = [
                     'price_data' => [
                         'currency' => $currency,
@@ -74,7 +74,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
         }
 
         // Payment subscription
-        foreach ($order->getItems() as $item) {
+        foreach ($order->items()->getItems() as $item) {
             $product = $item->getProduct();
             $duration_json = json_decode($product->data()->durability, true) ?? [];
 

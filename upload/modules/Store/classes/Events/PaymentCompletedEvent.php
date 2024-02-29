@@ -22,11 +22,13 @@ class PaymentCompletedEvent extends AbstractEvent implements HasWebhookParams, D
 
     public function webhookParams(): array {
         $products_list = [];
-        foreach ($this->order->getProducts() as $product) {
+        foreach ($this->order->items()->getItems() as $item) {
+            $product = $item->getProduct();
+
             $products_list[] = [
                 'id' => $product->data()->id,
                 'name' => $product->data()->name,
-                'fields' => $this->order->getProductFields($product->data()->id)
+                'fields' => $item->getFields()
             ];
         }
 

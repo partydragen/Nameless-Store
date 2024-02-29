@@ -10,8 +10,11 @@ class ExpireCustomerProductTask extends Task {
             $product = new Product($data['product_id']);
             $order = $payment->getOrder();
 
+            $item = new Item($data['order_item_id']);
+            $product = $item->getProduct();
+
             $payment->deletePendingActions($product->data()->id);
-            $payment->executeActions(Action::EXPIRE, $product);
+            $payment->executeActions(Action::EXPIRE, $item);
 
             EventHandler::executeEvent(new CustomerProductExpiredEvent(
                 $payment,
@@ -31,35 +34,35 @@ class ExpireCustomerProductTask extends Task {
      * Schedule this task
      *
      * @param Order $order
-     * @param Product $product
+     * @param Item $item
      * @param Payment $payment
      *
      * @return void
      */
-    public static function schedule(Order $order, Product $product, Payment $payment): void {
-        $hasBeenScheduled = DB::getInstance()->query('SELECT COUNT(*) c FROM nl2_queue WHERE `task` = \'ExpireCustomerProductTask\' AND entity_id = ?', [$item_id])->first()->c;
+    public static function schedule(Order $order, Item $item, Payment $payment): void {
+        $hasBeenScheduled = DB::getInstance()->query('SELECT COUNT(*) c FROM nl2_queue WHERE `task` = \'ExpireCustomerProductTask\' AND entity_id = ?', [$item->getId()])->first()->c;
 
         if (!$hasBeenScheduled) {
-            $duration_json = json_decode($product->data()->durability, true) ?? [];
-            $item = DB::getInstance()->query('SELECT id FROM nl2_store_orders_products WHERE order_id = ? AND product_id = ?', [$order->data()->id, $product->data()->id])->first();
+            $product = $item->getProduct();
 
+            $duration_json = json_decode($product->data()->durability, true) ?? [];
             $time = strtotime('+' . $duration_json['interval'] . ' ' . $duration_json['period']);
             $success = Queue::schedule((new ExpireCustomerProductTask())->fromNew(
                 Module::getIdFromName('Store'),
                 'Expire Customer Product',
                 [
                     'order_id' => $order->data()->id,
-                    'order_item_id' => $item->id,
+                    'order_item_id' => $item->getId(),
                     'product_id' => $product->data()->id,
                     'payment_id' => $payment->data()->id
                 ],
                 $time,
                 'order_item',
-                $item->id
+                $item->getId()
             ));
 
             $task_id = $success ? DB::getInstance()->lastId() : null;
-            DB::getInstance()->query('UPDATE nl2_store_orders_products SET expire = ?, task_id = ? WHERE id = ?', [$time, $task_id, $item->id]);
+            DB::getInstance()->query('UPDATE nl2_store_orders_products SET expire = ?, task_id = ? WHERE id = ?', [$time, $task_id, $item->getId()]);
         }
     }
 }

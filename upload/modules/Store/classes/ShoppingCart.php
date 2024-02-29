@@ -75,7 +75,7 @@ class ShoppingCart extends Instanceable {
                 ]);
 
                 $item = $items[$product->data()->id];
-                $this->_items[$product->data()->id] = new Item($product, $item['quantity'], $item['fields']);
+                $this->_items[$product->data()->id] = new Item(0, $product, $item['quantity'], $item['fields']);
                 $this->_products[$product->data()->id] = $product;
             }
         }

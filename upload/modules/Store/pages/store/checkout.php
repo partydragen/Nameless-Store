@@ -259,7 +259,6 @@ if (isset($_GET['do'])) {
                 $order->setAmount($amount);
                 $order->setSubscriptionMode($shopping_cart->isSubscriptionMode());
 
-                $order->setProducts($shopping_cart->getProducts());
                 $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems(), $shopping_cart->getCoupon());
 
                 $shopping_cart->setOrder($order);
