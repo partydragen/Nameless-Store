@@ -150,7 +150,7 @@ class Action {
 
         $placeholders = [];
         foreach ($item->getFields() as $field) {
-            $placeholders['{'.$field['identifier'].'}'] = Output::getClean($field['value']);
+            $placeholders['{' . $field['identifier'] . '}'] = Output::getClean($field['value']);
         }
 
         $customer = $order->customer();
