@@ -70,7 +70,18 @@ class Order {
 
                 foreach ($products_query as $data) {
                     $product = new Product(null, null, $data);
-                    $item = new Item($data->item_id, $product, $data->quantity);
+
+                    $fields = [];
+                    $fields_query = $this->_db->query('SELECT field_id, identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$this->data()->id, $product->data()->id])->results();
+                    foreach ($fields_query as $field) {
+                        $fields[$field->identifier] = [
+                            'field_id' => $field->field_id,
+                            'identifier' => Output::getClean($field->identifier),
+                            'value' => Output::getClean($field->value)
+                        ];
+                    }
+
+                    $item = new Item($data->item_id, $product, $data->quantity, $fields);
 
                     $items->addItem($item);
                 }
@@ -86,9 +97,9 @@ class Order {
      * @param ?User $user The NamelessMC user buying the product.
      * @param Customer $from_customer The customer buying the product.
      * @param Customer $to_customer The customer who is receiving the product.
-     * @param array<int, Item> $items The list of items along with custom fields for product
+     * @param ItemList $items The list of items along with custom fields for product
      */
-    public function create(?User $user, Customer $from_customer, Customer $to_customer, array $items, ?Coupon $coupon = null): void {
+    public function create(?User $user, Customer $from_customer, Customer $to_customer, ItemList $items, ?Coupon $coupon = null): void {
         $this->_db->insert('store_orders', [
             'user_id' => $user != null ? $user->exists() ? $user->data()->id : null : null,
             'from_customer_id' => $from_customer->data()->id,
@@ -101,7 +112,7 @@ class Order {
 
         // Register products and fields to order
         $this->_items = $items;
-        foreach ($items as $item) {
+        foreach ($items->getItems() as $item) {
             $this->_db->insert('store_orders_products', [
                 'order_id' => $last_id,
                 'product_id' => $item->getProduct()->data()->id,
@@ -113,7 +124,7 @@ class Order {
                 $this->_db->insert('store_orders_products_fields', [
                     'order_id' => $last_id,
                     'product_id' => $item->getProduct()->data()->id,
-                    'field_id' => $field['id'],
+                    'field_id' => $field['field_id'],
                     'value' => $field['value']
                 ]);
             }

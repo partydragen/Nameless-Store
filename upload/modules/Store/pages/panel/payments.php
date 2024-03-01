@@ -364,17 +364,18 @@ if (isset($_GET['customer'])) {
                         $recipient = new Customer($target_user);
                     }
 
-                    $items = [];
+                    $items = new ItemList();
                     $selected_products = $_POST['products'];
                     foreach ($selected_products as $item) {
-                        $items[] = new Item(
+                        $items->addItem(new Item(
+                            0,
                             new Product($item),
                             1,
                             []
-                        );
+                        ));
                     }
 
-                    if (!count($errors) && count($items)) {
+                    if (!count($errors) && $items->getItems()) {
                         // Register order
                         $order = new Order();
                         $order->create($target_user, $recipient, $recipient, $items);

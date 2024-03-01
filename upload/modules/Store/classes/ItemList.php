@@ -12,7 +12,7 @@ class ItemList {
     /**
      * @var Item[] The list of items.
      */
-    private array $_items;
+    private array $_items = [];
 
     /**
      * Get the items for this order.

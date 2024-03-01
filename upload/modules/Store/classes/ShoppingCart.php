@@ -10,14 +10,9 @@
 class ShoppingCart extends Instanceable {
 
     /**
-     * @var array<int, Item> The list of items.
+     * @var ItemList The list of items.
      */
-    private array $_items = [];
-
-    /**
-     * @var array<int, Product> The list of products.
-     */
-    private array $_products = [];
+    private ItemList $_items;
 
     /**
      * @var ?Order Current order.
@@ -36,6 +31,7 @@ class ShoppingCart extends Instanceable {
 
     // Constructor
     public function __construct() {
+        $this->_items = new ItemList();
         if (!Session::exists('shopping_cart')) {
             return;
         }
@@ -74,9 +70,14 @@ class ShoppingCart extends Instanceable {
                     'shopping_cart' => $this
                 ]);
 
+                // Add item to item list
                 $item = $items[$product->data()->id];
-                $this->_items[$product->data()->id] = new Item(0, $product, $item['quantity'], $item['fields']);
-                $this->_products[$product->data()->id] = $product;
+                $this->_items->addItem(new Item(
+                    0,
+                    $product,
+                    $item['quantity'],
+                    $item['fields']
+                ));
             }
         }
     }
@@ -102,7 +103,6 @@ class ShoppingCart extends Instanceable {
     // Remove product from shopping cart
     public function remove(int $product_id): void {
         unset($_SESSION['shopping_cart']['items'][$product_id]);
-        unset($this->_items[$product_id]);
     }
 
     // Clear the shopping cart
@@ -110,14 +110,9 @@ class ShoppingCart extends Instanceable {
         unset($_SESSION['shopping_cart']);
     }
 
-    // Get the items from the shopping cart
-    public function getItems(): array {
+    // Get the item list from the shopping cart
+    public function items(): ItemList {
         return $this->_items;
-    }
-
-    // Get the products from the shopping cart
-    public function getProducts(): array {
-        return $this->_products;
     }
 
     // Set order for this shopping cart
@@ -171,7 +166,7 @@ class ShoppingCart extends Instanceable {
     public function getTotalCents(): int {
         $price = 0;
 
-        foreach ($this->getItems() as $item) {
+        foreach ($this->items()->getItems() as $item) {
             $price += $item->getSubtotalPrice();
         }
 
@@ -182,7 +177,7 @@ class ShoppingCart extends Instanceable {
     public function getTotalRealPriceCents(): int {
         $price = 0;
 
-        foreach ($this->getItems() as $item) {
+        foreach ($this->items()->getItems() as $item) {
             $price += $item->getTotalPrice();
         }
 
@@ -193,7 +188,7 @@ class ShoppingCart extends Instanceable {
     public function getTotalDiscountCents(): int {
         $discount = 0;
 
-        foreach ($this->getItems() as $item) {
+        foreach ($this->items()->getItems() as $item) {
             $discount += $item->getTotalDiscounts();
         }
 
