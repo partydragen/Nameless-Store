@@ -100,5 +100,5 @@ abstract class ServiceBase {
     /**
      * Execute product action on connection
      */
-    abstract public function executeAction(Action $action, Order $order, Product $product, Payment $payment, array $placeholders);
+    abstract public function executeAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders);
 }

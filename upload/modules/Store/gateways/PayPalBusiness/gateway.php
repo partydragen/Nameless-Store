@@ -65,8 +65,8 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
         } else {
             // Payment subscription
             $product = null;
-            foreach ($order->getProducts() as $item) {
-                $product = $item;
+            foreach ($order->items()->getItems() as $item) {
+                $product = $item->getProduct();
                 break;
             }
 

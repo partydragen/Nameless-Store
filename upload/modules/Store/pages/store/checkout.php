@@ -129,7 +129,7 @@ if (isset($_GET['do'])) {
                         $value = (!is_array($item) ? $item : implode(', ', $item));
 
                         $product_fields[$field->id] = [
-                            'id' => Output::getClean($field->id),
+                            'field_id' => Output::getClean($field->id),
                             'identifier' => Output::getClean($field->identifier),
                             'value' => $value,
                             'description' => Output::getClean($field->description),
@@ -228,7 +228,7 @@ if (isset($_GET['do'])) {
 
 } else {
     // Make sure the shopping cart is not empty
-    if (!count($shopping_cart->getItems())) {
+    if (!count($shopping_cart->items()->getItems())) {
         Redirect::to(URL::build($store_url));
     }
 
@@ -259,8 +259,7 @@ if (isset($_GET['do'])) {
                 $order->setAmount($amount);
                 $order->setSubscriptionMode($shopping_cart->isSubscriptionMode());
 
-                $order->setProducts($shopping_cart->getProducts());
-                $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems(), $shopping_cart->getCoupon());
+                $order->create($user, $from_customer, $to_customer, $shopping_cart->items(), $shopping_cart->getCoupon());
 
                 $shopping_cart->setOrder($order);
 
@@ -317,7 +316,7 @@ if (isset($_GET['do'])) {
 
     // Load shopping list
     $shopping_cart_list = [];
-    foreach ($shopping_cart->getItems() as $item) {
+    foreach ($shopping_cart->items()->getItems() as $item) {
         $product = $item->getProduct();
 
         $fields = [];
@@ -383,8 +382,8 @@ if (isset($_GET['do'])) {
             }
 
             // Check of any products require certain gateways
-            foreach ($shopping_cart->getProducts() as $product) {
-                $allowed_gateways = json_decode($product->data()->allowed_gateways ?? '[]', true);
+            foreach ($shopping_cart->items()->getItems() as $item) {
+                $allowed_gateways = json_decode($item->getProduct()->data()->allowed_gateways ?? '[]', true);
                 if (count($allowed_gateways) && !in_array($gateway->getId(), $allowed_gateways)) {
                     continue 2;
                 }
