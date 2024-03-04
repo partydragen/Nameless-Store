@@ -167,6 +167,7 @@ class Action {
         $placeholders['{amount}'] = Store::fromCents($payment->data()->amount_cents ?? 0);
         $placeholders['{currency}'] = $payment->data()->currency;
         $placeholders['{orderId}'] = $payment->data()->order_id;
+        $placeholders['{subscriptionId}'] = $payment->data()->subscription_id ?? 0;
         $placeholders['{ip}'] = $order->data()->ip;
         $placeholders['{time}'] = date('H:i', $payment->data()->created);
         $placeholders['{date}'] = date('d M Y', $payment->data()->created);

@@ -18,7 +18,7 @@
         </select>
     </div>
     <div class="form-group">
-        <label for="InputCommand">MySQL Command</label><a class="float-right btn btn-primary btn-sm" href="" data-toggle="modal" data-target="#placeholders">Placeholders</a></br>
+        <label for="InputCommand">MySQL Command</label><a class="float-right btn btn-primary btn-sm" href="" data-toggle="modal" data-target="#placeholders">{$VIEW_PLACEHOLDERS}</a></br>
         <input type="text" name="command" class="form-control" id="InputCommand" value="{$COMMAND_VALUE}" placeholder="{literal}INSERT INTO your_table (`column1`, `column2`, `column3`) VALUES ({orderId}, {productId}, '{uuid}'){/literal}">
     </div>
     <div class="form-group">

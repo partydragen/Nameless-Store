@@ -353,7 +353,8 @@ if (!isset($_GET['action'])) {
                     'ACTION_TITLE' => $store_language->get('admin', 'new_action_for_x', ['product' => Output::getClean($product->data()->name)]),
                     'BACK' => $language->get('general', 'back'),
                     'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
-                    'FIELDS' => $fields->getAll()
+                    'FIELDS' => $fields->getAll(),
+                    'VIEW_PLACEHOLDERS' => $store_language->get('admin', 'view_placeholders'),
                 ]);
                 
                 $template_file = 'store/products_action_form.tpl';
@@ -383,7 +384,8 @@ if (!isset($_GET['action'])) {
                 'ACTION_TITLE' => $store_language->get('admin', 'editing_action_for_x', ['product' => Output::getClean($product->data()->name)]),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
-                'FIELDS' => $fields->getAll()
+                'FIELDS' => $fields->getAll(),
+                'VIEW_PLACEHOLDERS' => $store_language->get('admin', 'view_placeholders'),
             ]);
 
             $template_file = 'store/products_action_form.tpl';

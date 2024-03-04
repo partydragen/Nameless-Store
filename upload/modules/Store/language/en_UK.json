@@ -225,6 +225,7 @@
     "admin/queued_actions_results": "{{pending_actions}} Pending, {{completed_actions}} Completed",
     "admin/pretty_url": "Pretty URL",
     "admin/pretty_url_regex_error": "Pretty URL can only contain letters, numbers and dashes",
+    "admin/view_placeholders": "View Placeholders",
     "general/agree_t_and_c_purchase": "I agree to the {{termsLinkStart}}terms and conditions{{termsLinkEnd}} of this purchase.",
     "general/accept_terms": "You must accept the terms and conditions",
     "general/buy": "Buy",
