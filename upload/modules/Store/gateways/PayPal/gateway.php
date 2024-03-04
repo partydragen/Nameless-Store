@@ -25,7 +25,7 @@ class PayPal_Gateway extends GatewayBase {
 
     public function processOrder(Order $order): void {
         $paypal_email = StoreConfig::get('paypal.email');
-        if ($paypal_email == null || empty($paypal_email)) {
+        if (empty($paypal_email)) {
             $this->addError('Administration have not completed the configuration of this gateway!');
             return;
         }

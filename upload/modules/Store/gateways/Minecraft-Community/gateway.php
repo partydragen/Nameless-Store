@@ -34,8 +34,8 @@ class Minecraft_Community_Gateway extends GatewayBase {
         $cancelRedirect = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Minecraft-Community&do=cancel');
 
         $result = HttpClient::post('https://mccommunity.net/index.php?route=/api/v2/oauth2/store/order/create', json_encode([
-            'client_id' => StoreConfig::get('minecraft-community/client_id'),
-            'client_secret' => StoreConfig::get('minecraft-community/client_secret'),
+            'client_id' => StoreConfig::get('minecraft-community.client_id'),
+            'client_secret' => StoreConfig::get('minecraft-community.client_secret'),
             'order_id' => $order->data()->id,
             'currency' => $currency,
             'price' => Store::fromCents($order->getAmount()->getTotalCents()),
@@ -76,7 +76,7 @@ class Minecraft_Community_Gateway extends GatewayBase {
             return;
         }
 
-        if ($response->client_id != StoreConfig::get('minecraft-community/client_id') || $response->client_secret != StoreConfig::get('minecraft-community/client_secret')) {
+        if ($response->client_id != StoreConfig::get('minecraft-community.client_id') || $response->client_secret != StoreConfig::get('minecraft-community.client_secret')) {
             return;
         }
 
@@ -125,8 +125,8 @@ class Minecraft_Community_Gateway extends GatewayBase {
     }
 
     private function getApiContext() {
-        $client_id = StoreConfig::get('minecraft-community/client_id');
-        $client_secret = StoreConfig::get('minecraft-community/client_secret');
+        $client_id = StoreConfig::get('minecraft-community.client_id');
+        $client_secret = StoreConfig::get('minecraft-community.client_secret');
 
         if ($client_id && $client_secret) {
             return;

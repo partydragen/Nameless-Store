@@ -446,9 +446,9 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                     $output = $webhook->create($apiContext);
                     $id = $output->getId();
 
-                    StoreConfig::set('paypal_business', [
-                        'key' => $key,
-                        'hook_key' => $id
+                    StoreConfig::setMultiple([
+                        'paypal_business.key' => $key,
+                        'paypal_business.hook_key' => $id
                     ]);
                 }
                 

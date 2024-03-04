@@ -11,9 +11,9 @@
 if (Input::exists()) {
     if (Token::check()) {
         if (isset($_POST['publishable_key']) && isset($_POST['secret_key']) && strlen($_POST['publishable_key']) && strlen($_POST['secret_key'])) {
-            StoreConfig::set('stripe', [
-                'publishable_key' => $_POST['publishable_key'],
-                'secret_key' => $_POST['secret_key']
+            StoreConfig::setMultiple([
+                'stripe.publishable_key' => $_POST['publishable_key'],
+                'stripe.secret_key' => $_POST['secret_key']
             ]);
         }
 

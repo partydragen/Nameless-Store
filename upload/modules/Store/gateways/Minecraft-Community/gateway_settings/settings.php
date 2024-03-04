@@ -13,10 +13,10 @@ if (Input::exists()) {
     if (Token::check()) {
         if (isset($_POST['client_id']) && isset($_POST['client_secret']) && strlen($_POST['client_id']) && strlen($_POST['client_secret'])) {
             $settings = [];
-            $settings['minecraft-community/client_id'] = $_POST['client_id'];
-            $settings['minecraft-community/client_secret'] = $_POST['client_secret'];
+            $settings['minecraft-community.client_id'] = $_POST['client_id'];
+            $settings['minecraft-community.client_secret'] = $_POST['client_secret'];
 
-            StoreConfig::set($settings);
+            StoreConfig::setMultiple($settings);
         }
 
         // Is this gateway enabled

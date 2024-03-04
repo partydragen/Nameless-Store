@@ -13,9 +13,9 @@ if (Input::exists()) {
     if (Token::check()) {
 
         if (isset($_POST['client_id']) && isset($_POST['client_secret']) && strlen($_POST['client_secret']) && strlen($_POST['client_secret'])) {
-            StoreConfig::set('paypal_business', [
-                'client_id' => $_POST['client_id'],
-                'client_secret' => $_POST['client_secret']
+            StoreConfig::setMultiple([
+                'paypal_business.client_id' => $_POST['client_id'],
+                'paypal_business.client_secret' => $_POST['client_secret']
             ]);
         }
         

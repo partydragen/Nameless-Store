@@ -309,9 +309,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                         return null;
                     }
 
-                    StoreConfig::set('stripe', [
-                        'hook_key' => $webhook->secret
-                    ]);
+                    StoreConfig::set('stripe.hook_key', $webhook->secret);
                 }
 
                 return $stripe;

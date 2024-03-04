@@ -11,9 +11,7 @@
 
 if (Input::exists()) {
     if (Token::check()) {
-        StoreConfig::set('paypal', [
-            'email' => $_POST['paypal_email']
-        ]);
+        StoreConfig::set('paypal.email', $_POST['paypal_email']);
 
         // Is this gateway enabled
         if (isset($_POST['enable']) && $_POST['enable'] == 'on') $enabled = 1;
