@@ -156,6 +156,7 @@ class Action {
         $customer = $order->customer();
         $recipient = $order->recipient();
         $placeholders['{itemId}'] = $item->getId();
+        $placeholders['{quantity}'] = $item->getQuantity();
         $placeholders['{userId}'] = $recipient->exists() ? $recipient->data()->user_id ?? 0 : 0;
         $placeholders['{username}'] = $recipient->getUsername();
         $placeholders['{uuid}'] = $recipient->getIdentifier();

@@ -187,12 +187,28 @@
                             <td>The gateway name used for the payment</td>
                         </tr>
                         <tr>
+                            <td>{quantity}</td>
+                            <td>The quantity of the product that was purchased.</td>
+                        </tr>
+                        <tr>
                             <th><strong>Custom Fields</strong></th>
                             <th><strong></strong></th>
                         <tr>
                         <tr>
                             <td>{your field name}</td>
                             <td>The value the customer entered</td>
+                        </tr>
+                        <tr>
+                            <th><strong>User Integrations</strong></th>
+                            <th>(If user is logged in and have the integration linked)</th>
+                        <tr>
+                        <tr>
+                            <td>{discordUsername}</td>
+                            <td>The username of the linked integration</td>
+                        </tr>
+                        <tr>
+                            <td>{discordIdentifier}</td>
+                            <td>The identifier of the linked integration</td>
                         </tr>
                         {/literal}
                     </tbody>
