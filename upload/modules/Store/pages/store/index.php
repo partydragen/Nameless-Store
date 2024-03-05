@@ -118,7 +118,8 @@ if (!$products->count()) {
             'sale_active' => $product->data()->sale_active,
             'description' => $renderProductEvent['content'],
             'image' => $renderProductEvent['image'],
-            'link' => $renderProductEvent['link']
+            'link' => $product->data()->payment_type != 2 ? URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->data()->id) . '&type=single') : null,
+            'subscribe_link' => $product->data()->payment_type != 1 ? URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->data()->id) . '&type=subscribe') : null,
         ];
     }
 
@@ -151,6 +152,12 @@ $smarty->assign([
     'CATEGORY_ID' => $renderCategoryEvent['id'],
     'CATEGORY_NAME' => $renderCategoryEvent['name'],
     'CONTENT' => str_replace('{credits}', $from_customer->getCredits(), $renderCategoryEvent['content']),
+    'ACTIVE_CATEGORY' => Output::getClean($category->name),
+    'BUY' => $store_language->get('general', 'buy'),
+    'ADD_TO_CART' => $store_language->get('general', 'add_to_cart'),
+    'SUBSCRIBE' => $store_language->get('general', 'subscribe'),
+    'CLOSE' => $language->get('general', 'close'),
+    'SALE' => $store_language->get('general', 'sale'),
     'TOKEN' => Token::get(),
 ]);
 
