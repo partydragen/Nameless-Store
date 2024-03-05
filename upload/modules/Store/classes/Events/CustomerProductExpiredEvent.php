@@ -4,14 +4,14 @@ class CustomerProductExpiredEvent extends AbstractEvent implements HasWebhookPar
     public Order $order;
     public Customer $customer;
     public Customer $recipient;
-    public Product $product;
+    public Item $item;
 
-    public function __construct(Payment $payment, Order $order, Customer $customer, Customer $recipient, Product $product) {
+    public function __construct(Payment $payment, Order $order, Customer $customer, Customer $recipient, Item $item) {
         $this->payment = $payment;
         $this->order = $order;
         $this->customer = $customer;
         $this->recipient = $recipient;
-        $this->product = $product;
+        $this->item = $item;
     }
 
     public static function name(): string {
@@ -23,13 +23,15 @@ class CustomerProductExpiredEvent extends AbstractEvent implements HasWebhookPar
     }
 
     public function webhookParams(): array {
+        $product = $this->item->getProduct();
+
         return [
             'id' => $this->payment->data()->id,
             'order_id' => $this->payment->data()->order_id,
             'payment_id' => $this->payment->data()->id,
             'product' => [
-                'id' => $this->product->data()->id,
-                'name' => $this->product->data()->name
+                'id' => $product->data()->id,
+                'name' => $product->data()->name
             ],
             'customer' => [
                 'customer_id' => $this->customer->data()->id,
@@ -53,7 +55,7 @@ class CustomerProductExpiredEvent extends AbstractEvent implements HasWebhookPar
             ->setUsername($username)
             ->addEmbed(function (DiscordEmbed $embed) use ($username) {
                 return $embed
-                    ->setDescription($username . ' product ' . $this->product->data()->name . ' just expired!');
+                    ->setDescription($username . ' product ' . $this->item->getProduct()->data()->name . ' just expired!');
             });
     }
 }

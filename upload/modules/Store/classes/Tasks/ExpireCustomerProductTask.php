@@ -7,13 +7,10 @@ class ExpireCustomerProductTask extends Task {
 
         $payment = new Payment($data['payment_id']);
         if ($payment->exists()) {
-            $product = new Product($data['product_id']);
             $order = $payment->getOrder();
 
             $item = new Item($data['order_item_id']);
-            $product = $item->getProduct();
-
-            $payment->deletePendingActions($product->data()->id);
+            $payment->deletePendingActions($item->getProduct()->data()->id);
             $payment->executeActions(Action::EXPIRE, $item);
 
             EventHandler::executeEvent(new CustomerProductExpiredEvent(
@@ -21,7 +18,7 @@ class ExpireCustomerProductTask extends Task {
                 $order,
                 $order->customer(),
                 $order->recipient(),
-                $product
+                $item
             ));
 
             $this->setOutput(['success' => true]);
