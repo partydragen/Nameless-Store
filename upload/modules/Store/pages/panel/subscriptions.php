@@ -90,6 +90,10 @@ if (!isset($_GET['subscription'])) {
         if (Token::check()) {
             if (Input::get('action') == 'sync') {
                 // Sync subscription
+                if (!$user->hasPermission('staffcp.store.subscriptions.sync')) {
+                    Redirect::to(URL::build('/panel/store/subscriptions'));
+                }
+
                 if ($subscription->sync()) {
                     Session::flash('store_subscriptions_success', $store_language->get('admin', 'subscription_updated_successfully'));
                     Redirect::to(URL::build('/panel/store/subscriptions/', 'subscription=' . $subscription->data()->id));
@@ -97,7 +101,11 @@ if (!isset($_GET['subscription'])) {
                     $errors[] = 'Something went wrong syncing subscription!';
                 }
             } else if (Input::get('action') == 'cancel') {
-                // Sync subscription
+                // Cancel subscription
+                if (!$user->hasPermission('staffcp.store.subscriptions.cancel')) {
+                    Redirect::to(URL::build('/panel/store/subscriptions'));
+                }
+
                 if ($subscription->cancel()) {
                     Session::flash('store_subscriptions_success', $store_language->get('admin', 'subscription_cancelled_successfully'));
                     Redirect::to(URL::build('/panel/store/subscriptions/', 'subscription=' . urlencode($subscription->data()->id)));
@@ -152,8 +160,6 @@ if (!isset($_GET['subscription'])) {
         'VIEWING_SUBSCRIPTION' => $store_language->get('admin', 'viewing_subscription', ['subscription' => Output::getClean($subscription->data()->agreement_id)]),
         'BACK' => $language->get('general', 'back'),
         'BACK_LINK' => URL::build('/panel/store/subscriptions'),
-        'SYNC_SUBSCRIPTION' => $store_language->get('admin', 'sync_subscription'),
-        'CANCEL_SUBSCRIPTION' => $store_language->get('general', 'cancel_subscription'),
         'CUSTOMER' => $store_language->get('admin', 'customer'),
         'USERNAME' => $username,
         'USER_LINK' => $link,
@@ -180,6 +186,16 @@ if (!isset($_GET['subscription'])) {
         'PAYMENTS'  => $store_language->get('admin', 'payments'),
         'PAYMENTS_LIST' => $payments_list
     ]);
+
+    // Can cancel subscription?
+    if ($user->hasPermission('staffcp.store.subscriptions.cancel')) {
+        $smarty->assign('CANCEL_SUBSCRIPTION', $store_language->get('general', 'cancel_subscription'));
+    }
+
+    // Can sync subscription?
+    if ($user->hasPermission('staffcp.store.subscriptions.sync')) {
+        $smarty->assign('SYNC_SUBSCRIPTION', $store_language->get('admin', 'sync_subscription'));
+    }
 
     $template_file = 'store/subscription.tpl';
 }
