@@ -60,7 +60,6 @@ class Store_Module extends Module {
         EventHandler::registerEvent(PaymentDeniedEvent::class);
         EventHandler::registerEvent(SubscriptionCreatedEvent::class);
         EventHandler::registerEvent(SubscriptionCancelledEvent::class);
-        EventHandler::registerEvent(PaymentDeniedEvent::class);
         EventHandler::registerEvent(CheckoutAddProductEvent::class);
         EventHandler::registerEvent(CheckoutFieldsValidationEvent::class);
         EventHandler::registerEvent(CustomerProductExpiredEvent::class);
