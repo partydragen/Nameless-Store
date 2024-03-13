@@ -3,6 +3,7 @@
 class HandleSubscriptionsTask extends Task {
 
     public function run(): string {
+        $subscriptions_log = [];
         $subscriptions = DB::getInstance()->query('SELECT * FROM nl2_store_subscriptions WHERE next_billing_date < ? AND expired = 0', [date('U')]);
         foreach ($subscriptions->results() as $sub) {
             $subscription = new Subscription(null, null, $sub);
@@ -11,9 +12,11 @@ class HandleSubscriptionsTask extends Task {
                 case Subscription::ACTIVE:
                     // Active Subscription
                     try {
-                        $subscription->chargePayment();
+                        $success = $subscription->chargePayment();
+
+                        $subscriptions_log['charge_attempt'][$subscription->data()->id] = $success;
                     } catch (Exception $e) {
-                        
+                        $subscriptions_log['charge_failure'][$subscription->data()->id] = $e;
                     }
                     break;
 
@@ -26,6 +29,14 @@ class HandleSubscriptionsTask extends Task {
                         foreach ($order->items()->getItems() as $item) {
                             $payment->deletePendingActions($item->getProduct()->data()->id);
                             $payment->executeActions(Action::EXPIRE, $item);
+
+                            EventHandler::executeEvent(new CustomerProductExpiredEvent(
+                                $payment,
+                                $order,
+                                $order->customer(),
+                                $order->recipient(),
+                                $item
+                            ));
                         }
                     }
 
@@ -33,21 +44,28 @@ class HandleSubscriptionsTask extends Task {
                         'expired' => 1,
                         'updated' => date('U')
                     ]);
+
+                    $subscriptions_log['expired'][$subscription->data()->id] = true;
                     break;
             }
         }
 
+        $this->setOutput($subscriptions_log);
         $this->reschedule();
         return Task::STATUS_COMPLETED;
     }
 
     private function reschedule() {
-        Queue::schedule((new HandleSubscriptionsTask())->fromNew(
-            Module::getIdFromName('Store'),
-            'Handle Subscriptions',
-            [],
-            Date::next()->getTimestamp()
-        ));
+        $hasBeenScheduled = DB::getInstance()->query('SELECT COUNT(*) c FROM nl2_queue WHERE `task` = \'HandleSubscriptionsTask\' AND `status` = \'ready\'')->first()->c;
+
+        if (!$hasBeenScheduled) {
+            Queue::schedule((new HandleSubscriptionsTask())->fromNew(
+                Module::getIdFromName('Store'),
+                'Handle Subscriptions',
+                [],
+                Date::next()->getTimestamp()
+            ));
+        }
     }
 
     public static function schedule() {

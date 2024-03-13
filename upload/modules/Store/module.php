@@ -1106,6 +1106,10 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
+
+        if ($old_version < 180) {
+            HandleSubscriptionsTask::schedule();
+        }
     }
 
     private function initialise() {
@@ -1327,5 +1331,7 @@ class Store_Module extends Module {
         } catch (Exception $e) {
             // Error
         }
+
+        HandleSubscriptionsTask::schedule();
     }
 }
