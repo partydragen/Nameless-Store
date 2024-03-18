@@ -206,7 +206,8 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                 $subscription = new Subscription($data->id, 'agreement_id');
                 if (!$subscription->exists()) {
                     // Save agreement to database
-                    DB::getInstance()->insert('store_subscriptions', [
+                    $subscription = new Subscription();
+                    $subscription->create([
                         'order_id' => $data->metadata->order_id,
                         'gateway_id' => $this->getId(),
                         'customer_id' => $order->customer()->data()->id,
@@ -224,9 +225,6 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                         'created' => date('U'),
                         'updated' => date('U')
                     ]);
-
-                    $subscription = new Subscription($data->id, 'agreement_id');
-                    EventHandler::executeEvent(new SubscriptionCreatedEvent($subscription));
                 }
                 break;
 
@@ -300,7 +298,18 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                 if (!$hook_key) {
                     $webhook = $stripe->webhookEndpoints->create([
                         'url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/listener', 'gateway=Stripe'),
-                        'enabled_events' => ['payment_intent.succeeded', 'charge.refunded', 'charge.failed', 'charge.dispute.closed']
+                        'enabled_events' => [
+                            'payment_intent.succeeded',
+                            'charge.refunded',
+                            'charge.failed',
+                            'charge.dispute.closed',
+                            'customer.subscription.created',
+                            'customer.subscription.updated',
+                            'customer.subscription.deleted',
+                            'customer.subscription.paused',
+                            'customer.subscription.resumed',
+                            'invoice.paid'
+                        ]
                     ]);
 
                     if ($webhook->secret == null || empty($webhook->secret)) {
@@ -309,7 +318,12 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                         return null;
                     }
 
-                    StoreConfig::set('stripe.hook_key', $webhook->secret);
+                    StoreConfig::setMultiple([
+                        'stripe.hook_id' => $webhook->id,
+                        'stripe.hook_key' => $webhook->secret
+                    ]);
+                } else {
+                    $this->updateWebhook($stripe);
                 }
 
                 return $stripe;
@@ -383,6 +397,39 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
         }
 
         return $status_id;
+    }
+
+    public function updateWebhook(Stripe\StripeClient $stripe) {
+        $hook_id = StoreConfig::get('stripe.hook_id');
+        $hook_key = StoreConfig::get('stripe.hook_key');
+        if ($hook_key && !$hook_id) {
+            // Update existing webhooks
+            $last_id = null;
+            foreach ($stripe->webhookEndpoints->all() as $webhook) {
+                if (str_contains($webhook->url, 'gateway=Stripe')) {
+                    $webhook = $stripe->webhookEndpoints->update($webhook->id, [
+                        'enabled_events' => [
+                            'payment_intent.succeeded',
+                            'charge.refunded',
+                            'charge.failed',
+                            'charge.dispute.closed',
+                            'customer.subscription.created',
+                            'customer.subscription.updated',
+                            'customer.subscription.deleted',
+                            'customer.subscription.paused',
+                            'customer.subscription.resumed',
+                            'invoice.paid'
+                        ]
+                    ]);
+
+                    $last_id = $webhook->id;
+                }
+            }
+
+            if ($last_id) {
+                StoreConfig::set('stripe.hook_id', $last_id);
+            }
+        }
     }
 }
 
