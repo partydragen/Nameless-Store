@@ -14,6 +14,7 @@ class SubscriptionData {
     public int $frequency_interval;
     public int $last_payment_date;
     public int $next_billing_date;
+    public int $failed_attempts;
     public int $created;
     public int $updated;
 
@@ -30,6 +31,7 @@ class SubscriptionData {
         $this->frequency_interval = $row->frequency_interval;
         $this->last_payment_date = $row->last_payment_date;
         $this->next_billing_date = $row->next_billing_date;
+        $this->failed_attempts = $row->failed_attempts;
         $this->created = $row->created;
         $this->updated = $row->updated;
     }

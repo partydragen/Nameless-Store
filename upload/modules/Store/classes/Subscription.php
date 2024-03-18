@@ -37,9 +37,30 @@ class Subscription {
     }
 
     /**
+     * Create a new subscription.
+     *
+     * @param array $fields Column names and values to insert to database.
+     * @throws Exception
+     */
+    public function create(array $fields = []): void {
+        if (!$this->_db->insert('store_subscriptions', $fields)) {
+            throw new Exception('There was a problem registering the subscription');
+        }
+        $last_id = $this->_db->lastId();
+
+        $data = $this->_db->get('store_subscriptions', ['id', '=', $last_id]);
+        if ($data->count()) {
+            $this->_data = new SubscriptionData($data->first());
+        }
+
+        EventHandler::executeEvent(new SubscriptionCreatedEvent($this));
+    }
+
+    /**
      * Update a subscription data in the database.
      *
      * @param array $fields Column names and values to update.
+     * @throws Exception
      */
     public function update(array $fields = []): void {
         if (!$this->_db->update('store_subscriptions', $this->data()->id, $fields)) {
