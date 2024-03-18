@@ -12,11 +12,14 @@ class SubscriptionData {
     public string $currency;
     public string $frequency;
     public int $frequency_interval;
-    public int $last_payment_date;
+    public bool $verified;
+    public ?string $payer_id;
+    public ?int $last_payment_date;
     public int $next_billing_date;
     public int $failed_attempts;
     public int $created;
     public int $updated;
+    public bool $expired;
 
     public function __construct(object $row) {
         $this->id = $row->id;
@@ -29,11 +32,14 @@ class SubscriptionData {
         $this->currency = $row->currency;
         $this->frequency = $row->frequency;
         $this->frequency_interval = $row->frequency_interval;
+        $this->verified = $row->verified;
+        $this->payer_id = $row->payer_id;
         $this->last_payment_date = $row->last_payment_date;
         $this->next_billing_date = $row->next_billing_date;
         $this->failed_attempts = $row->failed_attempts;
         $this->created = $row->created;
         $this->updated = $row->updated;
+        $this->expired = $row->expired;
     }
 
 }

@@ -7,7 +7,7 @@
  * @version 2.0.3
  * @license MIT
  */
-class PayPal_Business_Gateway extends GatewayBase implements SupportSubscriptions {
+class PayPal_Business_Gateway extends GatewayBase {
 
     public function __construct() {
         $name = 'PayPalBusiness';
@@ -163,7 +163,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                 $agreement = \PayPal\Api\Agreement::get($agreement->getId(), $apiContext);
                 $payer = $agreement->getPayer();
 
-                $last_payment_date = 0;
+                $last_payment_date = null;
                 if ($agreement->getAgreementDetails()->getLastPaymentDate() != null) {
                     $last_payment_date = date("U", strtotime($agreement->getAgreementDetails()->getLastPaymentDate()));
                 }

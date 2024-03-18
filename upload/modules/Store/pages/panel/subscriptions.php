@@ -56,7 +56,7 @@ if (!isset($_GET['subscription'])) {
                 'username' => $username,
                 'uuid' => $identifier,
                 'status' => $subscription->getStatusHtml(),
-                'last_billing_date' => $subscription->data()->last_payment_date != 0 ? date(DATE_FORMAT, $subscription->data()->last_payment_date) : 'Never',
+                'last_billing_date' => $subscription->data()->last_payment_date != null ? date(DATE_FORMAT, $subscription->data()->last_payment_date) : 'Never',
                 'next_billing_date' => date(DATE_FORMAT, $subscription->data()->next_billing_date),
                 'amount_format' => Output::getPurified(
                     Store::formatPrice(
@@ -181,7 +181,7 @@ if (!isset($_GET['subscription'])) {
                 STORE_CURRENCY_FORMAT,
             )
         ),
-        'LAST_PAYMENT_DATE_VALUE' => $subscription->data()->last_payment_date != 0 ? date(DATE_FORMAT, $subscription->data()->last_payment_date) : 'Never',
+        'LAST_PAYMENT_DATE_VALUE' => $subscription->data()->last_payment_date != null ? date(DATE_FORMAT, $subscription->data()->last_payment_date) : 'Never',
         'NEXT_BILLING_DATE_VALUE' => date(DATE_FORMAT, $subscription->data()->next_billing_date),
         'PAYMENTS'  => $store_language->get('admin', 'payments'),
         'PAYMENTS_LIST' => $payments_list

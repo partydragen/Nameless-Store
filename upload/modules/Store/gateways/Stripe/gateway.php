@@ -217,10 +217,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                         'currency' => strtoupper($data->plan->currency),
                         'frequency' => strtoupper($data->plan->interval),
                         'frequency_interval' => $data->plan->interval_count,
-                        'email' => '',
-                        'verified' => 0,
                         'payer_id' => $data->customer,
-                        'last_payment_date' => 0,
                         'next_billing_date' => $data->current_period_end,
                         'created' => date('U'),
                         'updated' => date('U')

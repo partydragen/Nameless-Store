@@ -122,4 +122,10 @@ class CheckoutAddProductHook extends HookBase {
             }
         }
     }
+
+    public static function cancel(CheckoutAddProductEvent $event): void {
+        if (isset($_GET['type']) && $_GET['type'] == 'subscribe') {
+            $event->setCancelled(true, 'Subscription feature is currently for patreon supporters, it will be available for everyone in the future with means this wont function for you');
+        }
+    }
 }

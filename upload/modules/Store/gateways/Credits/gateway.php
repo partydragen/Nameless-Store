@@ -67,10 +67,8 @@ class Credits_Gateway extends GatewayBase implements SupportSubscriptions {
                     'currency' => Store::getCurrency(),
                     'frequency' => strtoupper($duration_json['period'] ?? 'month',),
                     'frequency_interval' => $duration_json['interval'] ?? 1,
-                    'email' => '',
                     'verified' => 1,
                     'payer_id' => $order->customer()->data()->id,
-                    'last_payment_date' => 0,
                     'next_billing_date' => date('U'),
                     'created' => date('U'),
                     'updated' => date('U')

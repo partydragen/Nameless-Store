@@ -71,6 +71,7 @@ class Store_Module extends Module {
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredProducts']);
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredGroups']);
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredIntegrations']);
+        EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'cancel']);
         EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'purify']);
         EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'renderEmojis'], 10);
         EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'replaceAnchors'], 15);
@@ -1108,6 +1109,26 @@ class Store_Module extends Module {
         }
 
         if ($old_version < 180) {
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_payments ADD `subscription_id` int(11) DEFAULT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                if (!$this->_db->showTables('store_subscriptions')) {
+                    try {
+                        $this->_db->createTable("store_subscriptions", " `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `customer_id` int(11) NOT NULL, `agreement_id` varchar(64) NOT NULL, `status_id` int(11) NOT NULL DEFAULT '0', `amount_cents` int(11) NOT NULL, `currency` varchar(16) NOT NULL, `frequency` varchar(16) NOT NULL, `frequency_interval` int(11) NOT NULL, `email` varchar(128) DEFAULT NULL, `verified` tinyint(1) NOT NULL DEFAULT '0', `payer_id` varchar(64) DEFAULT NULL, `last_payment_date` int(11) DEFAULT NULL, `next_billing_date` int(11) NOT NULL, `failed_attempts` int(11) NOT NULL DEFAULT '0', `created` int(11) NOT NULL, `updated` int(11) NOT NULL, `expired` tinyint(1) NOT NULL DEFAULT '0', PRIMARY KEY (`id`)");
+                    } catch (Exception $e) {
+                        // Error
+                    }
+                }
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
             HandleSubscriptionsTask::schedule();
         }
     }
@@ -1208,7 +1229,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_payments')) {
             try {
-                $this->_db->createTable('store_payments', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `payment_id` varchar(64) DEFAULT NULL, `agreement_id` varchar(64) DEFAULT NULL, `transaction` varchar(32) DEFAULT NULL, `amount_cents` int(11) DEFAULT NULL, `currency` varchar(11) DEFAULT NULL, `fee_cents` int(11) DEFAULT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `last_updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_payments', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `payment_id` varchar(64) DEFAULT NULL, `subscription_id` int(11) DEFAULT NULL, `transaction` varchar(32) DEFAULT NULL, `amount_cents` int(11) DEFAULT NULL, `currency` varchar(11) DEFAULT NULL, `fee_cents` int(11) DEFAULT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `last_updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
 
                 $this->_db->query('ALTER TABLE `nl2_store_payments` ADD INDEX `nl2_store_payments_idx_order_id` (`order_id`)');
             } catch (Exception $e) {
@@ -1307,6 +1328,14 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_coupons')) {
             try {
                 $this->_db->createTable("store_coupons", " `id` int(11) NOT NULL AUTO_INCREMENT, `code` varchar(64) NOT NULL, `effective_on` varchar(256) NOT NULL, `discount_type` int(11) NOT NULL, `discount_amount` int(11) NOT NULL, `start_date` int(11) NOT NULL, `expire_date` int(11) NOT NULL, `redeem_limit` int(11) NOT NULL DEFAULT '0', `customer_limit` int(11) NOT NULL DEFAULT '0', `min_basket` int(11) NOT NULL DEFAULT '0', PRIMARY KEY (`id`)");
+            } catch (Exception $e) {
+                // Error
+            }
+        }
+
+        if (!$this->_db->showTables('store_subscriptions')) {
+            try {
+                $this->_db->createTable("store_subscriptions", " `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `customer_id` int(11) NOT NULL, `agreement_id` varchar(64) NOT NULL, `status_id` int(11) NOT NULL DEFAULT '0', `amount_cents` int(11) NOT NULL, `currency` varchar(16) NOT NULL, `frequency` varchar(16) NOT NULL, `frequency_interval` int(11) NOT NULL, `email` varchar(128) DEFAULT NULL, `verified` tinyint(1) NOT NULL DEFAULT '0', `payer_id` varchar(64) DEFAULT NULL, `last_payment_date` int(11) DEFAULT NULL, `next_billing_date` int(11) NOT NULL, `failed_attempts` int(11) NOT NULL DEFAULT '0', `created` int(11) NOT NULL, `updated` int(11) NOT NULL, `expired` tinyint(1) NOT NULL DEFAULT '0', PRIMARY KEY (`id`)");
             } catch (Exception $e) {
                 // Error
             }
