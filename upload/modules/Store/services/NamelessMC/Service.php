@@ -43,12 +43,12 @@ class NamelessMCService extends ServiceBase {
 
             // Add credits to user
             if (isset($command['add_credits']) && is_numeric($command['add_credits']) && $command['add_credits'] > 0) {
-                $recipient->addCents(Store::toCents($command['add_credits']));
+                $recipient->addCents(Store::toCents($command['add_credits']), 'Product Action');
             }
 
             // Remove credits from user
             if (isset($command['remove_credits']) && is_numeric($command['remove_credits']) && $command['remove_credits'] > 0) {
-                $recipient->removeCents(Store::toCents($command['remove_credits']));
+                $recipient->removeCents(Store::toCents($command['remove_credits']), 'Product Action');
             }
 
             // Send alert to user
