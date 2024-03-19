@@ -160,19 +160,45 @@ class Customer {
     /**
      * Add credits to the customer.
      *
-     * @param int $cents The amount of cents to add to their balance
+     * @param int $cents The amount of cents to add to their balance.
+     * @param string $info Transaction information.
+     * @return int Returns the Transaction id.
      */
-    public function addCents(int $cents): void {
+    public function addCents(int $cents, string $info = '', int $user_id = null): int {
         $this->_db->query('UPDATE nl2_store_customers SET cents = cents + ? WHERE id = ?', [$cents, $this->_data->id]);
+
+        $this->_db->insert('store_transactions', [
+            'customer_id' => $this->_data->id,
+            'received_by' => $user_id,
+            'action' => 'add_cents',
+            'cents' => $cents,
+            'time' => date('U'),
+            'info' => $info
+        ]);
+
+        return $this->_db->lastId();
     }
 
     /**
      * Remove credits from the customer.
      *
-     * @param int $cents The amount of cents to remove from their balance
+     * @param int $cents The amount of cents to remove from their balance.
+     * @param string $info Transaction information.
+     * @return int Returns the Transaction id.
      */
-    public function removeCents(int $cents): void {
+    public function removeCents(int $cents, string $info = '', int $user_id = null): int {
         $this->_db->query('UPDATE nl2_store_customers SET cents = cents - ? WHERE id = ?', [$cents, $this->_data->id]);
+
+        $this->_db->insert('store_transactions', [
+            'customer_id' => $this->_data->id,
+            'received_by' => $user_id,
+            'action' => 'remove_cents',
+            'cents' => '-' . $cents,
+            'time' => date('U'),
+            'info' => $info
+        ]);
+
+        return $this->_db->lastId();
     }
 
     public function getPayments(): array {

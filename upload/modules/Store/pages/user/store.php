@@ -63,8 +63,8 @@ if (Input::exists()) {
                 // Success perform transaction
                 $target_customer = new Customer($target_user);
                 if ($target_customer->exists()) {
-                    $customer->removeCents($cents);
-                    $target_customer->addCents($cents);
+                    $customer->removeCents($cents, 'Received credits from user', $user->data()->id);
+                    $target_customer->addCents($cents, 'Sent credits to user', $user->data()->id);
 
                     $credits = Store::fromCents($cents);
                     Alert::create(

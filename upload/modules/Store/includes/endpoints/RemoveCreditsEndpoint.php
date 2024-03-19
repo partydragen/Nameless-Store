@@ -20,9 +20,9 @@ class RemoveCreditsEndpoint extends KeyAuthEndpoint {
 
         $customer = new Customer($user);
         if (isset($_POST['cents'])) {
-            $customer->removeCents($credits);
+            $customer->removeCents($credits, 'API');
         } else {
-            $customer->removeCents(Store::toCents($credits));
+            $customer->removeCents(Store::toCents($credits), 'API');
         }
 
         $api->returnArray(['message' => 'Successfully removed credits from user']);

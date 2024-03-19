@@ -20,9 +20,9 @@ class AddCreditsEndpoint extends KeyAuthEndpoint {
 
         $customer = new Customer($user);
         if (isset($_POST['cents'])) {
-            $customer->addCents($credits);
+            $customer->addCents($credits, 'API');
         } else {
-            $customer->addCents(Store::toCents($credits));
+            $customer->addCents(Store::toCents($credits), 'API');
         }
 
         $api->returnArray(['message' => 'Successfully added credits to user']);

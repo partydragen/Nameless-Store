@@ -52,11 +52,11 @@ if (Input::exists()) {
                 $credits = Input::get('credits');
 
                 if (Input::get('action') == 'addCredits') {
-                    $customer->addCents(Store::toCents($credits));
+                    $customer->addCents(Store::toCents($credits), 'Staff User', $user->data()->id);
 
                     Session::flash('users_store_success', $store_language->get('admin', 'successfully_added_credits', ['amount' => $credits]));
                 } else if (Input::get('action') == 'removeCredits') {
-                    $customer->removeCents(Store::toCents($credits));
+                    $customer->removeCents(Store::toCents($credits), 'Staff User', $user->data()->id);
 
                     Session::flash('users_store_success', $store_language->get('admin', 'successfully_removed_credits', ['amount' => $credits]));
                 }

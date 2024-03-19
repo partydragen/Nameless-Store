@@ -41,14 +41,14 @@ class Credits_Gateway extends GatewayBase implements SupportSubscriptions {
         if ($customer->exists() && $customer->data()->cents >= $amount_to_pay) {
             if (!$order->isSubscriptionMode()) {
                 // Single payment
-                $customer->removeCents($amount_to_pay);
+                $transaction_id = $customer->removeCents($amount_to_pay, 'Order_payment');
 
                 $payment = new Payment();
                 $payment->handlePaymentEvent(Payment::COMPLETED, [
                     'order_id' => $order->data()->id,
                     'gateway_id' => $this->getId(),
                     'amount_cents' => $amount_to_pay,
-                    'transaction' => 'Credits',
+                    'transaction' => $transaction_id,
                     'currency' => Store::getCurrency()
                 ]);
             } else {
@@ -112,7 +112,7 @@ class Credits_Gateway extends GatewayBase implements SupportSubscriptions {
 
         if ($customer->exists() && $customer->data()->cents >= $amount_to_pay) {
             // Successfully renewal
-            $customer->removeCents($amount_to_pay);
+            $transaction_id = $customer->removeCents($amount_to_pay, 'Order_payment');
 
             $payment = new Payment();
             $payment->handlePaymentEvent(Payment::COMPLETED, [
@@ -120,7 +120,7 @@ class Credits_Gateway extends GatewayBase implements SupportSubscriptions {
                 'gateway_id' => $this->getId(),
                 'subscription_id' => $subscription->data()->id,
                 'amount_cents' => $amount_to_pay,
-                'transaction' => 'Credits',
+                'transaction' => $transaction_id,
                 'currency' => $subscription->data()->currency
             ]);
 

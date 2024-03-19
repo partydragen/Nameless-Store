@@ -1129,6 +1129,19 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
 
+            try {
+                if (!$this->_db->showTables('store_transactions')) {
+                    try {
+                        $this->_db->createTable("store_transactions", " `id` int(11) NOT NULL AUTO_INCREMENT, `customer_id` int(11) NOT NULL, `received_by` int(11) DEFAULT NULL, `action` varchar(64) NOT NULL, `cents` int(11) NOT NULL, `time` int(11) NOT NULL, `info` TEXT NOT NULL, PRIMARY KEY (`id`)");
+                    } catch (Exception $e) {
+                        // Error
+                    }
+                }
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
             HandleSubscriptionsTask::schedule();
         }
     }
@@ -1336,6 +1349,14 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_subscriptions')) {
             try {
                 $this->_db->createTable("store_subscriptions", " `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `customer_id` int(11) NOT NULL, `agreement_id` varchar(64) NOT NULL, `status_id` int(11) NOT NULL DEFAULT '0', `amount_cents` int(11) NOT NULL, `currency` varchar(16) NOT NULL, `frequency` varchar(16) NOT NULL, `frequency_interval` int(11) NOT NULL, `email` varchar(128) DEFAULT NULL, `verified` tinyint(1) NOT NULL DEFAULT '0', `payer_id` varchar(64) DEFAULT NULL, `last_payment_date` int(11) DEFAULT NULL, `next_billing_date` int(11) NOT NULL, `failed_attempts` int(11) NOT NULL DEFAULT '0', `created` int(11) NOT NULL, `updated` int(11) NOT NULL, `expired` tinyint(1) NOT NULL DEFAULT '0', PRIMARY KEY (`id`)");
+            } catch (Exception $e) {
+                // Error
+            }
+        }
+
+        if (!$this->_db->showTables('store_transactions')) {
+            try {
+                $this->_db->createTable("store_transactions", " `id` int(11) NOT NULL AUTO_INCREMENT, `customer_id` int(11) NOT NULL, `received_by` int(11) DEFAULT NULL, `action` varchar(64) NOT NULL, `cents` int(11) NOT NULL, `time` int(11) NOT NULL, `info` TEXT NOT NULL, PRIMARY KEY (`id`)");
             } catch (Exception $e) {
                 // Error
             }
