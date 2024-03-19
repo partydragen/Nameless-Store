@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.3
+ * @version 2.2.0
  * @license MIT
  */
 class Order {
@@ -13,19 +13,19 @@ class Order {
             $_data;
 
     /**
-     * @var Item[] The list of products.
+     * @var ItemList Lists of all items for this order.
      */
-    private array $_items;
-
-    /**
-     * @var Product[] The list of products.
-     */
-    private array $_products;
+    private ItemList $_items;
 
     /**
      * @var Amount The amount to charge.
      */
     private Amount $_amount;
+
+    /**
+     * @var bool Whenever this order is a subscription during checkout flow.
+     */
+    private bool $_subscription = false;
 
     // Constructor
     public function __construct(?string $value = null, string $field = 'id') {
@@ -51,62 +51,44 @@ class Order {
     /**
      * @return object This order's data.
      */
-    public function data() {
+    public function data(): object {
         return $this->_data;
     }
 
-    // Set products to keep current rendered data and to avoid to requery
-    public function setProducts(array $products) {
-        $this->_products = $products;
-    }
-
     /**
-     * Get the products for this order.
+     * Get the items list for this order.
      *
-     * @return Item[] The products for this order.
+     * @return ItemList Lists of all items for this order.
      */
-    public function getItems(): array {
-        return $this->_items;
-    }
+    public function items(): ItemList {
+        return $this->_items ??= (function (): ItemList {
+            $items = new ItemList();
 
-    /**
-     * Get the products for this order.
-     *
-     * @return Product[] The products for this order.
-     */
-    public function getProducts(): array {
-        return $this->_products ??= (function (): array {
-            $products = [];
-
-            $products_query = $this->_db->query('SELECT nl2_store_products.* FROM nl2_store_orders_products INNER JOIN nl2_store_products ON nl2_store_products.id=product_id WHERE order_id = ?', [$this->data()->id]);
+            $products_query = $this->_db->query('SELECT nl2_store_products.*, nl2_store_orders_products.quantity, nl2_store_orders_products.id AS item_id FROM nl2_store_orders_products INNER JOIN nl2_store_products ON nl2_store_products.id=product_id WHERE order_id = ?', [$this->data()->id]);
             if ($products_query->count()) {
                 $products_query = $products_query->results();
 
                 foreach ($products_query as $data) {
-                    $products[$data->id] = new Product(null, null, $data);
+                    $product = new Product(null, null, $data);
+
+                    $fields = [];
+                    $fields_query = $this->_db->query('SELECT field_id, identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$this->data()->id, $product->data()->id])->results();
+                    foreach ($fields_query as $field) {
+                        $fields[$field->identifier] = [
+                            'field_id' => $field->field_id,
+                            'identifier' => Output::getClean($field->identifier),
+                            'value' => Output::getClean($field->value)
+                        ];
+                    }
+
+                    $item = new Item($data->item_id, $product, $data->quantity, $fields);
+
+                    $items->addItem($item);
                 }
             }
 
-            return $products;
+            return $items;
         })();
-    }
-
-    /**
-     * Get the product fields.
-     *
-     * @return array The list of field values
-     */
-    public function getProductFields(int $product_id): array {
-        $fields = [];
-        $fields_query = $this->_db->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$this->data()->id, $product_id])->results();
-        foreach ($fields_query as $field) {
-            $fields[$field->identifier] = [
-                'identifier' => Output::getClean($field->identifier),
-                'value' => Output::getClean($field->value)
-            ];
-        }
-
-        return $fields;
     }
 
     /**
@@ -115,9 +97,9 @@ class Order {
      * @param ?User $user The NamelessMC user buying the product.
      * @param Customer $from_customer The customer buying the product.
      * @param Customer $to_customer The customer who is receiving the product.
-     * @param array<int, Item> $items The list of items along with custom fields for product
+     * @param ItemList $items The list of items along with custom fields for product
      */
-    public function create(?User $user, Customer $from_customer, Customer $to_customer, array $items, ?Coupon $coupon = null): void {
+    public function create(?User $user, Customer $from_customer, Customer $to_customer, ItemList $items, ?Coupon $coupon = null): void {
         $this->_db->insert('store_orders', [
             'user_id' => $user != null ? $user->exists() ? $user->data()->id : null : null,
             'from_customer_id' => $from_customer->data()->id,
@@ -130,7 +112,7 @@ class Order {
 
         // Register products and fields to order
         $this->_items = $items;
-        foreach ($items as $item) {
+        foreach ($items->getItems() as $item) {
             $this->_db->insert('store_orders_products', [
                 'order_id' => $last_id,
                 'product_id' => $item->getProduct()->data()->id,
@@ -142,7 +124,7 @@ class Order {
                 $this->_db->insert('store_orders_products_fields', [
                     'order_id' => $last_id,
                     'product_id' => $item->getProduct()->data()->id,
-                    'field_id' => $field['id'],
+                    'field_id' => $field['field_id'],
                     'value' => $field['value']
                 ]);
             }
@@ -196,11 +178,19 @@ class Order {
      */
     public function getDescription(): string {
         $product_names = '';
-        foreach ($this->getProducts() as $product) {
-            $product_names .= $product->data()->name . ', ';
+        foreach ($this->items()->getItems() as $item) {
+            $product_names .= $item->getProduct()->data()->name . ', ';
         }
         $product_names = rtrim($product_names, ', ');
 
         return $product_names;
+    }
+
+    public function setSubscriptionMode(bool $value): void {
+        $this->_subscription = $value;
+    }
+
+    public function isSubscriptionMode(): bool {
+        return $this->_subscription;
     }
 }

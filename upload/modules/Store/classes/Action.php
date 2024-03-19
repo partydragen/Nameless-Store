@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.3
+ * @version 2.2.0
  * @license MIT
  */
 class Action {
@@ -145,21 +145,18 @@ class Action {
     /**
      * Execute actions for product and make placeholders
      */
-    public function execute(Order $order, Product $product, Payment $payment): void {
+    public function execute(Order $order, Item $item, Payment $payment): void {
+        $product = $item->getProduct();
+
         $placeholders = [];
-
-        $quantity = 1;
-        $custom_fields = $this->_db->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$order->data()->id, $product->data()->id])->results();
-        foreach ($custom_fields as $field) {
-            $placeholders['{'.$field->identifier.'}'] = Output::getClean($field->value);
-
-            if ($field->identifier == 'quantity') {
-                $quantity = $field->value;
-            }
+        foreach ($item->getFields() as $field) {
+            $placeholders['{' . $field['identifier'] . '}'] = Output::getClean($field['value']);
         }
 
         $customer = $order->customer();
         $recipient = $order->recipient();
+        $placeholders['{itemId}'] = $item->getId();
+        $placeholders['{quantity}'] = $item->getQuantity();
         $placeholders['{userId}'] = $recipient->exists() ? $recipient->data()->user_id ?? 0 : 0;
         $placeholders['{username}'] = $recipient->getUsername();
         $placeholders['{uuid}'] = $recipient->getIdentifier();
@@ -170,6 +167,7 @@ class Action {
         $placeholders['{amount}'] = Store::fromCents($payment->data()->amount_cents ?? 0);
         $placeholders['{currency}'] = $payment->data()->currency;
         $placeholders['{orderId}'] = $payment->data()->order_id;
+        $placeholders['{subscriptionId}'] = $payment->data()->subscription_id ?? 0;
         $placeholders['{ip}'] = $order->data()->ip;
         $placeholders['{time}'] = date('H:i', $payment->data()->created);
         $placeholders['{date}'] = date('d M Y', $payment->data()->created);
@@ -190,8 +188,8 @@ class Action {
 
         try {
             // For each quantity
-            for($i = 0; $i < $quantity; $i++){
-                $this->_service->executeAction($this, $order, $product, $payment, $placeholders);
+            for($i = 0; $i < $item->getQuantity(); $i++){
+                $this->_service->executeAction($this, $order, $item, $payment, $placeholders);
             }
         } catch (Exception $e) {
 

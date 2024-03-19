@@ -29,7 +29,7 @@
         </select>
     </div>
     <div class="form-group">
-        <label for="InputCommand">Command (Without /)</label><a class="float-right btn btn-primary btn-sm" href="" data-toggle="modal" data-target="#placeholders">Placeholders</a></br>
+        <label for="InputCommand">Command (Without /)</label><a class="float-right btn btn-primary btn-sm" href="" data-toggle="modal" data-target="#placeholders">{$VIEW_PLACEHOLDERS}</a></br>
         <input type="text" name="command" class="form-control" id="InputCommand" value="{$COMMAND_VALUE}" placeholder="{literal}say Thanks {username} for purchasing {productName}{/literal}">
     </div>
     <div class="form-group">

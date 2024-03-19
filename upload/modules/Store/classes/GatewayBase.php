@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.2
+ * @version 2.2.0
  * @license MIT
  */
 abstract class GatewayBase {
@@ -152,6 +152,10 @@ abstract class GatewayBase {
      */
     public function getErrors(): array {
         return $this->_errors;
+    }
+
+    public function logError(string $error): void {
+        ErrorHandler::logWarning('[Store] [' . $this->getName() . '] ' . $error);
     }
 
     /**

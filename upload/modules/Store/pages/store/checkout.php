@@ -129,7 +129,7 @@ if (isset($_GET['do'])) {
                         $value = (!is_array($item) ? $item : implode(', ', $item));
 
                         $product_fields[$field->id] = [
-                            'id' => Output::getClean($field->id),
+                            'field_id' => Output::getClean($field->id),
                             'identifier' => Output::getClean($field->identifier),
                             'value' => $value,
                             'description' => Output::getClean($field->description),
@@ -170,6 +170,7 @@ if (isset($_GET['do'])) {
                     if ($validation_event->isCancelled()) {
                         $errors[] = $validation_event->getCancelledReason();
                     } else {
+                        $shopping_cart->setSubscriptionMode(isset($_GET['type']) && $_GET['type'] == 'subscribe');
                         $shopping_cart->add($_GET['add'], $quantity, $product_fields);
                         Redirect::to(URL::build($store_url . '/checkout/'));
                     }
@@ -212,6 +213,7 @@ if (isset($_GET['do'])) {
         $template_file = 'store/checkout_add.tpl';
     } else {
         // No customer input to fill, continue to next step
+        $shopping_cart->setSubscriptionMode(isset($_GET['type']) && $_GET['type'] == 'subscribe');
         $shopping_cart->add($_GET['add']);
         Redirect::to(URL::build($store_url . '/checkout/'));
     }
@@ -226,7 +228,7 @@ if (isset($_GET['do'])) {
 
 } else {
     // Make sure the shopping cart is not empty
-    if (!count($shopping_cart->getItems())) {
+    if (!count($shopping_cart->items()->getItems())) {
         Redirect::to(URL::build($store_url));
     }
 
@@ -248,13 +250,6 @@ if (isset($_GET['do'])) {
             // Valid, continue with validation
             $validation = Validate::check($_POST, $to_validation); // Execute validation
             if ($validation->passed()) {
-                require_once(ROOT_PATH . '/modules/Store/config.php');
-
-                // Load Store config
-                if (isset($store_conf) && is_array($store_conf)) {
-                    $GLOBALS['store_config'] = $store_conf;
-                }
-
                 // Create order
                 $amount = new Amount();
                 $amount->setCurrency($currency);
@@ -262,9 +257,11 @@ if (isset($_GET['do'])) {
 
                 $order = new Order();
                 $order->setAmount($amount);
+                $order->setSubscriptionMode($shopping_cart->isSubscriptionMode());
 
-                $order->setProducts($shopping_cart->getProducts());
-                $order->create($user, $from_customer, $to_customer, $shopping_cart->getItems(), $shopping_cart->getCoupon());
+                $order->create($user, $from_customer, $to_customer, $shopping_cart->items(), $shopping_cart->getCoupon());
+
+                $shopping_cart->setOrder($order);
 
                 // Complete order if there is nothing to pay
                 $amount_to_pay = $shopping_cart->getTotalRealPriceCents();
@@ -319,7 +316,7 @@ if (isset($_GET['do'])) {
 
     // Load shopping list
     $shopping_cart_list = [];
-    foreach ($shopping_cart->getItems() as $item) {
+    foreach ($shopping_cart->items()->getItems() as $item) {
         $product = $item->getProduct();
 
         $fields = [];
@@ -377,9 +374,16 @@ if (isset($_GET['do'])) {
     $payment_methods = [];
     foreach (Gateways::getInstance()->getAll() as $gateway) {
         if ($gateway->isEnabled()) {
+            // If subscription mode then check if gateway supports subscription
+            if ($shopping_cart->isSubscriptionMode()) {
+                if (!$gateway instanceof SupportSubscriptions) {
+                    continue;
+                }
+            }
+
             // Check of any products require certain gateways
-            foreach ($shopping_cart->getProducts() as $product) {
-                $allowed_gateways = json_decode($product->data()->allowed_gateways, true) ?? [];
+            foreach ($shopping_cart->items()->getItems() as $item) {
+                $allowed_gateways = json_decode($item->getProduct()->data()->allowed_gateways ?? '[]', true);
                 if (count($allowed_gateways) && !in_array($gateway->getId(), $allowed_gateways)) {
                     continue 2;
                 }
@@ -444,6 +448,10 @@ if (isset($_GET['do'])) {
         'PAYMENT_METHODS' => $payment_methods,
         'SHOPPING_CART_LIST' => $shopping_cart_list
     ]);
+
+    if ($shopping_cart->isSubscriptionMode()) {
+        $smarty->assign('CHECKOUT_SUBSCRIBE', $store_language->get('general', 'subscribe'));
+    }
 
     $template_file = 'store/checkout.tpl';
 }

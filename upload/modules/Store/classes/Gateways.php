@@ -1,16 +1,14 @@
 <?php
-/*
- *  Made by Partydragen
- *  https://partydragen.com/resources/resource/5-store-module/
- *  https://partydragen.com/
+/**
+ *  Gateways class
  *
- *  License: MIT
- *
- *  Store module
+ * @package Modules\Store
+ * @author Partydragen
+ * @version 2.2.0
+ * @license MIT
  */
-
 class Gateways extends Instanceable {
-    private static array $_gateways;
+    private array $_gateways = [];
 
     // Constructor, connect to database
     public function __construct() {
@@ -27,7 +25,7 @@ class Gateways extends Instanceable {
     }
 
     // Get all gateways
-    public function getAll() {
+    public function getAll(): array {
         return $this->_gateways;
     }
 

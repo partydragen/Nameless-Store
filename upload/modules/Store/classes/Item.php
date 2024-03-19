@@ -4,10 +4,15 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.3
+ * @version 2.2.0
  * @license MIT
  */
 class Item {
+
+    /**
+     * @var int Get the item id.
+     */
+    private int $_item_id;
 
     /**
      * @var Product The product for this item.
@@ -20,18 +25,39 @@ class Item {
     private int $_quantity;
 
     /**
-     * @var array The custom fields for this item.
+     * @var ?array The custom fields for this item.
      */
-    private array $_fields = [];
+    private array $_fields;
 
-    public function __construct(Product $product, int $quantity, array $fields) {
-        $this->_product = $product;
-        $this->_quantity = $quantity;
-        $this->_fields = $fields;
+    public function __construct(int $item_id, Product $product = null, int $quantity = null, array $fields = []) {
+        $this->_item_id = $item_id;
+
+        if ($product != null) {
+            $this->_product = $product;
+            $this->_quantity = $quantity;
+            $this->_fields = $fields;
+        } else {
+            $item_query = DB::getInstance()->query('SELECT nl2_store_products.*, nl2_store_orders_products.quantity, nl2_store_orders_products.id AS item_id FROM nl2_store_orders_products INNER JOIN nl2_store_products ON nl2_store_products.id=product_id WHERE nl2_store_orders_products.id = ?', [$item_id]);
+            if ($item_query->count()) {
+                $item_query = $item_query->first();
+
+                $this->_product = new Product(null, null, $item_query);
+                $this->_quantity = $item_query->quantity;
+            }
+        }
     }
 
     /**
      * Get the product for this item.
+     *
+     * @return int
+     */
+    public function getId(): int {
+        return $this->_item_id;
+    }
+
+    /**
+     * Get the item id.
      *
      * @return Product
      */

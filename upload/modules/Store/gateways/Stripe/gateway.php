@@ -7,7 +7,7 @@
  * @version 2.0.3
  * @license MIT
  */
-class Stripe_Gateway extends GatewayBase {
+class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
 
     public function __construct() {
         $name = 'Stripe';
@@ -24,7 +24,7 @@ class Stripe_Gateway extends GatewayBase {
     }
 
     public function processOrder(Order $order): void {
-        $this->getApiContext();
+        $stripe = $this->getApiContext();
         if (count($this->getErrors())) {
             return;
         }
@@ -34,14 +34,61 @@ class Stripe_Gateway extends GatewayBase {
         $cancelRedirect = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=cancel');
 
         $products = [];
-        foreach ($order->getItems() as $item) {
+        if (!$order->isSubscriptionMode()) {
+            // Single payment
+            foreach ($order->items()->getItems() as $item) {
+                $products[] = [
+                    'price_data' => [
+                        'currency' => $currency,
+                        'product_data' => [
+                            'name' => $item->getProduct()->data()->name,
+                        ],
+                        'unit_amount' => $item->getSingleQuantityPrice(),
+                    ],
+                    'quantity' => $item->getQuantity()
+                ];
+            }
+
+            try {
+                $json = [
+                    'mode' => 'payment',
+                    'line_items' => $products,
+                    'success_url' => $successRedirect,
+                    'cancel_url' => $cancelRedirect,
+
+                    'payment_intent_data' => [
+                        'metadata' => [
+                            'order_id' => $order->data()->id
+                        ],
+                    ]
+                ];
+
+                $session = $stripe->checkout->sessions->create($json);
+                Redirect::to($session->url);
+            } catch (\Stripe\Exception\ApiErrorException $e) {
+                $this->logError($e->getMessage());
+                $this->addError('Somethings went wrong, Please contact administration!');
+            }
+
+            return;
+        }
+
+        // Payment subscription
+        foreach ($order->items()->getItems() as $item) {
+            $product = $item->getProduct();
+            $duration_json = json_decode($product->data()->durability, true) ?? [];
+
             $products[] = [
                 'price_data' => [
                     'currency' => $currency,
                     'product_data' => [
-                        'name' => $item->getProduct()->data()->name,
+                        'name' => $product->data()->name,
                     ],
                     'unit_amount' => $item->getSingleQuantityPrice(),
+                    'recurring' => [
+                        'interval' => $duration_json['period'] ?? 'month',
+                        'interval_count' => $duration_json['interval'] ?? 1
+                    ]
                 ],
                 'quantity' => $item->getQuantity()
             ];
@@ -49,22 +96,25 @@ class Stripe_Gateway extends GatewayBase {
 
         try {
             $json = [
-                'mode' => 'payment',
+                'mode' => 'subscription',
                 'line_items' => $products,
                 'success_url' => $successRedirect,
                 'cancel_url' => $cancelRedirect,
-
-                'payment_intent_data' => [
-                    'metadata'=> [
+                'metadata' => [
+                    'order_id' => $order->data()->id
+                ],
+                'subscription_data' => [
+                    'metadata' => [
                         'order_id' => $order->data()->id
                     ],
                 ]
             ];
 
-            $session = \Stripe\Checkout\Session::create($json);
+            $session = $stripe->checkout->sessions->create($json);
             Redirect::to($session->url);
         } catch (\Stripe\Exception\ApiErrorException $e) {
-            ErrorHandler::logCustomError($e->getMessage());
+            $this->logError($e->getMessage());
+            $this->addError('Somethings went wrong, Please contact administration!');
         }
     }
 
@@ -79,15 +129,15 @@ class Stripe_Gateway extends GatewayBase {
     public function handleListener(): void {
         $this->getApiContext();
 
-        $webhook_secret = StoreConfig::get('stripe/hook_key');
+        $webhook_secret = StoreConfig::get('stripe.hook_key');
         if (!$webhook_secret) {
-            ErrorHandler::logCustomError('No webhook secret found. Is it set up?');
+            http_response_code(500);
+            $this->logError('No webhook secret found. Is it set up?');
             return;
         }
 
         $bodyReceived = file_get_contents('php://input');
         $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
-        $event = null;
         $response = json_decode($bodyReceived);
 
         if (is_dir(ROOT_PATH . '/cache/stripe_logs/')) {
@@ -100,7 +150,7 @@ class Stripe_Gateway extends GatewayBase {
             );
         } catch (\UnexpectedValueException | \Stripe\Exception\SignatureVerificationException $e) {
             http_response_code(400);
-            ErrorHandler::logCustomError($e->getMessage());
+            $this->logError($e->getMessage());
             return;
         }
 
@@ -115,7 +165,7 @@ class Stripe_Gateway extends GatewayBase {
                        'payment_id' => $data->charges->data[0]->payment_intent,
                        'transaction' => $data->charges->data[0]->id,
                        'amount_cents' => $data->amount_received,
-                       'currency' => $data->currency,
+                       'currency' => strtoupper($data->currency),
                    ]);
                }
                break;
@@ -145,41 +195,237 @@ class Stripe_Gateway extends GatewayBase {
                     }
                 }
                 break;
+
+            case 'customer.subscription.created':
+                // Subscription created
+                $data = $event->data->object;
+
+                // Get order
+                $order = new Order($data->metadata->order_id);
+
+                $subscription = new Subscription($data->id, 'agreement_id');
+                if (!$subscription->exists()) {
+                    // Save agreement to database
+                    $subscription = new Subscription();
+                    $subscription->create([
+                        'order_id' => $data->metadata->order_id,
+                        'gateway_id' => $this->getId(),
+                        'customer_id' => $order->customer()->data()->id,
+                        'agreement_id' => $data->id,
+                        'status_id' => $this->subscriptionStatus($data->status),
+                        'amount_cents' => $data->plan->amount,
+                        'currency' => strtoupper($data->plan->currency),
+                        'frequency' => strtoupper($data->plan->interval),
+                        'frequency_interval' => $data->plan->interval_count,
+                        'payer_id' => $data->customer,
+                        'next_billing_date' => $data->current_period_end,
+                        'created' => date('U'),
+                        'updated' => date('U')
+                    ]);
+                }
+                break;
+
+            case 'customer.subscription.updated':
+                // Subscription updated
+                $data = $event->data->object;
+                $subscription = new Subscription($data->id, 'agreement_id');
+                if ($subscription->exists()) {
+                   $subscription->update([
+                       'status_id' => $this->subscriptionStatus($data->status),
+                       'next_billing_date' => $data->current_period_end,
+                       'updated' => date('U')
+                   ]);
+                } else {
+                    http_response_code(503);
+                    $this->logError('Received subscription updated event for unknown subscription');
+                }
+                break;
+
+            case 'customer.subscription.deleted':
+                // Subscription deleted
+                $data = $event->data->object;
+                $subscription = new Subscription($data->id, 'agreement_id');
+                if ($subscription->exists()) {
+                    $subscription->cancelled();
+                }
+                break;
+
+            case 'invoice.paid':
+                $data = $event->data->object;
+                if (isset($data->subscription, $data->subscription_details)) {
+                    $subscription = new Subscription($data->subscription, 'agreement_id');
+                    if ($subscription->exists()) {
+                        $payment = new Payment($data->payment_intent, 'payment_id');
+                        if (!$payment->exists()) {
+                            // Register new payment from subscription
+                            $data = [
+                                'order_id' => $data->subscription_details->metadata->order_id,
+                                'payment_id' => $data->payment_intent,
+                                'gateway_id' => $this->getId(),
+                                'subscription_id' => $subscription->data()->id,
+                                'transaction' => $data->charge,
+                                'amount_cents' => $data->total,
+                                'currency' => strtoupper($data->currency)
+                            ];
+
+                            $payment->handlePaymentEvent(Payment::COMPLETED, $data);
+                        }
+
+                        $subscription->update([
+                            'last_payment_date' => date('U')
+                        ]);
+                    } else {
+                        http_response_code(503);
+                        $this->logError('Received invoice paid event for unknown subscription');
+                    }
+                }
+                break;
         }
     }
 
-    private function getApiContext() {
-        $secret_key = StoreConfig::get('stripe/secret_key');
+    private function getApiContext(): ?\Stripe\StripeClient {
+        $secret_key = StoreConfig::get('stripe.secret_key');
 
         if ($secret_key) {
             try {
                 require_once(ROOT_PATH . '/modules/Store/gateways/Stripe/vendor/autoload.php');
-                \Stripe\Stripe::setApiKey($secret_key);
+                $stripe = new \Stripe\StripeClient($secret_key);
 
-                $hook_key = StoreConfig::get('stripe/hook_key');
+                $hook_key = StoreConfig::get('stripe.hook_key');
                 if (!$hook_key) {
-                    $stripe = new \Stripe\StripeClient($secret_key);
                     $webhook = $stripe->webhookEndpoints->create([
                         'url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/listener', 'gateway=Stripe'),
-                        'enabled_events' => ['payment_intent.succeeded', 'charge.refunded', 'charge.failed', 'charge.dispute.closed']
+                        'enabled_events' => [
+                            'payment_intent.succeeded',
+                            'charge.refunded',
+                            'charge.failed',
+                            'charge.dispute.closed',
+                            'customer.subscription.created',
+                            'customer.subscription.updated',
+                            'customer.subscription.deleted',
+                            'customer.subscription.paused',
+                            'customer.subscription.resumed',
+                            'invoice.paid'
+                        ]
                     ]);
 
                     if ($webhook->secret == null || empty($webhook->secret)) {
-                        ErrorHandler::logCustomError('Could not generate webhook secret for Stripe gateway');
+                        $this->logError('Could not generate webhook secret');
                         $this->addError('Somethings went wrong, Please contact administration!');
-                        return;
+                        return null;
                     }
 
-                    StoreConfig::set([
-                        'stripe/hook_key' => $webhook->secret
+                    StoreConfig::setMultiple([
+                        'stripe.hook_id' => $webhook->id,
+                        'stripe.hook_key' => $webhook->secret
                     ]);
+                } else {
+                    $this->updateWebhook($stripe);
                 }
+
+                return $stripe;
             } catch (Exception $e) {
-                ErrorHandler::logCustomError($e->getMessage());
+                $this->logError($e->getMessage());
                 $this->addError('Stripe integration incorrectly configured!');
             }
         } else {
             $this->addError('Administration has not completed the configuration of this gateway!');
+        }
+
+        return null;
+    }
+
+    public function createSubscription(): void {
+
+    }
+
+    public function cancelSubscription(Subscription $subscription): bool {
+        $stripe = $this->getApiContext();
+        if (count($this->getErrors())) {
+            return false;
+        }
+
+        try {
+            $stripe->subscriptions->cancel($subscription->data()->agreement_id);
+            return true;
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            $this->logError($e->getMessage());
+            return false;
+        }
+    }
+
+    public function syncSubscription(Subscription $subscription): bool {
+        $stripe = $this->getApiContext();
+        if (count($this->getErrors())) {
+            return false;
+        }
+        $data = $stripe->subscriptions->retrieve($subscription->data()->agreement_id);
+
+        $subscription->update([
+            'status_id' => $this->subscriptionStatus($data->status),
+            'next_billing_date' => $data->current_period_end,
+        ]);
+
+        return true;
+    }
+
+    public function chargePayment(Subscription $subscription): bool {
+        return false;
+    }
+
+    public function subscriptionStatus(string $status): int {
+        switch($status) {
+            case 'incomplete':
+                $status_id = Subscription::PENDING;
+                break;
+            case 'active':
+            case 'past_due':
+            case 'unpaid':
+            case 'trialing':
+                $status_id = Subscription::ACTIVE;
+                break;
+            case 'incomplete_expired':
+            case 'canceled':
+                $status_id = Subscription::CANCELLED;
+                break;
+            default:
+                $status_id = Subscription::UNKNOWN;
+                break;
+        }
+
+        return $status_id;
+    }
+
+    public function updateWebhook(Stripe\StripeClient $stripe) {
+        $hook_id = StoreConfig::get('stripe.hook_id');
+        $hook_key = StoreConfig::get('stripe.hook_key');
+        if ($hook_key && !$hook_id) {
+            // Update existing webhooks
+            $last_id = null;
+            foreach ($stripe->webhookEndpoints->all() as $webhook) {
+                if (str_contains($webhook->url, 'gateway=Stripe')) {
+                    $webhook = $stripe->webhookEndpoints->update($webhook->id, [
+                        'enabled_events' => [
+                            'payment_intent.succeeded',
+                            'charge.refunded',
+                            'charge.failed',
+                            'charge.dispute.closed',
+                            'customer.subscription.created',
+                            'customer.subscription.updated',
+                            'customer.subscription.deleted',
+                            'customer.subscription.paused',
+                            'customer.subscription.resumed',
+                            'invoice.paid'
+                        ]
+                    ]);
+
+                    $last_id = $webhook->id;
+                }
+            }
+
+            if ($last_id) {
+                StoreConfig::set('stripe.hook_id', $last_id);
+            }
         }
     }
 }

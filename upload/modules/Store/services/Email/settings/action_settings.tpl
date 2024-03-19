@@ -14,7 +14,7 @@
         <input type="text" class="form-control" id="inputEmailSubject" name="subject" value="{$EMAIL_SUBJECT_VALUE}">
     </div>
     <div class="form-group">
-        <label for="inputEmailContent">Email Content</label><a class="float-right btn btn-primary btn-sm" href="" data-toggle="modal" data-target="#placeholders">Placeholders</a>
+        <label for="inputEmailContent">Email Content</label><a class="float-right btn btn-primary btn-sm" href="" data-toggle="modal" data-target="#placeholders">{$VIEW_PLACEHOLDERS}</a>
         <textarea id="inputEmailContent" name="content">{$EMAIL_CONTENT_VALUE}</textarea>
     </div>
     <div class="form-group">

@@ -18,7 +18,8 @@ class EmailService extends ServiceBase {
 
     }
 
-    public function executeAction(Action $action, Order $order, Product $product, Payment $payment, array $placeholders) {
+    public function executeAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
+        $product = $item->getProduct();
         $user = $order->recipient()->getUser();
         if ($user->exists()) {
             $email = json_decode($action->data()->command, true);

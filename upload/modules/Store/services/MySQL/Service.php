@@ -18,8 +18,9 @@ class MySQLService extends ServiceBase {
 
     }
 
-    public function executeAction(Action $action, Order $order, Product $product, Payment $payment, array $placeholders) {
+    public function executeAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
         // Execute this action on all selected connections
+        $product = $item->getProduct();
         $connections = ($action->data()->own_connections ? $action->getConnections() : $product->getConnections($this->getId()));
         foreach ($connections as $connection) {
             // Replace existing placeholder

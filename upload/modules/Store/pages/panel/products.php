@@ -171,7 +171,8 @@ if (!isset($_GET['action'])) {
                                 'hidden' => $hidden,
                                 'disabled' => $disabled,
                                 'order' => $last_order + 1,
-                                'durability' => $durability
+                                'durability' => $durability,
+                                'payment_type' => Input::get('payment_type')
                             ]);
                             $lastId = DB::getInstance()->lastId();
                             $product = new Product($lastId);
@@ -252,6 +253,12 @@ if (!isset($_GET['action'])) {
                 'FIELDS_LIST' => $fields_array,
                 'CURRENCY' => Output::getClean(Store::getCurrency()),
                 'DURABILITY' => $durability,
+                'REMOVE_AFTER_EXPIRE' => $store_language->get('admin', 'remove_after_expire'),
+                'RECURRING_PAYMENT' => $store_language->get('admin', 'recurring_payment'),
+                'RECURRING_PAYMENT_VALUE' => ((isset($_POST['recurring_payment']) && $_POST['recurring_payment']) ? Output::getClean(Input::get('recurring_payment')) : '1'),
+                'CHARGE_CUSTOMER_ONCE' => $store_language->get('admin', 'charge_customer_once'),
+                'CHARGE_RECURRING_SUBSCRIPTION' => $store_language->get('admin', 'charge_recurring_subscription'),
+                'ONE_OFF_AND_RECURRING' => $store_language->get('admin', 'one_off_and_recurring'),
                 'HIDE_PRODUCT' => $store_language->get('admin', 'hide_product_from_store'),
                 'HIDE_PRODUCT_VALUE' => ((isset($_POST['hidden'])) ? 1 : 0),
                 'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),

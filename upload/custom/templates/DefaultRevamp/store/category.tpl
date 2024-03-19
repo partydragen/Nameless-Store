@@ -98,10 +98,20 @@
                     <div class="ui red deny button">
                       {$CLOSE}
                     </div>
-                    <a class="ui positive right labeled icon button" href="{$product.link}">
-                      {$BUY}
-                      <i class="shopping cart icon"></i>
-                    </a>
+
+                    {if $product.subscribe_link != null}
+                      <a class="ui positive right labeled icon button" href="{$product.subscribe_link}">
+                        {$SUBSCRIBE}
+                        <i class="shopping cart icon"></i>
+                      </a>
+                    {/if}
+
+                    {if $product.link != null}
+                      <a class="ui positive right labeled icon button" href="{$product.link}">
+                        {$ADD_TO_CART}
+                        <i class="shopping cart icon"></i>
+                      </a>
+                    {/if}
                   </div>
                 </div>
               {/foreach}

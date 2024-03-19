@@ -13,7 +13,6 @@
 class Store_Module extends Module {
     private DB $_db;
     private $_store_language, $_language, $_cache, $_store_url;
-
     public function __construct($language, $store_language, $pages, $cache, $endpoints) {
         $this->_db = DB::getInstance();
         $this->_language = $language;
@@ -43,6 +42,7 @@ class Store_Module extends Module {
         $pages->add('Store', '/panel/store/product', 'pages/panel/product.php');
         $pages->add('Store', '/panel/store/categories', 'pages/panel/categories.php');
         $pages->add('Store', '/panel/store/payments', 'pages/panel/payments.php');
+        $pages->add('Store', '/panel/store/subscriptions', 'pages/panel/subscriptions.php');
         $pages->add('Store', '/panel/store/connections', 'pages/panel/connections.php');
         $pages->add('Store', '/panel/store/fields', 'pages/panel/fields.php');
         $pages->add('Store', '/panel/store/sales', 'pages/panel/sales.php');
@@ -58,6 +58,8 @@ class Store_Module extends Module {
         EventHandler::registerEvent(PaymentRefundedEvent::class);
         EventHandler::registerEvent(PaymentReversedEvent::class);
         EventHandler::registerEvent(PaymentDeniedEvent::class);
+        EventHandler::registerEvent(SubscriptionCreatedEvent::class);
+        EventHandler::registerEvent(SubscriptionCancelledEvent::class);
         EventHandler::registerEvent(CheckoutAddProductEvent::class);
         EventHandler::registerEvent(CheckoutFieldsValidationEvent::class);
         EventHandler::registerEvent(CustomerProductExpiredEvent::class);
@@ -69,6 +71,7 @@ class Store_Module extends Module {
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredProducts']);
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredGroups']);
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredIntegrations']);
+        EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'cancel']);
         EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'purify']);
         EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'renderEmojis'], 10);
         EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'replaceAnchors'], 15);
@@ -146,12 +149,6 @@ class Store_Module extends Module {
         else
             $icon = $cache->retrieve('store_icon');
 
-        $cache->setCache('store_settings');
-        if ($cache->isCached('navbar_position'))
-            $navbar_pos = $cache->retrieve('navbar_position');
-        else
-            $navbar_pos = 'top';
-
         switch ($link_location) {
             case 1:
                 // Navbar
@@ -184,7 +181,10 @@ class Store_Module extends Module {
                 'staffcp.store.payments' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments'),
                 'staffcp.store.payments.create' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments') . ' &raquo; ' . $this->_store_language->get('admin', 'create_payment'),
                 'staffcp.store.payments.delete' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments') . ' &raquo; ' . $this->_store_language->get('admin', 'delete_payment'),
-                'staffcp.store.connections' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'connections'),
+                'staffcp.store.subscriptions' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'subscriptions'),
+                'staffcp.store.subscriptions.cancel' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'subscriptions') . ' &raquo; ' . $this->_store_language->get('general', 'cancel_subscription'),
+                'staffcp.store.subscriptions.sync' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'subscriptions') . ' &raquo; ' . $this->_store_language->get('admin', 'sync_subscription'),
+                'staffcp.store.connections' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'service_connections'),
                 'staffcp.store.fields' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'fields'),
                 'staffcp.store.manage_credits' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'manage_users_credits'),
                 'staffcp.store.sales' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'sales'),
@@ -268,6 +268,16 @@ class Store_Module extends Module {
                         $icon = $cache->retrieve('store_payments_icon');
 
                     $navs[2]->add('store_payments', $this->_store_language->get('admin', 'payments'), URL::build('/panel/store/payments'), 'top', null, ($order + 0.7), $icon);
+                }
+
+                if ($user->hasPermission('staffcp.store.subscriptions')) {
+                    if (!$cache->isCached('store_subscriptions_icon')) {
+                        $icon = '<i class="nav-icon fa-solid fa-handshake"></i>';
+                        $cache->store('store_subscriptions_icon', $icon);
+                    } else
+                        $icon = $cache->retrieve('store_subscriptions_icon');
+
+                    $navs[2]->add('store_subscriptions', $this->_store_language->get('admin', 'subscriptions'), URL::build('/panel/store/subscriptions'), 'top', null, ($order + 0.7), $icon);
                 }
 
                 if ($user->hasPermission('staffcp.store.sales')) {
@@ -1020,7 +1030,6 @@ class Store_Module extends Module {
         if ($old_version < 160) {
             try {
                 $this->_db->query('ALTER TABLE nl2_store_products ADD `durability` varchar(128) DEFAULT NULL');
-                $this->_db->query('ALTER TABLE nl2_store_products ADD `recurring_payment_type` int(11) NOT NULL DEFAULT \'1\'');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
@@ -1097,6 +1106,30 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
+        }
+
+        if ($old_version < 180) {
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_payments ADD `subscription_id` int(11) DEFAULT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                if (!$this->_db->showTables('store_subscriptions')) {
+                    try {
+                        $this->_db->createTable("store_subscriptions", " `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `customer_id` int(11) NOT NULL, `agreement_id` varchar(64) NOT NULL, `status_id` int(11) NOT NULL DEFAULT '0', `amount_cents` int(11) NOT NULL, `currency` varchar(16) NOT NULL, `frequency` varchar(16) NOT NULL, `frequency_interval` int(11) NOT NULL, `email` varchar(128) DEFAULT NULL, `verified` tinyint(1) NOT NULL DEFAULT '0', `payer_id` varchar(64) DEFAULT NULL, `last_payment_date` int(11) DEFAULT NULL, `next_billing_date` int(11) NOT NULL, `failed_attempts` int(11) NOT NULL DEFAULT '0', `created` int(11) NOT NULL, `updated` int(11) NOT NULL, `expired` tinyint(1) NOT NULL DEFAULT '0', PRIMARY KEY (`id`)");
+                    } catch (Exception $e) {
+                        // Error
+                    }
+                }
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            HandleSubscriptionsTask::schedule();
         }
     }
 
@@ -1196,7 +1229,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_payments')) {
             try {
-                $this->_db->createTable('store_payments', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `payment_id` varchar(64) DEFAULT NULL, `agreement_id` varchar(64) DEFAULT NULL, `transaction` varchar(32) DEFAULT NULL, `amount_cents` int(11) DEFAULT NULL, `currency` varchar(11) DEFAULT NULL, `fee_cents` int(11) DEFAULT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `last_updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_payments', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `payment_id` varchar(64) DEFAULT NULL, `subscription_id` int(11) DEFAULT NULL, `transaction` varchar(32) DEFAULT NULL, `amount_cents` int(11) DEFAULT NULL, `currency` varchar(11) DEFAULT NULL, `fee_cents` int(11) DEFAULT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `last_updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
 
                 $this->_db->query('ALTER TABLE `nl2_store_payments` ADD INDEX `nl2_store_payments_idx_order_id` (`order_id`)');
             } catch (Exception $e) {
@@ -1300,6 +1333,14 @@ class Store_Module extends Module {
             }
         }
 
+        if (!$this->_db->showTables('store_subscriptions')) {
+            try {
+                $this->_db->createTable("store_subscriptions", " `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `customer_id` int(11) NOT NULL, `agreement_id` varchar(64) NOT NULL, `status_id` int(11) NOT NULL DEFAULT '0', `amount_cents` int(11) NOT NULL, `currency` varchar(16) NOT NULL, `frequency` varchar(16) NOT NULL, `frequency_interval` int(11) NOT NULL, `email` varchar(128) DEFAULT NULL, `verified` tinyint(1) NOT NULL DEFAULT '0', `payer_id` varchar(64) DEFAULT NULL, `last_payment_date` int(11) DEFAULT NULL, `next_billing_date` int(11) NOT NULL, `failed_attempts` int(11) NOT NULL DEFAULT '0', `created` int(11) NOT NULL, `updated` int(11) NOT NULL, `expired` tinyint(1) NOT NULL DEFAULT '0', PRIMARY KEY (`id`)");
+            } catch (Exception $e) {
+                // Error
+            }
+        }
+
         try {
             // Update main admin group permissions
             $group = $this->_db->get('groups', ['id', '=', 2])->results();
@@ -1319,5 +1360,7 @@ class Store_Module extends Module {
         } catch (Exception $e) {
             // Error
         }
+
+        HandleSubscriptionsTask::schedule();
     }
 }

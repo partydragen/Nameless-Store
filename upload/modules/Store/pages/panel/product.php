@@ -102,7 +102,8 @@ if (!isset($_GET['action'])) {
                         'price_cents' => Store::toCents(Input::get('price')),
                         'hidden' => $hidden,
                         'disabled' => $disabled,
-                        'durability' => $durability
+                        'durability' => $durability,
+                        'payment_type' => Input::get('payment_type')
                     ]);
 
                     $selected_connections = isset($_POST['connections']) && is_array($_POST['connections']) ? $_POST['connections'] : [];
@@ -272,6 +273,12 @@ if (!isset($_GET['action'])) {
         'ACTION_LIST' => $actions_array,
         'CURRENCY' => Output::getClean(Store::getCurrency()),
         'DURABILITY' => $durability,
+        'REMOVE_AFTER_EXPIRE' => $store_language->get('admin', 'remove_after_expire'),
+        'RECURRING_PAYMENT' => $store_language->get('admin', 'recurring_payment'),
+        'RECURRING_PAYMENT_VALUE' => $product->data()->payment_type,
+        'CHARGE_CUSTOMER_ONCE' => $store_language->get('admin', 'charge_customer_once'),
+        'CHARGE_RECURRING_SUBSCRIPTION' => $store_language->get('admin', 'charge_recurring_subscription'),
+        'ONE_OFF_AND_RECURRING' => $store_language->get('admin', 'one_off_and_recurring'),
         'HIDE_PRODUCT' => $store_language->get('admin', 'hide_product_from_store'),
         'HIDE_PRODUCT_VALUE' => $product->data()->hidden,
         'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),
@@ -281,7 +288,7 @@ if (!isset($_GET['action'])) {
         'UPLOAD_NEW_IMAGE' => $store_language->get('admin', 'upload_new_image'),
         'BROWSE' => $language->get('general', 'browse'),
         'REMOVE' => $language->get('general', 'remove'),
-        'REMOVE_IMAGE_LINK' => URL::build('/panel/store/product/' , 'action=remove_image&product=' . $product->data()->id),
+        'REMOVE_IMAGE_LINK' => URL::build('/panel/store/product/' , 'action=remove_image&product=' . $product->data()->id)
     ]);
 
     $template->assets()->include([
@@ -346,7 +353,8 @@ if (!isset($_GET['action'])) {
                     'ACTION_TITLE' => $store_language->get('admin', 'new_action_for_x', ['product' => Output::getClean($product->data()->name)]),
                     'BACK' => $language->get('general', 'back'),
                     'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
-                    'FIELDS' => $fields->getAll()
+                    'FIELDS' => $fields->getAll(),
+                    'VIEW_PLACEHOLDERS' => $store_language->get('admin', 'view_placeholders'),
                 ]);
                 
                 $template_file = 'store/products_action_form.tpl';
@@ -376,7 +384,8 @@ if (!isset($_GET['action'])) {
                 'ACTION_TITLE' => $store_language->get('admin', 'editing_action_for_x', ['product' => Output::getClean($product->data()->name)]),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
-                'FIELDS' => $fields->getAll()
+                'FIELDS' => $fields->getAll(),
+                'VIEW_PLACEHOLDERS' => $store_language->get('admin', 'view_placeholders'),
             ]);
 
             $template_file = 'store/products_action_form.tpl';

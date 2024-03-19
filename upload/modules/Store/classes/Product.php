@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.3
+ * @version 2.2.0
  * @license MIT
  */
 class Product {
@@ -288,7 +288,7 @@ class Product {
         }
 
         $enabled_integrations = $integrations->getEnabledIntegrations();
-        $required_integrations = json_decode($this->data()->required_integrations, true) ?? [];
+        $required_integrations = json_decode($this->data()->required_integrations ?? '[]', true);
         foreach ($required_integrations as $item) {
             foreach ($enabled_integrations as $integration) {
                 if ($integration->data()->id == $item) {

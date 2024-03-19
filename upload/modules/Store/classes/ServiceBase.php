@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.0.0-pr13
+ * @version 2.2.0
  * @license MIT
  */
 abstract class ServiceBase {
@@ -100,5 +100,5 @@ abstract class ServiceBase {
     /**
      * Execute product action on connection
      */
-    abstract public function executeAction(Action $action, Order $order, Product $product, Payment $payment, array $placeholders);
+    abstract public function executeAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders);
 }

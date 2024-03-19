@@ -22,11 +22,11 @@
 
                 <!-- Page Heading -->
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">{$GATEWAYS}</h1>
+                    <h1 class="h3 mb-0 text-gray-800">{$SUBSCRIPTIONS}</h1>
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{$PANEL_INDEX}">{$DASHBOARD}</a></li>
                         <li class="breadcrumb-item active">{$STORE}</li>
-                        <li class="breadcrumb-item active">{$GATEWAYS}</li>
+                        <li class="breadcrumb-item active">{$SUBSCRIPTIONS}</li>
                     </ol>
                 </div>
 
@@ -39,34 +39,45 @@
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
 
-                        {if isset($GATEWAYS_LIST)}
-                        <div class="table-responsive">
-                            <table class="table table-striped dataTables-payments">
-                                <thead>
+                        <div class="alert alert-warning" role="alert">
+                            This features is currently for patreon supporters, it will be available for everyone in the future with means this wont function for you
+                            </br></br>
+                            <a href="https://partydragen.com/patreon/" target="_blank" class="btn btn-primary">Patreon</a>
+                        </div>
+
+                        {if isset($NO_SUBSCRIPTIONS)}
+                            <p>{$NO_SUBSCRIPTIONS}</p>
+                        {else}
+                            <div class="table-responsive">
+                                <table class="table table-striped dataTables-payments" style="width:100%">
+                                    <thead>
                                     <tr>
-                                        <th>{$PAYMENT_METHOD}</th>
-                                        <th>{$SUPPORTS_SUBSCRIPTIONS}</th>
-                                        <th>{$ENABLED}</th>
-                                        <th><div class="float-right">{$EDIT}</div></th>
+                                        <th>{$USER}</th>
+                                        <th>{$STATUS}</th>
+                                        <th>{$AMOUNT}</th>
+                                        <th>{$LAST_PAYMENT_DATE}</th>
+                                        <th>{$NEXT_BILLING_DATE}</th>
+                                        <th>{$VIEW}</th>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {foreach from=$GATEWAYS_LIST item=gateway}
+                                    </thead>
+                                    <tbody>
+                                    {foreach from=$SUBSCRIPTIONS_LIST item=subscription}
                                         <tr>
-                                            <td><strong>{$gateway.name}</strong> <small>{$gateway.version}</small><br />
-                                            <small>{$gateway.author_x}</small></td>
-                                            <td>{if $gateway.supports_subscriptions}<i class="fa fa-check-circle text-success"></i>{else}<i class="fa fa-times-circle text-danger"></i>{/if}</td>
-                                            <td>{if $gateway.enabled}<span class="badge badge-success">{$ENABLED}</span>{else}<span class="badge badge-danger">{$DISABLED}</span>{/if}</td>
-                                            <td><a href="{$gateway.edit_link}" class="btn btn-primary btn-sm float-right">{$EDIT}</a></td>
+                                            <td><a href="{$subscription.user_link}" style="{$subscription.user_style}"><img src="{$subscription.user_avatar}" class="rounded" style="max-width:32px;max-height:32px;" alt="{$subscription.username}" /> {$subscription.username}</a></td>
+                                            <td>{$subscription.status}</td>
+                                            <td>{$subscription.amount_format}</td>
+                                            <td>{$subscription.last_billing_date}</td>
+                                            <td>{$subscription.next_billing_date}</td>
+                                            <td><a href="{$subscription.link}" class="btn btn-primary btn-sm">{$VIEW}</a></td>
                                         </tr>
                                     {/foreach}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </tbody>
+                                </table>
+                            </div>
                         {/if}
 
                         <center>
-                            <p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a></br>
+                            <p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a></br>
                                 <a class="ml-1" href="https://partydragen.com/suggestions/" target="_blank" data-toggle="tooltip"
                                    data-placement="top" title="You can submit suggestions here"><i class="fa-solid fa-thumbs-up text-warning"></i></a>
                                 <a class="ml-1" href="https://discord.gg/TtH6tpp" target="_blank" data-toggle="tooltip"
@@ -98,7 +109,6 @@
 </div>
 
 {include file='scripts.tpl'}
-
 
 </body>
 </html>

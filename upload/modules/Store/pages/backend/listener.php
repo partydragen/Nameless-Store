@@ -13,12 +13,6 @@ if (!isset($_GET['gateway'])) {
     die('Invalid');
 }
 
-require_once(ROOT_PATH . '/modules/Store/config.php');
-// Load Store config
-if (isset($store_conf) && is_array($store_conf)) {
-    $GLOBALS['store_config'] = $store_conf;
-}
-
 // Handle listener from gateway
 $gateways = Gateways::getInstance();
 $gateway = $gateways->get($_GET['gateway']);

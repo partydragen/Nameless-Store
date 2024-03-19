@@ -10,7 +10,7 @@
  */
  
 $store = new Store($cache, $store_language);
-$shopping_cart = new ShoppingCart();
+$shopping_cart = ShoppingCart::getInstance();
 
 $from_customer = new Customer($user);
 if ($store->isPlayerSystemEnabled()) {
@@ -54,9 +54,9 @@ if ($show_credits_amount === '1' || $show_credits_amount === null) {
 }
 
 $smarty->assign([
-    'SHOPPING_CART_PRODUCTS' => $shopping_cart->getProducts(),
+    'SHOPPING_CART_PRODUCTS' => $shopping_cart->items()->getItems(),
     'X_ITEMS_FOR_Y' => $store_language->get('general', 'x_items_for_y', [
-        'items' => count($shopping_cart->getItems()),
+        'items' => count($shopping_cart->items()->getItems()),
         'amount' => Store::fromCents($shopping_cart->getTotalRealPriceCents()),
         'currency' => $currency,
         'currency_symbol' => $currency_symbol,

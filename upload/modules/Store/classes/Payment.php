@@ -4,7 +4,7 @@
  *
  * @package Modules\Store
  * @author Partydragen
- * @version 2.1.0
+ * @version 2.2.0
  * @license MIT
  */
 class Payment {
@@ -141,14 +141,26 @@ class Payment {
 
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
 
-                    // Schedule any products for expiration?
-                    foreach ($this->getOrder()->getProducts() as $product) {
-                        if ($product->data()->durability != null) {
-                            ExpireCustomerProductTask::schedule($this->getOrder(), $product, $this);
+                    if ($this->data()->subscription_id == null) {
+                        // This is a non-subscription payment
+                        // Schedule any products for expiration?
+                        foreach ($this->getOrder()->items()->getItems() as $item) {
+                            if ($item->getProduct()->data()->durability != null) {
+                                ExpireCustomerProductTask::schedule($this->getOrder(), $item, $this);
+                            }
+                        }
+
+                        $this->executeActions(Action::PURCHASE);
+                    } else {
+                        // Handle subscription payment
+                        // Is this a first or renewal payment?
+                        $subscription_payments = DB::getInstance()->query('SELECT count(*) AS c FROM nl2_store_payments WHERE subscription_id = ?', [$this->data()->subscription_id])->first()->c;
+                        if ($subscription_payments == 1) {
+                            $this->executeActions(Action::PURCHASE);
+                        } else {
+                            $this->executeActions(Action::RENEWAL);
                         }
                     }
-
-                    $this->executeActions(Action::PURCHASE);
 
                     EventHandler::executeEvent(new PaymentCompletedEvent(
                         $this,
@@ -260,14 +272,26 @@ class Payment {
 
                     $this->create(array_merge($insert_array, $extra_data));
 
-                    // Schedule any products for expiration?
-                    foreach ($this->getOrder()->getProducts() as $product) {
-                        if ($product->data()->durability != null) {
-                            ExpireCustomerProductTask::schedule($this->getOrder(), $product, $this);
+                    if ($this->data()->subscription_id == null) {
+                        // This is a non-subscription payment
+                        // Schedule any products for expiration?
+                        foreach ($this->getOrder()->items()->getItems() as $item) {
+                            if ($item->getProduct()->data()->durability != null) {
+                                ExpireCustomerProductTask::schedule($this->getOrder(), $item, $this);
+                            }
+                        }
+
+                        $this->executeActions(Action::PURCHASE);
+                    } else {
+                        // Handle subscription payment
+                        // Is this a first or renewal payment?
+                        $subscription_payments = DB::getInstance()->query('SELECT count(*) AS c FROM nl2_store_payments WHERE subscription_id = ?', [$this->data()->subscription_id])->first()->c;
+                        if ($subscription_payments == 1) {
+                            $this->executeActions(Action::PURCHASE);
+                        } else {
+                            $this->executeActions(Action::RENEWAL);
                         }
                     }
-
-                    $this->executeActions(Action::PURCHASE);
 
                     EventHandler::executeEvent(new PaymentCompletedEvent(
                         $this,
@@ -339,20 +363,22 @@ class Payment {
      * Execute all actions for the called trigger all products or specific product.
      *
      * @param int $type Action type.
-     * @param Product|null $product Delete pending actions from specific product if isset.
+     * @param Item|null $item Delete pending actions from specific item if isset.
      */
-    public function executeActions(int $type, Product $product = null): void {
+    public function executeActions(int $type, Item $item = null): void {
         $order = $this->getOrder();
 
-        if ($product) {
-            foreach ($product->getActions($type) as $action) {
-                $action->execute($order, $product, $this);
+        if ($item) {
+            foreach ($item->getProduct()->getActions($type) as $action) {
+                $action->execute($order, $item, $this);
             }
         } else {
-            foreach ($order->getProducts() as $product) {
+            foreach ($order->items()->getItems() as $item) {
+                $product = $item->getProduct();
+
                 if ($product->data()->deleted == 0) {
                     foreach ($product->getActions($type) as $action) {
-                        $action->execute($order, $product, $this);
+                        $action->execute($order, $item, $this);
                     }
                 }
             }

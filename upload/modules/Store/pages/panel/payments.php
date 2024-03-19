@@ -79,6 +79,7 @@ if (isset($_GET['customer'])) {
                     )
                 ),
                 'date' => date(DATE_FORMAT, $paymentQuery->created),
+                'is_subscription' => $paymentQuery->subscription_id != null,
                 'link' => URL::build('/panel/store/payments', 'payment=' . Output::getClean($paymentQuery->id))
             ];
         }
@@ -193,13 +194,14 @@ if (isset($_GET['customer'])) {
 
     // Get Products
     $products_list = [];
-    foreach ($order->getProducts() as $product) {
+    foreach ($order->items()->getItems() as $item) {
+        $product = $item->getProduct();
+
         $fields_array = [];
-        $fields = DB::getInstance()->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$payment->data()->order_id, $product->data()->id])->results();
-        foreach ($fields as $field) {
+        foreach ($item->getFields() as $field) {
             $fields_array[] = [
-                'identifier' => Output::getClean($field->identifier),
-                'value' => Output::getClean($field->value)
+                'identifier' => Output::getClean($field['identifier']),
+                'value' => Output::getClean($field['value'])
             ];
         }
 
@@ -313,6 +315,14 @@ if (isset($_GET['customer'])) {
         'WARNING' => $language->get('general', 'warning')
     ]);
 
+    if ($payment->data()->subscription_id != null) {
+        $smarty->assign([
+            'SUBSCRIPTION' => $store_language->get('admin', 'subscription'),
+            'SUBSCRIPTION_VALUE' => Output::getClean($payment->data()->subscription_id),
+            'SUBSCRIPTION_LINK' => URL::build('/panel/store/subscriptions/', 'subscription=' . $payment->data()->subscription_id),
+        ]);
+    }
+
     $template_file = 'store/payments_view.tpl';
 
 } else if (isset($_GET['action'])) {
@@ -354,17 +364,18 @@ if (isset($_GET['customer'])) {
                         $recipient = new Customer($target_user);
                     }
 
-                    $items = [];
+                    $items = new ItemList();
                     $selected_products = $_POST['products'];
                     foreach ($selected_products as $item) {
-                        $items[] = new Item(
+                        $items->addItem(new Item(
+                            0,
                             new Product($item),
                             1,
                             []
-                        );
+                        ));
                     }
 
-                    if (!count($errors) && count($items)) {
+                    if (!count($errors) && $items->getItems()) {
                         // Register order
                         $order = new Order();
                         $order->create($target_user, $recipient, $recipient, $items);

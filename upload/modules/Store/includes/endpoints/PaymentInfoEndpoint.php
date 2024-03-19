@@ -20,21 +20,14 @@ class PaymentInfoEndpoint extends KeyAuthEndpoint {
         $order = $payment->getOrder();
 
         $products = [];
-        foreach ($order->getProducts() as $product) {
-            $fields_array = [];
-            $fields = DB::getInstance()->query('SELECT identifier, value FROM nl2_store_orders_products_fields INNER JOIN nl2_store_fields ON field_id=nl2_store_fields.id WHERE order_id = ? AND product_id = ?', [$payment->data()->order_id, $product->data()->id])->results();
-            foreach ($fields as $field) {
-                $fields_array[] = [
-                    'identifier' => Output::getClean($field->identifier),
-                    'value' => Output::getClean($field->value)
-                ];
-            }
+        foreach ($order->items()->getItems() as $item) {
+            $product = $item->getProduct();
 
             $products[] = [
-                'id' => (int)$product->data()->id,
+                'id' => $product->data()->id,
                 'name' => $product->data()->name,
                 'quantity' => 1,
-                'fields' => $fields_array
+                'fields' => $item->getFields()
             ];
         }
 

@@ -6,7 +6,7 @@ class PaymentData {
     public int $order_id;
     public int $gateway_id;
     public ?string $payment_id;
-    public ?string $agreement_id;
+    public ?int $subscription_id;
     public ?string $transaction;
     public ?int $amount_cents;
     public ?string $currency;
@@ -20,7 +20,7 @@ class PaymentData {
         $this->order_id = $row->order_id;
         $this->gateway_id = $row->gateway_id;
         $this->payment_id = $row->payment_id;
-        $this->agreement_id = $row->agreement_id;
+        $this->subscription_id = $row->subscription_id;
         $this->transaction = $row->transaction;
         $this->amount_cents = $row->amount_cents;
         $this->currency = $row->currency;
