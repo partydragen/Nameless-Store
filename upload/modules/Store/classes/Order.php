@@ -100,13 +100,29 @@ class Order {
      * @param ItemList $items The list of items along with custom fields for product
      */
     public function create(?User $user, Customer $from_customer, Customer $to_customer, ItemList $items, ?Coupon $coupon = null): void {
+        // Referrals Integration
+        $referral_id = null;
+        if (Util::isModuleEnabled('Referrals')) {
+            if (Session::exists('referral_id')) {
+                // Get referral id by session
+                $referral_id = Session::get('referral_id');
+            } else {
+                // Get referral id by registered user
+                $referral = new Referral($from_customer->data()->user_id, 'reg_user_id');
+                if ($referral->exists()) {
+                    $referral_id = $referral->data()->id;
+                }
+            }
+        }
+
         $this->_db->insert('store_orders', [
             'user_id' => $user != null ? $user->exists() ? $user->data()->id : null : null,
             'from_customer_id' => $from_customer->data()->id,
             'to_customer_id' => $to_customer->data()->id,
             'created' => date('U'),
             'ip' => HttpUtils::getRemoteAddress(),
-            'coupon_id' => $coupon != null ? $coupon->data()->id : null
+            'coupon_id' => $coupon != null ? $coupon->data()->id : null,
+            'referral_id' => $referral_id
         ]);
         $last_id = $this->_db->lastId();
 

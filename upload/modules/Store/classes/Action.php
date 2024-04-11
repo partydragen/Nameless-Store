@@ -186,6 +186,24 @@ class Action {
             $placeholders['{' . $integrationName . 'Verified}'] = $integrationUser->data()->verified ? true : false;
         }
 
+        // Referrals Integration
+        if (Util::isModuleEnabled('Referrals')) {
+            if ($order->data()->referral_id != null) {
+                $referral = new Referral($order->data()->referral_id);
+                if ($referral->exists()) {
+                    $referral_user = new User($referral->data()->user_id);
+
+                    $placeholders['{referralId}'] = $referral->data()->id;
+                    $placeholders['{referralUser}'] = $referral_user->exists() ? $referral_user->getDisplayname() : 'Unknown';
+                    $placeholders['{referralCode}'] = $referral->data()->code;
+                }
+            } else {
+                $placeholders['{referralId}'] = '';
+                $placeholders['{referralUser}'] = 'None';
+                $placeholders['{referralCode}'] = '';
+            }
+        }
+
         try {
             // For each quantity
             for($i = 0; $i < $item->getQuantity(); $i++){

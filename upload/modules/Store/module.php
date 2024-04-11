@@ -1142,6 +1142,13 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
 
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_orders ADD `referral_id` int(11) DEFAULT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
             HandleSubscriptionsTask::schedule();
         }
     }
@@ -1212,7 +1219,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_orders')) {
             try {
-                $this->_db->createTable('store_orders', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `from_customer_id` int(11) NOT NULL, `to_customer_id` int(11) NOT NULL, `created` int(11) NOT NULL, `ip` varchar(128) DEFAULT NULL, `coupon_id` int(11) DEFAULT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_orders', ' `id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) DEFAULT NULL, `from_customer_id` int(11) NOT NULL, `to_customer_id` int(11) NOT NULL, `created` int(11) NOT NULL, `ip` varchar(128) DEFAULT NULL, `coupon_id` int(11) DEFAULT NULL, `referral_id` int(11) DEFAULT NULL, PRIMARY KEY (`id`)');
 
                 $this->_db->query('ALTER TABLE `nl2_store_orders` ADD INDEX `nl2_store_orders_idx_to_customer_id` (`to_customer_id`)');
                 $this->_db->query('ALTER TABLE `nl2_store_orders` ADD INDEX `nl2_store_orders_idx_from_customer_id` (`from_customer_id`)');
