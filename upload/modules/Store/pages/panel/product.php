@@ -234,7 +234,7 @@ if (!isset($_GET['action'])) {
 
         $actions_array[] = [
             'id' => Output::getClean($action->data()->id),
-            'command' => Output::getClean($action->data()->command),
+            'command' => Output::getClean(Text::truncate($action->data()->command, 120)),
             'type' => $type,
             'service' => $action->getService()->getName(),
             'requirePlayer' => ($action->data()->require_online ? 'Yes' : 'No'),
@@ -429,7 +429,7 @@ if (!isset($_GET['action'])) {
 
                 $actions_array[] = [
                     'id' => Output::getClean($action->data()->id),
-                    'command' => Output::getClean($action->data()->command),
+                    'command' => Output::getClean(Text::truncate($action->data()->command, 120)),
                     'type' => $type,
                     'service' => $action->getService()->getName(),
                     'requirePlayer' => ($action->data()->require_online ? 'Yes' : 'No'),
