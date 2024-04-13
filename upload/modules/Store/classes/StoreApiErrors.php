@@ -10,5 +10,6 @@
  */
 class StoreApiErrors {
     public const ERROR_PAYMENT_NOT_FOUND = 'store:payment_not_found';
+    public const ERROR_CONNECTION_NOT_FOUND = 'store:connection_not_found';
     public const ERROR_INVALID_CREDITS_AMOUNT = 'store:invalid_credits_amount';
 }

@@ -14,11 +14,18 @@ class PendingCommandsEndpoint extends KeyAuthEndpoint {
         $order = ' ORDER BY `order` ASC';
         $params = [];
 
-        if (isset($_GET['connection_id']) || isset($_GET['server_id'])) {
-            $where .= ' AND connection_id = ?';
-            array_push($params, (isset($_GET['connection_id']) ? $_GET['connection_id'] : $_GET['server_id']));
+        if (isset($_GET['connection_id'])) {
+            $connection_id = $_GET['connection_id'];
 
-            $api->getDb()->update('store_connections', isset($_GET['connection_id']) ? $_GET['connection_id'] : $_GET['server_id'], [
+            $connection = $api->getDb()->query('SELECT id FROM nl2_store_connections WHERE id = ?', [$connection_id]);
+            if (!$connection->count()) {
+                $api->throwError(StoreApiErrors::ERROR_CONNECTION_NOT_FOUND);
+            }
+
+            $where .= ' AND connection_id = ?';
+            $params[] = $connection_id;
+
+            $api->getDb()->update('store_connections', $connection_id, [
                 'last_fetch' => date('U')
             ]);
         }
@@ -29,7 +36,7 @@ class PendingCommandsEndpoint extends KeyAuthEndpoint {
         $customers_commands = [];
         foreach ($commands_query as $command) {
             $customers_commands[$command->customer_id][] = [
-                'id' => (int)$command->id,
+                'id' => (int) $command->id,
                 'command' => $command->command,
                 'order_id' => (int) $command->order_id,
                 'require_online' => (boolean) $command->require_online
@@ -51,8 +58,7 @@ class PendingCommandsEndpoint extends KeyAuthEndpoint {
         }
 
         // Online mode or offline mode?
-        $uuid_linking = $api->getDb()->get('settings', ['name', '=', 'uuid_linking'])->results();
-        $uuid_linking = ($uuid_linking[0]->value == '1' ? true : false);
+        $uuid_linking = Settings::get('uuid_linking') == '1';
 
         $api->returnArray(['online_mode' => $uuid_linking, 'customers' => $customers]);
     }
