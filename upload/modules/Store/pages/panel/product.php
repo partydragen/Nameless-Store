@@ -232,6 +232,21 @@ if (!isset($_GET['action'])) {
             break;
         }
 
+        $warning = null;
+        if ($action->getService() instanceof ConnectionsBase && !$action->data()->own_connections) {
+            $found = false;
+            foreach ($product->getConnections() as $connection) {
+                if ($connection->service_id == $action->getService()->getId()) {
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                $warning = 'No service connections selected, Select any connections on product or on the action for this to action to function!';
+            }
+        }
+
         $actions_array[] = [
             'id' => Output::getClean($action->data()->id),
             'command' => Output::getClean(Text::truncate($action->data()->command, 120)),
@@ -240,6 +255,7 @@ if (!isset($_GET['action'])) {
             'requirePlayer' => ($action->data()->require_online ? 'Yes' : 'No'),
             'edit_link' => URL::build('/panel/store/product', 'action=edit_action&product=' . $product->data()->id . '&aid=' . $action->data()->id),
             'delete_link' => URL::build('/panel/store/product', 'action=delete_action&product=' . $product->data()->id . '&aid=' . $action->data()->id),
+            'warning' => $warning
         ];
     }
 
@@ -427,6 +443,21 @@ if (!isset($_GET['action'])) {
                     break;
                 }
 
+                $warning = null;
+                if ($action->getService() instanceof ConnectionsBase && !$action->data()->own_connections) {
+                    $found = false;
+                    foreach ($product->getConnections() as $connection) {
+                        if ($connection->service_id == $action->getService()->getId()) {
+                            $found = true;
+                            break;
+                        }
+                    }
+
+                    if (!$found) {
+                        $warning = 'No service connections selected, Select any connections on product or on the action for this to action to function!';
+                    }
+                }
+
                 $actions_array[] = [
                     'id' => Output::getClean($action->data()->id),
                     'command' => Output::getClean(Text::truncate($action->data()->command, 120)),
@@ -435,6 +466,7 @@ if (!isset($_GET['action'])) {
                     'requirePlayer' => ($action->data()->require_online ? 'Yes' : 'No'),
                     'edit_link' => URL::build('/panel/store/product', 'action=edit_action&product=' . $product->data()->id . '&aid=' . $action->data()->id),
                     'delete_link' => URL::build('/panel/store/product', 'action=delete_action&product=' . $product->data()->id . '&aid=' . $action->data()->id),
+                    'warning' => $warning
                 ];
             }
             $smarty->assign([
@@ -638,7 +670,8 @@ $smarty->assign([
     'ACTIONS' => $store_language->get('admin', 'actions'),
     'ACTIONS_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id . '&action=actions'),
     'LIMITS_AND_REQUIREMENTS' => $store_language->get('admin', 'limits_and_requirements'),
-    'LIMITS_AND_REQUIREMENTS_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id . '&action=limits_requirements')
+    'LIMITS_AND_REQUIREMENTS_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id . '&action=limits_requirements'),
+    'WARNING' => $language->get('general', 'warning'),
 ]);
 
 $template->onPageLoad();

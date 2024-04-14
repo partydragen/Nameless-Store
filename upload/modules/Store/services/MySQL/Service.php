@@ -1,5 +1,5 @@
 <?php
-class MySQLService extends ServiceBase {
+class MySQLService extends ServiceBase implements ConnectionsBase {
     public function __construct() {
         $id = 3;
         $name = 'MySQL';

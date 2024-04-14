@@ -71,7 +71,11 @@
                                     {foreach from=$ACTION_LIST item=action}
                                         <tr data-id="{$command.id}">
                                             <td>{$action.type}</td>
-                                            <td>{$action.service}</td>
+                                            <td>{$action.service}{if $action.warning}
+                                                    <button role="button" class="btn btn-sm btn-warning" data-toggle="popover"
+                                                            data-title="{$WARNING}" data-content="{$action.warning}"><i
+                                                                class="fa fa-exclamation-triangle"></i></button>
+                                                {/if}</td>
                                             <td>{$action.command}</td>
                                             <td>
                                                 <div class="float-md-right">

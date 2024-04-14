@@ -88,11 +88,6 @@ abstract class ServiceBase {
     }
 
     /**
-     * Called when connection settings page is loaded
-     */
-    abstract public function onConnectionSettingsPageLoad(TemplateBase $template, Fields $fields);
-
-    /**
      * Called when action settings page is loaded
      */
     abstract public function onActionSettingsPageLoad(TemplateBase $template, Fields $fields);

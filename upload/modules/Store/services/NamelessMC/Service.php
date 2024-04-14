@@ -10,10 +10,6 @@ class NamelessMCService extends ServiceBase {
         parent::__construct($id, $name, $description, $connection_settings, $action_settings);
     }
 
-    public function onConnectionSettingsPageLoad(TemplateBase $template, Fields $fields) {
-
-    }
-
     public function onActionSettingsPageLoad(TemplateBase $template, Fields $fields) {
 
     }

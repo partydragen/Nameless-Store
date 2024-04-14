@@ -1,5 +1,5 @@
 <?php
-class MinecraftServerService extends ServiceBase {
+class MinecraftServerService extends ServiceBase implements ConnectionsBase {
     public function __construct() {
         $id = 2;
         $name = 'Minecraft Server';

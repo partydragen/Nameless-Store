@@ -3,7 +3,7 @@ require_once ROOT_PATH . '/modules/Store/services/RCON/SourceQuery/bootstrap.php
 
 use xPaw\SourceQuery\SourceQuery;
 
-class RCONService extends ServiceBase {
+class RCONService extends ServiceBase implements ConnectionsBase {
     public function __construct() {
         $id = 4;
         $name = 'RCON';

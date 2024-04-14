@@ -80,7 +80,7 @@ if (!isset($_GET['action'])) {
                 // Select service type
                 $services_list = [];
                 foreach ($services->getAll() as $service) {
-                    if ($service->getConnectionSettings() == null) {
+                    if (!$service instanceof ConnectionsBase) {
                         continue;
                     }
 
