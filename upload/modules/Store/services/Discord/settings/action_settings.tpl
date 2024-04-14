@@ -9,7 +9,22 @@
             <option value="5" {if $TRIGGER_VALUE == 5} selected{/if}>Expire</option>
         </select>
     </div>
-
+    <div class="form-group">
+        <label for="inputAddRoles">Add any roles to user?</label>
+        <select name="add_roles[]" id="inputAddRoles" class="form-control" multiple>
+            {foreach from=$ALL_ROLES item=item}
+                <option value="{$item.id}"{if in_array($item.id, $ADD_ROLES_VALUE)} selected{/if}>{$item.name|escape}</option>
+            {/foreach}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="inputRemoveRoles">Remove any roles from user?</label>
+        <select name="remove_roles[]" id="inputRemoveRoles" class="form-control" multiple>
+            {foreach from=$ALL_ROLES item=item}
+                <option value="{$item.id}"{if in_array($item.id, $REMOVE_ROLES_VALUE)} selected{/if}>{$item.name|escape}</option>
+            {/foreach}
+        </select>
+    </div>
     <br /><br />
 
     <h5 style="display:inline">Webhook Message</h5><a class="float-right btn btn-primary btn-sm" href="" data-toggle="modal" data-target="#placeholders">{$VIEW_PLACEHOLDERS}</a>

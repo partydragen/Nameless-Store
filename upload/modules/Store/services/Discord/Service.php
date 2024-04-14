@@ -16,6 +16,19 @@ class DiscordService extends ServiceBase {
 
     public function executeAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
         $command = json_decode($action->data()->command, true);
+
+        // Add or Remove roles
+        if (isset($command['add_roles']) || isset($command['remove_roles'])) {
+            $recipient = $order->recipient();
+            if ($recipient->exists() && $recipient->getUser()->exists()) {
+                // Get original recipient user
+                $user = $recipient->getUser();
+
+                Discord::updateDiscordRoles($user, $command['add_roles'] ?? [], $command['remove_roles'] ?? []);
+            }
+        }
+
+        // Webhook
         if (isset($command['webhook']['url'])) {
             $webhook = $command['webhook'];
 
