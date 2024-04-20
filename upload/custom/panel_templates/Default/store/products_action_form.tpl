@@ -191,8 +191,12 @@
                             <td>The quantity of the product that was purchased.</td>
                         </tr>
                         <tr>
+                            <td>{couponCode}</td>
+                            <td>The coupon code used if any.</td>
+                        </tr>
+                        <tr>
                             <td>{subscriptionId}</td>
-                            <td>The subscription id if any</td>
+                            <td>The subscription id if any.</td>
                         </tr>
                         <tr>
                             <th><strong>Custom Fields</strong></th>
@@ -217,6 +221,18 @@
                         <tr>
                             <td>{discordVerified}</td>
                             <td>Whenever the linked integration is verified or not</td>
+                        </tr>
+                        <tr>
+                            <th><strong>Referrals Module</strong></th>
+                            <td>If you have referrals module installed</td>
+                        <tr>
+                        <tr>
+                            <td>{referralCode}</td>
+                            <td>Referral code</td>
+                        </tr>
+                        <tr>
+                            <td>{referralUser}</td>
+                            <td>The user the referral code belongs too.</td>
                         </tr>
                         {/literal}
                     </tbody>

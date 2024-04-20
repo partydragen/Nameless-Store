@@ -186,6 +186,15 @@ class Action {
             $placeholders['{' . $integrationName . 'Verified}'] = $integrationUser->data()->verified ? true : false;
         }
 
+        // Coupon
+        if ($order->data()->coupon_id != null) {
+            $coupon = new Coupon($order->data()->coupon_id);
+            if ($coupon->exists()) {
+                $placeholders['{couponId}'] = $coupon->data()->id;
+                $placeholders['{couponCode}'] = $coupon->data()->code;
+            }
+        }
+
         // Referrals Integration
         if (Util::isModuleEnabled('Referrals')) {
             if ($order->data()->referral_id != null) {
@@ -197,10 +206,6 @@ class Action {
                     $placeholders['{referralUser}'] = $referral_user->exists() ? $referral_user->getDisplayname() : 'Unknown';
                     $placeholders['{referralCode}'] = $referral->data()->code;
                 }
-            } else {
-                $placeholders['{referralId}'] = '';
-                $placeholders['{referralUser}'] = 'None';
-                $placeholders['{referralCode}'] = '';
             }
         }
 
