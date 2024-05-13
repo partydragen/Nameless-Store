@@ -504,6 +504,7 @@ class PayPal_Business_Gateway extends GatewayBase {
         $subscription->update([
             'last_payment_date' => $last_payment_date,
             'next_billing_date' => $next_billing_date,
+            'status_id' => $this->subscriptionStatus($agreement->getState())
         ]);
 
         return true;
@@ -580,6 +581,25 @@ class PayPal_Business_Gateway extends GatewayBase {
         $new_plan->update($patchRequest, $this->getApiContext());
 
         return $new_plan;
+    }
+
+    public function subscriptionStatus(string $status): int {
+        switch($status) {
+            case 'Active':
+                $status_id = Subscription::ACTIVE;
+                break;
+            case 'Cancelled':
+                $status_id = Subscription::CANCELLED;
+                break;
+            case 'Suspended':
+                $status_id = Subscription::PAUSED;
+                break;
+            default:
+                $status_id = Subscription::UNKNOWN;
+                break;
+        }
+
+        return $status_id;
     }
 }
 
