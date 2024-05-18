@@ -13,6 +13,10 @@ if (Input::exists()) {
             'content' => [
                 Validate::REQUIRED => true,
                 Validate::MAX => 65000
+            ],
+            'trigger' => [
+                Validate::REQUIRED => true,
+                Validate::IN => [1,2,3,4,5],
             ]
         ])->messages([
             'subject' => [
@@ -22,54 +26,51 @@ if (Input::exists()) {
             'content' => [
                 Validate::REQUIRED => 'Email content is required!',
                 Validate::MAX => 'Email content is to long!'
+            ],
+            'trigger' => [
+                Validate::IN => 'Invalid Trigger'
             ]
         ]);
 
         if ($validation->passed()) {
-            $trigger = Input::get('trigger');
-            if (!in_array($trigger, [1,2,3,4,5])) {
-                $errors[] = 'Invalid Trigger';
-            }
+            $email = [];
+            $email['subject'] = Input::get('subject');
+            $email['content'] = Input::get('content');
 
             if (!$action->exists()) {
                 // Create new action
-                $last_order = DB::getInstance()->query('SELECT id FROM nl2_store_products_actions WHERE product_id = ? ORDER BY `order` DESC LIMIT 1', [$product->id])->results();
+                $last_order = DB::getInstance()->query('SELECT `order` FROM nl2_store_products_actions ORDER BY `order` DESC LIMIT 1')->results();
                 if (count($last_order)) $last_order = $last_order[0]->order;
                 else $last_order = 0;
 
-                $email = [];
-                $email['subject'] = Input::get('subject');
-                $email['content'] = Input::get('content');
-
                 DB::getInstance()->insert('store_products_actions', [
-                    'product_id' => $product->data()->id,
-                    'type' => $trigger,
+                    'product_id' => $product != null ? $product->data()->id : null,
+                    'type' => Input::get('trigger'),
                     'service_id' => $service->getId(),
                     'command' => json_encode($email),
                     'require_online' => 0,
                     'order' => $last_order + 1,
                     'own_connections' => 0
                 ]);
-                $lastId = DB::getInstance()->lastId();
 
                 Session::flash('products_success', $store_language->get('admin', 'action_created_successfully'));
-                Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
             } else {
                 // Update existing action
-
-                $email = [];
-                $email['subject'] = Input::get('subject');
-                $email['content'] = Input::get('content');
-
                 $action->update([
-                    'type' => $trigger,
+                    'type' => Input::get('trigger'),
                     'command' => json_encode($email),
                     'require_online' => 0,
                     'own_connections' => 0
                 ]);
 
                 Session::flash('products_success', $store_language->get('admin', 'action_updated_successfully'));
+            }
+
+            // Redirect to right page
+            if ($product != null) {
                 Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
+            } else {
+                Redirect::to(URL::build('/panel/store/actions/'));
             }
         } else {
             $errors = $validation->errors();

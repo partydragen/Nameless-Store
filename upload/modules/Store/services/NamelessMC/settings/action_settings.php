@@ -15,6 +15,10 @@ if (Input::exists()) {
                 Validate::MIN => 1,
                 Validate::MAX => 11,
                 Validate::NUMERIC => true
+            ],
+            'trigger' => [
+                Validate::REQUIRED => true,
+                Validate::IN => [1,2,3,4,5],
             ]
         ])->messages([
             'add_credits' => [
@@ -26,15 +30,13 @@ if (Input::exists()) {
                 Validate::NUMERIC => 'Invalid credits amount',
                 Validate::MIN => 'Invalid credits amount',
                 Validate::MAX => 'Invalid credits amount'
+            ],
+            'trigger' => [
+                Validate::IN => 'Invalid Trigger'
             ]
         ]);
 
         if ($validation->passed()) {
-            $trigger = Input::get('trigger');
-            if (!in_array($trigger, [1,2,3,4,5])) {
-                $errors[] = 'Invalid Trigger';
-            }
-
             $command = [];
             // Add groups to user
             if (isset($_POST['add_groups']) && is_array($_POST['add_groups']) && count($_POST['add_groups'])) {
@@ -85,35 +87,39 @@ if (Input::exists()) {
             if (!count($errors)) {
                 if (!$action->exists()) {
                     // Create new action
-                    $last_order = DB::getInstance()->query('SELECT id FROM nl2_store_products_actions WHERE product_id = ? ORDER BY `order` DESC LIMIT 1', [$product->id])->results();
+                    $last_order = DB::getInstance()->query('SELECT `order` FROM nl2_store_products_actions ORDER BY `order` DESC LIMIT 1')->results();
                     if (count($last_order)) $last_order = $last_order[0]->order;
                     else $last_order = 0;
 
                     DB::getInstance()->insert('store_products_actions', [
-                        'product_id' => $product->data()->id,
-                        'type' => $trigger,
+                        'product_id' => $product != null ? $product->data()->id : null,
+                        'type' => Input::get('trigger'),
                         'service_id' => $service->getId(),
                         'command' => json_encode($command),
                         'require_online' => 0,
                         'order' => $last_order + 1,
                         'own_connections' => 0
                     ]);
-                    $lastId = DB::getInstance()->lastId();
 
                     Session::flash('products_success', $store_language->get('admin', 'action_created_successfully'));
-                    Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
                 } else {
                     // Update existing action
                     $action->update([
-                        'type' => $trigger,
+                        'type' => Input::get('trigger'),
                         'command' => json_encode($command),
                         'require_online' => 0,
                         'own_connections' => 0
                     ]);
 
                     Session::flash('products_success', $store_language->get('admin', 'action_updated_successfully'));
-                    Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
                 }
+
+                if ($product != null) {
+                    Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
+                } else {
+                    Redirect::to(URL::build('/panel/store/actions/'));
+                }
+
             }
         } else {
             $errors = $validation->errors();

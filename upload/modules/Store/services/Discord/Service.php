@@ -60,6 +60,20 @@ class DiscordService extends ServiceBase {
                 ],
             ]);
         }
+
+        // Action executed
+        DB::getInstance()->insert('store_pending_actions', [
+            'order_id' => $payment->data()->order_id,
+            'action_id' => $action->data()->id,
+            'product_id' => $item->getProduct()->data()->id,
+            'customer_id' => $order->data()->to_customer_id,
+            'connection_id' => 0,
+            'type' => $action->data()->type,
+            'command' => $action->data()->command,
+            'require_online' => $action->data()->require_online,
+            'order' => $action->data()->order,
+            'status' => 1
+        ]);
     }
 }
 

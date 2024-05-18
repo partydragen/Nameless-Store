@@ -7,120 +7,96 @@ if (Input::exists()) {
         // New Action
         $validation = Validate::check($_POST, [
             'webhook_url' => [
-                Validate::REQUIRED => true,
                 Validate::MAX => 128
+            ],
+            'trigger' => [
+                Validate::REQUIRED => true,
+                Validate::IN => [1,2,3,4,5],
+            ]
+        ])->messages([
+            'trigger' => [
+                Validate::IN => 'Invalid Trigger'
             ]
         ]);
 
         if ($validation->passed()) {
-            $trigger = Input::get('trigger');
-            if (!in_array($trigger, [1,2,3,4,5])) {
-                $errors[] = 'Invalid Trigger';
+            $command = [];
+
+            // Add roles to user
+            if (isset($_POST['add_roles']) && is_array($_POST['add_roles']) && count($_POST['add_roles'])) {
+                $groups = [];
+                foreach ($_POST['add_roles'] as $group) {
+                    $groups[] = (int)$group;
+                }
+                $command['add_roles'] = $groups;
             }
 
-            if (!$action->exists()) {
-                // Create new action
-                $last_order = DB::getInstance()->query('SELECT id FROM nl2_store_products_actions WHERE product_id = ? ORDER BY `order` DESC LIMIT 1', [$product->id])->results();
-                if (count($last_order)) $last_order = $last_order[0]->order;
-                else $last_order = 0;
-                $command = [];
-
-                // Add roles to user
-                if (isset($_POST['add_roles']) && is_array($_POST['add_roles']) && count($_POST['add_roles'])) {
-                    $groups = [];
-                    foreach ($_POST['add_roles'] as $group) {
-                        $groups[] = (int)$group;
-                    }
-                    $command['add_roles'] = $groups;
+            // Remove roles from user
+            if (isset($_POST['remove_roles']) && is_array($_POST['remove_roles']) && count($_POST['remove_roles'])) {
+                $groups = [];
+                foreach ($_POST['remove_roles'] as $group) {
+                    $groups[] = (int)$group;
                 }
+                $command['remove_roles'] = $groups;
+            }
 
-                // Remove roles from user
-                if (isset($_POST['remove_roles']) && is_array($_POST['remove_roles']) && count($_POST['remove_roles'])) {
-                    $groups = [];
-                    foreach ($_POST['remove_roles'] as $group) {
-                        $groups[] = (int)$group;
-                    }
-                    $command['remove_roles'] = $groups;
-                }
-
-                // Webhook
-                if (!empty(Input::get('webhook_url')) || !empty(Input::get('webhook_content')) || !empty(Input::get('embed_title')) || !empty(Input::get('embed_content')) || !empty(Input::get('embed_footer'))) {
-                    $command['webhook'] = [
-                        'url' => Input::get('webhook_url'),
-                        'content' => Input::get('webhook_content'),
-                        'embeds' => [
-                            [
-                                'title' => Input::get('embed_title'),
-                                'description' => Input::get('embed_content'),
-                                'footer' => [
-                                    'text' => Input::get('embed_footer'),
-                                ]
+            // Webhook
+            if (!empty(Input::get('webhook_url')) || !empty(Input::get('webhook_content')) || !empty(Input::get('embed_title')) || !empty(Input::get('embed_content')) || !empty(Input::get('embed_footer'))) {
+                $command['webhook'] = [
+                    'url' => Input::get('webhook_url'),
+                    'content' => Input::get('webhook_content'),
+                    'embeds' => [
+                        [
+                            'title' => Input::get('embed_title'),
+                            'description' => Input::get('embed_content'),
+                            'footer' => [
+                                'text' => Input::get('embed_footer'),
                             ]
-                        ],
-                    ];
+                        ]
+                    ],
+                ];
+            }
+
+            if (!count($command)) {
+                $errors[] = 'You need at least one action';
+            }
+
+            if (!count($errors)) {
+                if (!$action->exists()) {
+                    // Create new action
+                    $last_order = DB::getInstance()->query('SELECT `order` FROM nl2_store_products_actions ORDER BY `order` DESC LIMIT 1')->results();
+                    if (count($last_order)) $last_order = $last_order[0]->order;
+                    else $last_order = 0;
+
+                    DB::getInstance()->insert('store_products_actions', [
+                        'product_id' => $product != null ? $product->data()->id : null,
+                        'type' => Input::get('trigger'),
+                        'service_id' => $service->getId(),
+                        'command' => json_encode($command),
+                        'require_online' => 0,
+                        'order' => $last_order + 1,
+                        'own_connections' => 0
+                    ]);
+
+                    Session::flash('products_success', $store_language->get('admin', 'action_created_successfully'));
+                } else {
+                    // Update existing action
+                    $action->update([
+                        'type' => Input::get('trigger'),
+                        'command' => json_encode($command),
+                        'require_online' => 0,
+                        'own_connections' => 0
+                    ]);
+
+                    Session::flash('products_success', $store_language->get('admin', 'action_updated_successfully'));
                 }
 
-                DB::getInstance()->insert('store_products_actions', [
-                    'product_id' => $product->data()->id,
-                    'type' => $trigger,
-                    'service_id' => $service->getId(),
-                    'command' => json_encode($command),
-                    'require_online' => 0,
-                    'order' => $last_order + 1,
-                    'own_connections' => 0
-                ]);
-                $lastId = DB::getInstance()->lastId();
-
-                Session::flash('products_success', $store_language->get('admin', 'action_created_successfully'));
-                Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
-            } else {
-                // Update existing action
-                $command = [];
-
-                // Add roles to user
-                if (isset($_POST['add_roles']) && is_array($_POST['add_roles']) && count($_POST['add_roles'])) {
-                    $groups = [];
-                    foreach ($_POST['add_roles'] as $group) {
-                        $groups[] = (int)$group;
-                    }
-                    $command['add_roles'] = $groups;
+                // Redirect to right page
+                if ($product != null) {
+                    Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
+                } else {
+                    Redirect::to(URL::build('/panel/store/actions/'));
                 }
-
-                // Remove roles from user
-                if (isset($_POST['remove_roles']) && is_array($_POST['remove_roles']) && count($_POST['remove_roles'])) {
-                    $groups = [];
-                    foreach ($_POST['remove_roles'] as $group) {
-                        $groups[] = (int)$group;
-                    }
-                    $command['remove_roles'] = $groups;
-                }
-
-                // Webhook
-                if (!empty(Input::get('webhook_url')) || !empty(Input::get('webhook_content')) || !empty(Input::get('embed_title')) || !empty(Input::get('embed_content')) || !empty(Input::get('embed_footer'))) {
-                    $command['webhook'] = [
-                        'url' => Input::get('webhook_url'),
-                        'content' => Input::get('webhook_content'),
-                        'embeds' => [
-                            [
-                                'title' => Input::get('embed_title'),
-                                'description' => Input::get('embed_content'),
-                                'footer' => [
-                                    'text' => Input::get('embed_footer'),
-                                ]
-                            ]
-                        ],
-                    ];
-                }
-
-                $action->update([
-                    'type' => $trigger,
-                    'command' => json_encode($command),
-                    'require_online' => 0,
-                    'own_connections' => 0
-                ]);
-
-                Session::flash('products_success', $store_language->get('admin', 'action_updated_successfully'));
-                Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
             }
         } else {
             $errors = $validation->errors();
