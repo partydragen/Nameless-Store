@@ -212,7 +212,7 @@ if (!isset($_GET['action'])) {
 
     // Get product actions
     $actions_array = [];
-    foreach ($product->getActions() as $action) {
+    foreach (ActionsHandler::getInstance()->getActions($product) as $action) {
         $type = 'Unknown';
         switch ($action->data()->type) {
             case 1:
@@ -253,9 +253,10 @@ if (!isset($_GET['action'])) {
             'type' => $type,
             'service' => $action->getService()->getName(),
             'requirePlayer' => ($action->data()->require_online ? 'Yes' : 'No'),
-            'edit_link' => URL::build('/panel/store/product', 'action=edit_action&product=' . $product->data()->id . '&aid=' . $action->data()->id),
-            'delete_link' => URL::build('/panel/store/product', 'action=delete_action&product=' . $product->data()->id . '&aid=' . $action->data()->id),
-            'warning' => $warning
+            'edit_link' => URL::build('/panel/store/actions/', 'action=edit&product=' . $product->data()->id . '&aid=' . $action->data()->id),
+            'delete_link' => URL::build('/panel/store/actions/', 'action=delete&product=' . $product->data()->id . '&aid=' . $action->data()->id),
+            'warning' => $warning,
+            'action_type' => $action->data()->product_id != null ? 'product' : 'global'
         ];
     }
 
@@ -285,7 +286,7 @@ if (!isset($_GET['action'])) {
         'FIELDS' => $store_language->get('admin', 'fields'),
         'FIELDS_LIST' => $fields_array,
         'NEW_ACTION' => $store_language->get('admin', 'new_action'),
-        'NEW_ACTION_LINK' => URL::build('/panel/store/product/' , 'action=new_action&product=' . $product->data()->id),
+        'NEW_ACTION_LINK' => URL::build('/panel/store/actions/' , 'action=new&product=' . $product->data()->id),
         'ACTION_LIST' => $actions_array,
         'CURRENCY' => Output::getClean(Store::getCurrency()),
         'DURABILITY' => $durability,
@@ -323,107 +324,10 @@ if (!isset($_GET['action'])) {
 
             Redirect::to(URL::build('/panel/store/products'));
         break;
-        case 'new_action';
-            // New action for product
-            if (!isset($_GET['service'])) {
-                // Select service type
-                $services_list = [];
-                foreach ($services->getAll() as $service) {
-                    $services_list[] = [
-                        'id' => Output::getClean($service->getId()),
-                        'name' => Output::getClean($service->getName()),
-                        'description' => Output::getClean($service->getDescription()),
-                        'select_link' => URL::build('/panel/store/product/' , 'action=new_action&product=' . $product->data()->id . '&service=' . $service->getId()),
-                    ];
-                }
-                
-                $smarty->assign([
-                    'ACTION_TITLE' => $store_language->get('admin', 'new_action_for_x', ['product' => Output::getClean($product->data()->name)]),
-                    'BACK' => $language->get('general', 'back'),
-                    'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
-                    'SERVICES_LIST' => $services_list
-                ]);
-                
-                $template_file = 'store/products_action_type.tpl';
-            } else {
-                if (!is_numeric($_GET['service'])) {
-                    Redirect::to(URL::build('/panel/store/products'));
-                }
-
-                $service = $services->get($_GET['service']);
-                if ($service == null) {
-                    Redirect::to(URL::build('/panel/store/products'));
-                }
-
-                $action = new Action($service);
-
-                $fields = new Fields();
-                if (file_exists($service->getActionSettings())) {
-                    $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
-                    require_once($service->getActionSettings());
-                }
-
-                $service->onActionSettingsPageLoad($template, $fields);
-
-                $smarty->assign([
-                    'ACTION_TITLE' => $store_language->get('admin', 'new_action_for_x', ['product' => Output::getClean($product->data()->name)]),
-                    'BACK' => $language->get('general', 'back'),
-                    'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
-                    'FIELDS' => $fields->getAll(),
-                    'VIEW_PLACEHOLDERS' => $store_language->get('admin', 'view_placeholders'),
-                ]);
-                
-                $template_file = 'store/products_action_form.tpl';
-            }
-        break;
-        case 'edit_action';
-            // Editing action for product
-            if (!isset($_GET['aid']) || !is_numeric($_GET['aid'])) {
-                Redirect::to(URL::build('/panel/store/products'));
-            }
-
-            $action = $product->getAction($_GET['aid']);
-            if ($action == null) {
-                Redirect::to(URL::build('/panel/store/products'));
-            }
-            $service = $action->getService();
-
-            $fields = new Fields();
-            if (file_exists($service->getActionSettings())) {
-                $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
-                require_once($service->getActionSettings());
-            }
-
-            $action->getService()->onActionSettingsPageLoad($template, $fields);
-
-            $smarty->assign([
-                'ACTION_TITLE' => $store_language->get('admin', 'editing_action_for_x', ['product' => Output::getClean($product->data()->name)]),
-                'BACK' => $language->get('general', 'back'),
-                'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
-                'FIELDS' => $fields->getAll(),
-                'VIEW_PLACEHOLDERS' => $store_language->get('admin', 'view_placeholders'),
-            ]);
-
-            $template_file = 'store/products_action_form.tpl';
-        break;
-        case 'delete_action';
-            // Delete product
-            if (!isset($_GET['aid']) || !is_numeric($_GET['aid'])) {
-                Redirect::to(URL::build('/panel/store/products'));
-            }
-
-            $action = $product->getAction($_GET['aid']);
-            if ($action != null) {
-                $action->delete();
-                Session::flash('products_success', $store_language->get('admin', 'action_deleted_successfully'));
-            }
-
-            Redirect::to(URL::build('/panel/store/product/', 'product=' . $product->data()->id));
-        break;
         case 'actions';
             // Get product actions
             $actions_array = [];
-            foreach ($product->getActions() as $action) {
+            foreach (ActionsHandler::getInstance()->getActions($product) as $action) {
                 $type = 'Unknown';
                 switch ($action->data()->type) {
                     case 1:
@@ -464,9 +368,10 @@ if (!isset($_GET['action'])) {
                     'type' => $type,
                     'service' => $action->getService()->getName(),
                     'requirePlayer' => ($action->data()->require_online ? 'Yes' : 'No'),
-                    'edit_link' => URL::build('/panel/store/product', 'action=edit_action&product=' . $product->data()->id . '&aid=' . $action->data()->id),
-                    'delete_link' => URL::build('/panel/store/product', 'action=delete_action&product=' . $product->data()->id . '&aid=' . $action->data()->id),
-                    'warning' => $warning
+                    'edit_link' => URL::build('/panel/store/actions/', 'action=edit&product=' . $product->data()->id . '&aid=' . $action->data()->id),
+                    'delete_link' => URL::build('/panel/store/actions/', 'action=delete&product=' . $product->data()->id . '&aid=' . $action->data()->id),
+                    'warning' => $warning,
+                    'action_type' => $action->data()->product_id != null ? 'product' : 'global'
                 ];
             }
             $smarty->assign([
@@ -474,7 +379,7 @@ if (!isset($_GET['action'])) {
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
                 'NEW_ACTION' => $store_language->get('admin', 'new_action'),
-                'NEW_ACTION_LINK' => URL::build('/panel/store/product/' , 'action=new_action&product=' . $product->data()->id),
+                'NEW_ACTION_LINK' => URL::build('/panel/store/actions/' , 'action=new&product=' . $product->data()->id),
                 'ACTION_LIST' => $actions_array,
             ]);
             

@@ -219,41 +219,7 @@ class Product {
      * @return Action Actions for this product.
      */
     public function getActions(int $type = null): array {
-        $this->_actions ??= (function (): array {
-            $this->_actions = [];
-
-            $actions_query = $this->_db->query('SELECT * FROM nl2_store_products_actions WHERE product_id = ? ORDER BY `order` ASC', [$this->data()->id]);
-            if ($actions_query->count()) {
-                $actions_query = $actions_query->results();
-                
-                $services = Services::getInstance();
-                foreach ($actions_query as $data) {
-                    $service = $services->get($data->service_id);
-                    if ($service == null) {
-                        continue;
-                    }
-
-                    $action = new Action($service, null, null, $data);
-
-                    $this->_actions[$action->data()->id] = $action;
-                }
-            }
-            
-            return $this->_actions;
-        })();
-
-        if ($type) {
-            $return = [];
-            foreach ($this->_actions as $action) {
-                if ($action->data()->type == $type) {
-                    $return[$action->data()->id] = $action;
-                }
-            }
-
-            return $return;
-        }
-
-        return $this->_actions;
+        return ActionsHandler::getInstance()->getActions($this, $type);
     }
 
     /**
@@ -264,7 +230,7 @@ class Product {
      * @return Action|null Action by id otherwise null.
      */
     public function getAction(int $id): ?Action {
-        return $this->getActions()[$id] ?? null;
+        return ActionsHandler::getInstance()->getAction($id);
     }
 
     /**

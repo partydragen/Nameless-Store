@@ -37,6 +37,7 @@ class Store_Module extends Module {
         $pages->add('Store', '/store/process', 'pages/backend/process.php');
         $pages->add('Store', '/store/listener', 'pages/backend/listener.php');
         $pages->add('Store', '/panel/store/general_settings', 'pages/panel/general_settings.php');
+        $pages->add('Store', '/panel/store/actions', 'pages/panel/actions.php');
         $pages->add('Store', '/panel/store/gateways', 'pages/panel/gateways.php');
         $pages->add('Store', '/panel/store/products', 'pages/panel/products.php');
         $pages->add('Store', '/panel/store/product', 'pages/panel/product.php');
@@ -248,6 +249,16 @@ class Store_Module extends Module {
                         $icon = $cache->retrieve('store_fields_icon');
 
                     $navs[2]->addItemToDropdown('store_configuration', 'store_fields', $this->_store_language->get('admin', 'fields'), URL::build('/panel/store/fields'), 'top', null, $icon, $order + 0.5);
+                }
+
+                if ($user->hasPermission('staffcp.store.products')) {
+                    if (!$cache->isCached('store_actions_icon')) {
+                        $icon = '<i class="nav-icon fas fa-code"></i>';
+                        $cache->store('store_actions_icon', $icon);
+                    } else
+                        $icon = $cache->retrieve('store_actions_icon');
+
+                    $navs[2]->addItemToDropdown('store_configuration', 'store_actions', $this->_store_language->get('admin', 'global_actions'), URL::build('/panel/store/actions'), 'top', null, $icon, $order + 0.6);
                 }
 
                 if ($user->hasPermission('staffcp.store.products')) {
@@ -1149,6 +1160,13 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
 
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_products_actions CHANGE `product_id` `product_id` INT(11) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_products_connections CHANGE `product_id` `product_id` INT(11) DEFAULT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
             HandleSubscriptionsTask::schedule();
         }
     }
@@ -1187,7 +1205,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_products_connections')) {
             try {
-                $this->_db->createTable('store_products_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `action_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_products_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) DEFAULT NULL, `action_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1203,7 +1221,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_products_actions')) {
             try {
-                $this->_db->createTable('store_products_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `service_id` int(11) NOT NULL, `command` text NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `own_connections` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_products_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) DEFAULT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `service_id` int(11) NOT NULL, `command` text NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `own_connections` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }

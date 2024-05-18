@@ -8,8 +8,8 @@
  * @license MIT
  */
 class Store {
-    private $_db,
-            $_cache;
+
+    private DB $_db;
 
     /**
      * @var array The list of the active sales.
@@ -22,10 +22,8 @@ class Store {
     private static Language $_store_language;
 
     // Constructor, connect to database
-    public function __construct($cache, $store_language) {
+    public function __construct() {
         $this->_db = DB::getInstance();
-
-        $this->_cache = $cache;
     }
 
     public function getStoreURL(): string {
