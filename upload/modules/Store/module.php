@@ -64,6 +64,7 @@ class Store_Module extends Module {
         EventHandler::registerEvent(CheckoutAddProductEvent::class);
         EventHandler::registerEvent(CheckoutFieldsValidationEvent::class);
         EventHandler::registerEvent(CustomerProductExpiredEvent::class);
+        EventHandler::registerEvent(ParseActionCommandEvent::class);
         EventHandler::registerEvent('renderStoreCategory', 'renderStoreCategory', [], true, true);
         EventHandler::registerEvent('renderStoreProduct', 'renderStoreProduct', [], true, true);
 
@@ -73,6 +74,8 @@ class Store_Module extends Module {
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredGroups']);
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredIntegrations']);
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'cancel']);
+        EventHandler::registerListener(ParseActionCommandEvent::class, [ParseActionCommandListener::class, 'placeholders']);
+        EventHandler::registerListener(ParseActionCommandEvent::class, [ParseActionCommandListener::class, 'conditions'], 15);
         EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'purify']);
         EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'renderEmojis'], 10);
         EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'replaceAnchors'], 15);
@@ -105,6 +108,77 @@ class Store_Module extends Module {
                     $cache->erase('update_check');
                 }
             }
+        }
+
+        ActionsHandler::getInstance()->registerPlaceholders('Store', static function (Order $order, Item $item, Payment $payment) {
+            $placeholders = [];
+
+            $product = $item->getProduct();
+            $customer = $order->customer();
+            $recipient = $order->recipient();
+            $placeholders['itemId'] = $item->getId();
+            $placeholders['quantity'] = $item->getQuantity();
+            $placeholders['userId'] = $recipient->exists() ? $recipient->data()->user_id ?? 0 : 0;
+            $placeholders['username'] = $recipient->getUsername();
+            $placeholders['uuid'] = $recipient->getIdentifier();
+            $placeholders['productId'] = $product->data()->id;
+            $placeholders['productPrice'] = Store::fromCents($product->data()->price_cents);
+            $placeholders['productName'] = $product->data()->name;
+            $placeholders['transaction'] = $payment->data()->transaction;
+            $placeholders['amount'] = Store::fromCents($payment->data()->amount_cents ?? 0);
+            $placeholders['currency'] = $payment->data()->currency;
+            $placeholders['orderId'] = $payment->data()->order_id;
+            $placeholders['subscriptionId'] = $payment->data()->subscription_id ?? 0;
+            $placeholders['ip'] = $order->data()->ip;
+            $placeholders['time'] = date('H:i', $payment->data()->created);
+            $placeholders['date'] = date('d M Y', $payment->data()->created);
+            $placeholders['gateway'] = $payment->getGateway() != null ? $payment->getGateway()->getName() : 'Unknown';
+            $placeholders['purchaserUserId'] = $customer->exists() ? $customer->data()->user_id ?? 0 : 0;
+            $placeholders['purchaserName'] = $customer->getUsername();
+            $placeholders['purchaserUuid'] = $customer->getIdentifier();
+
+            // Coupon
+            $coupon = new Coupon($order->data()->coupon_id);
+            if ($coupon->exists()) {
+                $placeholders['couponId'] = $coupon->data()->id;
+                $placeholders['couponCode'] = $coupon->data()->code;
+            }
+
+            // User Integrations
+            $user = $order->recipient()->getUser();
+            foreach ($user->getIntegrations() as $integrationUser) {
+                $integrationName = strtolower($integrationUser->getIntegration()->getName());
+
+                $placeholders[$integrationName . 'Username'] = $integrationUser->data()->username;
+                $placeholders[$integrationName . 'Identifier'] = $integrationUser->data()->identifier;
+                $placeholders[$integrationName . 'Verified'] = (bool) $integrationUser->data()->verified;
+            }
+
+            // Custom fields
+            foreach ($item->getFields() as $field) {
+                $placeholders[$field['identifier']] = Output::getClean($field['value']);
+            }
+
+            return $placeholders;
+        });
+
+        if (Util::isModuleEnabled('Referrals')) {
+            ActionsHandler::getInstance()->registerPlaceholders('Referrals', static function (Order $order, Item $item, Payment $payment) {
+                $placeholders = [];
+
+                if ($order->data()->referral_id != null) {
+                    $referral = new Referral($order->data()->referral_id);
+                    if ($referral->exists()) {
+                        $referral_user = new User($referral->data()->user_id);
+
+                        $placeholders['referralId'] = $referral->data()->id;
+                        $placeholders['referralUser'] = $referral_user->exists() ? $referral_user->getDisplayname() : 'Unknown';
+                        $placeholders['referralCode'] = $referral->data()->code;
+                    }
+                }
+
+                return $placeholders;
+            });
         }
     }
 
