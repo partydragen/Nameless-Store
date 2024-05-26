@@ -49,7 +49,8 @@ class NamelessMCService extends ServiceBase {
 
             // Send alert to user
             if (isset($command['alert']) && !empty($command['alert'])) {
-                $alert = str_replace(array_keys($placeholders), array_values($placeholders), $command['alert']);
+                $alert = $action->parseCommand($command['alert'], $order, $item, $payment, $placeholders);
+
                 DB::getInstance()->insert('alerts', [
                     'user_id' => $user->data()->id,
                     'type' => 'store',

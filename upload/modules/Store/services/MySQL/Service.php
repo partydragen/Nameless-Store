@@ -24,12 +24,11 @@ class MySQLService extends ServiceBase implements ConnectionsBase {
         $connections = ($action->data()->own_connections ? $action->getConnections() : $product->getConnections($this->getId()));
         foreach ($connections as $connection) {
             // Replace existing placeholder
-            $placeholders['{connection}'] = $connection->name;
+            $placeholders['connection'] = $connection->name;
             
             $data = json_decode($connection->data);
             if ($data != null && isset($data->password) && !empty($data->password)) {
-                $command = $action->data()->command;
-                $command = str_replace(array_keys($placeholders), array_values($placeholders), $command);
+                $command = $action->parseCommand($action->data()->command, $order, $item, $payment, $placeholders);
 
                 $db = DB::getCustomInstance($data->address, $data->database, $data->username, $data->password, $data->port, null, '');
                 $db->query($command);

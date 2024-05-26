@@ -146,68 +146,7 @@ class Action {
      * Execute actions for product and make placeholders
      */
     public function execute(Order $order, Item $item, Payment $payment): void {
-        $product = $item->getProduct();
-
-        $placeholders = [];
-        foreach ($item->getFields() as $field) {
-            $placeholders['{' . $field['identifier'] . '}'] = Output::getClean($field['value']);
-        }
-
-        $customer = $order->customer();
-        $recipient = $order->recipient();
-        $placeholders['{itemId}'] = $item->getId();
-        $placeholders['{quantity}'] = $item->getQuantity();
-        $placeholders['{userId}'] = $recipient->exists() ? $recipient->data()->user_id ?? 0 : 0;
-        $placeholders['{username}'] = $recipient->getUsername();
-        $placeholders['{uuid}'] = $recipient->getIdentifier();
-        $placeholders['{productId}'] = $product->data()->id;
-        $placeholders['{productPrice}'] = Store::fromCents($product->data()->price_cents);
-        $placeholders['{productName}'] = $product->data()->name;
-        $placeholders['{transaction}'] = $payment->data()->transaction;
-        $placeholders['{amount}'] = Store::fromCents($payment->data()->amount_cents ?? 0);
-        $placeholders['{currency}'] = $payment->data()->currency;
-        $placeholders['{orderId}'] = $payment->data()->order_id;
-        $placeholders['{subscriptionId}'] = $payment->data()->subscription_id ?? 0;
-        $placeholders['{ip}'] = $order->data()->ip;
-        $placeholders['{time}'] = date('H:i', $payment->data()->created);
-        $placeholders['{date}'] = date('d M Y', $payment->data()->created);
-        $placeholders['{gateway}'] = $payment->getGateway() != null ? $payment->getGateway()->getName() : 'Unknown';
-        $placeholders['{purchaserUserId}'] = $customer->exists() ? $customer->data()->user_id ?? 0 : 0;
-        $placeholders['{purchaserName}'] = $customer->getUsername();
-        $placeholders['{purchaserUuid}'] = $customer->getIdentifier();
-
-        // User Integrations placeholders
-        $user = $order->recipient()->getUser();
-        foreach ($user->getIntegrations() as $integrationUser) {
-            $integrationName = strtolower($integrationUser->getIntegration()->getName());
-
-            $placeholders['{' . $integrationName . 'Username}'] = $integrationUser->data()->username;
-            $placeholders['{' . $integrationName . 'Identifier}'] = $integrationUser->data()->identifier;
-            $placeholders['{' . $integrationName . 'Verified}'] = $integrationUser->data()->verified ? true : false;
-        }
-
-        // Coupon
-        if ($order->data()->coupon_id != null) {
-            $coupon = new Coupon($order->data()->coupon_id);
-            if ($coupon->exists()) {
-                $placeholders['{couponId}'] = $coupon->data()->id;
-                $placeholders['{couponCode}'] = $coupon->data()->code;
-            }
-        }
-
-        // Referrals Integration
-        if (Util::isModuleEnabled('Referrals')) {
-            if ($order->data()->referral_id != null) {
-                $referral = new Referral($order->data()->referral_id);
-                if ($referral->exists()) {
-                    $referral_user = new User($referral->data()->user_id);
-
-                    $placeholders['{referralId}'] = $referral->data()->id;
-                    $placeholders['{referralUser}'] = $referral_user->exists() ? $referral_user->getDisplayname() : 'Unknown';
-                    $placeholders['{referralCode}'] = $referral->data()->code;
-                }
-            }
-        }
+        $placeholders = ActionsHandler::getInstance()->getPlaceholders($this, $order, $item, $payment);
 
         try {
             // For each quantity
@@ -217,6 +156,13 @@ class Action {
         } catch (Exception $e) {
 
         }
+    }
+
+    public function parseCommand(string $command, Order $order, Item $item, Payment $payment, array $placeholders): string {
+        $event = new ParseActionCommandEvent($command, $this, $order, $item, $payment, $placeholders);
+        EventHandler::executeEvent($event);
+
+        return $event->command;
     }
 
     public function delete(): bool {

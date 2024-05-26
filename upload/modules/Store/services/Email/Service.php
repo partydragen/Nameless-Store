@@ -21,8 +21,7 @@ class EmailService extends ServiceBase {
             $email = json_decode($action->data()->command, true);
 
             // Replace the email placeholders
-            $content = $action->data()->command;
-            $content = str_replace(array_keys($placeholders), array_values($placeholders), $email['content']);
+            $content = $action->parseCommand($email['content'], $order, $item, $payment, $placeholders);
 
             $sent = Email::send(
                 ['email' => $user->data()->email, 'name' => SITE_NAME],
