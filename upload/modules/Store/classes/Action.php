@@ -151,7 +151,7 @@ class Action {
         try {
             // For each quantity
             for($i = 0; $i < $item->getQuantity(); $i++){
-                $this->_service->executeAction($this, $order, $item, $payment, $placeholders);
+                $this->_service->scheduleAction($this, $order, $item, $payment, $placeholders);
             }
         } catch (Exception $e) {
 

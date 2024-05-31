@@ -14,7 +14,7 @@ class NamelessMCService extends ServiceBase {
 
     }
 
-    public function executeAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
+    public function scheduleAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
         $product = $item->getProduct();
         $recipient = $order->recipient();
         if ($recipient->exists() && $recipient->getUser()->exists()) {
@@ -76,19 +76,15 @@ class NamelessMCService extends ServiceBase {
             }
         }
 
-        // Action executed
-        DB::getInstance()->insert('store_pending_actions', [
-            'order_id' => $payment->data()->order_id,
-            'action_id' => $action->data()->id,
-            'product_id' => $product->data()->id,
-            'customer_id' => $order->data()->to_customer_id,
+        $task = new ActionTask();
+        $task->create($action->data()->command, $action, $order, $item, $payment, [
             'connection_id' => 0,
-            'type' => $action->data()->type,
-            'command' => $action->data()->command,
-            'require_online' => $action->data()->require_online,
-            'order' => $action->data()->order,
-            'status' => 1
+            'status' => ActionTask::COMPLETED
         ]);
+    }
+
+    public function executeAction(ActionTask $task) {
+
     }
 }
 

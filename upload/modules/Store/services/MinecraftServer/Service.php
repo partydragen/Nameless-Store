@@ -18,7 +18,7 @@ class MinecraftServerService extends ServiceBase implements ConnectionsBase {
 
     }
 
-    public function executeAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
+    public function scheduleAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
         // Plugin handle username and uuid replacement
         unset($placeholders['username']);
         unset($placeholders['uuid']);
@@ -33,19 +33,15 @@ class MinecraftServerService extends ServiceBase implements ConnectionsBase {
             // Replace the command placeholders
             $command = $action->parseCommand($action->data()->command, $order, $item, $payment, $placeholders);
 
-            // Save queued command
-            DB::getInstance()->insert('store_pending_actions', [
-                'order_id' => $payment->data()->order_id,
-                'action_id' => $action->data()->id,
-                'product_id' => $product->data()->id,
-                'customer_id' => $order->data()->to_customer_id,
-                'connection_id' => $connection->id,
-                'type' => $action->data()->type,
-                'command' => $command,
-                'require_online' => $action->data()->require_online,
-                'order' => $action->data()->order,
+            $task = new ActionTask();
+            $task->create($command, $action, $order, $item, $payment, [
+                'connection_id' => $connection->id
             ]);
         }
+    }
+
+    public function executeAction(ActionTask $task) {
+
     }
 }
 
