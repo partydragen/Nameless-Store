@@ -15,22 +15,22 @@ class EmailService extends ServiceBase {
     }
 
     public function scheduleAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
-        $product = $item->getProduct();
         $user = $order->recipient()->getUser();
         if ($user->exists()) {
             $email = json_decode($action->data()->command, true);
 
             // Replace the email placeholders
+            $subject = $action->parseCommand($email['subject'], $order, $item, $payment, $placeholders);
             $content = $action->parseCommand($email['content'], $order, $item, $payment, $placeholders);
 
-            $sent = Email::send(
+            Email::send(
                 ['email' => $user->data()->email, 'name' => SITE_NAME],
-                $email['subject'],
+                $subject,
                 $content,
                 Email::getReplyTo()
             );
 
-            $command = json_encode(['subject' => $email['subject'], 'content' => $content]);
+            $command = json_encode(['subject' => $subject, 'content' => $content]);
 
             $task = new ActionTask();
             $task->create($command, $action, $order, $item, $payment, [
