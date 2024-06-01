@@ -171,6 +171,10 @@
                             <td>The ID of the order</td>
                         </tr>
                         <tr>
+                            <td>{orderProducts}</td>
+                            <td>List of all products for this order</td>
+                        </tr>
+                        <tr>
                             <td>{productId}</td>
                             <td>The ID of the product</td>
                         </tr>

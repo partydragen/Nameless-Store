@@ -127,7 +127,6 @@ class Store_Module extends Module {
             $placeholders['transaction'] = $payment->data()->transaction;
             $placeholders['amount'] = Store::fromCents($payment->data()->amount_cents ?? 0);
             $placeholders['currency'] = $payment->data()->currency;
-            $placeholders['orderId'] = $payment->data()->order_id;
             $placeholders['subscriptionId'] = $payment->data()->subscription_id ?? 0;
             $placeholders['ip'] = $order->data()->ip;
             $placeholders['time'] = date('H:i', $payment->data()->created);
@@ -136,6 +135,11 @@ class Store_Module extends Module {
             $placeholders['purchaserUserId'] = $customer->exists() ? $customer->data()->user_id ?? 0 : 0;
             $placeholders['purchaserName'] = $customer->getUsername();
             $placeholders['purchaserUuid'] = $customer->getIdentifier();
+
+            $placeholders['orderId'] = $payment->data()->order_id;
+            $placeholders['orderAmount'] = Store::fromCents($order->getAmount()->getTotalCents());
+            $placeholders['orderCurrency'] = $order->getAmount()->getCurrency();
+            $placeholders['orderProducts'] = $order->getDescription();
 
             // Coupon
             $coupon = new Coupon($order->data()->coupon_id);
