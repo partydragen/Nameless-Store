@@ -1256,6 +1256,19 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
 
+            try {
+                if (!$this->_db->showTables('store_products_meta')) {
+                    try {
+                        $this->_db->createTable("store_products_meta", " `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `name` varchar(64) NOT NULL, `value` varchar(2048) DEFAULT NULL, PRIMARY KEY (`id`)");
+                    } catch (Exception $e) {
+                        // Error
+                    }
+                }
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
             HandleSubscriptionsTask::schedule();
         }
     }
@@ -1471,6 +1484,14 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_transactions')) {
             try {
                 $this->_db->createTable("store_transactions", " `id` int(11) NOT NULL AUTO_INCREMENT, `customer_id` int(11) NOT NULL, `received_by` int(11) DEFAULT NULL, `action` varchar(64) NOT NULL, `cents` int(11) NOT NULL, `time` int(11) NOT NULL, `info` TEXT NOT NULL, PRIMARY KEY (`id`)");
+            } catch (Exception $e) {
+                // Error
+            }
+        }
+
+        if (!$this->_db->showTables('store_products_meta')) {
+            try {
+                $this->_db->createTable("store_products_meta", " `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `name` varchar(64) NOT NULL, `value` varchar(2048) DEFAULT NULL, PRIMARY KEY (`id`)");
             } catch (Exception $e) {
                 // Error
             }
