@@ -129,6 +129,7 @@ if (!isset($_GET['action'])) {
                     'BACK_LINK' => $product == null ? URL::build('/panel/store/actions') : URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
                     'FIELDS' => $fields->getAll(),
                     'VIEW_PLACEHOLDERS' => $store_language->get('admin', 'view_placeholders'),
+                    'ACTION_TYPE' => $product != null ? 'product' : 'global'
                 ]);
 
                 $template_file = 'store/products_action_form.tpl';
@@ -159,6 +160,7 @@ if (!isset($_GET['action'])) {
                 'BACK_LINK' => $product == null ? URL::build('/panel/store/actions') : URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
                 'FIELDS' => $fields->getAll(),
                 'VIEW_PLACEHOLDERS' => $store_language->get('admin', 'view_placeholders'),
+                'ACTION_TYPE' => $product != null ? 'product' : 'global'
             ]);
 
             $template_file = 'store/products_action_form.tpl';

@@ -536,6 +536,8 @@ class Store_Module extends Module {
                     'own_connections' => $action->data()->own_connections,
                     'service_id' => $action->data()->service_id,
                     'connections' => $action_connections,
+                    'each_quantity' => $action->data()->each_quantity,
+                    'each_product' => $action->data()->each_product,
                 ];
             }
 
@@ -1241,6 +1243,15 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
+
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_products_actions ADD `each_quantity` tinyint(1) NOT NULL DEFAULT \'1\'');
+                $this->_db->query('ALTER TABLE nl2_store_products_actions ADD `each_product` tinyint(1) NOT NULL DEFAULT \'1\'');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
             HandleSubscriptionsTask::schedule();
         }
     }
@@ -1295,7 +1306,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_products_actions')) {
             try {
-                $this->_db->createTable('store_products_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) DEFAULT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `service_id` int(11) NOT NULL, `command` text NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `own_connections` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_products_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) DEFAULT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `service_id` int(11) NOT NULL, `command` text NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `own_connections` tinyint(1) NOT NULL DEFAULT \'0\', `each_quantity` tinyint(1) NOT NULL DEFAULT \'1\', `each_product` tinyint(1) NOT NULL DEFAULT \'1\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }

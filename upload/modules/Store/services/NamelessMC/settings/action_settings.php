@@ -85,6 +85,14 @@ if (Input::exists()) {
             }
 
             if (!count($errors)) {
+                // Run for each quantity?
+                if (isset($_POST['each_quantity']) && $_POST['each_quantity'] == 'on') $each_quantity = 1;
+                else $each_quantity = 0;
+
+                // Run for each product?
+                if (isset($_POST['each_product']) && $_POST['each_product'] == 'on') $each_product = 1;
+                else $each_product = 0;
+
                 if (!$action->exists()) {
                     // Create new action
                     $last_order = DB::getInstance()->query('SELECT `order` FROM nl2_store_products_actions ORDER BY `order` DESC LIMIT 1')->results();
@@ -98,7 +106,9 @@ if (Input::exists()) {
                         'command' => json_encode($command),
                         'require_online' => 0,
                         'order' => $last_order + 1,
-                        'own_connections' => 0
+                        'own_connections' => 0,
+                        'each_quantity' => $each_quantity,
+                        'each_product' => $each_product,
                     ]);
 
                     Session::flash('products_success', $store_language->get('admin', 'action_created_successfully'));
@@ -108,7 +118,9 @@ if (Input::exists()) {
                         'type' => Input::get('trigger'),
                         'command' => json_encode($command),
                         'require_online' => 0,
-                        'own_connections' => 0
+                        'own_connections' => 0,
+                        'each_quantity' => $each_quantity,
+                        'each_product' => $each_product,
                     ]);
 
                     Session::flash('products_success', $store_language->get('admin', 'action_updated_successfully'));
@@ -140,6 +152,8 @@ if (!$action->exists()) {
         'REMOVE_CREDITS_VALUE' => ((isset($_POST['remove_credits']) && $_POST['remove_credits']) ? Output::getClean($_POST['remove_credits']) : '0.00'),
         'ALERT_VALUE' => ((isset($_POST['alert']) && $_POST['alert']) ? Output::getClean($_POST['alert']) : ''),
         'ADD_TROPHIES_VALUE' => ((isset($_POST['add_trophies']) && is_array($_POST['add_trophies'])) ? $_POST['add_trophies'] : []),
+        'EACH_QUANTITY_VALUE' => 1,
+        'EACH_PRODUCT_VALUE' => 1,
     ]);
 } else {
     // Updating action
@@ -153,6 +167,8 @@ if (!$action->exists()) {
         'REMOVE_CREDITS_VALUE' => ((isset($command['remove_credits']) && $command['remove_credits']) ? Output::getClean($command['remove_credits']) : '0.00'),
         'ALERT_VALUE' => ((isset($command['alert']) && $command['alert']) ? Output::getClean($command['alert']) : ''),
         'ADD_TROPHIES_VALUE' => ((isset($command['add_trophies']) && is_array($command['add_trophies'])) ? $command['add_trophies'] : []),
+        'EACH_QUANTITY_VALUE' => $action->data()->each_quantity,
+        'EACH_PRODUCT_VALUE' => $action->data()->each_product,
     ]);
 }
 

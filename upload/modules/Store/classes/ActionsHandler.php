@@ -25,6 +25,7 @@ class ActionsHandler extends Instanceable {
      */
     public function getActions(?Product $product = null, string $trigger = null): array {
         if ($product == null) {
+            // Get all global actions.
             $actions = $this->_actions ??= (function (): array {
                 $this->_actions = [];
 
@@ -47,6 +48,7 @@ class ActionsHandler extends Instanceable {
                 return $this->_actions;
             })();
         } else {
+            // Get actions for provided product.
             $actions = $this->_product_actions[$product->data()->id] ??= (function ($product): array {
                 $this->_product_actions[$product->data()->id] = [];
 

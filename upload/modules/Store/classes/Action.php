@@ -149,8 +149,13 @@ class Action {
         $placeholders = ActionsHandler::getInstance()->getPlaceholders($this, $order, $item, $payment);
 
         try {
-            // For each quantity
-            for($i = 0; $i < $item->getQuantity(); $i++){
+            if ($this->data()->each_quantity) {
+                // For each quantity
+                for ($i = 0; $i < $item->getQuantity(); $i++) {
+                    $this->_service->scheduleAction($this, $order, $item, $payment, $placeholders);
+                }
+            } else {
+                // Run once
                 $this->_service->scheduleAction($this, $order, $item, $payment, $placeholders);
             }
         } catch (Exception $e) {

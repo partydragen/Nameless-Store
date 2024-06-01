@@ -29,6 +29,14 @@ if (Input::exists()) {
         if ($validation->passed()) {
             $selected_connections = (isset($_POST['connections']) && is_array($_POST['connections']) ? $_POST['connections'] : []);
 
+            // Run for each quantity?
+            if (isset($_POST['each_quantity']) && $_POST['each_quantity'] == 'on') $each_quantity = 1;
+            else $each_quantity = 0;
+
+            // Run for each product?
+            if (isset($_POST['each_product']) && $_POST['each_product'] == 'on') $each_product = 1;
+            else $each_product = 0;
+
             if (!$action->exists()) {
                 // Create new action
                 $last_order = DB::getInstance()->query('SELECT `order` FROM nl2_store_products_actions ORDER BY `order` DESC LIMIT 1')->results();
@@ -42,7 +50,9 @@ if (Input::exists()) {
                     'service_id' => $service->getId(),
                     'command' => Input::get('command'),
                     'order' => $last_order + 1,
-                    'own_connections' => (in_array(0, $selected_connections) ? 0 : 1)
+                    'own_connections' => (in_array(0, $selected_connections) ? 0 : 1),
+                    'each_quantity' => $each_quantity,
+                    'each_product' => $each_product,
                 ]);
                 $lastId = DB::getInstance()->lastId();
 
@@ -60,7 +70,9 @@ if (Input::exists()) {
                 $action->update([
                     'type' => Input::get('trigger'),
                     'command' => Input::get('command'),
-                    'own_connections' => (in_array(0, $selected_connections) ? 0 : 1)
+                    'own_connections' => (in_array(0, $selected_connections) ? 0 : 1),
+                    'each_quantity' => $each_quantity,
+                    'each_product' => $each_product,
                 ]);
 
                 // Handle selected connections if its use own connection list
@@ -119,6 +131,8 @@ if (!$action->exists()) {
         'REQUIRE_PLAYER_VALUE' => ((isset($_POST['requirePlayer'])) ? Output::getClean($_POST['requirePlayer']) : 1),
         'COMMAND_VALUE' => ((isset($_POST['command']) && $_POST['command']) ? Output::getClean($_POST['command']) : ''),
         'CONNECTIONS_LIST' => $connections_array,
+        'EACH_QUANTITY_VALUE' => 1,
+        'EACH_PRODUCT_VALUE' => 1,
     ]);
 
 } else {
@@ -146,6 +160,8 @@ if (!$action->exists()) {
         'REQUIRE_PLAYER_VALUE' => Output::getClean($action->data()->require_online),
         'COMMAND_VALUE' => Output::getClean($action->data()->command),
         'CONNECTIONS_LIST' => $connections_array,
+        'EACH_QUANTITY_VALUE' => $action->data()->each_quantity,
+        'EACH_PRODUCT_VALUE' => $action->data()->each_product,
     ]);
 }
 
