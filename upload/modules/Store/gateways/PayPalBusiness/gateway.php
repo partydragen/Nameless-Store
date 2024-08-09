@@ -388,10 +388,16 @@ class PayPal_Business_Gateway extends GatewayBase {
 
             } catch (\PayPal\Exception\PayPalInvalidCredentialException $e) {
                 // Error verifying webhook
+                http_response_code(400);
                 $this->logError($e->errorMessage());
             } catch (Exception $e) {
+                http_response_code(500);
                 $this->logError($e->getMessage());
             }
+        } else {
+            // Missing or invalid webhook key
+            http_response_code(400);
+            $this->logError('Missing or invalid webhook key');
         }
     }
 
