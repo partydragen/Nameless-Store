@@ -1,24 +1,16 @@
 <?php
 /**
- * Stripe gateway settings page
+ * Minecraft-Community gateway settings page
  *
  * @package Modules\Store
- * @author Supercrafter100
- * @version 2.0.0-pre13
+ * @author Partydragen
+ * @version 2.1.2
  * @license MIT
  */
 require_once(ROOT_PATH . '/modules/Store/classes/StoreConfig.php');
 
 if (Input::exists()) {
     if (Token::check()) {
-        if (isset($_POST['client_id']) && isset($_POST['client_secret']) && strlen($_POST['client_id']) && strlen($_POST['client_secret'])) {
-            $settings = [];
-            $settings['minecraft-community.client_id'] = $_POST['client_id'];
-            $settings['minecraft-community.client_secret'] = $_POST['client_secret'];
-
-            StoreConfig::setMultiple($settings);
-        }
-
         // Is this gateway enabled
         if (isset($_POST['enable']) && $_POST['enable'] == 'on') $enabled = 1;
         else $enabled = 0;
