@@ -94,24 +94,97 @@
                                 </div>
                               </div>
                             </div>
+
+                            <br />
+                            <h5>User Conditions</h5>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label for="inputConditionType">Condition</label>
+                                    <div class="form-group">
+
+                                            <select name="discount_type" id="inputConditionType" class="form-control">
+                                                {foreach from=$CONDITIONS item=condition}
+                                                    <option value="{$condition.condition}"{if $condition.selected} selected{/if}>{$condition.condition}</option>
+                                                {/foreach}
+                                            </select>
+                                    </div>
+                                </div>
+
+                                {foreach from=$CONDITIONS item=condition}
+                                <div class="col-md" id="{$condition.condition}">
+                                    <label for="inputConditionType">{$condition.condition}</label>
+                                    <div class="form-group">
+
+                                            <div class="input-group">
+                                                {assign var=counter value=1}
+                                                {foreach from=$condition.fields item=field}
+                                                    {if $field.type eq 1}
+                                                        <input class="form-control" type="text" name="{$field_key}" id="{$field_key}" value="{$field.value}"
+                                                               placeholder="{$field.placeholder}" tabindex="{$counter++}" {if $field.required}
+                                                        required{/if}>
+                                                    {else if $field.type eq 2}
+                                                        <textarea class="form-control" name="{$field_key}" id="{$field_key}" placeholder="{$field.placeholder}"
+                                                                  tabindex="{$counter++}"></textarea>
+                                                    {else if $field.type eq 3}
+                                                        <input class="form-control" type="date" name="{$field_key}" id="{$field_key}" value="{$field.value}"
+                                                               tabindex="{$counter++}">
+                                                    {else if $field.type eq 4}
+                                                        <input class="form-control" type="password" name="{$field_key}" id="{$field_key}" value="{$field.value}"
+                                                               placeholder="{$field.placeholder}" tabindex="{$counter++}" {if $field.required}
+                                                        required{/if}>
+                                                    {else if $field.type eq 5}
+                                                        <select class="form-control" name="{$field_key}" id="{$field_key}" {if
+                                                        $field.required}required{/if}>
+                                                            {foreach from=$field.options item=option}
+                                                                <option value="{$option.value}" {if $option.value eq $field.value} selected{/if}>
+                                                                    {$option.option}</option>
+                                                            {/foreach}
+                                                        </select>
+                                                    {else if $field.type eq 6}
+                                                        <input class="form-control" type="number" name="{$field_key}" id="{$field_key}" value="{$field.value}"
+                                                               placeholder="{$field.name}" tabindex="{$counter++}" {if $field.required} required{/if}>
+                                                    {else if $field.type eq 7}
+                                                        <input class="form-control" type="email" name="{$field_key}" id="{$field_key}" value="{$field.value}"
+                                                               placeholder="{$field.placeholder}" tabindex="{$counter++}" {if $field.required}
+                                                        required{/if}>
+                                                    {else if $field.type eq 8}
+                                                        {foreach from=$field.options item=option}
+                                                            <div class="form-group">
+                                                                <div class="form-control" tabindex="{$counter++}">
+                                                                    <input type="radio" name="{$field_key}" value="{$option.value}" {if $field.value eq
+                                                                    $option.value}checked{/if} {if $field.required}required{/if}>
+                                                                    <label>{$option.option}</label>
+                                                                </div>
+                                                            </div>
+                                                        {/foreach}
+                                                    {else if $field.type eq 9}
+                                                        {foreach from=$field.options item=option}
+                                                            <div class="form-group">
+                                                                <div class="form-control">
+                                                                    <input type="checkbox" name="{$field_key}[]" value="{$option.value}" {if
+                                                                    is_array($field.value) && in_array($option.value, $field.value)}checked{/if}
+                                                                           tabindex="{$counter++}">
+                                                                    <label>{$option.option}</label>
+                                                                </div>
+                                                            </div>
+                                                        {/foreach}
+                                                    {/if}
+                                                {/foreach}
+                                            </div>
+                                    </div>
+                                </div>
+                                {/foreach}
+
+                            </div>
+
+                            <br />
+
                             <div class="form-group">
                                 <input type="hidden" name="token" value="{$TOKEN}">
                                 <span data-toggle="popover" data-title="Early access" data-content="This feature is currently for patreon supporters, it will be available for everyone in the future with means this wont function for you"><input type="submit" class="btn btn-primary" value="{$SUBMIT}" disabled></span>
                             </div>
                         </form>
-
-                        <center>
-                            <p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a></br>
-                                <a class="ml-1" href="https://partydragen.com/suggestions/" target="_blank" data-toggle="tooltip"
-                                   data-placement="top" title="You can submit suggestions here"><i class="fa-solid fa-thumbs-up text-warning"></i></a>
-                                <a class="ml-1" href="https://discord.gg/TtH6tpp" target="_blank" data-toggle="tooltip"
-                                   data-placement="top" title="Discord"><i class="fab fa-discord fa-fw text-discord"></i></a>
-                                <a class="ml-1" href="https://partydragen.com/" target="_blank" data-toggle="tooltip"
-                                   data-placement="top" title="Website"><i class="fas fa-globe fa-fw text-primary"></i></a>
-                                <a class="ml-1" href="https://www.patreon.com/partydragen" target="_blank" data-toggle="tooltip"
-                                   data-placement="top" title="Support the development on Patreon"><i class="fas fa-heart fa-fw text-danger"></i></a>
-                            </p>
-                        </center>
                     </div>
                 </div>
 
@@ -133,6 +206,30 @@
 </div>
 
 {include file='scripts.tpl'}
+
+<script>
+
+    const condition = document.getElementById("inputConditionType");
+    condition.addEventListener("change", (event) => {
+        console.log(event.target.value);
+
+        myFunction();
+
+        const x = document.getElementById(event.target.value);
+        x.style.display = "block";
+
+    });
+
+    function myFunction() {
+        Array.from(document.querySelector("#inputConditionType").options).forEach(function (option_element) {
+            const x = document.getElementById(option_element.value);
+            x.style.display = "none";
+        });
+    }
+
+    myFunction();
+
+</script>
 
 <script type="text/javascript">
     $(document).ready(() => {

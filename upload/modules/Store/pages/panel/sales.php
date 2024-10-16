@@ -131,6 +131,14 @@ if (!isset($_GET['action'])) {
                 ];
             }
 
+            $conditions_list = [];
+            foreach (Conditions::getInstance()->getConditions() as $condition) {
+                $conditions_list[] = [
+                    'condition' => $condition->name(),
+                    'fields' => $condition->getSelectionFields()->getAll()
+                ];
+            }
+
             $smarty->assign([
                 'SALE_TITLE' => $store_language->get('admin', 'creating_sale'),
                 'BACK' => $language->get('general', 'back'),
@@ -150,6 +158,8 @@ if (!isset($_GET['action'])) {
                 'EXPIRE_DATE' => $store_language->get('admin', 'expire_date'),
                 'EXPIRE_DATE_VALUE' => ((isset($_POST['expire_date']) && $_POST['expire_date']) ? Input::get('expire_date') : date('Y-m-d\TH:i', strtotime('+7 days'))),
                 'EXPIRE_DATE_MIN' => date('Y-m-d\TH:i'),
+
+                'CONDITIONS' => $conditions_list
             ]);
 
             $template_file = 'store/sales_form.tpl';

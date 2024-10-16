@@ -83,6 +83,10 @@ class Store_Module extends Module {
         EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'renderEmojis'], 10);
         EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'replaceAnchors'], 15);
 
+        Conditions::getInstance()->registerCondition(new HasIntegrationCondition());
+        Conditions::getInstance()->registerCondition(new HasGroupCondition());
+        Conditions::getInstance()->registerCondition(new PlaceholderCondition());
+
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
 
         define('STORE_CURRENCY_FORMAT', Settings::get('currency_format', '{currencySymbol}{price} {currencyCode}', 'Store'));
