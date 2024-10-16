@@ -363,14 +363,15 @@ class Payment {
      * Execute all actions for the called trigger all products or specific product.
      *
      * @param int $type Action type.
-     * @param Item|null $item Delete pending actions from specific item if isset.
+     * @param Item|null $item execute actions from specific item if isset.
      */
     public function executeActions(int $type, Item $item = null): void {
         $order = $this->getOrder();
 
         if ($item) {
             foreach ($item->getProduct()->getActions($type) as $action) {
-                $action->execute($order, $item, $this);
+                if ($action->data()->product_id != null || $action->data()->each_product)
+                    $action->execute($order, $item, $this);
             }
         } else {
             foreach ($order->items()->getItems() as $item) {
@@ -378,10 +379,18 @@ class Payment {
 
                 if ($product->data()->deleted == 0) {
                     foreach ($product->getActions($type) as $action) {
-                        $action->execute($order, $item, $this);
+                        if ($action->data()->product_id != null || $action->data()->each_product)
+                            $action->execute($order, $item, $this);
                     }
                 }
             }
+        }
+
+        // Global actions without assigning product for products with
+        $actions = ActionsHandler::getInstance()->getActions(null, $type);
+        foreach ($actions as $action) {
+            if (!$action->data()->each_product)
+                $action->execute($order, $item ?? $this->getOrder()->items()->getItems()[0], $this);
         }
     }
 

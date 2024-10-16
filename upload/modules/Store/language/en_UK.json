@@ -227,6 +227,7 @@
     "admin/pretty_url_regex_error": "Pretty URL can only contain letters, numbers and dashes",
     "admin/supports_subscriptions": "Supports subscriptions",
     "admin/view_placeholders": "View Placeholders",
+    "admin/global_actions": "Global Actions",
     "general/agree_t_and_c_purchase": "I agree to the {{termsLinkStart}}terms and conditions{{termsLinkEnd}} of this purchase.",
     "general/accept_terms": "You must accept the terms and conditions",
     "general/buy": "Buy",

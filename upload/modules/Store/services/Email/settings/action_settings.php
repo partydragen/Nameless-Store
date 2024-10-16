@@ -33,6 +33,15 @@ if (Input::exists()) {
         ]);
 
         if ($validation->passed()) {
+            // Run for each quantity?
+            if (isset($_POST['each_quantity']) && $_POST['each_quantity'] == 'on') $each_quantity = 1;
+            else $each_quantity = 0;
+
+            // Run for each product?
+            if (isset($_POST['each_product']) && $_POST['each_product'] == 'on') $each_product = 1;
+            else $each_product = 0;
+
+
             $email = [];
             $email['subject'] = Input::get('subject');
             $email['content'] = Input::get('content');
@@ -50,7 +59,9 @@ if (Input::exists()) {
                     'command' => json_encode($email),
                     'require_online' => 0,
                     'order' => $last_order + 1,
-                    'own_connections' => 0
+                    'own_connections' => 0,
+                    'each_quantity' => $each_quantity,
+                    'each_product' => $each_product,
                 ]);
 
                 Session::flash('products_success', $store_language->get('admin', 'action_created_successfully'));
@@ -60,7 +71,9 @@ if (Input::exists()) {
                     'type' => Input::get('trigger'),
                     'command' => json_encode($email),
                     'require_online' => 0,
-                    'own_connections' => 0
+                    'own_connections' => 0,
+                    'each_quantity' => $each_quantity,
+                    'each_product' => $each_product,
                 ]);
 
                 Session::flash('products_success', $store_language->get('admin', 'action_updated_successfully'));
@@ -86,7 +99,9 @@ if (!$action->exists()) {
     $smarty->assign([
         'TRIGGER_VALUE' => ((isset($_POST['trigger'])) ? Output::getClean($_POST['trigger']) : 1),
         'EMAIL_SUBJECT_VALUE' => ((isset($_POST['subject']) && $_POST['subject']) ? Output::getClean($_POST['subject']) : ''),
-        'EMAIL_CONTENT_VALUE' => ((isset($_POST['content']) && $_POST['content']) ? Output::getClean($_POST['content']) : '')
+        'EMAIL_CONTENT_VALUE' => ((isset($_POST['content']) && $_POST['content']) ? Output::getClean($_POST['content']) : ''),
+        'EACH_QUANTITY_VALUE' => 1,
+        'EACH_PRODUCT_VALUE' => 1,
     ]);
 } else {
     // Updating action
@@ -95,7 +110,9 @@ if (!$action->exists()) {
     $smarty->assign([
         'TRIGGER_VALUE' => Output::getClean($action->data()->type),
         'EMAIL_SUBJECT_VALUE' => Output::getClean($email['subject']),
-        'EMAIL_CONTENT_VALUE' => Output::getPurified($email['content'], true)
+        'EMAIL_CONTENT_VALUE' => Output::getPurified($email['content'], true),
+        'EACH_QUANTITY_VALUE' => $action->data()->each_quantity,
+        'EACH_PRODUCT_VALUE' => $action->data()->each_product,
     ]);
 }
 

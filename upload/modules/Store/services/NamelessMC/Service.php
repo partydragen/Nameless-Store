@@ -14,7 +14,7 @@ class NamelessMCService extends ServiceBase {
 
     }
 
-    public function executeAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
+    public function scheduleAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
         $product = $item->getProduct();
         $recipient = $order->recipient();
         if ($recipient->exists() && $recipient->getUser()->exists()) {
@@ -49,7 +49,8 @@ class NamelessMCService extends ServiceBase {
 
             // Send alert to user
             if (isset($command['alert']) && !empty($command['alert'])) {
-                $alert = str_replace(array_keys($placeholders), array_values($placeholders), $command['alert']);
+                $alert = $action->parseCommand($command['alert'], $order, $item, $payment, $placeholders);
+
                 DB::getInstance()->insert('alerts', [
                     'user_id' => $user->data()->id,
                     'type' => 'store',
@@ -64,8 +65,8 @@ class NamelessMCService extends ServiceBase {
             if (isset($command['add_trophies']) && is_array($command['add_trophies']) && count($command['add_trophies']) && Util::isModuleEnabled('Trophies')) {
                 $user_trophies = new UserTrophies($user);
 
-                foreach ($command['add_trophies'] as $trophy) {
-                    $trophy = new Trophy($_POST['trophy']);
+                foreach ($command['add_trophies'] as $trophy_id) {
+                    $trophy = new Trophy($trophy_id);
                     if ($trophy->exists()) {
                         if (!$user_trophies->hasTrophy($trophy)) {
                             $user_trophies->rewardTrophy($trophy);
@@ -75,19 +76,15 @@ class NamelessMCService extends ServiceBase {
             }
         }
 
-        // Action executed
-        DB::getInstance()->insert('store_pending_actions', [
-            'order_id' => $payment->data()->order_id,
-            'action_id' => $action->data()->id,
-            'product_id' => $product->data()->id,
-            'customer_id' => $order->data()->to_customer_id,
+        $task = new ActionTask();
+        $task->create($action->data()->command, $action, $order, $item, $payment, [
             'connection_id' => 0,
-            'type' => $action->data()->type,
-            'command' => $action->data()->command,
-            'require_online' => $action->data()->require_online,
-            'order' => $action->data()->order,
-            'status' => 1
+            'status' => ActionTask::COMPLETED
         ]);
+    }
+
+    public function executeAction(ActionTask $task) {
+
     }
 }
 

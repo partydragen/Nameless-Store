@@ -14,8 +14,9 @@ class DiscordService extends ServiceBase {
 
     }
 
-    public function executeAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
+    public function scheduleAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
         $command = json_decode($action->data()->command, true);
+        $command_log = [];
 
         // Add or Remove roles
         if (isset($command['add_roles']) || isset($command['remove_roles'])) {
@@ -26,14 +27,23 @@ class DiscordService extends ServiceBase {
 
                 Discord::updateDiscordRoles($user, $command['add_roles'] ?? [], $command['remove_roles'] ?? []);
             }
+
+            if (isset($command['add_roles'])) {
+                $command_log['add_roles'] = $command['add_roles'];
+            }
+
+            if (isset($command['remove_roles'])) {
+                $command_log['remove_roles'] = $command['remove_roles'];
+            }
         }
 
         // Webhook
         if (isset($command['webhook']['url'])) {
             $webhook = $command['webhook'];
 
+            $content = $action->parseCommand($webhook['content'], $order, $item, $payment, $placeholders);
             $return = DiscordWebhookBuilder::make()
-                ->setContent(str_replace(array_keys($placeholders), array_values($placeholders), $webhook['content']));
+                ->setContent($content);
 
             // Any embeds?
             if (isset($webhook['embeds'])) {
@@ -42,12 +52,16 @@ class DiscordService extends ServiceBase {
                         continue;
                     }
 
-                    $return->addEmbed(function (DiscordEmbed $embed) use ($params, $placeholders) {
+                    $title = $action->parseCommand($params['title'], $order, $item, $payment, $placeholders);
+                    $description = $action->parseCommand($params['description'], $order, $item, $payment, $placeholders);
+                    $footer = $action->parseCommand($params['footer']['text'], $order, $item, $payment, $placeholders);
+
+                    $return->addEmbed(function (DiscordEmbed $embed) use ($params, $title, $description, $footer) {
                         return $embed
-                            ->setTitle(str_replace(array_keys($placeholders), array_values($placeholders), $params['title']))
-                            ->setDescription(Text::embedSafe(str_replace(array_keys($placeholders), array_values($placeholders), $params['description'])))
+                            ->setTitle($title)
+                            ->setDescription(Text::embedSafe($description))
                             ->setUrl($params['url'])
-                            ->setFooter(Text::embedSafe(str_replace(array_keys($placeholders), array_values($placeholders), $params['footer']['text'])));
+                            ->setFooter(Text::embedSafe($footer));
                     });
                 }
             }
@@ -59,21 +73,32 @@ class DiscordService extends ServiceBase {
                     'Content-Type' => 'application/json',
                 ],
             ]);
-        }
 
-        // Action executed
-        DB::getInstance()->insert('store_pending_actions', [
-            'order_id' => $payment->data()->order_id,
-            'action_id' => $action->data()->id,
-            'product_id' => $item->getProduct()->data()->id,
-            'customer_id' => $order->data()->to_customer_id,
+            $command_log['webhook'] = [
+                'url' => $command['webhook']['url'],
+                'content' => $content,
+                'embeds' => [
+                    [
+                        'title' => $title ?? '',
+                        'description' => $description ?? '',
+                        'footer' => [
+                            'text' => $footer ?? '',
+                        ]
+                    ]
+                ],
+            ];
+        }
+        $command = json_encode($command_log);
+
+        $task = new ActionTask();
+        $task->create($command, $action, $order, $item, $payment, [
             'connection_id' => 0,
-            'type' => $action->data()->type,
-            'command' => $action->data()->command,
-            'require_online' => $action->data()->require_online,
-            'order' => $action->data()->order,
-            'status' => 1
+            'status' => ActionTask::COMPLETED
         ]);
+    }
+
+    public function executeAction(ActionTask $task) {
+
     }
 }
 

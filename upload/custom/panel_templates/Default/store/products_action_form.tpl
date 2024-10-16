@@ -26,7 +26,7 @@
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{$PANEL_INDEX}">{$DASHBOARD}</a></li>
                         <li class="breadcrumb-item active">{$STORE}</li>
-                        <li class="breadcrumb-item active">{$PRODUCTS}</li>
+                        <li class="breadcrumb-item active">{$ACTIONS}</li>
                     </ol>
                 </div>
 
@@ -171,6 +171,10 @@
                             <td>The ID of the order</td>
                         </tr>
                         <tr>
+                            <td>{orderProducts}</td>
+                            <td>List of all products for this order</td>
+                        </tr>
+                        <tr>
                             <td>{productId}</td>
                             <td>The ID of the product</td>
                         </tr>
@@ -237,6 +241,8 @@
                         {/literal}
                     </tbody>
                 </table>
+
+                <center>You can view all placeholders <a href="https://store-demo.partydragen.com/placeholders/" target="_blank">here</a></center>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

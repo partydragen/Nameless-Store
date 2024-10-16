@@ -63,8 +63,9 @@ class Order {
     public function items(): ItemList {
         return $this->_items ??= (function (): ItemList {
             $items = new ItemList();
+            $amount = 0;
 
-            $products_query = $this->_db->query('SELECT nl2_store_products.*, nl2_store_orders_products.quantity, nl2_store_orders_products.id AS item_id FROM nl2_store_orders_products INNER JOIN nl2_store_products ON nl2_store_products.id=product_id WHERE order_id = ?', [$this->data()->id]);
+            $products_query = $this->_db->query('SELECT nl2_store_products.*, nl2_store_orders_products.quantity, nl2_store_orders_products.id AS item_id, amount_cents FROM nl2_store_orders_products INNER JOIN nl2_store_products ON nl2_store_products.id=product_id WHERE order_id = ?', [$this->data()->id]);
             if ($products_query->count()) {
                 $products_query = $products_query->results();
 
@@ -82,10 +83,15 @@ class Order {
                     }
 
                     $item = new Item($data->item_id, $product, $data->quantity, $fields);
+                    $amount += $data->amount_cents;
 
                     $items->addItem($item);
                 }
             }
+
+            $this->_amount = new Amount();
+            $this->_amount->setTotalCents($amount);
+            $this->_amount->setCurrency(Store::getCurrency());
 
             return $items;
         })();

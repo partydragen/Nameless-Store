@@ -37,6 +37,7 @@ class Store_Module extends Module {
         $pages->add('Store', '/store/process', 'pages/backend/process.php');
         $pages->add('Store', '/store/listener', 'pages/backend/listener.php');
         $pages->add('Store', '/panel/store/general_settings', 'pages/panel/general_settings.php');
+        $pages->add('Store', '/panel/store/actions', 'pages/panel/actions.php');
         $pages->add('Store', '/panel/store/gateways', 'pages/panel/gateways.php');
         $pages->add('Store', '/panel/store/products', 'pages/panel/products.php');
         $pages->add('Store', '/panel/store/product', 'pages/panel/product.php');
@@ -63,6 +64,7 @@ class Store_Module extends Module {
         EventHandler::registerEvent(CheckoutAddProductEvent::class);
         EventHandler::registerEvent(CheckoutFieldsValidationEvent::class);
         EventHandler::registerEvent(CustomerProductExpiredEvent::class);
+        EventHandler::registerEvent(ParseActionCommandEvent::class);
         EventHandler::registerEvent('renderStoreCategory', 'renderStoreCategory', [], true, true);
         EventHandler::registerEvent('renderStoreProduct', 'renderStoreProduct', [], true, true);
 
@@ -72,6 +74,8 @@ class Store_Module extends Module {
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredGroups']);
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredIntegrations']);
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'cancel']);
+        EventHandler::registerListener(ParseActionCommandEvent::class, [ParseActionCommandListener::class, 'placeholders']);
+        EventHandler::registerListener(ParseActionCommandEvent::class, [ParseActionCommandListener::class, 'conditions'], 15);
         EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'purify']);
         EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'renderEmojis'], 10);
         EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'replaceAnchors'], 15);
@@ -104,6 +108,81 @@ class Store_Module extends Module {
                     $cache->erase('update_check');
                 }
             }
+        }
+
+        ActionsHandler::getInstance()->registerPlaceholders('Store', static function (Order $order, Item $item, Payment $payment) {
+            $placeholders = [];
+
+            $product = $item->getProduct();
+            $customer = $order->customer();
+            $recipient = $order->recipient();
+            $placeholders['itemId'] = $item->getId();
+            $placeholders['quantity'] = $item->getQuantity();
+            $placeholders['userId'] = $recipient->exists() ? $recipient->data()->user_id ?? 0 : 0;
+            $placeholders['username'] = $recipient->getUsername();
+            $placeholders['uuid'] = $recipient->getIdentifier();
+            $placeholders['productId'] = $product->data()->id;
+            $placeholders['productPrice'] = Store::fromCents($product->data()->price_cents);
+            $placeholders['productName'] = $product->data()->name;
+            $placeholders['transaction'] = $payment->data()->transaction;
+            $placeholders['amount'] = Store::fromCents($payment->data()->amount_cents ?? 0);
+            $placeholders['currency'] = $payment->data()->currency;
+            $placeholders['subscriptionId'] = $payment->data()->subscription_id ?? 0;
+            $placeholders['ip'] = $order->data()->ip;
+            $placeholders['time'] = date('H:i', $payment->data()->created);
+            $placeholders['date'] = date('d M Y', $payment->data()->created);
+            $placeholders['gateway'] = $payment->getGateway() != null ? $payment->getGateway()->getName() : 'Unknown';
+            $placeholders['purchaserUserId'] = $customer->exists() ? $customer->data()->user_id ?? 0 : 0;
+            $placeholders['purchaserName'] = $customer->getUsername();
+            $placeholders['purchaserUuid'] = $customer->getIdentifier();
+
+            $placeholders['orderId'] = $payment->data()->order_id;
+            $placeholders['orderAmount'] = Store::fromCents($order->getAmount()->getTotalCents());
+            $placeholders['orderCurrency'] = $order->getAmount()->getCurrency();
+            $placeholders['orderProducts'] = $order->getDescription();
+
+            // Coupon
+            $coupon = new Coupon($order->data()->coupon_id);
+            if ($coupon->exists()) {
+                $placeholders['couponId'] = $coupon->data()->id;
+                $placeholders['couponCode'] = $coupon->data()->code;
+            }
+
+            // User Integrations
+            $user = $order->recipient()->getUser();
+            foreach ($user->getIntegrations() as $integrationUser) {
+                $integrationName = strtolower($integrationUser->getIntegration()->getName());
+
+                $placeholders[$integrationName . 'Username'] = $integrationUser->data()->username;
+                $placeholders[$integrationName . 'Identifier'] = $integrationUser->data()->identifier;
+                $placeholders[$integrationName . 'Verified'] = (bool) $integrationUser->data()->verified;
+            }
+
+            // Custom fields
+            foreach ($item->getFields() as $field) {
+                $placeholders[$field['identifier']] = Output::getClean($field['value']);
+            }
+
+            return $placeholders;
+        });
+
+        if (Util::isModuleEnabled('Referrals')) {
+            ActionsHandler::getInstance()->registerPlaceholders('Referrals', static function (Order $order, Item $item, Payment $payment) {
+                $placeholders = [];
+
+                if ($order->data()->referral_id != null) {
+                    $referral = new Referral($order->data()->referral_id);
+                    if ($referral->exists()) {
+                        $referral_user = new User($referral->data()->user_id);
+
+                        $placeholders['referralId'] = $referral->data()->id;
+                        $placeholders['referralUser'] = $referral_user->exists() ? $referral_user->getDisplayname() : 'Unknown';
+                        $placeholders['referralCode'] = $referral->data()->code;
+                    }
+                }
+
+                return $placeholders;
+            });
         }
     }
 
@@ -248,6 +327,16 @@ class Store_Module extends Module {
                         $icon = $cache->retrieve('store_fields_icon');
 
                     $navs[2]->addItemToDropdown('store_configuration', 'store_fields', $this->_store_language->get('admin', 'fields'), URL::build('/panel/store/fields'), 'top', null, $icon, $order + 0.5);
+                }
+
+                if ($user->hasPermission('staffcp.store.products')) {
+                    if (!$cache->isCached('store_actions_icon')) {
+                        $icon = '<i class="nav-icon fas fa-code"></i>';
+                        $cache->store('store_actions_icon', $icon);
+                    } else
+                        $icon = $cache->retrieve('store_actions_icon');
+
+                    $navs[2]->addItemToDropdown('store_configuration', 'store_actions', $this->_store_language->get('admin', 'global_actions'), URL::build('/panel/store/actions'), 'top', null, $icon, $order + 0.6);
                 }
 
                 if ($user->hasPermission('staffcp.store.products')) {
@@ -451,6 +540,8 @@ class Store_Module extends Module {
                     'own_connections' => $action->data()->own_connections,
                     'service_id' => $action->data()->service_id,
                     'connections' => $action_connections,
+                    'each_quantity' => $action->data()->each_quantity,
+                    'each_product' => $action->data()->each_product,
                 ];
             }
 
@@ -1149,6 +1240,35 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
 
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_products_actions CHANGE `product_id` `product_id` INT(11) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_products_connections CHANGE `product_id` `product_id` INT(11) DEFAULT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_products_actions ADD `each_quantity` tinyint(1) NOT NULL DEFAULT \'1\'');
+                $this->_db->query('ALTER TABLE nl2_store_products_actions ADD `each_product` tinyint(1) NOT NULL DEFAULT \'1\'');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                if (!$this->_db->showTables('store_products_meta')) {
+                    try {
+                        $this->_db->createTable("store_products_meta", " `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `name` varchar(64) NOT NULL, `value` varchar(2048) DEFAULT NULL, PRIMARY KEY (`id`)");
+                    } catch (Exception $e) {
+                        // Error
+                    }
+                }
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
             HandleSubscriptionsTask::schedule();
         }
     }
@@ -1187,7 +1307,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_products_connections')) {
             try {
-                $this->_db->createTable('store_products_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `action_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_products_connections', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) DEFAULT NULL, `action_id` int(11) DEFAULT NULL, `connection_id` int(11) NOT NULL, PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1203,7 +1323,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_products_actions')) {
             try {
-                $this->_db->createTable('store_products_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `service_id` int(11) NOT NULL, `command` text NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `own_connections` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_products_actions', ' `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) DEFAULT NULL, `type` int(11) NOT NULL DEFAULT \'1\', `service_id` int(11) NOT NULL, `command` text NOT NULL, `require_online` tinyint(1) NOT NULL DEFAULT \'1\', `own_connections` tinyint(1) NOT NULL DEFAULT \'0\', `each_quantity` tinyint(1) NOT NULL DEFAULT \'1\', `each_product` tinyint(1) NOT NULL DEFAULT \'1\', `order` int(11) NOT NULL, PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1364,6 +1484,14 @@ class Store_Module extends Module {
         if (!$this->_db->showTables('store_transactions')) {
             try {
                 $this->_db->createTable("store_transactions", " `id` int(11) NOT NULL AUTO_INCREMENT, `customer_id` int(11) NOT NULL, `received_by` int(11) DEFAULT NULL, `action` varchar(64) NOT NULL, `cents` int(11) NOT NULL, `time` int(11) NOT NULL, `info` TEXT NOT NULL, PRIMARY KEY (`id`)");
+            } catch (Exception $e) {
+                // Error
+            }
+        }
+
+        if (!$this->_db->showTables('store_products_meta')) {
+            try {
+                $this->_db->createTable("store_products_meta", " `id` int(11) NOT NULL AUTO_INCREMENT, `product_id` int(11) NOT NULL, `name` varchar(64) NOT NULL, `value` varchar(2048) DEFAULT NULL, PRIMARY KEY (`id`)");
             } catch (Exception $e) {
                 // Error
             }

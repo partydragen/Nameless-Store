@@ -79,8 +79,13 @@
                                             <td>{$action.command}</td>
                                             <td>
                                                 <div class="float-md-right">
-                                                    <a class="btn btn-warning btn-sm" href="{$action.edit_link}"><i class="fas fa-edit fa-fw"></i></a>
-                                                    <a class="btn btn-danger btn-sm" href="{$action.delete_link}"><i class="fas fa-trash fa-fw"></i></a>
+                                                    {if $action.action_type == 'product'}
+                                                        <a class="btn btn-warning btn-sm" href="{$action.edit_link}"><i class="fas fa-edit fa-fw"></i></a>
+                                                        <a class="btn btn-danger btn-sm" href="{$action.delete_link}"><i class="fas fa-trash fa-fw"></i></a>
+                                                    {else}
+                                                        <span data-toggle="tooltip" data-placement="top" title="Edit global actions from global actions page!"><a class="btn btn-warning btn-sm disabled"><i class="fas fa-edit fa-fw"></i></a></span>
+                                                        <span data-toggle="tooltip" data-placement="top" title="Delete global actions from global actions page!"><a class="btn btn-danger btn-sm disabled"><i class="fas fa-trash fa-fw"></i></a></span>
+                                                    {/if}
                                                 </div>
                                             </td>
                                         </tr>

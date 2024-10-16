@@ -62,6 +62,14 @@ if (Input::exists()) {
             }
 
             if (!count($errors)) {
+                // Run for each quantity?
+                if (isset($_POST['each_quantity']) && $_POST['each_quantity'] == 'on') $each_quantity = 1;
+                else $each_quantity = 0;
+
+                // Run for each product?
+                if (isset($_POST['each_product']) && $_POST['each_product'] == 'on') $each_product = 1;
+                else $each_product = 0;
+
                 if (!$action->exists()) {
                     // Create new action
                     $last_order = DB::getInstance()->query('SELECT `order` FROM nl2_store_products_actions ORDER BY `order` DESC LIMIT 1')->results();
@@ -75,7 +83,9 @@ if (Input::exists()) {
                         'command' => json_encode($command),
                         'require_online' => 0,
                         'order' => $last_order + 1,
-                        'own_connections' => 0
+                        'own_connections' => 0,
+                        'each_quantity' => $each_quantity,
+                        'each_product' => $each_product,
                     ]);
 
                     Session::flash('products_success', $store_language->get('admin', 'action_created_successfully'));
@@ -85,7 +95,9 @@ if (Input::exists()) {
                         'type' => Input::get('trigger'),
                         'command' => json_encode($command),
                         'require_online' => 0,
-                        'own_connections' => 0
+                        'own_connections' => 0,
+                        'each_quantity' => $each_quantity,
+                        'each_product' => $each_product,
                     ]);
 
                     Session::flash('products_success', $store_language->get('admin', 'action_updated_successfully'));
@@ -117,7 +129,9 @@ if (!$action->exists()) {
         'WEBHOOK_CONTENT_VALUE' => ((isset($_POST['webhook_content']) && $_POST['webhook_content']) ? Output::getClean($_POST['webhook_content']) : ''),
         'WEBHOOK_EMBED_TITLE_VALUE' => ((isset($_POST['embed_title']) && $_POST['embed_title']) ? Output::getClean($_POST['embed_title']) : ''),
         'WEBHOOK_EMBED_CONTENT_VALUE' => ((isset($_POST['embed_content']) && $_POST['embed_content']) ? Output::getClean($_POST['embed_content']) : ''),
-        'WEBHOOK_EMBED_FOOTER_VALUE' => ((isset($_POST['embed_footer']) && $_POST['embed_footer']) ? Output::getClean($_POST['embed_footer']) : '')
+        'WEBHOOK_EMBED_FOOTER_VALUE' => ((isset($_POST['embed_footer']) && $_POST['embed_footer']) ? Output::getClean($_POST['embed_footer']) : ''),
+        'EACH_QUANTITY_VALUE' => 1,
+        'EACH_PRODUCT_VALUE' => 1,
     ]);
 } else {
     // Updating action
@@ -132,7 +146,9 @@ if (!$action->exists()) {
         'WEBHOOK_CONTENT_VALUE' => Output::getClean($webhook['content']),
         'WEBHOOK_EMBED_TITLE_VALUE' => Output::getClean($webhook['embeds'][0]['title']),
         'WEBHOOK_EMBED_CONTENT_VALUE' => Output::getClean($webhook['embeds'][0]['description']),
-        'WEBHOOK_EMBED_FOOTER_VALUE' => Output::getClean($webhook['embeds'][0]['footer']['text'])
+        'WEBHOOK_EMBED_FOOTER_VALUE' => Output::getClean($webhook['embeds'][0]['footer']['text']),
+        'EACH_QUANTITY_VALUE' => $action->data()->each_quantity,
+        'EACH_PRODUCT_VALUE' => $action->data()->each_product,
     ]);
 }
 

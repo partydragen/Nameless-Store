@@ -14,37 +14,34 @@ class EmailService extends ServiceBase {
 
     }
 
-    public function executeAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
-        $product = $item->getProduct();
+    public function scheduleAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
         $user = $order->recipient()->getUser();
         if ($user->exists()) {
             $email = json_decode($action->data()->command, true);
 
             // Replace the email placeholders
-            $content = $action->data()->command;
-            $content = str_replace(array_keys($placeholders), array_values($placeholders), $email['content']);
+            $subject = $action->parseCommand($email['subject'], $order, $item, $payment, $placeholders);
+            $content = $action->parseCommand($email['content'], $order, $item, $payment, $placeholders);
 
-            $sent = Email::send(
+            Email::send(
                 ['email' => $user->data()->email, 'name' => SITE_NAME],
-                $email['subject'],
+                $subject,
                 $content,
                 Email::getReplyTo()
             );
 
-            // Action executed
-            DB::getInstance()->insert('store_pending_actions', [
-                'order_id' => $payment->data()->order_id,
-                'action_id' => $action->data()->id,
-                'product_id' => $product->data()->id,
-                'customer_id' => $order->data()->to_customer_id,
+            $command = json_encode(['subject' => $subject, 'content' => $content]);
+
+            $task = new ActionTask();
+            $task->create($command, $action, $order, $item, $payment, [
                 'connection_id' => 0,
-                'type' => $action->data()->type,
-                'command' =>  json_encode(['subject' => $email['subject'], 'content' => $content]),
-                'require_online' => $action->data()->require_online,
-                'order' => $action->data()->order,
-                'status' => 1
+                'status' => ActionTask::COMPLETED
             ]);
         }
+    }
+
+    public function executeAction(ActionTask $task) {
+
     }
 }
 
