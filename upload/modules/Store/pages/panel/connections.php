@@ -41,7 +41,7 @@ if (!isset($_GET['action'])) {
                 'name' => Output::getClean($connection->name),
                 'service' => Output::getClean($service->getName()),
                 'edit_link' => URL::build('/panel/store/connections/', 'action=edit&id=' . $connection->id),
-                'error' => $service->getId() == 2 && $connection->last_fetch < strtotime('-1 hour') ? 'There has been no API fetch within the last hour, Is the nameless plugin installed, and is store module integration enabled in modules.yaml?' : false,
+                'error' => $service->getId() == 2 && $connection->last_fetch < strtotime('-1 hour') ? 'There has been no API fetch within the last hour, Is the nameless plugin installed, and is store module integration enabled in modules.yaml? <a href=\'https://partydragen.com/wiki/store/nameless-plugin/\' target=\'_blank\'>Read more »</a>' : false,
                 'queued_actions' => $store_language->get('admin', 'queued_actions_results', [
                     'pending_actions' => DB::getInstance()->query('SELECT COUNT(*) AS c FROM nl2_store_pending_actions WHERE connection_id = ? AND status = 0', [$connection->id])->first()->c,
                     'completed_actions' => DB::getInstance()->query('SELECT COUNT(*) AS c FROM nl2_store_pending_actions WHERE connection_id = ? AND status = 1', [$connection->id])->first()->c
