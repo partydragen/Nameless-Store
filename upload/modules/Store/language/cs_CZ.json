@@ -300,5 +300,6 @@
     "admin/no_subscriptions": "Zde se zobrazí všechna vytvořená předplatná.",
     "admin/subscription_cancelled_successfully": "Předplatné úspěšně zrušeno",
     "general/subscribe": "Předplatné",
-    "general/subscription_created": "Vytvořeno nové předplatné v bráně {{gateway}} uživatelem {{username}}"
+    "general/subscription_created": "Vytvořeno nové předplatné v bráně {{gateway}} uživatelem {{username}}",
+    "admin/global_actions": "Globální akce"
 }
