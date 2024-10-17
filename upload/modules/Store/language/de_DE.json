@@ -300,5 +300,6 @@
     "admin/no_subscriptions": "Wenn du Abo-Produkte hast, werden hier alle erstellten Abos angezeigt.",
     "admin/subscription_updated_successfully": "Abo erfolgreich aktualisiert",
     "admin/supports_subscriptions": "Unterstützt Abos",
-    "general/subscription_cancelled": "{{gateway}} Abo von {{username}} gekündigt"
+    "general/subscription_cancelled": "{{gateway}} Abo von {{username}} gekündigt",
+    "admin/global_actions": "Globale Aktionen"
 }
