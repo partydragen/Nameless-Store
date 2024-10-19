@@ -37,7 +37,7 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-9">
-                                <p style="margin-top: 7px; margin-bottom: 7px;">{$FIELDS_INFO}</p>
+                                <p style="margin-top: 7px; margin-bottom: 7px;">{$FIELDS_INFO} <a href="https://partydragen.com/wiki/store/fields/" target="_blank">Read More</a></p>
                             </div>
                             <div class="col-md-3">
                                 <span class="float-md-right"><a href="{$NEW_FIELD_LINK}" class="btn btn-primary"><i class="fas fa-plus-circle"></i> {$NEW_FIELD}</a></span>

@@ -1,9 +1,10 @@
 # Nameless-Store
 
 ## Requirements
-- NamelessMC version 2.1.0
+- NamelessMC version 2.1.x
 
 ## Installation:
+- Read the installation instructions [here](https://partydragen.com/wiki/installation/) or read below
 - Upload the contents of the **upload** directory straight into your NamelessMC installation's directory
 - Activate the module in the StaffCP -> Modules tab
 - Install the Nameless Plugin on your server [https://www.spigotmc.org/resources/nameless-plugin-for-v2.59032/](https://www.spigotmc.org/resources/nameless-plugin-for-v2.59032/)

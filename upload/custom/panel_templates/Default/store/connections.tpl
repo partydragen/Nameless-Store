@@ -37,7 +37,7 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-9">
-                                    <p style="margin-top: 7px; margin-bottom: 7px;">{$CONNECTIONS_INFO}</p>
+                                    <p style="margin-top: 7px; margin-bottom: 7px;">{$CONNECTIONS_INFO}. <a href="https://partydragen.com/wiki/store/connections/" target="_blank">Read more</a></p>
                                 </div>
                                 <div class="col-md-3">
                                     <span class="float-md-right"><a href="{$NEW_CONNECTION_LINK}" class="btn btn-primary"><i class="fas fa-plus-circle"></i> {$NEW_CONNECTION}</a></span>

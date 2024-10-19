@@ -242,7 +242,7 @@
                     </tbody>
                 </table>
 
-                <center>You can view all placeholders <a href="https://store-demo.partydragen.com/placeholders/" target="_blank">here</a></center>
+                <center>You can view all placeholders <a href="https://partydragen.com/wiki/store/placeholders/" target="_blank">here</a></center>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
