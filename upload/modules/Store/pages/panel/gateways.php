@@ -35,6 +35,15 @@ if (!isset($_GET['gateway'])) {
             ]);
         } else {
             $errors = [$store_language->get('admin', 'unavailable_generate_config')];
+
+            if (function_exists('posix_geteuid')) {
+                $uid = posix_geteuid();
+                $gid = posix_getegid();
+                $chown_command = 'sudo chown -R ' . $uid . ':' . $gid . ' ' . Output::getClean(ROOT_PATH . '/modules/Store');
+                $errors[] = 'The ssh command to fix this for your system was determined to be: <code style="color: blue;">' . $chown_command . '</code> Please check if it makes sense before running it.';
+            } else {
+                $errors[] = '<strong>Example</strong> ssh command to change owner recursively: <code style="color: blue;">sudo chown -R www-data: ' . Output::getClean(ROOT_PATH . '/modules/Store') . '</code>';
+            }
         }
     }
 
@@ -76,6 +85,15 @@ if (!isset($_GET['gateway'])) {
         // File exist, Make sure its writeable
         if (!is_writable(ROOT_PATH . '/modules/Store/config.php')) {
             $errors = [$store_language->get('admin', 'config_not_writable')];
+
+            if (function_exists('posix_geteuid')) {
+                $uid = posix_geteuid();
+                $gid = posix_getegid();
+                $chown_command = 'sudo chown -R ' . $uid . ':' . $gid . ' ' . Output::getClean(ROOT_PATH . '/modules/Store');
+                $errors[] = 'The ssh command to fix this for your system was determined to be: <code style="color: blue;">' . $chown_command . '</code> Please check if it makes sense before running it.';
+            } else {
+                $errors[] = '<strong>Example</strong> ssh command to change owner recursively: <code style="color: blue;">sudo chown -R www-data: ' . Output::getClean(ROOT_PATH . '/modules/Store') . '</code>';
+            }
         }
     } else if (!is_writable(ROOT_PATH . '/modules/Store')) {
         // File don't exist
