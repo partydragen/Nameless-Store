@@ -63,6 +63,66 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <br />
+                        <h5 style="display:inline">{$FIND_GATEWAYS}</h5>
+                        <div class="float-md-right">
+                            <a href="{$VIEW_ALL_GATEWAYS_LINK}" class="btn btn-primary" target="_blank">{$VIEW_ALL_GATEWAYS} &raquo;</a>
+                        </div>
+                        <br /><br />
+
+                        {if count($WEBSITE_GATEWAYS)}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <colgroup>
+                                        <col width="70%">
+                                        <col width="20%">
+                                        <col width="10%">
+                                    </colgroup>
+                                    <thead>
+                                    <tr>
+                                        <th>{$GATEWAY}</th>
+                                        <th>{$STATS}</th>
+                                        <th>{$ACTIONS}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {foreach from=$WEBSITE_GATEWAYS item=item}
+                                        <tr>
+                                            <td>
+                                                <strong>{$item.name}</strong> <small>{$item.latest_version}</small>
+                                                <br />
+                                                <small>{$item.author_x}</small>
+                                                <br />
+                                                <small>{$item.updated_x}</small>
+                                            </td>
+                                            <td>
+                                                <div class="star-rating view">
+                                                        <span class="far fa-star" data-rating="1"
+                                                              style="color:gold;"></span>
+                                                    <span class="far fa-star" data-rating="2" style="color:gold"></span>
+                                                    <span class="far fa-star" data-rating="3"
+                                                          style="color:gold;"></span>
+                                                    <span class="far fa-star" data-rating="4"
+                                                          style="color:gold;"></span>
+                                                    <span class="far fa-star" data-rating="5"
+                                                          style="color:gold;"></span>
+                                                    <input type="hidden" name="rating" class="rating-value"
+                                                           value="{($item.rating/10)|round}">
+                                                </div>
+                                                {$item.downloads_full}<br />
+                                                {$item.views_full}
+                                            </td>
+                                            <td><a href="{$item.url}" target="_blank"
+                                                   class="btn btn-primary btn-sm">{$VIEW} &raquo;</a></td>
+                                        </tr>
+                                    {/foreach}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {else}
+                            <div class="alert alert-warning">{$UNABLE_TO_RETRIEVE_GATEWAYS}</div>
+                        {/if}
                         {/if}
 
                         <center>

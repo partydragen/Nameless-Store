@@ -62,8 +62,61 @@ if (!isset($_GET['gateway'])) {
             ];
         }
 
+        // Get gateways from Nameless website
+        $cache->setCache('all_gateways');
+        if ($cache->isCached('all_gateways')) {
+            $all_gateways = $cache->retrieve('all_gateways');
+        } else {
+            $all_gateways = [];
+            $all_gateways_query = HttpClient::get('https://namelesscms.com/index.php?route=/api/v2/resources&category=12');
+
+            if ($all_gateways_query->hasError()) {
+                $all_gateways_error = $all_gateways_query->getError();
+            } else {
+                $all_gateways_query = json_decode($all_gateways_query->contents());
+                $timeago = new TimeAgo(TIMEZONE);
+
+                foreach ($all_gateways_query->resources as $item) {
+                    $all_gateways[] = [
+                        'name' => Output::getClean($item->name),
+                        'description' => Output::getPurified($item->description),
+                        'description_short' => Text::truncate(Output::getPurified($item->description)),
+                        'author' => Output::getClean($item->author->username),
+                        'author_x' => $language->get('admin', 'author_x', ['author' => Output::getClean($item->author->username)]),
+                        'updated_x' => $language->get('admin', 'updated_x', ['updatedAt' => date(DATE_FORMAT, $item->updated)]),
+                        'url' => Output::getClean($item->url),
+                        'latest_version' => Output::getClean($item->latest_version),
+                        'rating' => Output::getClean($item->rating),
+                        'downloads' => Output::getClean($item->downloads),
+                        'views' => Output::getClean($item->views),
+                        'rating_full' => $language->get('admin', 'rating_x', ['rating' => Output::getClean($item->rating * 2) . '/100']),
+                        'downloads_full' => $language->get('admin', 'downloads_x', ['downloads' => Output::getClean($item->downloads)]),
+                        'views_full' =>  $language->get('admin', 'views_x', ['views' => Output::getClean($item->views)])
+                    ];
+                }
+
+                $cache->store('all_gateways', $all_gateways, 3600);
+            }
+        }
+
+        if (count($all_gateways)) {
+            if (count($all_gateways) > 3) {
+                $rand_keys = array_rand($all_gateways, 3);
+                $all_gateways = [$all_gateways[$rand_keys[0]], $all_gateways[$rand_keys[1]], $all_gateways[$rand_keys[2]]];
+            }
+        }
+
         $smarty->assign([
-            'GATEWAYS_LIST' => $gateways_list
+            'GATEWAYS_LIST' => $gateways_list,
+            'FIND_GATEWAYS' => $store_language->get('admin', 'find_gateways'),
+            'VIEW' => $language->get('general', 'view'),
+            'GATEWAY' => $store_language->get('admin', 'gateway'),
+            'STATS' => $language->get('admin', 'stats'),
+            'ACTIONS' => $language->get('general', 'actions'),
+            'WEBSITE_GATEWAYS' => $all_gateways,
+            'VIEW_ALL_GATEWAYS' => $store_language->get('admin', 'view_all_gateways'),
+            'VIEW_ALL_GATEWAYS_LINK' => 'https://namelesscms.com/resources/category/12-store-gateways/',
+            'UNABLE_TO_RETRIEVE_GATEWAYS' => $all_gateways_error ?? $store_language->get('admin', 'unable_to_retrieve_gateways'),
         ]);
     }
 
