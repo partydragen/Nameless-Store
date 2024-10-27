@@ -301,5 +301,9 @@
     "admin/subscription_updated_successfully": "Abo erfolgreich aktualisiert",
     "admin/supports_subscriptions": "Unterstützt Abos",
     "general/subscription_cancelled": "{{gateway}} Abo von {{username}} gekündigt",
-    "admin/global_actions": "Globale Aktionen"
+    "admin/global_actions": "Globale Aktionen",
+    "admin/gateway": "Gateway",
+    "admin/find_gateways": "Gateways finden",
+    "admin/view_all_gateways": "Alle Gateways anzeigen",
+    "admin/unable_to_retrieve_gateways": "Gateways können nicht abgerufen werden"
 }
