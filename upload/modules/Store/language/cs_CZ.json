@@ -301,5 +301,9 @@
     "admin/subscription_cancelled_successfully": "Předplatné úspěšně zrušeno",
     "general/subscribe": "Předplatné",
     "general/subscription_created": "Vytvořeno nové předplatné v bráně {{gateway}} uživatelem {{username}}",
-    "admin/global_actions": "Globální akce"
+    "admin/global_actions": "Globální akce",
+    "admin/gateway": "Brána",
+    "admin/find_gateways": "Hledat brány",
+    "admin/view_all_gateways": "Zobrazit všechny brány",
+    "admin/unable_to_retrieve_gateways": "Nepodařilo se načíst brány"
 }
