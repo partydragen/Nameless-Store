@@ -80,7 +80,7 @@ class Credits_Gateway extends GatewayBase implements SupportSubscriptions {
             ShoppingCart::getInstance()->clear();
             Redirect::to(URL::build(Store::getStorePath() . '/checkout/', 'do=complete'));
         } else {
-            $this->addError('You don\'t have enough credits to complete this order!');
+            $this->addError(Store::getLanguage()->get('general', 'not_enough_credits'));
         }
     }
 
