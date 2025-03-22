@@ -10,26 +10,21 @@
  */
 
 class LatestStorePurchasesWidget extends WidgetBase {
-	private $_language, $_cache, $_store_language;
 
-    public function __construct(Smarty $smarty, Language $language, Language $store_language, Cache $cache) {
-		$this->_smarty = $smarty;
-		$this->_language = $language;
-		$this->_store_language = $store_language;
-		$this->_cache = $cache;
+    private Cache $_cache;
+    private Language $_language;
+    private Language $_store_language;
 
-        // Get widget
-        $widget_query = self::getData('Latest Purchases');
-
-        parent::__construct(self::parsePages($widget_query));
-
-		// Set widget variables
+    public function __construct(TemplateEngine $engine, Language $language, Language $store_language, Cache $cache) {
 		$this->_module = 'Store';
 		$this->_name = 'Latest Purchases';
-		$this->_location = $widget_query->location;
 		$this->_description = 'Displays a list of your store\'s most recent purchases.';
 		$this->_settings = ROOT_PATH . '/modules/Store/widgets/admin/latest_purchases.php';
-		$this->_order = $widget_query->order;
+
+        $this->_engine = $engine;
+        $this->_language = $language;
+        $this->_store_language = $store_language;
+        $this->_cache = $cache;
 	}
 
 	public function initialise(): void {
@@ -106,17 +101,17 @@ class LatestStorePurchasesWidget extends WidgetBase {
 		}
 
 		if (count($latest_purchases)) {
-			$this->_smarty->assign([
+            $this->_engine->assign([
 				'LATEST_PURCHASES' => $this->_store_language->get('general', 'latest_purchases'),
 				'LATEST_PURCHASES_LIST' => $latest_purchases
 			]);
 
 		} else
-			$this->_smarty->assign([
+            $this->_engine->assign([
 				'LATEST_PURCHASES' => $this->_store_language->get('general', 'latest_purchases'),
 				'NO_PURCHASES' => $this->_store_language->get('general', 'no_purchases')
 			]);
 
-		$this->_content = $this->_smarty->fetch('store/widgets/latest_purchases.tpl');
+		$this->_content = $this->_engine->fetch('store/widgets/latest_purchases.tpl');
 	}
 }

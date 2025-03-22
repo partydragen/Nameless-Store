@@ -12,8 +12,6 @@
 // Always define page name
 define('PAGE', 'store');
 
-require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
-
 // Query category
 $category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE deleted = 0 ORDER BY `order` ASC LIMIT 1');
 if (!$category->count()) {
@@ -22,7 +20,7 @@ if (!$category->count()) {
 }
 
 $category = $category->first();
-$store_url = $store->getStoreURL();
+$store_url = Store::getStorePath();
 
 $page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/view'])->results();
 if (count($page_metadata)) {
@@ -32,6 +30,7 @@ if (count($page_metadata)) {
 
 $page_title = Output::getClean($category->name);
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
+require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
 
 if (Input::exists()) {
     if (Token::check()) {

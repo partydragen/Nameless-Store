@@ -248,7 +248,7 @@ class Store_Module extends Module {
 		// Widgets
 		// Latest purchases
 		require_once(ROOT_PATH . '/modules/Store/widgets/LatestPurchasesWidget.php');
-		$widgets->add(new LatestStorePurchasesWidget($smarty, $this->_language, $this->_store_language, $cache));
+		$widgets->add(new LatestStorePurchasesWidget($template->getEngine(), $this->_language, $this->_store_language, $cache));
 
         if (defined('BACK_END')) {
             // Define permissions which belong to this module

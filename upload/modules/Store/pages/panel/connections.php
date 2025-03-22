@@ -109,11 +109,13 @@ if (!isset($_GET['action'])) {
                 if ($service == null) {
                     URL::build('/panel/store/connections', 'action=new');
                 }
-
                 $fields = new Fields();
 
                 if (file_exists($service->getConnectionSettings())) {
-                    $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
+                    if ($template->getEngine() instanceof SmartyTemplateEngine) {
+                        $template->getEngine()->addSecurityPolicyDirectory(ROOT_PATH . '/modules/Store');
+                    }
+
                     require_once($service->getConnectionSettings());
                 }
 
@@ -143,10 +145,13 @@ if (!isset($_GET['action'])) {
             if ($service == null) {
                 URL::build('/panel/store/connections', 'action=new');
             }
-
             $fields = new Fields();
+
             if (file_exists($service->getConnectionSettings())) {
-                $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
+                if ($template->getEngine() instanceof SmartyTemplateEngine) {
+                    $template->getEngine()->addSecurityPolicyDirectory(ROOT_PATH . '/modules/Store');
+                }
+
                 require_once($service->getConnectionSettings());
             }
 

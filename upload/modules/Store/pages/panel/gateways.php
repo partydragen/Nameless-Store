@@ -132,7 +132,9 @@ if (!isset($_GET['gateway'])) {
 } else {
     $gateway = Gateways::getInstance()->get($_GET['gateway']);
 
-    $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
+    if ($template->getEngine() instanceof SmartyTemplateEngine) {
+        $template->getEngine()->addSecurityPolicyDirectory(ROOT_PATH . '/modules/Store');
+    }
 
     if (file_exists(ROOT_PATH . '/modules/Store/config.php')) {
         // File exist, Make sure its writeable

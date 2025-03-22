@@ -118,7 +118,10 @@ if (!isset($_GET['action'])) {
 
                 $fields = new Fields();
                 if (file_exists($service->getActionSettings())) {
-                    $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
+                    if ($template->getEngine() instanceof SmartyTemplateEngine) {
+                        $template->getEngine()->addSecurityPolicyDirectory(ROOT_PATH . '/modules/Store');
+                    }
+
                     require_once($service->getActionSettings());
                 }
                 $service->onActionSettingsPageLoad($template, $fields);
@@ -149,7 +152,10 @@ if (!isset($_GET['action'])) {
 
             $fields = new Fields();
             if (file_exists($service->getActionSettings())) {
-                $securityPolicy->secure_dir = [ROOT_PATH . '/modules/Store', ROOT_PATH . '/custom/panel_templates'];
+                if ($template->getEngine() instanceof SmartyTemplateEngine) {
+                    $template->getEngine()->addSecurityPolicyDirectory(ROOT_PATH . '/modules/Store');
+                }
+
                 require_once($service->getActionSettings());
             }
             $action->getService()->onActionSettingsPageLoad($template, $fields);

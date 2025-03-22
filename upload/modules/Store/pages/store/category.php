@@ -12,8 +12,6 @@
 // Always define page name
 define('PAGE', 'store');
 
-require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
-
 // Get category ID
 $category_id = explode('/', $route);
 $category_id = $category_id[count($category_id) - 1];
@@ -38,7 +36,7 @@ if (!$category->count()) {
 
 $category = $category->first();
 $category_id = $category->id;
-$store_url = $store->getStoreURL();
+$store_url = Store::getStorePath();
 
 $page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/view'])->results();
 if (count($page_metadata)) {
@@ -48,6 +46,7 @@ if (count($page_metadata)) {
 
 $page_title = Output::getClean($category->name);
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
+require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
 
 if (Input::exists()) {
     if (Token::check()) {
