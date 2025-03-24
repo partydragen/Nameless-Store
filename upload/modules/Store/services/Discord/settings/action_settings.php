@@ -121,7 +121,7 @@ if (Input::exists()) {
 
 if (!$action->exists()) {
     // Creating new action
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'TRIGGER_VALUE' => ((isset($_POST['trigger'])) ? Output::getClean($_POST['trigger']) : 1),
         'ADD_ROLES_VALUE' => ((isset($_POST['add_roles']) && is_array($_POST['add_roles'])) ? $_POST['add_roles'] : []),
         'REMOVE_ROLES_VALUE' => ((isset($_POST['remove_roles']) && is_array($_POST['remove_roles'])) ? $_POST['remove_roles'] : []),
@@ -138,7 +138,7 @@ if (!$action->exists()) {
     $command = json_decode($action->data()->command, true);
     $webhook = $command['webhook'];
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'TRIGGER_VALUE' => Output::getClean($action->data()->type),
         'ADD_ROLES_VALUE' => ((isset($command['add_roles']) && is_array($command['add_roles'])) ? $command['add_roles'] : []),
         'REMOVE_ROLES_VALUE' => ((isset($command['remove_roles']) && is_array($command['remove_roles'])) ? $command['remove_roles'] : []),
@@ -170,7 +170,7 @@ foreach (Discord::getRoles() as $role) {
     ];
 }
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'SETTINGS_TEMPLATE' => ROOT_PATH . '/modules/Store/services/Discord/settings/action_settings.tpl',
     'ALL_ROLES' => $roles
 ]);

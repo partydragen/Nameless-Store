@@ -55,7 +55,7 @@ if ($_GET['action'] == 'new') {
         }
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'NAME' => $language->get('admin', 'name'),
         'NAME_VALUE' => Output::getClean($connection->name),
         'RCON_HOST_VALUE' => ((isset($_POST['rcon_address']) && $_POST['rcon_address']) ? Output::getClean($_POST['rcon_address']) : ''),
@@ -127,7 +127,7 @@ if ($_GET['action'] == 'new') {
 
     $data = json_decode($connection->data);
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'NAME' => $language->get('admin', 'name'),
         'NAME_VALUE' => Output::getClean($connection->name),
         'RCON_HOST_VALUE' => Output::getClean($data->address),

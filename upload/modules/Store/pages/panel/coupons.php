@@ -21,7 +21,7 @@ const PANEL_PAGE = 'store_coupons';
 $page_title = $store_language->get('admin', 'coupons');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
-$store = new Store($cache, $store_language);
+$store = new Store();
 
 if (!isset($_GET['action'])) {
     // Get coupons from database
@@ -38,7 +38,7 @@ if (!isset($_GET['action'])) {
             ];
         }
 
-        $smarty->assign([
+        $template->getEngine()->addVariables([
             'COUPONS_LIST' => $coupons_list,
             'CODE' => $store_language->get('admin', 'code'),
             'ACTIVE' => $language->get('admin', 'active'),
@@ -49,13 +49,13 @@ if (!isset($_GET['action'])) {
         ]);
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'NEW_COUPON' => $store_language->get('admin', 'new_coupon'),
         'NEW_COUPON_LINK' => URL::build('/panel/store/coupons/', 'action=new'),
         'NO_COUPONS' => $store_language->get('admin', 'no_coupons'),
     ]);
 
-    $template_file = 'store/coupons.tpl';
+    $template_file = 'store/coupons';
 } else {
     switch ($_GET['action']) {
         case 'new';
@@ -134,7 +134,7 @@ if (!isset($_GET['action'])) {
                 ];
             }
 
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'COUPON_TITLE' => $store_language->get('admin', 'creating_coupon'),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/coupons'),
@@ -161,7 +161,7 @@ if (!isset($_GET['action'])) {
                 'MIN_BASKET_VALUE' => ((isset($_POST['min_basket']) && $_POST['min_basket']) ? Output::getClean(Input::get('min_basket')) : '0.00'),
             ]);
 
-            $template_file = 'store/coupons_form.tpl';
+            $template_file = 'store/coupons_form';
         break;
         case 'edit';
             if (!is_numeric($_GET['id'])) {
@@ -250,7 +250,7 @@ if (!isset($_GET['action'])) {
                 ];
             }
 
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'COUPON_TITLE' => $store_language->get('admin', 'editing_coupon_x', ['coupon' => Output::getClean($coupon->code)]),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/coupons'),
@@ -277,7 +277,7 @@ if (!isset($_GET['action'])) {
                 'MIN_BASKET_VALUE' => Store::fromCents($coupon->min_basket),
             ]);
 
-            $template_file = 'store/coupons_form.tpl';
+            $template_file = 'store/coupons_form';
         break;
         case 'delete';
             // Delete coupon
@@ -306,18 +306,18 @@ if (Session::exists('coupons_success'))
     $success = Session::flash('coupons_success');
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -332,4 +332,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate($template_file, $smarty);
+$template->displayTemplate($template_file);

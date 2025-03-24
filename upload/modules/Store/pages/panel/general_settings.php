@@ -135,13 +135,13 @@ if (Session::exists('store_success'))
     $success = Session::flash('store_success');
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
@@ -171,7 +171,7 @@ $link_location = $cache->retrieve('store_location');
 $show_credits_amount = Settings::get('show_credits_amount', '1');
 $show_credits_amount = ($show_credits_amount === '1' || $show_credits_amount === null ? true : false);
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -223,4 +223,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate('store/general_settings.tpl', $smarty);
+$template->displayTemplate('store/general_settings');

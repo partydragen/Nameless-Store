@@ -9,4 +9,4 @@
  *  Store module - Backend init
  */
  
-$store = new Store($cache, $store_language);
+$store = new Store();

@@ -101,17 +101,17 @@ class LatestStorePurchasesWidget extends WidgetBase {
 		}
 
 		if (count($latest_purchases)) {
-            $this->_engine->assign([
+            $this->_engine->addVariables([
 				'LATEST_PURCHASES' => $this->_store_language->get('general', 'latest_purchases'),
 				'LATEST_PURCHASES_LIST' => $latest_purchases
 			]);
 
 		} else
-            $this->_engine->assign([
+            $this->_engine->addVariables([
 				'LATEST_PURCHASES' => $this->_store_language->get('general', 'latest_purchases'),
 				'NO_PURCHASES' => $this->_store_language->get('general', 'no_purchases')
 			]);
 
-		$this->_content = $this->_engine->fetch('store/widgets/latest_purchases.tpl');
+		$this->_content = $this->_engine->fetch('store/widgets/latest_purchases');
 	}
 }

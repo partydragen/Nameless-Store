@@ -22,7 +22,7 @@ $page_title = $store_language->get('admin', 'gateways');
 
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
-$store = new Store($cache, $store_language);
+$store = new Store();
 
 if (!isset($_GET['gateway'])) {
 
@@ -106,7 +106,7 @@ if (!isset($_GET['gateway'])) {
             }
         }
 
-        $smarty->assign([
+        $template->getEngine()->addVariables([
             'GATEWAYS_LIST' => $gateways_list,
             'FIND_GATEWAYS' => $store_language->get('admin', 'find_gateways'),
             'VIEW' => $language->get('general', 'view'),
@@ -120,7 +120,7 @@ if (!isset($_GET['gateway'])) {
         ]);
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'PAYMENT_METHOD' => $store_language->get('admin', 'payment_method'),
         'EDIT' => $language->get('general', 'edit'),
         'ENABLED' => $language->get('admin', 'enabled'),
@@ -128,7 +128,7 @@ if (!isset($_GET['gateway'])) {
         'SUPPORTS_SUBSCRIPTIONS' => $store_language->get('admin', 'supports_subscriptions')
     ]);
 
-    $template_file = 'store/gateways.tpl';
+    $template_file = 'store/gateways';
 } else {
     $gateway = Gateways::getInstance()->get($_GET['gateway']);
 
@@ -157,13 +157,13 @@ if (!isset($_GET['gateway'])) {
 
     require_once($gateway->getSettings());
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'EDITING_GATEWAY' => $store_language->get('admin', 'editing_gateway_x', ['gateway' => Output::getClean($gateway->getName())]),
         'BACK' => $language->get('general', 'back'),
         'BACK_LINK' => URL::build('/panel/store/gateways')
     ]);
 
-    $template_file = 'store/gateway_settings.tpl';
+    $template_file = 'store/gateway_settings';
 }
 
 // Load modules + template
@@ -173,18 +173,18 @@ if (Session::exists('gateways_success'))
     $success = Session::flash('gateways_success');
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -199,4 +199,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate($template_file, $smarty);
+$template->displayTemplate($template_file);

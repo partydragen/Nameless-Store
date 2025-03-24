@@ -20,7 +20,7 @@ define('PANEL_PAGE', 'store_products');
 $page_title = $store_language->get('general', 'products');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
-$store = new Store($cache, $store_language);
+$store = new Store();
 if (!isset($_GET['action'])) {
     // Get all products and categories
     $categories = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE deleted = 0 ORDER BY `order` ASC', []);
@@ -72,14 +72,14 @@ if (!isset($_GET['action'])) {
         }
         
     } else {
-        $smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
+        $template->getEngine()->addVariable('NO_PRODUCTS', $store_language->get('general', 'no_products'));
     }
 
     $template->assets()->include(
         AssetTree::JQUERY_UI
     );
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ALL_CATEGORIES' => $all_categories,
         'CURRENCY' => $currency,
         'CURRENCY_SYMBOL' => $currency_symbol,
@@ -96,7 +96,7 @@ if (!isset($_GET['action'])) {
         'REORDER_PRODUCTS_URL' => URL::build('/panel/store/products', 'action=order_products'),
     ]);
 
-    $template_file = 'store/products.tpl';
+    $template_file = 'store/products';
 } else {
     switch ($_GET['action']) {
         case 'new';
@@ -235,7 +235,7 @@ if (!isset($_GET['action'])) {
                 'period' => ((isset($_POST['durability_period']) && $_POST['durability_period']) ? Output::getClean(Input::get('durability_period')) : 'never'),
             ];
 
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'PRODUCT_TITLE' => $store_language->get('admin', 'new_product'),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/products/'),
@@ -271,7 +271,7 @@ if (!isset($_GET['action'])) {
 
             $template->addJSScript(Input::createTinyEditor($language, 'inputDescription', null, false, true));
 
-            $template_file = 'store/product_new.tpl';
+            $template_file = 'store/product_new';
             break;
 
         case 'order_categories':
@@ -309,18 +309,18 @@ if (Session::exists('products_success'))
     $success = Session::flash('products_success');
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -335,4 +335,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate($template_file, $smarty);
+$template->displayTemplate($template_file);

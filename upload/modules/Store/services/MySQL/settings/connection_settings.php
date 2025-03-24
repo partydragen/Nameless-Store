@@ -62,7 +62,7 @@ if ($_GET['action'] == 'new') {
         }
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'NAME' => $language->get('admin', 'name'),
         'NAME_VALUE' => Output::getClean($connection->name),
         'DB_HOST_VALUE' => ((isset($_POST['db_address']) && $_POST['db_address']) ? Output::getClean($_POST['db_address']) : ''),
@@ -143,7 +143,7 @@ if ($_GET['action'] == 'new') {
 
     $data = json_decode($connection->data);
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'NAME' => $language->get('admin', 'name'),
         'NAME_VALUE' => Output::getClean($connection->name),
         'DB_HOST_VALUE' => Output::getClean($data->address),

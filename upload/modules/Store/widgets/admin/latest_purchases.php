@@ -29,7 +29,7 @@ if ($cache->isCached('purchase_limit'))
 else
 	$purchase_limit = 10;
 
-$smarty->assign([
+$template->getEngine()->addVariables([
 	'LATEST_PURCHASES_LIMIT' => $store_language->get('general', 'latest_purchases_limit'),
 	'LATEST_PURCHASES_LIMIT_VALUE' => Output::getClean($purchase_limit),
 	'INFO' => $language->get('general', 'info'),

@@ -144,7 +144,7 @@ if (Input::exists()) {
 
 if (!$action->exists()) {
     // Creating new action
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'TRIGGER_VALUE' => ((isset($_POST['trigger'])) ? Output::getClean($_POST['trigger']) : 1),
         'ADD_GROUPS_VALUE' => ((isset($_POST['add_groups']) && is_array($_POST['add_groups'])) ? $_POST['add_groups'] : []),
         'REMOVE_GROUPS_VALUE' => ((isset($_POST['remove_groups']) && is_array($_POST['remove_groups'])) ? $_POST['remove_groups'] : []),
@@ -159,7 +159,7 @@ if (!$action->exists()) {
     // Updating action
     $command = json_decode($action->data()->command, true);
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'TRIGGER_VALUE' => Output::getClean($action->data()->type),
         'ADD_GROUPS_VALUE' => ((isset($command['add_groups']) && is_array($command['add_groups'])) ? $command['add_groups'] : []),
         'REMOVE_GROUPS_VALUE' => ((isset($command['remove_groups']) && is_array($command['remove_groups'])) ? $command['remove_groups'] : []),
@@ -172,7 +172,7 @@ if (!$action->exists()) {
     ]);
 }
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'ALL_GROUPS' => $groups = DB::getInstance()->orderAll('groups', '`order`', 'ASC')->results(),
     'SETTINGS_TEMPLATE' => ROOT_PATH . '/modules/Store/services/NamelessMC/settings/action_settings.tpl'
 ]);
@@ -199,7 +199,7 @@ if (Util::isModuleEnabled('Trophies')) {
         ];
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'TROPHIES_LIST' => $trophies_list
     ]);
 

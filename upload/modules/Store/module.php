@@ -3,7 +3,7 @@
  *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
- *  NamelessMC version 2.1.2
+ *  NamelessMC version 2.2.0
  *
  *  License: MIT
  *
@@ -11,8 +11,10 @@
  */
 
 class Store_Module extends Module {
+
     private DB $_db;
     private $_store_language, $_language, $_cache, $_store_url;
+
     public function __construct($language, $store_language, $pages, $cache, $endpoints) {
         $this->_db = DB::getInstance();
         $this->_language = $language;
@@ -23,7 +25,7 @@ class Store_Module extends Module {
         $name = 'Store';
         $author = '<a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a>';
         $module_version = '1.8.1';
-        $nameless_version = '2.1.2';
+        $nameless_version = '2.2.0';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
 
@@ -453,7 +455,7 @@ class Store_Module extends Module {
 
                 $update_check = json_decode($update_check);
                 if (!isset($update_check->error) && !isset($update_check->no_update) && isset($update_check->new_version)) {  
-                    $smarty->assign([
+                    $template->getEngine()->addVariables([
                         'NEW_UPDATE' => (isset($update_check->urgent) && $update_check->urgent == 'true') ? $this->_store_language->get('admin', 'new_urgent_update_available_x', ['module' => $this->getName()]) : $this->_store_language->get('admin', 'new_update_available_x', ['module' => $this->getName()]),
                         'NEW_UPDATE_URGENT' => (isset($update_check->urgent) && $update_check->urgent == 'true'),
                         'CURRENT_VERSION' => $this->_store_language->get('admin', 'current_version_x', ['version' => Output::getClean($this->getVersion())]),

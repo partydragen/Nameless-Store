@@ -75,7 +75,7 @@ if (Input::exists()) {
 $payments = $customer->getPayments();
 
 if ($user->hasPermission('staffcp.store.manage_credits')) {
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ADD_CREDITS' => $store_language->get('admin', 'add_credits'),
         'REMOVE_CREDITS' => $store_language->get('admin', 'remove_credits'),
         'ENTER_AMOUNT_TO_ADD' => $store_language->get('admin', 'enter_amount_to_add'),
@@ -87,18 +87,18 @@ if (Session::exists('users_store_success'))
     $success = Session::flash('users_store_success');
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'PARENT_PAGE' => PARENT_PAGE,
     'PAGE' => PANEL_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
@@ -125,4 +125,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate('store/users_store.tpl', $smarty);
+$template->displayTemplate('store/users_store');

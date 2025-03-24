@@ -28,9 +28,9 @@ if (isset($_GET['do'])) {
     if ($_GET['do'] == 'complete') {
         // Checkout complete page
         $checkout_complete_content = Settings::get('checkout_complete_content', '', 'Store');
-        $smarty->assign('CHECKOUT_COMPLETE_CONTENT', Output::getPurified(Output::getDecoded($checkout_complete_content)));
+        $template->getEngine()->addVariable('CHECKOUT_COMPLETE_CONTENT', Output::getPurified(Output::getDecoded($checkout_complete_content)));
 
-        $template_file = 'store/checkout_complete.tpl';
+        $template_file = 'store/checkout_complete';
     } else {
         // Invalid
         Redirect::to(URL::build($store_url . '/checkout/'));
@@ -203,14 +203,14 @@ if (isset($_GET['do'])) {
             }
         }
 
-        $smarty->assign([
+        $template->getEngine()->addVariables([
             'PRODUCT_NAME' => Output::getClean($product->data()->name),
             'PRODUCT_FIELDS' => $product_fields,
             'CONTINUE' => $store_language->get('general', 'continue'),
             'TOKEN' => Token::get()
         ]);
 
-        $template_file = 'store/checkout_add.tpl';
+        $template_file = 'store/checkout_add';
     } else {
         // No customer input to fill, continue to next step
         $shopping_cart->setSubscriptionMode(isset($_GET['type']) && $_GET['type'] == 'subscribe');
@@ -396,7 +396,7 @@ if (isset($_GET['do'])) {
         }
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'TOKEN' => Token::get(),
         'CHECKOUT' => $store_language->get('general', 'checkout'),
         'SHOPPING_CART' => $store_language->get('general', 'shopping_cart'),
@@ -450,10 +450,10 @@ if (isset($_GET['do'])) {
     ]);
 
     if ($shopping_cart->isSubscriptionMode()) {
-        $smarty->assign('CHECKOUT_SUBSCRIBE', $store_language->get('general', 'subscribe'));
+        $template->getEngine()->addVariable('CHECKOUT_SUBSCRIBE', $store_language->get('general', 'subscribe'));
     }
 
-    $template_file = 'store/checkout.tpl';
+    $template_file = 'store/checkout';
 }
 
 // Check if store customer is required and isset
@@ -461,7 +461,7 @@ if ($store->isPlayerSystemEnabled() && !$to_customer->isLoggedIn()) {
     Redirect::to(URL::build($store_url));
 }
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'STORE' => $store_language->get('general', 'store'),
     'CATEGORIES' => $store->getNavbarMenu(false),
     'TOKEN' => Token::get()
@@ -479,24 +479,24 @@ if (Session::exists('store_error')) {
 }
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
 
 $template->onPageLoad();
 
-$smarty->assign('WIDGETS_LEFT', $widgets->getWidgets('left'));
-$smarty->assign('WIDGETS_RIGHT', $widgets->getWidgets('right'));
+$template->getEngine()->addVariable('WIDGETS_LEFT', $widgets->getWidgets('left'));
+$template->getEngine()->addVariable('WIDGETS_RIGHT', $widgets->getWidgets('right'));
 
 require(ROOT_PATH . '/core/templates/navbar.php');
 require(ROOT_PATH . '/core/templates/footer.php');
 
 // Display template
-$template->displayTemplate($template_file, $smarty);
+$template->displayTemplate($template_file);

@@ -70,14 +70,14 @@ if (!isset($_GET['subscription'])) {
             ];
         }
 
-        $smarty->assign([
+        $template->getEngine()->addVariables([
             'SUBSCRIPTIONS_LIST' => $subscriptions_list
         ]);
     } else {
-        $smarty->assign('NO_SUBSCRIPTIONS', $store_language->get('admin', 'no_subscriptions'));
+        $template->getEngine()->addVariable('NO_SUBSCRIPTIONS', $store_language->get('admin', 'no_subscriptions'));
     }
 
-    $template_file = 'store/subscriptions.tpl';
+    $template_file = 'store/subscriptions';
 } else {
     $subscription = new Subscription($_GET['subscription']);
     if (!$subscription->exists()) {
@@ -156,7 +156,7 @@ if (!isset($_GET['subscription'])) {
         }
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'VIEWING_SUBSCRIPTION' => $store_language->get('admin', 'viewing_subscription', ['subscription' => Output::getClean($subscription->data()->agreement_id)]),
         'BACK' => $language->get('general', 'back'),
         'BACK_LINK' => URL::build('/panel/store/subscriptions'),
@@ -189,18 +189,18 @@ if (!isset($_GET['subscription'])) {
 
     // Can cancel subscription?
     if ($user->hasPermission('staffcp.store.subscriptions.cancel')) {
-        $smarty->assign('CANCEL_SUBSCRIPTION', $store_language->get('general', 'cancel_subscription'));
+        $template->getEngine()->addVariable('CANCEL_SUBSCRIPTION', $store_language->get('general', 'cancel_subscription'));
     }
 
     // Can sync subscription?
     if ($user->hasPermission('staffcp.store.subscriptions.sync')) {
-        $smarty->assign('SYNC_SUBSCRIPTION', $store_language->get('admin', 'sync_subscription'));
+        $template->getEngine()->addVariable('SYNC_SUBSCRIPTION', $store_language->get('admin', 'sync_subscription'));
     }
 
-    $template_file = 'store/subscription.tpl';
+    $template_file = 'store/subscription';
 }
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -221,13 +221,13 @@ if (Session::exists('store_subscriptions_success')) {
 }
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
@@ -237,4 +237,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate($template_file, $smarty);
+$template->displayTemplate($template_file);

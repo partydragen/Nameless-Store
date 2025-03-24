@@ -116,7 +116,7 @@ if ($transactions->count()) {
     }
 }
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'STORE' => $store_language->get('general', 'store'),
     'CREDITS' => $store_language->get('general', 'credits'),
     'CREDITS_VALUE' => $customer->getCredits(),
@@ -140,7 +140,7 @@ $smarty->assign([
 
 $can_send_credits = Settings::get('user_send_credits');
 if ($can_send_credits) {
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'CAN_SEND_CREDITS' => true,
         'SEND_CREDITS' => $store_language->get('general', 'send_credits'),
         'TO' => $language->get('user', 'to'),
@@ -168,13 +168,13 @@ if (Session::exists('user_store_success')) {
 }
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
@@ -187,4 +187,4 @@ require(ROOT_PATH . '/core/templates/navbar.php');
 require(ROOT_PATH . '/core/templates/footer.php');
 
 // Display template
-$template->displayTemplate('store/user/store.tpl', $smarty);
+$template->displayTemplate('store/user/store');

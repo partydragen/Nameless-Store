@@ -49,10 +49,10 @@ if (!isset($_GET['action'])) {
             ];
         }
 
-        $smarty->assign('CONNECTIONS_LIST', $connections_list);
+        $template->getEngine()->addVariable('CONNECTIONS_LIST', $connections_list);
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'CONNECTIONS_INFO' => $store_language->get('admin', 'connections_info'),
         'NO_CONNECTIONS' => $store_language->get('admin', 'no_connections'),
         'NEW_CONNECTION' => $store_language->get('admin', 'new_connection'),
@@ -71,7 +71,7 @@ if (!isset($_GET['action'])) {
         'QUEUED_ACTIONS' => $store_language->get('admin', 'queued_actions'),
     ]);
     
-    $template_file = 'store/connections.tpl';
+    $template_file = 'store/connections';
 } else {
     switch ($_GET['action']) {
         case 'new';
@@ -92,14 +92,14 @@ if (!isset($_GET['action'])) {
                     ];
                 }
 
-                $smarty->assign([
+                $template->getEngine()->addVariables([
                     'CONNECTIONS_TITLE' => 'Select Connection Type',
                     'BACK' => $language->get('general', 'back'),
                     'BACK_LINK' => URL::build('/panel/store/connections/'),
                     'SERVICES_LIST' => $services_list
                 ]);
 
-                $template_file = 'store/connections_type.tpl';
+                $template_file = 'store/connections_type';
             } else {
                 if (!is_numeric($_GET['service'])) {
                     URL::build('/panel/store/connections', 'action=new');
@@ -119,14 +119,14 @@ if (!isset($_GET['action'])) {
                     require_once($service->getConnectionSettings());
                 }
 
-                $smarty->assign([
+                $template->getEngine()->addVariables([
                     'CONNECTIONS_TITLE' => $store_language->get('admin', 'creating_new_connection'),
                     'BACK' => $language->get('general', 'back'),
                     'BACK_LINK' => URL::build('/panel/store/connections/'),
                     'FIELDS' => $fields->getAll()
                 ]);
                 
-                $template_file = 'store/connections_form.tpl';
+                $template_file = 'store/connections_form';
             }
         break;
         case 'edit';
@@ -155,14 +155,14 @@ if (!isset($_GET['action'])) {
                 require_once($service->getConnectionSettings());
             }
 
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'CONNECTIONS_TITLE' => $store_language->get('admin', 'editing_connection_x', ['connection' => Output::getClean($connection->name)]),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/connections/'),
                 'FIELDS' => $fields->getAll()
             ]);
             
-            $template_file = 'store/connections_form.tpl';
+            $template_file = 'store/connections_form';
         break;
         case 'delete';
             // Delete connections
@@ -196,18 +196,18 @@ if (Session::exists('connections_error'))
     $errors = [Session::flash('connections_error')];
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -222,4 +222,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate($template_file, $smarty);
+$template->displayTemplate($template_file);

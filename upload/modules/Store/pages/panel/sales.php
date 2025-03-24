@@ -21,7 +21,7 @@ const PANEL_PAGE = 'store_sales';
 $page_title = $store_language->get('admin', 'sales');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
-$store = new Store($cache, $store_language);
+$store = new Store();
 
 if (!isset($_GET['action'])) {
     // Get sales from database
@@ -38,7 +38,7 @@ if (!isset($_GET['action'])) {
             ];
         }
 
-        $smarty->assign([
+        $template->getEngine()->addVariables([
             'SALES_LIST' => $sales_list,
             'NAME' => $store_language->get('admin', 'name'),
             'ACTIVE' => $language->get('admin', 'active'),
@@ -49,13 +49,13 @@ if (!isset($_GET['action'])) {
         ]);
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'NEW_SALE' => $store_language->get('admin', 'new_sale'),
         'NEW_SALE_LINK' => URL::build('/panel/store/sales/', 'action=new'),
         'NO_SALES' => $store_language->get('admin', 'no_sales'),
     ]);
 
-    $template_file = 'store/sales.tpl';
+    $template_file = 'store/sales';
 } else {
     switch ($_GET['action']) {
         case 'new';
@@ -131,7 +131,7 @@ if (!isset($_GET['action'])) {
                 ];
             }
 
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'SALE_TITLE' => $store_language->get('admin', 'creating_sale'),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/sales/'),
@@ -152,7 +152,7 @@ if (!isset($_GET['action'])) {
                 'EXPIRE_DATE_MIN' => date('Y-m-d\TH:i'),
             ]);
 
-            $template_file = 'store/sales_form.tpl';
+            $template_file = 'store/sales_form';
         break;
         case 'edit';
             if (!is_numeric($_GET['id'])) {
@@ -238,7 +238,7 @@ if (!isset($_GET['action'])) {
                 ];
             }
 
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'SALE_TITLE' => $store_language->get('admin', 'editing_sale_x', ['sale' => Output::getClean($sale->name)]),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/sales/'),
@@ -259,7 +259,7 @@ if (!isset($_GET['action'])) {
                 'EXPIRE_DATE_MIN' => date('Y-m-d\TH:i', $sale->expire_date),
             ]);
 
-            $template_file = 'store/sales_form.tpl';
+            $template_file = 'store/sales_form';
         break;
         case 'delete';
             // Delete sale
@@ -288,18 +288,18 @@ if (Session::exists('sales_success'))
     $success = Session::flash('sales_success');
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -314,4 +314,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate($template_file, $smarty);
+$template->displayTemplate($template_file);

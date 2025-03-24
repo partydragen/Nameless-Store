@@ -65,14 +65,14 @@ if (!isset($_GET['action'])) {
         ];
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'GLOBAL_ACTIONS' => $store_language->get('admin', 'global_actions'),
         'NEW_ACTION' => $store_language->get('admin', 'new_action'),
         'NEW_ACTION_LINK' => URL::build('/panel/store/actions/' , 'action=new'),
         'ACTION_LIST' => $actions_array,
     ]);
 
-    $template_file = 'store/actions.tpl';
+    $template_file = 'store/actions';
 } else {
     $product = null;
     if (isset($_GET['product'])) {
@@ -97,14 +97,14 @@ if (!isset($_GET['action'])) {
                     ];
                 }
 
-                $smarty->assign([
+                $template->getEngine()->addVariables([
                     'ACTION_TITLE' => $store_language->get('admin', 'new_action_for_x', ['product' => $product != null ? $product->data()->name : 'Global']),
                     'BACK' => $language->get('general', 'back'),
                     'BACK_LINK' => $product == null ? URL::build('/panel/store/actions') : URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
                     'SERVICES_LIST' => $services_list
                 ]);
 
-                $template_file = 'store/products_action_type.tpl';
+                $template_file = 'store/products_action_type';
             } else {
                 if (!is_numeric($_GET['service'])) {
                     Redirect::to(URL::build('/panel/store/actions'));
@@ -126,7 +126,7 @@ if (!isset($_GET['action'])) {
                 }
                 $service->onActionSettingsPageLoad($template, $fields);
 
-                $smarty->assign([
+                $template->getEngine()->addVariables([
                     'ACTION_TITLE' => $store_language->get('admin', 'new_action_for_x', ['product' => 'Global']),
                     'BACK' => $language->get('general', 'back'),
                     'BACK_LINK' => $product == null ? URL::build('/panel/store/actions') : URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
@@ -135,7 +135,7 @@ if (!isset($_GET['action'])) {
                     'ACTION_TYPE' => $product != null ? 'product' : 'global'
                 ]);
 
-                $template_file = 'store/products_action_form.tpl';
+                $template_file = 'store/products_action_form';
             }
             break;
         case 'edit';
@@ -160,7 +160,7 @@ if (!isset($_GET['action'])) {
             }
             $action->getService()->onActionSettingsPageLoad($template, $fields);
 
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'ACTION_TITLE' => $store_language->get('admin', 'editing_action_for_x', ['product' => $product != null ? $product->data()->name : 'Global']),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => $product == null ? URL::build('/panel/store/actions') : URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
@@ -169,7 +169,7 @@ if (!isset($_GET['action'])) {
                 'ACTION_TYPE' => $product != null ? 'product' : 'global'
             ]);
 
-            $template_file = 'store/products_action_form.tpl';
+            $template_file = 'store/products_action_form';
             break;
         case 'delete';
             // Delete product
@@ -197,18 +197,18 @@ if (Session::exists('products_success'))
     $success = Session::flash('products_success');
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -223,4 +223,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate($template_file, $smarty);
+$template->displayTemplate($template_file);

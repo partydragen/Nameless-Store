@@ -21,7 +21,7 @@ define('PANEL_PAGE', 'store_fields');
 $page_title = $store_language->get('admin', 'fields');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
-$store = new Store($cache, $store_language);
+$store = new Store();
 
 $field_types = [];
 $field_types[1] = ['id' => 1, 'name' => $language->get('admin', 'text')];
@@ -50,7 +50,7 @@ if (!isset($_GET['action'])) {
         }
     }
             
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'FIELDS_INFO' => $store_language->get('admin', 'fields_info'),
         'IDENTIFIER' => $store_language->get('admin', 'identifier'),
         'DESCRIPTION' => $store_language->get('admin', 'description'),
@@ -67,7 +67,7 @@ if (!isset($_GET['action'])) {
         'NO' => $language->get('general', 'no')
     ]);
     
-    $template_file = 'store/fields.tpl';
+    $template_file = 'store/fields';
 } else {
     switch ($_GET['action']) {
         case 'new';
@@ -145,7 +145,7 @@ if (!isset($_GET['action'])) {
                 }
             }
 
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'FIELD_TITLE' => $store_language->get('admin', 'creating_field'),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/fields/'),
@@ -173,7 +173,7 @@ if (!isset($_GET['action'])) {
                 'REQUIRED_VALUE' => ((isset($_POST['required'])) ? 1 : 0),
             ]);
 
-            $template_file = 'store/fields_form.tpl';
+            $template_file = 'store/fields_form';
         break;
         case 'edit';
             if (!is_numeric($_GET['id'])) {
@@ -267,7 +267,7 @@ if (!isset($_GET['action'])) {
                 $options = str_replace(',', "\n", htmlspecialchars($field->options));
             }
         
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'FIELD_TITLE' => $store_language->get('admin', 'editing_field_x', ['field' => Output::getClean($field->identifier)]),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/fields/'),
@@ -296,7 +296,7 @@ if (!isset($_GET['action'])) {
                 'RESERVED_FIELD' => ($field->identifier == 'quantity' || $field->identifier == 'price')
             ]);
         
-            $template_file = 'store/fields_form.tpl';
+            $template_file = 'store/fields_form';
         break;
         case 'delete';
             // Delete Field
@@ -323,18 +323,18 @@ if (Session::exists('fields_success'))
     $success = Session::flash('fields_success');
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -349,4 +349,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate($template_file, $smarty);
+$template->displayTemplate($template_file);

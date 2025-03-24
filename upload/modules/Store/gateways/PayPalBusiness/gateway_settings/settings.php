@@ -33,7 +33,7 @@ if (Input::exists()) {
         $errors = [$language->get('general', 'invalid_token')];
 }
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'SETTINGS_TEMPLATE' => ROOT_PATH . '/modules/Store/gateways/PayPalBusiness/gateway_settings/settings.tpl',
     'ENABLE_VALUE' => ((isset($enabled)) ? $enabled : $gateway->isEnabled())
 ]);

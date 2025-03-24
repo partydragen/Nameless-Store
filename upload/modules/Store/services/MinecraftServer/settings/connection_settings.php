@@ -38,7 +38,7 @@ if ($_GET['action'] == 'new') {
         }
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'NAME' => $language->get('admin', 'name'),
         'NAME_VALUE' => Output::getClean($connection->name),
         'SETTINGS_TEMPLATE' => ROOT_PATH . '/modules/Store/services/MinecraftServer/settings/connection_settings.tpl'
@@ -82,7 +82,7 @@ if ($_GET['action'] == 'new') {
         }
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'NAME' => $language->get('admin', 'name'),
         'NAME_VALUE' => Output::getClean($connection->name),
         'SETTINGS_TEMPLATE' => ROOT_PATH . '/modules/Store/services/MinecraftServer/settings/connection_settings.tpl'

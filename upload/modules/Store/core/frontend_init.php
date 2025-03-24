@@ -9,7 +9,7 @@
  *  Store module - Frontend init
  */
  
-$store = new Store($cache, $store_language);
+$store = new Store();
 $shopping_cart = ShoppingCart::getInstance();
 
 $from_customer = new Customer($user);
@@ -31,9 +31,9 @@ if (Input::exists()) {
     }
 }
 
-// Assign smarty variables
+// Assign variables
 if ($store->isPlayerSystemEnabled() && $to_customer->isLoggedIn()) {
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'STORE_PLAYER' => $to_customer->getUsername(),
         'LOGOUT' => $store_language->get('general', 'logout'),
     ]);
@@ -50,10 +50,10 @@ if ($from_customer->exists()) {
 
 $show_credits_amount = Settings::get('show_credits_amount', '1');
 if ($show_credits_amount === '1' || $show_credits_amount === null) {
-    $smarty->assign('SHOW_CREDITS_AMOUNT', true);
+    $template->getEngine()->addVariable('SHOW_CREDITS_AMOUNT', true);
 }
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'SHOPPING_CART_PRODUCTS' => $shopping_cart->items()->getItems(),
     'X_ITEMS_FOR_Y' => $store_language->get('general', 'x_items_for_y', [
         'items' => count($shopping_cart->items()->getItems()),

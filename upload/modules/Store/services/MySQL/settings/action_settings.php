@@ -126,7 +126,7 @@ if (!$action->exists()) {
         ];
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'TRIGGER_VALUE' => ((isset($_POST['trigger'])) ? Output::getClean($_POST['trigger']) : 1),
         'REQUIRE_PLAYER_VALUE' => ((isset($_POST['requirePlayer'])) ? Output::getClean($_POST['requirePlayer']) : 1),
         'COMMAND_VALUE' => ((isset($_POST['command']) && $_POST['command']) ? Output::getClean($_POST['command']) : ''),
@@ -155,7 +155,7 @@ if (!$action->exists()) {
         ];
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'TRIGGER_VALUE' => Output::getClean($action->data()->type),
         'REQUIRE_PLAYER_VALUE' => Output::getClean($action->data()->require_online),
         'COMMAND_VALUE' => Output::getClean($action->data()->command),
@@ -165,7 +165,7 @@ if (!$action->exists()) {
     ]);
 }
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'SERVICE_CONNECTIONS' => $store_language->get('admin', 'service_connections'),
     'SETTINGS_TEMPLATE' => ROOT_PATH . '/modules/Store/services/MySQL/settings/action_settings.tpl'
 ]);

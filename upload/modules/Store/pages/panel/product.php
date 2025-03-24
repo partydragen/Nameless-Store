@@ -30,7 +30,7 @@ define('PANEL_PAGE', 'store_products');
 $page_title = $store_language->get('general', 'products');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
-$store = new Store($cache, $store_language);
+$store = new Store();
 
 $services = Services::getInstance();
 
@@ -267,7 +267,7 @@ if (!isset($_GET['action'])) {
         'period' => $durability_json['period'] ?? 'never'
     ];
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'PRODUCT_TITLE' => $store_language->get('admin', 'editing_product_x', ['product' => Output::getClean($product->data()->name)]),
         'ID' => Output::getClean($product->data()->id),
         'BACK' => $language->get('general', 'back'),
@@ -314,7 +314,7 @@ if (!isset($_GET['action'])) {
 
     $template->addJSScript(Input::createTinyEditor($language, 'inputDescription', null, false, true));
 
-    $template_file = 'store/product.tpl';
+    $template_file = 'store/product';
 } else {
     switch ($_GET['action']) {
         case 'delete';
@@ -374,7 +374,7 @@ if (!isset($_GET['action'])) {
                     'action_type' => $action->data()->product_id != null ? 'product' : 'global'
                 ];
             }
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'PRODUCT_TITLE' => $store_language->get('admin', 'editing_product_x', ['product' => Output::getClean($product->data()->name)]),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
@@ -383,7 +383,7 @@ if (!isset($_GET['action'])) {
                 'ACTION_LIST' => $actions_array,
             ]);
             
-            $template_file = 'store/product_actions.tpl';
+            $template_file = 'store/product_actions';
         break;
         case 'limits_requirements';
             // Limits and requirements
@@ -513,7 +513,7 @@ if (!isset($_GET['action'])) {
                 'period' => $player_playtime_json['period'] ?? 'all_time'
             ];
 
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'PRODUCT_TITLE' => $store_language->get('admin', 'editing_product_x', ['product' => Output::getClean($product->data()->name)]),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/product/' , 'product=' . $product->data()->id),
@@ -529,7 +529,7 @@ if (!isset($_GET['action'])) {
                 'PLAYER_PLAYTIME_VALUE' => $player_playtime,
             ]);
             
-            $template_file = 'store/product_limits_requirements.tpl';
+            $template_file = 'store/product_limits_requirements';
         break;
         case 'remove_image';
             // Remove image from product
@@ -551,18 +551,18 @@ if (Session::exists('products_success'))
     $success = Session::flash('products_success');
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -584,4 +584,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate($template_file, $smarty);
+$template->displayTemplate($template_file);

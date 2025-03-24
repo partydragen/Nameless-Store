@@ -21,7 +21,7 @@ define('PANEL_PAGE', 'store_products');
 $page_title = $store_language->get('admin', 'categories');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
-$store = new Store($cache, $store_language);
+$store = new Store();
 
 if (!isset($_GET['action'])) {
     Redirect::to(URL::build('/panel/core/products'));
@@ -113,7 +113,7 @@ if (!isset($_GET['action'])) {
                 ];
             }
 
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'CATEGORY_TITLE' => $store_language->get('admin', 'new_category'),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/products'),
@@ -142,7 +142,7 @@ if (!isset($_GET['action'])) {
 
             $template->addJSScript(Input::createTinyEditor($language, 'inputDescription', null, false, true));
 
-            $template_file = 'store/categories_form.tpl';
+            $template_file = 'store/categories_form';
         break;
         case 'edit';
             // Edit category
@@ -234,7 +234,7 @@ if (!isset($_GET['action'])) {
                 ];
             }
 
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'CATEGORY_TITLE' => $store_language->get('admin', 'editing_category_x', ['category' => Output::getClean($category->name)]),
                 'BACK' => $language->get('general', 'back'),
                 'BACK_LINK' => URL::build('/panel/store/products'),
@@ -263,7 +263,7 @@ if (!isset($_GET['action'])) {
 
             $template->addJSScript(Input::createTinyEditor($language, 'inputDescription', null, false, true));
 
-            $template_file = 'store/categories_form.tpl';
+            $template_file = 'store/categories_form';
         break;
         case 'delete';
             // Delete category
@@ -303,18 +303,18 @@ if (!isset($_GET['action'])) {
 Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -331,4 +331,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate($template_file, $smarty);
+$template->displayTemplate($template_file);

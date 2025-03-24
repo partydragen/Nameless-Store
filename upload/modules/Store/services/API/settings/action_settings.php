@@ -95,7 +95,7 @@ if (Input::exists()) {
 
 if (!$action->exists()) {
     // Creating new action
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'TRIGGER_VALUE' => ((isset($_POST['trigger'])) ? Output::getClean($_POST['trigger']) : 1),
         'HTTP_TYPE_VALUE' => ((isset($_POST['http_type']) && $_POST['http_type']) ? Output::getClean($_POST['http_type']) : ''),
         'HTTP_URL_VALUE' => ((isset($_POST['http_url']) && $_POST['http_url']) ? Output::getClean($_POST['http_url']) : ''),
@@ -108,7 +108,7 @@ if (!$action->exists()) {
     // Updating action
     $command = json_decode($action->data()->command, true);
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'TRIGGER_VALUE' => Output::getClean($action->data()->type),
         'HTTP_TYPE_VALUE' => Output::getClean($command['http_type']),
         'HTTP_URL_VALUE' => Output::getClean($command['http_url']),
@@ -119,7 +119,7 @@ if (!$action->exists()) {
     ]);
 }
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'SETTINGS_TEMPLATE' => ROOT_PATH . '/modules/Store/services/API/settings/action_settings.tpl',
     'ALL_ROLES' => $roles,
     'BODY_JSON' => Output::getClean('{"username":"{username}", "products":"{orderProducts}", "referral":"{referralUser}"}')

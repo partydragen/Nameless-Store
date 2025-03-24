@@ -96,7 +96,7 @@ if (Input::exists()) {
 
 if (!$action->exists()) {
     // Creating new action
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'TRIGGER_VALUE' => ((isset($_POST['trigger'])) ? Output::getClean($_POST['trigger']) : 1),
         'EMAIL_SUBJECT_VALUE' => ((isset($_POST['subject']) && $_POST['subject']) ? Output::getClean($_POST['subject']) : ''),
         'EMAIL_CONTENT_VALUE' => ((isset($_POST['content']) && $_POST['content']) ? Output::getClean($_POST['content']) : ''),
@@ -107,7 +107,7 @@ if (!$action->exists()) {
     // Updating action
     $email = json_decode($action->data()->command, true);
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'TRIGGER_VALUE' => Output::getClean($action->data()->type),
         'EMAIL_SUBJECT_VALUE' => Output::getClean($email['subject']),
         'EMAIL_CONTENT_VALUE' => Output::getPurified($email['content'], true),
@@ -122,6 +122,6 @@ $template->assets()->include([
 
 $template->addJSScript(Input::createTinyEditor($language, 'inputEmailContent', null, false, true));
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'SETTINGS_TEMPLATE' => ROOT_PATH . '/modules/Store/services/Email/settings/action_settings.tpl'
 ]);

@@ -63,7 +63,7 @@ if (Input::exists()) {
 $products = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE category_id = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', [$category->id]);
 
 if (!$products->count()) {
-    $smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
+    $template->getEngine()->addVariable('NO_PRODUCTS', $store_language->get('general', 'no_products'));
 } else {
     $category_products = [];
 
@@ -122,7 +122,7 @@ if (!$products->count()) {
         ];
     }
 
-    $smarty->assign('PRODUCTS', $category_products);
+    $template->getEngine()->addVariable('PRODUCTS', $category_products);
 }
 
 // Category description
@@ -132,7 +132,7 @@ $renderCategoryEvent = EventHandler::executeEvent('renderStoreCategory', [
     'content' => $category->description
 ]);
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'ACTIVE_CATEGORY' => Output::getClean($category->name),
     'BUY' => $store_language->get('general', 'buy'),
     'CLOSE' => $language->get('general', 'close'),
@@ -140,9 +140,9 @@ $smarty->assign([
 ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign('ERRORS', $errors);
+    $template->getEngine()->addVariable('ERRORS', $errors);
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'STORE' => $store_language->get('general', 'store'),
     'STORE_URL' => URL::build($store_url),
     'HOME' => $store_language->get('general', 'home'),
@@ -161,14 +161,14 @@ $smarty->assign([
 ]);
 
 if ($store->isPlayerSystemEnabled() && !$to_customer->isLoggedIn()) {
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'PLEASE_ENTER_USERNAME' => $store_language->get('general', 'please_enter_username'),
         'CONTINUE' => $store_language->get('general', 'continue'),
     ]);
 
-    $template_file = 'store/player_login.tpl';
+    $template_file = 'store/player_login';
 } else {
-    $template_file = 'store/category.tpl';
+    $template_file = 'store/category';
 }
 
 $template->assets()->include([
@@ -186,24 +186,24 @@ if (Session::exists('store_error')) {
 }
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
 
 $template->onPageLoad();
 
-$smarty->assign('WIDGETS_LEFT', $widgets->getWidgets('left'));
-$smarty->assign('WIDGETS_RIGHT', $widgets->getWidgets('right'));
+$template->getEngine()->addVariable('WIDGETS_LEFT', $widgets->getWidgets('left'));
+$template->getEngine()->addVariable('WIDGETS_RIGHT', $widgets->getWidgets('right'));
 
 require(ROOT_PATH . '/core/templates/navbar.php');
 require(ROOT_PATH . '/core/templates/footer.php');
 
 // Display template
-$template->displayTemplate($template_file, $smarty);
+$template->displayTemplate($template_file);

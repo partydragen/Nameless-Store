@@ -21,7 +21,7 @@ define('PANEL_PAGE', 'store_payments');
 $page_title = $store_language->get('admin', 'payments');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
-$store = new Store($cache, $store_language);
+$store = new Store();
 
 // Load modules + template
 Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
@@ -84,7 +84,7 @@ if (isset($_GET['customer'])) {
             ];
         }
 
-        $smarty->assign([
+        $template->getEngine()->addVariables([
             'VIEW' => $store_language->get('admin', 'view'),
             'USER_PAYMENTS' => $template_payments
         ]);
@@ -117,15 +117,15 @@ if (isset($_GET['customer'])) {
         }
 
     } else
-        $smarty->assign('NO_PAYMENTS', $store_language->get('admin', 'no_payments_for_user'));
+        $template->getEngine()->addVariable('NO_PAYMENTS', $store_language->get('admin', 'no_payments_for_user'));
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'VIEWING_PAYMENTS_FOR_USER' => $store_language->get('admin', 'viewing_payments_for_user_x', ['user' => Output::getClean($_GET['customer'])]),
         'BACK' => $language->get('general', 'back'),
         'BACK_LINK' => URL::build('/panel/store/payments')
     ]);
 
-    $template_file = 'store/payments_user.tpl';
+    $template_file = 'store/payments_user';
 
 } else if (isset($_GET['payment'])) {
     // View payment
@@ -233,7 +233,7 @@ if (isset($_GET['customer'])) {
 
     // Allow manual payment deletion
     if ($user->hasPermission('staffcp.store.payments.delete') && ($payment->data()->gateway_id == 0 || (defined('DEBUGGING') && DEBUGGING))) {
-        $smarty->assign([
+        $template->getEngine()->addVariables([
             'DELETE_PAYMENT' => $language->get('admin', 'delete'),
             'CONFIRM_DELETE_PAYMENT' => $store_language->get('admin', 'confirm_payment_deletion'),
         ]);
@@ -250,7 +250,7 @@ if (isset($_GET['customer'])) {
     if ($order->data()->coupon_id != null) {
         $coupon = new Coupon($order->data()->coupon_id);
         if ($coupon->exists()) {
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'COUPON' => $store_language->get('general', 'coupon'),
                 'COUPON_ID' => Output::getClean($coupon->data()->id),
                 'COUPON_CODE' => Output::getClean($coupon->data()->code),
@@ -259,7 +259,7 @@ if (isset($_GET['customer'])) {
         }
     }
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'VIEWING_PAYMENT' => $store_language->get('admin', 'viewing_payment', ['payment' => Output::getClean($payment->data()->transaction)]),
         'BACK' => $language->get('general', 'back'),
         'BACK_LINK' => URL::build('/panel/store/payments'),
@@ -316,14 +316,14 @@ if (isset($_GET['customer'])) {
     ]);
 
     if ($payment->data()->subscription_id != null) {
-        $smarty->assign([
+        $template->getEngine()->addVariables([
             'SUBSCRIPTION' => $store_language->get('admin', 'subscription'),
             'SUBSCRIPTION_VALUE' => Output::getClean($payment->data()->subscription_id),
             'SUBSCRIPTION_LINK' => URL::build('/panel/store/subscriptions/', 'subscription=' . $payment->data()->subscription_id),
         ]);
     }
 
-    $template_file = 'store/payments_view.tpl';
+    $template_file = 'store/payments_view';
 
 } else if (isset($_GET['action'])) {
     if ($_GET['action'] == 'create') {
@@ -402,7 +402,7 @@ if (isset($_GET['customer'])) {
             }
         }
     
-        $smarty->assign([
+        $template->getEngine()->addVariables([
             'CREATE_PAYMENT' => $store_language->get('admin', 'create_payment'),
             'BACK' => $language->get('general', 'back'),
             'BACK_LINK' => URL::build('/panel/store/payments'),
@@ -422,16 +422,16 @@ if (isset($_GET['customer'])) {
                 ];
             }
 
-            $smarty->assign([
+            $template->getEngine()->addVariables([
                 'USERNAME' => $store->isPlayerSystemEnabled() ? $store_language->get('admin', 'ign') : $language->get('user', 'username'),
                 'PRODUCTS' => $store_language->get('general', 'products') . ' ' . $store_language->get('admin', 'select_multiple_with_ctrl'),
                 'PRODUCTS_LIST' => $template_products
             ]);
 
         } else
-            $smarty->assign('NO_PRODUCTS', $store_language->get('general', 'no_products'));
+            $template->getEngine()->addVariable('NO_PRODUCTS', $store_language->get('general', 'no_products'));
 
-        $template_file = 'store/payments_new.tpl';
+        $template_file = 'store/payments_new';
     }
 } else {
     // View all payments
@@ -439,7 +439,7 @@ if (isset($_GET['customer'])) {
         AssetTree::DATATABLES
     ]);
 
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'VIEW' => $store_language->get('admin', 'view'),
         'QUERY_PAYMENTS_LINK' => URL::build('/queries/payments'),
         'VIEW_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'payment='),
@@ -454,16 +454,16 @@ if (isset($_GET['customer'])) {
     ]);
 
     if ($user->hasPermission('staffcp.store.payments.create')) {
-        $smarty->assign([
+        $template->getEngine()->addVariables([
             'CREATE_PAYMENT' => $store_language->get('admin', 'create_payment'),
             'CREATE_PAYMENT_LINK' => URL::build('/panel/store/payments/', 'action=create'),
         ]);
     }
 
-    $template_file = 'store/payments.tpl';
+    $template_file = 'store/payments';
 }
 
-$smarty->assign([
+$template->getEngine()->addVariables([
     'PARENT_PAGE' => PARENT_PAGE,
     'DASHBOARD' => $language->get('admin', 'dashboard'),
     'STORE' => $store_language->get('general', 'store'),
@@ -482,13 +482,13 @@ if (Session::exists('store_payment_success')) {
 }
 
 if (isset($success))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'SUCCESS' => $success,
         'SUCCESS_TITLE' => $language->get('general', 'success')
     ]);
 
 if (isset($errors) && count($errors))
-    $smarty->assign([
+    $template->getEngine()->addVariables([
         'ERRORS' => $errors,
         'ERRORS_TITLE' => $language->get('general', 'error')
     ]);
@@ -498,4 +498,4 @@ $template->onPageLoad();
 require(ROOT_PATH . '/core/templates/panel_navbar.php');
 
 // Display template
-$template->displayTemplate($template_file, $smarty);
+$template->displayTemplate($template_file);
