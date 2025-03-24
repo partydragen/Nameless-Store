@@ -230,11 +230,8 @@ class PayPal_Business_Gateway extends GatewayBase {
             try {
                 $response = json_decode($bodyReceived);     
                 if (isset($response->event_type)) {
-
-                    // Save response to log
-                    if (is_dir(ROOT_PATH . '/cache/paypal_logs/')) {
-                        file_put_contents(ROOT_PATH . '/cache/paypal_logs/'. $this->getName() . '_' .$response->event_type.'_'.date('U').'.txt', $bodyReceived);
-                    }
+                    // Log webhook response
+                    $this->logWebhookResponse($bodyReceived, $response->event_type);
 
                     // Handle event
                     switch ($response->event_type) {
@@ -380,10 +377,8 @@ class PayPal_Business_Gateway extends GatewayBase {
                             break;
                     }
                 } else {
-                    // Save response to log
-                    if (is_dir(ROOT_PATH . '/cache/paypal_logs/')) {
-                        file_put_contents(ROOT_PATH . '/cache/paypal_logs/' . $this->getName() . '_no_event_'.date('U').'.txt', $bodyReceived);
-                    }
+                    // Log webhook response
+                    $this->logWebhookResponse($bodyReceived, 'unknown');
                 }
 
             } catch (\PayPal\Exception\PayPalInvalidCredentialException $e) {

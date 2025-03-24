@@ -14,8 +14,7 @@ if (!isset($_GET['gateway'])) {
 }
 
 // Handle listener from gateway
-$gateways = Gateways::getInstance();
-$gateway = $gateways->get($_GET['gateway']);
+$gateway = Gateways::getInstance()->get($_GET['gateway']);
 if ($gateway) {
     $gateway->handleListener();
 } else {

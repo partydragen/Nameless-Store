@@ -68,9 +68,8 @@ class Minecraft_Community_Gateway extends GatewayBase {
         $bodyReceived = file_get_contents('php://input');
         $response = json_decode($bodyReceived);
 
-        if (is_dir(ROOT_PATH . '/cache/store_logs/')) {
-            file_put_contents(ROOT_PATH . '/cache/store_logs/' . $this->getName() . '_' . $response->type . "_" . date('U') . '.txt', $bodyReceived);
-        }
+        // Log webhook response
+        $this->logWebhookResponse($bodyReceived, $response->type);
 
         if (!isset($response->client_id, $response->client_secret)) {
             return;

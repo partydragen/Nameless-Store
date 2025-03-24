@@ -126,14 +126,8 @@ class PayPal_Gateway extends GatewayBase {
         }
         curl_close($ch);
 
-        // Save response to log
-        if (is_dir(ROOT_PATH . '/cache/paypal_logs/')) {
-            if (isset($_POST['payment_status'])) {
-                file_put_contents(ROOT_PATH . '/cache/paypal_logs/'.$this->getName() . '_' . $_POST['payment_status'] .'_'.date('U').'.txt', $req);
-            } else {
-                file_put_contents(ROOT_PATH . '/cache/paypal_logs/'.$this->getName() . '_no_event_'.date('U').'.txt', $req);
-            }
-        }
+        // Log webhook response
+        $this->logWebhookResponse($req, $_POST['payment_status'] ?? 'unknown');
 
         if (strcmp($res, "VERIFIED") == 0) {
             $receiver_email = $_POST['receiver_email'];

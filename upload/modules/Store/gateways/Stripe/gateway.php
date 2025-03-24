@@ -140,9 +140,8 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
         $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
         $response = json_decode($bodyReceived);
 
-        if (is_dir(ROOT_PATH . '/cache/stripe_logs/')) {
-            file_put_contents(ROOT_PATH . '/cache/stripe_logs/' . $this->getName() . '_' . $response->type . "_" . date('U') . '.txt', $bodyReceived);
-        }
+        // Log webhook response
+        $this->logWebhookResponse($bodyReceived, $response->type);
 
         try {
             $event = \Stripe\Webhook::constructEvent(

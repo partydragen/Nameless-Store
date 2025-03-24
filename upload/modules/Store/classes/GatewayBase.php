@@ -211,4 +211,20 @@ abstract class GatewayBase {
     public function getStoreVersion(): string {
         return $this->_store_version;
     }
+
+    public function logWebhookResponse(string $content, string $event): void {
+        if (!is_dir(ROOT_PATH . '/cache/store_logs')) {
+            mkdir(ROOT_PATH . '/cache/store_logs');
+        }
+
+        if (!is_dir(ROOT_PATH . '/cache/store_logs/' . $this->getName())) {
+            mkdir(ROOT_PATH . '/cache/store_logs/' . $this->getName());
+        }
+
+        if (!is_dir(ROOT_PATH . '/cache/store_logs/' . $this->getName())) {
+            return;
+        }
+
+        file_put_contents(ROOT_PATH . '/cache/store_logs/' . $this->getName() . '/' . date('U') . '_' . $event . '.txt', $content);
+    }
 }
