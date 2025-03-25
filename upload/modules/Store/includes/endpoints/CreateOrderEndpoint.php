@@ -26,8 +26,25 @@ class CreateOrderEndpoint extends KeyAuthEndpoint {
             $api->throwError('store:cannot_find_customer');
         }
 
+        $items = new ItemList();
+        foreach ($_POST['products'] as $item) {
+            $product = new Product($item['id']);
+            if ($product->exists()) {
+                $items->addItem(new Item(
+                    0,
+                    $product,
+                    1,
+                    $item['fields'] ?? []
+                ));
+            }
+        }
+
+        if (!count($items->getItems())) {
+            $api->throwError('store:cannot_find_products');
+        }
+
         $order = new Order();
-        $order->create($user, $customer, $recipient, $_POST['products']);
+        $order->create($user, $customer, $recipient, $items);
 
         $api->returnArray(['id' => $order->data()->id]);
     }
