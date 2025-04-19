@@ -3,7 +3,7 @@
  *  Made by Partydragen
  *  https://partydragen.com/resources/resource/5-store-module/
  *  https://partydragen.com/
- *  NamelessMC version 2.1.1
+ *  NamelessMC version 2.2.0
  *
  *  License: MIT
  *

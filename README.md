@@ -1,7 +1,7 @@
 # Nameless-Store
 
 ## Requirements
-- NamelessMC version 2.1.x
+- NamelessMC version 2.2.x
 
 ## Installation:
 - Read the installation instructions [here](https://partydragen.com/wiki/installation/) or read below
