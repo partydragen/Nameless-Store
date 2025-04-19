@@ -39,12 +39,6 @@
                         <!-- Success and Error Alerts -->
                         {include file='includes/alerts.tpl'}
 
-                        <div class="alert alert-warning" role="alert">
-                            This features is currently for patreon supporters, it will be available for everyone in the future with means this wont function for you
-                            </br></br>
-                            <a href="https://partydragen.com/patreon/" target="_blank" class="btn btn-primary">Patreon</a>
-                        </div>
-
                         {if isset($NO_SUBSCRIPTIONS)}
                             <p>{$NO_SUBSCRIPTIONS}</p>
                         {else}

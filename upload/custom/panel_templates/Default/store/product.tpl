@@ -122,8 +122,8 @@
                                         <label for="inputPaymentType">{$RECURRING_PAYMENT}</label>
                                         <select name="payment_type" class="form-control" id="inputPaymentType">
                                             <option value="1" {if $RECURRING_PAYMENT_VALUE == 1} selected{/if}>{$CHARGE_CUSTOMER_ONCE}</option>
-                                            <option value="2" {if $RECURRING_PAYMENT_VALUE == 2} selected{/if} disabled>{$CHARGE_RECURRING_SUBSCRIPTION}</option>
-                                            <option value="3" {if $RECURRING_PAYMENT_VALUE == 3} selected{/if} disabled>{$ONE_OFF_AND_RECURRING}</option>
+                                            <option value="2" {if $RECURRING_PAYMENT_VALUE == 2} selected{/if}>{$CHARGE_RECURRING_SUBSCRIPTION}</option>
+                                            <option value="3" {if $RECURRING_PAYMENT_VALUE == 3} selected{/if}>{$ONE_OFF_AND_RECURRING}</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6">
