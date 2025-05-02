@@ -1,5 +1,4 @@
 <?php
-require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
 
 // Handle input
 if (Input::exists()) {
@@ -14,6 +13,7 @@ if (Input::exists()) {
         ]);
 
         if ($validation->passed()) {
+            $shopping_cart = ShoppingCart::getInstance();
             if (!empty($_POST['coupon'])) {
                 $coupon = DB::getInstance()->query('SELECT * FROM nl2_store_coupons WHERE code = ? AND start_date < ? AND expire_date > ? ', [$_POST['coupon'], date('U'), date('U')]);
                 if ($coupon->count()) {
