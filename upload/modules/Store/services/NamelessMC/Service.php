@@ -37,6 +37,14 @@ class NamelessMCService extends ServiceBase {
                 }
             }
 
+            if ((isset($command['add_groups']) && count($command['add_groups'])) || (isset($command['remove_groups']) && count($command['remove_groups']))) {
+                GroupSyncManager::getInstance()->broadcastChange(
+                    $user,
+                    NamelessMCGroupSyncInjector::class,
+                    $user->getAllGroupIds(),
+                );
+            }
+
             // Add credits to user
             if (isset($command['add_credits']) && is_numeric($command['add_credits']) && $command['add_credits'] > 0) {
                 $recipient->addCents(Store::toCents($command['add_credits']), 'Product Action');
