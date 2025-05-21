@@ -20,9 +20,7 @@ class MySQLService extends ServiceBase implements ConnectionsBase {
 
     public function scheduleAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
         // Execute this action on all selected connections
-        $product = $item->getProduct();
-        $connections = ($action->data()->own_connections ? $action->getConnections() : $product->getConnections($this->getId()));
-        foreach ($connections as $connection) {
+        foreach ($action->getSelectedConnections($item, $this) as $connection) {
             // Replace existing placeholder
             $placeholders['connection'] = $connection->name;
             

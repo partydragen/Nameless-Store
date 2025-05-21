@@ -52,8 +52,8 @@
                 <input type="text" name="{$field.id}" id="{$field.id}" value="{$field.value}" placeholder="{$field.description}" {if $field.required}required{/if}>
               {elseif $field.type == "2"}
                 <select class="ui fluid dropdown" name="{$field.id}" id="{$field.id}" {if $field.required}required{/if}>
-                  {foreach from=$field.options item=option}
-                  <option value="{$option}" {if $option eq $field.value} selected{/if}>{$option}</option>
+                  {foreach from=$field.selections item=option}
+                  <option value="{$option.value}" {if $option eq $field.value} selected{/if}>{$option.description} {if isset($option.price)}({$option.price}){/if}</option>
                   {/foreach}
                 </select>
               {elseif $field.type == "3"}
@@ -63,20 +63,20 @@
               {elseif $field.type == "5"}
                 <input type="email" name="{$field.id}" id="{$field.id}" value="{$field.value}" placeholder="{$field.description}" {if $field.required}required{/if}>
               {elseif $field.type == "6"}
-                {foreach from=$field.options item=option}
+                {foreach from=$field.selections item=option}
                   <div class="field">
                     <div class="ui radio checkbox">
-                      <input type="radio" name="{$field.id}" value="{$option}" {if $field.required}required{/if}>
-                      <label>{$option}</label>
+                      <input type="radio" name="{$field.id}" value="{$option.value}" {if $field.required}required{/if}>
+                      <label>{$option.description} {if isset($option.price)}({$option.price}){/if}</label>
                     </div>
                   </div>
                 {/foreach}
               {elseif $field.type == "7"}
-                {foreach from=$field.options item=option}
+                {foreach from=$field.selections item=option}
                   <div class="field">
                     <div class="ui checkbox">
-                      <input type="checkbox" name="{$field.id}[]" value="{$option}">
-                      <label>{$option}</label>
+                      <input type="checkbox" name="{$field.id}[]" value="{$option.value}">
+                      <label>{$option.description} {if isset($option.price)}({$option.price}){/if}</label>
                     </div>
                   </div>
                 {/foreach}

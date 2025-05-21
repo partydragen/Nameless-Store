@@ -163,7 +163,7 @@ class Product {
             if ($fields_query->count()) {
                 $fields_query = $fields_query->results();
                 foreach ($fields_query as $field) {
-                    $this->_fields[$field->id] = $field;
+                    $this->_fields[$field->id] = new FieldData($field);
                 }
             }
 

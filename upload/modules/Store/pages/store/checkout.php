@@ -74,7 +74,8 @@ if (isset($_GET['do'])) {
                 'description' => Output::getClean($field->description),
                 'type' => Output::getClean($field->type),
                 'required' => Output::getClean($field->required),
-                'options' => explode(',', Output::getClean($field->options))
+                'options' => $field->options,
+                'selections' => $field->selections
             ];
         }
 

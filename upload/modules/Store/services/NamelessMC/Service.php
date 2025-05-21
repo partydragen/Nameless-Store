@@ -15,7 +15,6 @@ class NamelessMCService extends ServiceBase {
     }
 
     public function scheduleAction(Action $action, Order $order, Item $item, Payment $payment, array $placeholders) {
-        $product = $item->getProduct();
         $recipient = $order->recipient();
         if ($recipient->exists() && $recipient->getUser()->exists()) {
             // Get original recipient user

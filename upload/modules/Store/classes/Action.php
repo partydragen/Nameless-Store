@@ -163,6 +163,21 @@ class Action {
         }
     }
 
+    public function getSelectedConnections(Item $item, ServiceBase $service): array {
+        $selected_connection = $item->getField('connection');
+
+        $connections = ($this->data()->own_connections ? $this->getConnections() : $item->getProduct()->getConnections($service->getId()));
+        if ($selected_connection == null) {
+            // Return all connections
+            return $connections;
+        } else if (array_key_exists($selected_connection['value'], $connections)) {
+            // Return specific connection
+            return [$connections[$selected_connection['value']]];
+        }
+
+        return [];
+    }
+
     public function parseCommand(string $command, Order $order, Item $item, Payment $payment, array $placeholders): string {
         $event = new ParseActionCommandEvent($command, $this, $order, $item, $payment, $placeholders);
         EventHandler::executeEvent($event);
