@@ -24,8 +24,8 @@ class Store_Module extends Module {
 
         $name = 'Store';
         $author = '<a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a>';
-        $module_version = '1.8.2';
-        $nameless_version = '2.2.0';
+        $module_version = '1.8.3';
+        $nameless_version = '2.2.3';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
 
@@ -1274,6 +1274,27 @@ class Store_Module extends Module {
 
             HandleSubscriptionsTask::schedule();
         }
+
+        if ($old_version < 183) {
+            try {
+                $field = $this->_db->query('SELECT id FROM nl2_store_fields WHERE identifier = \'connection\'');
+                if (!$field->count()) {
+                    $this->_db->insert('store_fields', [
+                        'identifier' => 'connection',
+                        'description' => 'Where do you want to receive your product?',
+                        'type' => '2',
+                        'required' => '1',
+                        'min' => '0',
+                        'max' => '0',
+                        'default_value' => '',
+                        'order' => '0'
+                    ]);
+                }
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+        }
     }
 
     private function initialise() {
@@ -1454,6 +1475,17 @@ class Store_Module extends Module {
                     'max' => '9',
                     'default_value' => '',
                     'order' => '1'
+                ]);
+
+                $this->_db->insert('store_fields', [
+                    'identifier' => 'connection',
+                    'description' => 'Where do you want to receive your product?',
+                    'type' => '2',
+                    'required' => '1',
+                    'min' => '0',
+                    'max' => '0',
+                    'default_value' => '',
+                    'order' => '0'
                 ]);
             } catch (Exception $e) {
                 // Error
