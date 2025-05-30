@@ -7,6 +7,10 @@ class CheckoutAddProductEvent extends AbstractEvent {
     public Product $product;
     public Customer $customer;
     public Customer $recipient;
+
+    /**
+     * @var array<FieldData> Product store fields
+     */
     public array $fields;
 
     public function __construct(User $user, Product $product, Customer $customer, Customer $recipient, array $fields) {

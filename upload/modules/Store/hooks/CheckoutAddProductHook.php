@@ -128,4 +128,18 @@ class CheckoutAddProductHook extends HookBase {
             $event->setCancelled(true, 'Subscription feature is currently for patreon supporters, it will be available for everyone in the future with means this wont function for you');
         }
     }
+
+    public static function handleFieldsData(CheckoutAddProductEvent $event): void {
+        foreach ($event->fields as $field) {
+            // Handle connection field
+            if ($field->identifier == 'connection') {
+                $field->options = [];
+
+                $connections = $event->product->getConnections();
+                foreach ($connections as $connection) {
+                    $field->addOption($connection->id, $connection->name);
+                }
+            }
+        }
+    }
 }

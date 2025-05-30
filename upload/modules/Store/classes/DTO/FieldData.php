@@ -9,23 +9,13 @@ class FieldData {
     public bool $required;
     public int $min;
     public int $max;
-    public array $options;
-    public array $selections;
+    public array $options = [];
     public ?string $regex;
     public string $default_value;
     public int $deleted;
     public int $order;
 
     public function __construct(object $row) {
-        $selections = [];
-        foreach (explode(',', Output::getClean($row->options)) as $option) {
-            $selections[] = [
-                'value' => $option,
-                'description' => $option,
-                'price' => null,
-            ];
-        }
-
         $this->id = $row->id;
         $this->identifier = $row->identifier;
         $this->description = $row->description;
@@ -33,12 +23,29 @@ class FieldData {
         $this->required = $row->required;
         $this->min = $row->min;
         $this->max = $row->max;
-        $this->options = explode(',', Output::getClean($row->options));
-        $this->selections = $selections;
         $this->regex = $row->regex;
         $this->default_value = $row->default_value;
         $this->deleted = $row->deleted;
         $this->order = $row->order;
+
+        // TODO: Rework the way options are stored in database to add support for value, description and price
+        foreach (explode(',', Output::getClean($row->options)) as $option) {
+            $this->addOption($option, $option);
+        }
+    }
+
+    /**
+     * Add option to field
+     *
+     * @param string $value       Option value.
+     * @param string $description The option description to display.
+     */
+    public function addOption(string $value, string $description, int $price_cents = null): void {
+        $this->options[] = [
+            'value' => $value,
+            'description' => $description,
+            'price' => $price_cents
+        ];
     }
 
 }

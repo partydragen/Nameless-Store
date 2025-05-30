@@ -52,8 +52,9 @@
                 <input type="text" name="{$field.id}" id="{$field.id}" value="{$field.value}" placeholder="{$field.description}" {if $field.required}required{/if}>
               {elseif $field.type == "2"}
                 <select class="ui fluid dropdown" name="{$field.id}" id="{$field.id}" {if $field.required}required{/if}>
+                  <option value="">{$field.description}</option>
                   {foreach from=$field.selections item=option}
-                  <option value="{$option.value}" {if $option eq $field.value} selected{/if}>{$option.description} {if isset($option.price)}({$option.price}){/if}</option>
+                  <option value="{$option.value}" {if $option.value eq $field.value} selected{/if}>{$option.description} {if isset($option.price)}({$option.price}){/if}</option>
                   {/foreach}
                 </select>
               {elseif $field.type == "3"}
@@ -66,7 +67,7 @@
                 {foreach from=$field.selections item=option}
                   <div class="field">
                     <div class="ui radio checkbox">
-                      <input type="radio" name="{$field.id}" value="{$option.value}" {if $field.required}required{/if}>
+                      <input type="radio" name="{$field.id}" value="{$option.value}" {if $field.required}required{/if} {if $option.value eq $field.value} checked{/if}>
                       <label>{$option.description} {if isset($option.price)}({$option.price}){/if}</label>
                     </div>
                   </div>

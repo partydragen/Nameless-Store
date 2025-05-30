@@ -67,6 +67,13 @@ if (isset($_GET['do'])) {
     if (count($fields)) {
         $product_fields = [];
         foreach ($fields as $field) {
+
+            // TODO: Remove this old deprecated way
+            $options = [];
+            foreach ($field->options as $option) {
+                $options[] = $option['value'];
+            }
+
             $product_fields[] = [
                 'id' => Output::getClean($field->id),
                 'identifier' => Output::getClean($field->identifier),
@@ -74,8 +81,8 @@ if (isset($_GET['do'])) {
                 'description' => Output::getClean($field->description),
                 'type' => Output::getClean($field->type),
                 'required' => Output::getClean($field->required),
-                'options' => $field->options,
-                'selections' => $field->selections
+                'options' => $options,
+                'selections' => $field->options
             ];
         }
 
