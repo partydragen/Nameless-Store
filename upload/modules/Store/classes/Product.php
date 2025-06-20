@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Product class.
  *
  * @package Modules\Store
@@ -7,31 +7,16 @@
  * @version 2.2.0
  * @license MIT
  */
+
 class Product {
 
-    private DB $_db;
+    private $_db;
+    private $_data;
+    private $_connections;
+    private $_fields;
+    private $_actions;
 
-    /**
-     * @var ProductData|null The product data. Basically just the row from `nl2_store_products` where the product ID is the key.
-     */
-    private ?ProductData $_data;
-
-    /**
-     * @var array The list of connections for this product.
-     */
-    private array $_connections;
-
-    /**
-     * @var array The list of fields for this product.
-     */
-    private array $_fields;
-
-    /**
-     * @var Action[] The list of actions for this product.
-     */
-    private array $_actions;
-
-    public function __construct(?string $value = null, ?string $field = 'id', $query_data = null) {
+    public function __construct($value = null, $field = 'id', $query_data = null) {
         $this->_db = DB::getInstance();
 
         if (!$query_data && $value) {
@@ -50,7 +35,7 @@ class Product {
      *
      * @param array $fields Column names and values to update.
      */
-    public function update(array $fields = []): void {
+    public function update($fields = []) {
         if (!$this->_db->update('store_products', $this->data()->id, $fields)) {
             throw new Exception('There was a problem updating product');
         }
@@ -61,7 +46,7 @@ class Product {
      *
      * @return bool Whether the product exists (has data) or not.
      */
-    public function exists(): bool {
+    public function exists() {
         return (!empty($this->_data));
     }
 
@@ -70,7 +55,7 @@ class Product {
      *
      * @return ProductData This product data.
      */
-    public function data(): ?ProductData {
+    public function data() {
         return $this->_data;
     }
 
@@ -81,8 +66,8 @@ class Product {
      *
      * @return array Their connections.
      */
-    public function getConnections(int $service_id = null): array {
-        $this->_connections ??= (function (): array {
+    public function getConnections($service_id = null) {
+        $this->_connections ??= (function () {
             $this->_connections = [];
 
             $connections_query = $this->_db->query('SELECT nl2_store_connections.* FROM nl2_store_products_connections INNER JOIN nl2_store_connections ON connection_id = nl2_store_connections.id WHERE product_id = ? AND action_id IS NULL', [$this->data()->id]);
@@ -110,12 +95,7 @@ class Product {
         return $this->_connections;
     }
 
-    /**
-     * Add a connection to this product.
-     *
-     * @return bool True on success, false if product already have it.
-     */
-    public function addConnection(int $connection_id): bool {
+    public function addConnection($connection_id) {
         if (array_key_exists($connection_id, $this->getConnections())) {
             return false;
         }
@@ -130,12 +110,7 @@ class Product {
         return true;
     }
 
-    /**
-     * Remove a connection to this product.
-     *
-     * @return bool Returns false if they did not have this connection
-     */
-    public function removeConnection(int $connection_id): bool {
+    public function removeConnection($connection_id) {
         if (!array_key_exists($connection_id, $this->getConnections())) {
             return false;
         }
@@ -150,13 +125,8 @@ class Product {
         return true;
     }
 
-    /**
-     * Get the product fields.
-     *
-     * @return array Their fields.
-     */
-    public function getFields(): array {
-        return $this->_fields ??= (function (): array {
+    public function getFields() {
+        return $this->_fields ??= (function () {
             $this->_fields = [];
 
             $fields_query = $this->_db->query('SELECT nl2_store_fields.* FROM nl2_store_products_fields INNER JOIN nl2_store_fields ON field_id = nl2_store_fields.id WHERE product_id = ? AND deleted = 0 ORDER BY `order`', [$this->data()->id]);
@@ -171,12 +141,7 @@ class Product {
         })();
     }
 
-    /**
-     * Add a field to this product.
-     *
-     * @return bool True on success, false if product already have it.
-     */
-    public function addField(int $field_id): bool {
+    public function addField($field_id) {
         if (array_key_exists($field_id, $this->getFields())) {
             return false;
         }
@@ -191,12 +156,7 @@ class Product {
         return true;
     }
 
-    /**
-     * Remove a field to this product.
-     *
-     * @return bool Returns false if they did not have this field
-     */
-    public function removeField(int $field_id): bool {
+    public function removeField($field_id) {
         if (!array_key_exists($field_id, $this->getFields())) {
             return false;
         }
@@ -211,34 +171,15 @@ class Product {
         return true;
     }
 
-    /**
-     * Get the product actions.
-     *
-     * @param int $type Trigger type like Purchase/Refund/Changeback etc
-     *
-     * @return Action Actions for this product.
-     */
-    public function getActions(int $type = null): array {
+    public function getActions($type = null) {
         return ActionsHandler::getInstance()->getActions($this, $type);
     }
 
-    /**
-     * Get product action by id.
-     *
-     * @param int $id Action id
-     *
-     * @return Action|null Action by id otherwise null.
-     */
-    public function getAction(int $id): ?Action {
+    public function getAction($id) {
         return ActionsHandler::getInstance()->getAction($id);
     }
 
-    /**
-     * Get the required user integrations that this product require.
-     *
-     * @return array List of required integrations.
-     */
-    public function getRequiredIntegrations(): array {
+    public function getRequiredIntegrations() {
         $required_integrations_list = [];
 
         $integrations = Integrations::getInstance();
@@ -267,55 +208,39 @@ class Product {
     }
 
     /**
-         * Get the real price in cents for a specific user, takes sales and cumulative pricing into account.
-         *
-         * @param User|null $user The user object to calculate the price for.
-         * @return int The final price in cents.
-         */
-        public function getRealPriceCents(User $user = null): int {
-            // First, calculate the standard price, including any active sales.
-            $base_price = $this->data()->sale_active == 1 ? $this->data()->price_cents - $this->data()->sale_discount_cents : $this->data()->price_cents;
+     * Get the real price in cents for a specific user, takes sales and cumulative pricing into account.
+     *
+     * @param User|null $user The user object to calculate the price for.
+     * @return int The final price in cents.
+     */
+    public function getRealPriceCents(User $user = null) {
+        // First, calculate the standard price, including any active sales.
+        $base_price = $this->data()->sale_active == 1 ? $this->data()->price_cents - $this->data()->sale_discount_cents : $this->data()->price_cents;
 
-            // If there's no user or the product doesn't exist, return the base price.
-            if ($user === null || !$user->isLoggedIn() || !$this->exists()) {
-                return $base_price;
-            }
-
-            // We need the category to check if cumulative pricing is enabled.
-            try {
-                $category = new Category($this->data()->category_id);
-                if (!$category->exists() || !$category->data()->cumulative_pricing) {
-                    // Cumulative pricing is not enabled for this category, so return base price.
-                    return $base_price;
-                }
-            } catch (Exception $e) {
-                // Category class might not exist or failed to load, proceed with base price.
-                return $base_price;
-            }
-
-            // If we get here, cumulative pricing is enabled. Calculate the discount.
-            $amount_spent = $this->_calculateUserSpendingInCategory($user->data()->id, $this->data()->category_id);
-
-            // Subtract the amount already spent from the base price.
-            $new_price = $base_price - $amount_spent;
-
-            // Ensure the price doesn't drop below zero.
-            return max(0, $new_price);
+        // If there's no user or the product doesn't exist, return the base price.
+        if ($user === null || !$user->isLoggedIn() || !$this->exists()) {
+            return $base_price;
         }
 
-    public function delete() {
-        if ($this->exists()) {
-            $this->update([
-                'deleted' => date('U')
-            ]);
-            
-            $this->_db->query('DELETE FROM `nl2_store_pending_actions` WHERE `product_id` = ?', [$this->data()->id]);
-            
-            return true;
+        // Get the category data directly from the database
+        $category_query = $this->_db->query('SELECT cumulative_pricing FROM nl2_store_categories WHERE id = ?', [$this->data()->category_id]);
+
+        // Check if category exists and has cumulative pricing enabled
+        if (!$category_query->count() || $category_query->first()->cumulative_pricing != 1) {
+            // Not enabled, so return the normal price with sales
+            return $base_price;
         }
 
-        return false;
+        // If we get here, cumulative pricing is enabled. Calculate the discount.
+        $amount_spent = $this->_calculateUserSpendingInCategory($user->data()->id, $this->data()->category_id);
+
+        // Subtract the amount already spent from the base price.
+        $new_price = $base_price - $amount_spent;
+
+        // Ensure the price doesn't drop below zero.
+        return max(0, $new_price);
     }
+
     /*
      * Calculate total amount a user has spent in a specific category.
      *
@@ -323,14 +248,12 @@ class Product {
      * @param int $category_id The ID of the category.
      * @return int The total amount spent in cents.
      */
-    private function _calculateUserSpendingInCategory(int $user_id, int $category_id): int {
-        // This query finds all successful payments made by the user
-        // for products within the specified category.
+    private function _calculateUserSpendingInCategory($user_id, $category_id) {
         $spending = $this->_db->query(
             "SELECT SUM(p.amount_cents) as total
              FROM nl2_store_payments p
              JOIN nl2_store_orders o ON o.id = p.order_id
-             JOIN nl2_store_products_orders po ON po.order_id = o.id
+             JOIN nl2_store_orders_products po ON po.order_id = o.id
              JOIN nl2_store_products pr ON pr.id = po.product_id
              WHERE o.to_customer_id = ? AND pr.category_id = ? AND p.status_id = 1",
             [$user_id, $category_id]
@@ -341,5 +264,19 @@ class Product {
         }
 
         return 0;
+    }
+
+    public function delete() {
+        if ($this->exists()) {
+            $this->update([
+                'deleted' => date('U')
+            ]);
+
+            $this->_db->query('DELETE FROM `nl2_store_pending_actions` WHERE `product_id` = ?', [$this->data()->id]);
+
+            return true;
+        }
+
+        return false;
     }
 }
