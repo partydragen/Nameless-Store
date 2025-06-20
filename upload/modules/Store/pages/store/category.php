@@ -100,36 +100,38 @@ if (!$products->count()) {
             continue;
         }
 
+        // Get the price *before* cumulative discount, but *with* sales applied.
+        $original_price_cents = $product->data()->sale_active == 1 ? $product->data()->price_cents - $product->data()->sale_discount_cents : $product->data()->price_cents;
+
+        // Get the final price for the current user, including cumulative discount.
+        // We pass the $user object here, which is the crucial change.
+        $final_price_cents = $product->getRealPriceCents($user);
+
         $category_products[] = [
             'id' => $product->data()->id,
             'name' => Output::getClean($renderProductEvent['name']),
-            'price' => Store::fromCents($product->data()->price_cents),
-            'real_price' => Store::fromCents($product->getRealPriceCents()),
-            'sale_discount' => Store::fromCents($product->data()->sale_discount_cents),
-            'price_format' => Output::getPurified(
+
+            // We now provide both original and final prices to the template for more flexibility
+            'original_price' => Store::fromCents($original_price_cents),
+            'original_price_format' => Output::getPurified(
                 Store::formatPrice(
-                    $product->data()->price_cents,
+                    $original_price_cents,
                     $currency,
                     $currency_symbol,
                     STORE_CURRENCY_FORMAT,
                 )
             ),
-            'real_price_format' => Output::getPurified(
+            'final_price' => Store::fromCents($final_price_cents),
+            'final_price_format' => Output::getPurified(
                 Store::formatPrice(
-                    $product->getRealPriceCents(),
+                    $final_price_cents,
                     $currency,
                     $currency_symbol,
                     STORE_CURRENCY_FORMAT,
                 )
             ),
-            'sale_discount_format' => Output::getPurified(
-                Store::formatPrice(
-                    $product->data()->sale_discount_cents,
-                    $currency,
-                    $currency_symbol,
-                    STORE_CURRENCY_FORMAT,
-                )
-            ),
+            'has_discount' => $final_price_cents < $original_price_cents,
+
             'sale_active' => $product->data()->sale_active,
             'description' => $renderProductEvent['content'],
             'image' => $renderProductEvent['image'],

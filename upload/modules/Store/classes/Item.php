@@ -79,8 +79,9 @@ class Item {
      *
      * @return int
      */
-    public function getSingleQuantityPrice(): int {
-        return ($this->getSubtotalPrice() - $this->getTotalDiscounts()) / $this->getQuantity();
+    public function getSingleQuantityPrice(User $user = null): int {
+       : Pass user object
+        return ($this->getSubtotalPrice() - $this->getTotalDiscounts($user)) / $this->getQuantity();
     }
 
     /**
@@ -88,8 +89,11 @@ class Item {
      *
      * @return int
      */
-    public function getTotalPrice(): int {
-        return $this->getSubtotalPrice() - $this->getTotalDiscounts();
+    public function getTotalPrice(User $user = null): int {
+        // This logic is now simpler and more powerful.
+        // It correctly calculates the final price by subtracting our newly calculated total discounts
+        // from the subtotal (which correctly handles custom "pay what you want" prices).
+        return $this->getSubtotalPrice() - $this->getTotalDiscounts($user);
     }
 
     /**
@@ -119,8 +123,21 @@ class Item {
      *
      * @return int
      */
-    public function getTotalDiscounts(): int {
-        return $this->_product->data()->sale_active == 1 ? $this->_product->data()->sale_discount_cents * $this->getQuantity() : 0;
+    public function getTotalDiscounts(User $user = null): int {
+        // This is the new core logic for this class.
+        // We get the subtotal (which could be a custom price).
+        $subtotal = $this->getSubtotalPrice();
+
+        // Then we get the final price PER UNIT from our powerful Product class method.
+        // This single method call accounts for both sales AND cumulative discounts.
+        $final_unit_price = $this->_product->getRealPriceCents($user);
+
+        // The total final price is the unit price times quantity.
+        $final_total_price = $final_unit_price * $this->getQuantity();
+
+        // The total discount is simply the difference.
+        // This elegantly handles all cases, including when the discount is greater than the subtotal.
+        return max(0, $subtotal - $final_total_price);
     }
 
     /**

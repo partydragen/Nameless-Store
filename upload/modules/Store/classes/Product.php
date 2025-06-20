@@ -266,9 +266,42 @@ class Product {
         return $required_integrations_list;
     }
 
-    public function getRealPriceCents(): int {
-        return $this->data()->sale_active == 1 ? $this->data()->price_cents - $this->data()->sale_discount_cents : $this->data()->price_cents;
-    }
+    /**
+         * Get the real price in cents for a specific user, takes sales and cumulative pricing into account.
+         *
+         * @param User|null $user The user object to calculate the price for.
+         * @return int The final price in cents.
+         */
+        public function getRealPriceCents(User $user = null): int {
+            // First, calculate the standard price, including any active sales.
+            $base_price = $this->data()->sale_active == 1 ? $this->data()->price_cents - $this->data()->sale_discount_cents : $this->data()->price_cents;
+
+            // If there's no user or the product doesn't exist, return the base price.
+            if ($user === null || !$user->isLoggedIn() || !$this->exists()) {
+                return $base_price;
+            }
+
+            // We need the category to check if cumulative pricing is enabled.
+            try {
+                $category = new Category($this->data()->category_id);
+                if (!$category->exists() || !$category->data()->cumulative_pricing) {
+                    // Cumulative pricing is not enabled for this category, so return base price.
+                    return $base_price;
+                }
+            } catch (Exception $e) {
+                // Category class might not exist or failed to load, proceed with base price.
+                return $base_price;
+            }
+
+            // If we get here, cumulative pricing is enabled. Calculate the discount.
+            $amount_spent = $this->_calculateUserSpendingInCategory($user->data()->id, $this->data()->category_id);
+
+            // Subtract the amount already spent from the base price.
+            $new_price = $base_price - $amount_spent;
+
+            // Ensure the price doesn't drop below zero.
+            return max(0, $new_price);
+        }
 
     public function delete() {
         if ($this->exists()) {
@@ -282,5 +315,31 @@ class Product {
         }
 
         return false;
+    }
+    /*
+     * Calculate total amount a user has spent in a specific category.
+     *
+     * @param int $user_id The ID of the user.
+     * @param int $category_id The ID of the category.
+     * @return int The total amount spent in cents.
+     */
+    private function _calculateUserSpendingInCategory(int $user_id, int $category_id): int {
+        // This query finds all successful payments made by the user
+        // for products within the specified category.
+        $spending = $this->_db->query(
+            "SELECT SUM(p.amount_cents) as total
+             FROM nl2_store_payments p
+             JOIN nl2_store_orders o ON o.id = p.order_id
+             JOIN nl2_store_products_orders po ON po.order_id = o.id
+             JOIN nl2_store_products pr ON pr.id = po.product_id
+             WHERE o.to_customer_id = ? AND pr.category_id = ? AND p.status_id = 1",
+            [$user_id, $category_id]
+        );
+
+        if ($spending->count() && $spending->first()->total) {
+            return (int)$spending->first()->total;
+        }
+
+        return 0;
     }
 }

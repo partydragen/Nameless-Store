@@ -163,16 +163,22 @@ class ShoppingCart extends Instanceable {
         return $this->_coupon;
     }
 
-    // Get total price to pay in cents
-    public function getTotalCents(): int {
-        $price = 0;
+    // Get total real price in cents
+        public function getTotalRealPriceCents(User $user = null): int {
+            $price = 0;
 
-        foreach ($this->items()->getItems() as $item) {
-            $price += $item->getSubtotalPrice();
+            foreach ($this->items()->getItems() as $item) {
+                // Pass the user object down to the item's price calculation
+                $price += $item->getTotalPrice($user);
+            }
+
+            // Apply coupon discount if one exists
+            if ($this->getCoupon() != null) {
+                $price -= $this->getCoupon()->data()->discount_value;
+            }
+
+            return max(0, $price);
         }
-
-        return $price;
-    }
 
     // Get total real price in cents
     public function getTotalRealPriceCents(): int {
@@ -186,13 +192,19 @@ class ShoppingCart extends Instanceable {
     }
 
     // Get total discount in cents
-    public function getTotalDiscountCents(): int {
-        $discount = 0;
+        public function getTotalDiscountCents(User $user = null): int {
+            $discount = 0;
 
-        foreach ($this->items()->getItems() as $item) {
-            $discount += $item->getTotalDiscounts();
+            foreach ($this->items()->getItems() as $item) {
+                // Pass the user object down to the item's discount calculation
+                $discount += $item->getTotalDiscounts($user);
+            }
+
+            // Add coupon discount if one exists
+            if ($this->getCoupon() != null) {
+                $discount += $this->getCoupon()->data()->discount_value;
+            }
+
+            return $discount;
         }
-
-        return $discount;
-    }
 }

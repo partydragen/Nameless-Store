@@ -69,10 +69,16 @@
                     <div class="center aligned content">
                       <span class="header">{$product.name}</span>
                       <div class="ui divider"></div>
-                      {if $product.sale_active}
-                        <span style="color: #dc3545;text-decoration:line-through;">{$product.price_format}</span>
+
+                      {* This is our new pricing logic *}
+                      {if $product.has_discount}
+                        {* If a discount was applied, show original price crossed out and the new price in green *}
+                        <span style="text-decoration: line-through;">{$product.original_price_format}</span>
+                        <strong style="font-size: 1.1em; color: #28a745;">{$product.final_price_format}</strong>
+                      {else}
+                        {* Otherwise, just show the normal price *}
+                        <strong>{$product.final_price_format}</strong>
                       {/if}
-                      {$product.real_price_format}
                     </div>
                     <div class="ui bottom attached blue button" onClick="$('#modal{$product.id}').modal('show');">
                       {$BUY} &raquo;
@@ -82,7 +88,14 @@
 
                 <div class="ui small modal" id="modal{$product.id}">
                   <div class="header">
-                    {$product.name} | {if $product.sale_active}<span style="color: #dc3545;text-decoration:line-through;">{$product.price_format}</span>{/if} {$product.real_price_format}
+                    {$product.name} |
+                    {* This is our new pricing logic, matching the card display *}
+                    {if $product.has_discount}
+                      <span style="text-decoration: line-through;">{$product.original_price_format}</span>
+                      <strong style="color: #28a745;">{$product.final_price_format}</strong>
+                    {else}
+                      <strong>{$product.final_price_format}</strong>
+                    {/if}
                   </div>
                   <div class="{if $product.image}image {/if}content">
                     {if $product.image}
