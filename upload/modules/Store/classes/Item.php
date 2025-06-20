@@ -12,24 +12,24 @@ class Item {
     /**
      * @var int Get the item id.
      */
-    private int $_item_id;
+    private $_item_id;
 
     /**
      * @var Product The product for this item.
      */
-    private Product $_product;
+    private $_product;
 
     /**
      * @var int Number of a particular item.
      */
-    private int $_quantity;
+    private $_quantity;
 
     /**
-     * @var ?array The custom fields for this item.
+     * @var array The custom fields for this item.
      */
-    private array $_fields;
+    private $_fields;
 
-    public function __construct(int $item_id, Product $product = null, int $quantity = null, array $fields = []) {
+    public function __construct($item_id, Product $product = null, $quantity = null, $fields = []) {
         $this->_item_id = $item_id;
 
         if ($product != null) {
@@ -52,7 +52,7 @@ class Item {
      *
      * @return int
      */
-    public function getId(): int {
+    public function getId() {
         return $this->_item_id;
     }
 
@@ -61,7 +61,7 @@ class Item {
      *
      * @return Product
      */
-    public function getProduct(): Product {
+    public function getProduct() {
         return $this->_product;
     }
 
@@ -70,7 +70,7 @@ class Item {
      *
      * @return int
      */
-    public function getQuantity(): int {
+    public function getQuantity() {
         return $this->_quantity;
     }
 
@@ -79,8 +79,7 @@ class Item {
      *
      * @return int
      */
-    public function getSingleQuantityPrice(User $user = null): int {
-       : Pass user object
+    public function getSingleQuantityPrice(User $user = null) {
         return ($this->getSubtotalPrice() - $this->getTotalDiscounts($user)) / $this->getQuantity();
     }
 
@@ -89,10 +88,7 @@ class Item {
      *
      * @return int
      */
-    public function getTotalPrice(User $user = null): int {
-        // This logic is now simpler and more powerful.
-        // It correctly calculates the final price by subtracting our newly calculated total discounts
-        // from the subtotal (which correctly handles custom "pay what you want" prices).
+    public function getTotalPrice(User $user = null) {
         return $this->getSubtotalPrice() - $this->getTotalDiscounts($user);
     }
 
@@ -101,7 +97,7 @@ class Item {
      *
      * @return int
      */
-    public function getSubtotalPrice(): int {
+    public function getSubtotalPrice() {
         $field = $this->getField('price');
         if ($field) {
             $price = Store::toCents($field['value']);
@@ -123,20 +119,10 @@ class Item {
      *
      * @return int
      */
-    public function getTotalDiscounts(User $user = null): int {
-        // This is the new core logic for this class.
-        // We get the subtotal (which could be a custom price).
+    public function getTotalDiscounts(User $user = null) {
         $subtotal = $this->getSubtotalPrice();
-
-        // Then we get the final price PER UNIT from our powerful Product class method.
-        // This single method call accounts for both sales AND cumulative discounts.
         $final_unit_price = $this->_product->getRealPriceCents($user);
-
-        // The total final price is the unit price times quantity.
         $final_total_price = $final_unit_price * $this->getQuantity();
-
-        // The total discount is simply the difference.
-        // This elegantly handles all cases, including when the discount is greater than the subtotal.
         return max(0, $subtotal - $final_total_price);
     }
 
@@ -145,7 +131,7 @@ class Item {
      *
      * @return array
      */
-    public function getFields(): array {
+    public function getFields() {
         return $this->_fields;
     }
 
@@ -156,7 +142,7 @@ class Item {
      *
      * @return array
      */
-    public function getField(string $identifier): ?array {
+    public function getField($identifier) {
         foreach ($this->_fields as $field) {
             if ($field['identifier'] == $identifier) {
                 return $field;
@@ -167,7 +153,7 @@ class Item {
     }
 
     // Get item description
-    public function getDescription(): string {
+    public function getDescription() {
         return $this->_product->data()->description;
     }
 }
