@@ -1,12 +1,12 @@
 <?php
 /*
- *  Made by Partydragen
- *  https://partydragen.com/resources/resource/5-store-module/
- *  https://partydragen.com/
+ * Made by Partydragen
+ * https://partydragen.com/resources/resource/5-store-module/
+ * https://partydragen.com/
  *
- *  License: MIT
+ * License: MIT
  *
- *  Store module - Checkout page
+ * Store module - Checkout page
  */
 
 // Always define page name
@@ -261,7 +261,7 @@ if (isset($_GET['do'])) {
                 // Create order
                 $amount = new Amount();
                 $amount->setCurrency($currency);
-                $amount->setTotalCents($shopping_cart->getTotalRealPriceCents());
+                $amount->setTotalCents($shopping_cart->getTotalRealPriceCents($to_customer));
 
                 $order = new Order();
                 $order->setAmount($amount);
@@ -272,7 +272,7 @@ if (isset($_GET['do'])) {
                 $shopping_cart->setOrder($order);
 
                 // Complete order if there is nothing to pay
-                $amount_to_pay = $shopping_cart->getTotalRealPriceCents();
+                $amount_to_pay = $shopping_cart->getTotalRealPriceCents($to_customer);
                 if ($amount_to_pay == 0) {
                     $payment = new Payment();
                     $payment->handlePaymentEvent(Payment::COMPLETED, [
@@ -346,8 +346,8 @@ if (isset($_GET['do'])) {
             'name' => Output::getClean($product->data()->name),
             'quantity' => $item->getQuantity(),
             'price' => Store::fromCents($item->getSubtotalPrice()),
-            'real_price' => Store::fromCents($item->getTotalPrice()),
-            'sale_discount' => Store::fromCents($item->getTotalDiscounts()),
+            'real_price' => Store::fromCents($item->getTotalPrice($to_customer)),
+            'sale_discount' => Store::fromCents($item->getTotalDiscounts($to_customer)),
             'price_format' => Output::getPurified(
                 Store::formatPrice(
                     $item->getSubtotalPrice(),
@@ -358,7 +358,7 @@ if (isset($_GET['do'])) {
             ),
             'real_price_format' => Output::getPurified(
                 Store::formatPrice(
-                    $item->getTotalPrice(),
+                    $item->getTotalPrice($to_customer),
                     $currency,
                     $currency_symbol,
                     STORE_CURRENCY_FORMAT,
@@ -366,7 +366,7 @@ if (isset($_GET['do'])) {
             ),
             'sale_discount_format' => Output::getPurified(
                 Store::formatPrice(
-                    $item->getTotalDiscounts(),
+                    $item->getTotalDiscounts($to_customer),
                     $currency,
                     $currency_symbol,
                     STORE_CURRENCY_FORMAT,
@@ -415,9 +415,9 @@ if (isset($_GET['do'])) {
         'TOTAL_PRICE' => $store_language->get('general', 'total_price'),
         'TOTAL_DISCOUNT' => $store_language->get('general', 'total_discount'),
         'PRICE_TO_PAY' => $store_language->get('general', 'price_to_pay'),
-        'TOTAL_PRICE_VALUE' => Store::fromCents($shopping_cart->getTotalRealPriceCents()),
-        'TOTAL_REAL_PRICE_VALUE' => Store::fromCents($shopping_cart->getTotalRealPriceCents()),
-        'TOTAL_DISCOUNT_VALUE' => Store::fromCents($shopping_cart->getTotalDiscountCents()),
+        'TOTAL_PRICE_VALUE' => Store::fromCents($shopping_cart->getTotalCents()),
+        'TOTAL_REAL_PRICE_VALUE' => Store::fromCents($shopping_cart->getTotalRealPriceCents($to_customer)),
+        'TOTAL_DISCOUNT_VALUE' => Store::fromCents($shopping_cart->getTotalDiscountCents($to_customer)),
         'TOTAL_PRICE_FORMAT_VALUE' => Output::getPurified(
             Store::formatPrice(
                 $shopping_cart->getTotalCents(),
@@ -428,7 +428,7 @@ if (isset($_GET['do'])) {
         ),
         'TOTAL_REAL_PRICE_FORMAT_VALUE' => Output::getPurified(
             Store::formatPrice(
-                $shopping_cart->getTotalRealPriceCents(),
+                $shopping_cart->getTotalRealPriceCents($to_customer),
                 $currency,
                 $currency_symbol,
                 STORE_CURRENCY_FORMAT,
@@ -436,7 +436,7 @@ if (isset($_GET['do'])) {
         ),
         'TOTAL_DISCOUNT_FORMAT_VALUE' => Output::getPurified(
             Store::formatPrice(
-                $shopping_cart->getTotalDiscountCents(),
+                $shopping_cart->getTotalDiscountCents($to_customer),
                 $currency,
                 $currency_symbol,
                 STORE_CURRENCY_FORMAT,

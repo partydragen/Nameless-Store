@@ -9,25 +9,10 @@
  */
 class ShoppingCart extends Instanceable {
 
-    /**
-     * @var ItemList The list of items.
-     */
-    private ItemList $_items;
-
-    /**
-     * @var ?Order Current order.
-     */
-    private ?Order $_order = null;
-
-    /**
-     * @var ?Coupon Coupon code.
-     */
-    private ?Coupon $_coupon = null;
-
-    /**
-     * @var bool Shopping cart subscription mode.
-     */
-    private bool $_subscription_mode = false;
+    private $_items;
+    private $_order = null;
+    private $_coupon = null;
+    private $_subscription_mode = false;
 
     // Constructor
     public function __construct() {
@@ -83,7 +68,7 @@ class ShoppingCart extends Instanceable {
     }
 
     // Add product to shopping cart
-    public function add(int $product_id, int $quantity = 1, array $fields = []): void {
+    public function add($product_id, $quantity = 1, $fields = []) {
         $shopping_cart = (isset($_SESSION['shopping_cart']) ? $_SESSION['shopping_cart'] : []);
 
         if ($this->_subscription_mode) {
@@ -101,22 +86,22 @@ class ShoppingCart extends Instanceable {
     }
 
     // Remove product from shopping cart
-    public function remove(int $product_id): void {
+    public function remove($product_id) {
         unset($_SESSION['shopping_cart']['items'][$product_id]);
     }
 
     // Clear the shopping cart
-    public function clear(): void {
+    public function clear() {
         unset($_SESSION['shopping_cart']);
     }
 
     // Get the item list from the shopping cart
-    public function items(): ItemList {
+    public function items() {
         return $this->_items;
     }
 
     // Set order for this shopping cart
-    public function setOrder(?Order $order) {
+    public function setOrder($order) {
         $this->_order = $order;
 
         if ($order != null) {
@@ -127,12 +112,12 @@ class ShoppingCart extends Instanceable {
     }
 
     // Get current active order.
-    public function getOrder(): ?Order {
+    public function getOrder() {
         return $this->_order;
     }
 
     // Set coupon for this shopping cart
-    public function setCoupon(?Coupon $coupon) {
+    public function setCoupon($coupon) {
         $this->_coupon = $coupon;
 
         if ($coupon != null) {
@@ -143,7 +128,7 @@ class ShoppingCart extends Instanceable {
     }
 
     // Set shopping cart subscription mode
-    public function setSubscriptionMode(bool $subscription_mode) {
+    public function setSubscriptionMode($subscription_mode) {
         if ($this->_subscription_mode != $subscription_mode) {
             $subscription_mode = false;
             $this->_subscription_mode = $subscription_mode;
@@ -154,17 +139,17 @@ class ShoppingCart extends Instanceable {
     }
 
     // Get current shopping cart subscription mode
-    public function isSubscriptionMode(): bool {
+    public function isSubscriptionMode() {
         return $this->_subscription_mode;
     }
 
     // Get active coupon code
-    public function getCoupon(): ?Coupon {
+    public function getCoupon() {
         return $this->_coupon;
     }
 
     // Get total price to pay in cents
-    public function getTotalCents(): int {
+    public function getTotalCents() {
         $price = 0;
 
         foreach ($this->items()->getItems() as $item) {
@@ -175,22 +160,34 @@ class ShoppingCart extends Instanceable {
     }
 
     // Get total real price in cents
-    public function getTotalRealPriceCents(): int {
+    public function getTotalRealPriceCents(Customer $recipient = null) {
         $price = 0;
 
         foreach ($this->items()->getItems() as $item) {
-            $price += $item->getTotalPrice();
+            // Pass the recipient object down to the item's price calculation
+            $price += $item->getTotalPrice($recipient);
         }
 
-        return $price;
+        // Apply coupon discount if one exists
+        if ($this->getCoupon() != null) {
+            $price -= $this->getCoupon()->data()->discount_value;
+        }
+
+        return max(0, $price);
     }
 
     // Get total discount in cents
-    public function getTotalDiscountCents(): int {
+    public function getTotalDiscountCents(Customer $recipient = null) {
         $discount = 0;
 
         foreach ($this->items()->getItems() as $item) {
-            $discount += $item->getTotalDiscounts();
+            // Pass the recipient object down to the item's discount calculation
+            $discount += $item->getTotalDiscounts($recipient);
+        }
+
+        // Add coupon discount if one exists
+        if ($this->getCoupon() != null) {
+            $discount += $this->getCoupon()->data()->discount_value;
         }
 
         return $discount;
