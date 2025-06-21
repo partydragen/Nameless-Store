@@ -7,7 +7,6 @@
  * @version 2.2.0
  * @license MIT
  */
-
 class Product {
 
     private $_db;
@@ -208,17 +207,17 @@ class Product {
     }
 
     /**
-     * Get the real price in cents for a specific user, takes sales and cumulative pricing into account.
+     * Get the real price in cents for a specific customer, takes sales and cumulative pricing into account.
      *
-     * @param User|null $user The user object to calculate the price for.
+     * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int The final price in cents.
      */
-    public function getRealPriceCents(User $user = null) {
+    public function getRealPriceCents(Customer $recipient = null) {
         // First, calculate the standard price, including any active sales.
         $base_price = $this->data()->sale_active == 1 ? $this->data()->price_cents - $this->data()->sale_discount_cents : $this->data()->price_cents;
 
-        // If there's no user or the product doesn't exist, return the base price.
-        if ($user === null || !$user->isLoggedIn() || !$this->exists()) {
+        // If there's no recipient customer or the product doesn't exist, return the base price.
+        if ($recipient === null || !$recipient->exists() || !$this->exists()) {
             return $base_price;
         }
 
@@ -231,8 +230,8 @@ class Product {
             return $base_price;
         }
 
-        // If we get here, cumulative pricing is enabled. Calculate the discount.
-        $amount_spent = $this->_calculateUserSpendingInCategory($user->data()->id, $this->data()->category_id);
+        // If we get here, cumulative pricing is enabled. Calculate the discount using the recipient's customer ID
+        $amount_spent = $this->_calculateUserSpendingInCategory($recipient->data()->id, $this->data()->category_id);
 
         // Subtract the amount already spent from the base price.
         $new_price = $base_price - $amount_spent;
@@ -244,11 +243,11 @@ class Product {
     /*
      * Calculate total amount a user has spent in a specific category.
      *
-     * @param int $user_id The ID of the user.
+     * @param int $customer_id The ID of the customer.
      * @param int $category_id The ID of the category.
      * @return int The total amount spent in cents.
      */
-    private function _calculateUserSpendingInCategory($user_id, $category_id) {
+    private function _calculateUserSpendingInCategory($customer_id, $category_id) {
         $spending = $this->_db->query(
             "SELECT SUM(p.amount_cents) as total
              FROM nl2_store_payments p
@@ -256,7 +255,7 @@ class Product {
              JOIN nl2_store_orders_products po ON po.order_id = o.id
              JOIN nl2_store_products pr ON pr.id = po.product_id
              WHERE o.to_customer_id = ? AND pr.category_id = ? AND p.status_id = 1",
-            [$user_id, $category_id]
+            [$customer_id, $category_id]
         );
 
         if ($spending->count() && $spending->first()->total) {

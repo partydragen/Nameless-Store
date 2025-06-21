@@ -9,24 +9,9 @@
  */
 class Item {
 
-    /**
-     * @var int Get the item id.
-     */
     private $_item_id;
-
-    /**
-     * @var Product The product for this item.
-     */
     private $_product;
-
-    /**
-     * @var int Number of a particular item.
-     */
     private $_quantity;
-
-    /**
-     * @var array The custom fields for this item.
-     */
     private $_fields;
 
     public function __construct($item_id, Product $product = null, $quantity = null, $fields = []) {
@@ -48,7 +33,7 @@ class Item {
     }
 
     /**
-     * Get the product for this item.
+     * Get the item id.
      *
      * @return int
      */
@@ -57,7 +42,7 @@ class Item {
     }
 
     /**
-     * Get the item id.
+     * Get the product for this item.
      *
      * @return Product
      */
@@ -75,25 +60,27 @@ class Item {
     }
 
     /**
-     * Item cost after any discounts in cents for a single quantity. (e.g., 100 cents is $1.00, a zero-decimal currency)
+     * Item cost after any discounts in cents for a single quantity.
      *
+     * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int
      */
-    public function getSingleQuantityPrice(User $user = null) {
-        return ($this->getSubtotalPrice() - $this->getTotalDiscounts($user)) / $this->getQuantity();
+    public function getSingleQuantityPrice(Customer $recipient = null) {
+        return ($this->getSubtotalPrice() - $this->getTotalDiscounts($recipient)) / $this->getQuantity();
     }
 
     /**
-     * Item cost after any discounts in cents. (e.g., 100 cents to charge $1.00, a zero-decimal currency)
+     * Item cost after any discounts in cents.
      *
+     * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int
      */
-    public function getTotalPrice(User $user = null) {
-        return $this->getSubtotalPrice() - $this->getTotalDiscounts($user);
+    public function getTotalPrice(Customer $recipient = null) {
+        return $this->getSubtotalPrice() - $this->getTotalDiscounts($recipient);
     }
 
     /**
-     * Item cost before any discounts in cents. (e.g., 100 cents to charge $1.00, a zero-decimal currency)
+     * Item cost before any discounts in cents.
      *
      * @return int
      */
@@ -105,6 +92,7 @@ class Item {
             $price = $this->_product->data()->price_cents;
         }
 
+
         foreach ($this->_fields as $field) {
             if (isset($field['value_price'])) {
                 $price += $field['value_price'];
@@ -115,14 +103,19 @@ class Item {
     }
 
     /**
-     * Item discounts. (e.g., 100 cents to charge $1.00, a zero-decimal currency)
+     * Item discounts.
      *
+     * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int
      */
-    public function getTotalDiscounts(User $user = null) {
+    public function getTotalDiscounts(Customer $recipient = null) {
         $subtotal = $this->getSubtotalPrice();
-        $final_unit_price = $this->_product->getRealPriceCents($user);
+
+        // Get the final price from the Product class, passing the recipient
+        $final_unit_price = $this->_product->getRealPriceCents($recipient);
+
         $final_total_price = $final_unit_price * $this->getQuantity();
+
         return max(0, $subtotal - $final_total_price);
     }
 

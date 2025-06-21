@@ -1,12 +1,12 @@
 <?php
 /*
- *  Made by Partydragen
- *  https://partydragen.com/resources/resource/5-store-module/
- *  https://partydragen.com/
+ * Made by Partydragen
+ * https://partydragen.com/resources/resource/5-store-module/
+ * https://partydragen.com/
  *
- *  License: MIT
+ * License: MIT
  *
- *  Store module - Category Page
+ * Store module - Category Page
  */
 
 // Always define page name
@@ -17,28 +17,35 @@ $category_id = explode('/', $route);
 $category_id = $category_id[count($category_id) - 1];
 
 if (!strlen($category_id)) {
-    require_once(ROOT_PATH . '404.php');
-    die();
-}
-
-if (is_numeric($category_id)) {
-    // Query category by id
-    $category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ? AND disabled = 0', [$category_id]);
-} else {
-    // Query category by url
-    $category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE url = ? AND disabled = 0', [$category_id]);
-}
-
-if (!$category->count()) {
     require_once(ROOT_PATH . '/404.php');
     die();
 }
 
-$category = $category->first();
+// THIS IS THE CORRECTED LOGIC - Reverted to the original database query
+if (is_numeric($category_id)) {
+    // Query category by id
+    $category_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ? AND disabled = 0', [$category_id]);
+} else {
+    // Query category by url
+    $category_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE url = ? AND disabled = 0', [$category_id]);
+}
+
+if (!$category_query->count()) {
+    require_once(ROOT_PATH . '/404.php');
+    die();
+}
+
+$category = $category_query->first();
+// END OF CORRECTED LOGIC
+
 $category_id = $category->id;
 $store_url = Store::getStorePath();
 
-$page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/view'])->results();
+$page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/category/' . $category_id])->results();
+if (!count($page_metadata)) {
+    $page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/category'])->results();
+}
+
 if (count($page_metadata)) {
     define('PAGE_DESCRIPTION', str_replace(['{site}', '{category_title}', '{description}'], [SITE_NAME, Output::getClean($category->name), Output::getClean(strip_tags(Output::getDecoded($category->description)))], $page_metadata[0]->description));
     define('PAGE_KEYWORDS', $page_metadata[0]->tags);
@@ -47,33 +54,6 @@ if (count($page_metadata)) {
 $page_title = Output::getClean($category->name);
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
-
-if (Input::exists()) {
-    if (Token::check()) {
-        $errors = [];
-
-        if (Input::get('type') == 'store_login') {
-            $validation = Validate::check($_POST, [
-                'username' => [
-                    Validate::REQUIRED => true,
-                    Validate::MIN => 3,
-                    Validate::MAX => 16
-                ]
-            ]);
-
-            if ($validation->passed()) {
-                // Attempt to load customer
-                if ($to_customer->login(Input::get('username'))) {
-                    Redirect::to(URL::build($store_url . '/category/' . $category->id));
-                } else {
-                    $errors[] = $language->get('user', 'invalid_mcname');
-                }
-            } else {
-                $errors[] = $store_language->get('general', 'unable_to_find_player');
-            }
-        }
-    }
-}
 
 // Get products
 $products = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE category_id = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', [$category_id]);
@@ -100,19 +80,13 @@ if (!$products->count()) {
             continue;
         }
 
-        // Get the price *before* cumulative discount, but *with* sales applied.
+        // --- UPDATED PRICE LOGIC ---
         $original_price_cents = $product->data()->sale_active == 1 ? $product->data()->price_cents - $product->data()->sale_discount_cents : $product->data()->price_cents;
-
-        // Get the final price for the current user, including cumulative discount.
-        // We pass the $user object here, which is the crucial change.
-        $final_price_cents = $product->getRealPriceCents($user);
+        $final_price_cents = $product->getRealPriceCents($to_customer);
 
         $category_products[] = [
             'id' => $product->data()->id,
             'name' => Output::getClean($renderProductEvent['name']),
-
-            // We now provide both original and final prices to the template for more flexibility
-            'original_price' => Store::fromCents($original_price_cents),
             'original_price_format' => Output::getPurified(
                 Store::formatPrice(
                     $original_price_cents,
@@ -121,7 +95,6 @@ if (!$products->count()) {
                     STORE_CURRENCY_FORMAT,
                 )
             ),
-            'final_price' => Store::fromCents($final_price_cents),
             'final_price_format' => Output::getPurified(
                 Store::formatPrice(
                     $final_price_cents,
@@ -131,7 +104,6 @@ if (!$products->count()) {
                 )
             ),
             'has_discount' => $final_price_cents < $original_price_cents,
-
             'sale_active' => $product->data()->sale_active,
             'description' => $renderProductEvent['content'],
             'image' => $renderProductEvent['image'],
@@ -176,7 +148,7 @@ if ($store->isPlayerSystemEnabled() && !$to_customer->isLoggedIn()) {
         'PLEASE_ENTER_USERNAME' => $store_language->get('general', 'please_enter_username'),
         'CONTINUE' => $store_language->get('general', 'continue'),
     ]);
-    
+
     $template_file = 'store/player_login';
 } else {
     $template_file = 'store/category';

@@ -9,24 +9,9 @@
  */
 class ShoppingCart extends Instanceable {
 
-    /**
-     * @var ItemList The list of items.
-     */
     private $_items;
-
-    /**
-     * @var Order Current order.
-     */
     private $_order = null;
-
-    /**
-     * @var Coupon Coupon code.
-     */
     private $_coupon = null;
-
-    /**
-     * @var bool Shopping cart subscription mode.
-     */
     private $_subscription_mode = false;
 
     // Constructor
@@ -175,12 +160,12 @@ class ShoppingCart extends Instanceable {
     }
 
     // Get total real price in cents
-    public function getTotalRealPriceCents(User $user = null) {
+    public function getTotalRealPriceCents(Customer $recipient = null) {
         $price = 0;
 
         foreach ($this->items()->getItems() as $item) {
-            // Pass the user object down to the item's price calculation
-            $price += $item->getTotalPrice($user);
+            // Pass the recipient object down to the item's price calculation
+            $price += $item->getTotalPrice($recipient);
         }
 
         // Apply coupon discount if one exists
@@ -192,12 +177,12 @@ class ShoppingCart extends Instanceable {
     }
 
     // Get total discount in cents
-    public function getTotalDiscountCents(User $user = null) {
+    public function getTotalDiscountCents(Customer $recipient = null) {
         $discount = 0;
 
         foreach ($this->items()->getItems() as $item) {
-            // Pass the user object down to the item's discount calculation
-            $discount += $item->getTotalDiscounts($user);
+            // Pass the recipient object down to the item's discount calculation
+            $discount += $item->getTotalDiscounts($recipient);
         }
 
         // Add coupon discount if one exists
