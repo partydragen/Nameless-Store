@@ -12,8 +12,8 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
     public function __construct() {
         $name = 'Stripe';
         $author = '<a href="https://github.com/supercrafter100/" target="_blank" rel="nofollow noopener">Supercrafter100</a>';
-        $gateway_version = '1.8.3';
-        $store_version = '1.8.3';
+        $gateway_version = '1.8.4';
+        $store_version = '1.8.4';
         $settings = ROOT_PATH . '/modules/Store/gateways/Stripe/gateway_settings/settings.php';
 
         parent::__construct($name, $author, $gateway_version, $store_version, $settings);
@@ -33,17 +33,23 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
         $successRedirect = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=success');
         $cancelRedirect = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=cancel');
 
+        // Get the recipient customer from the order object
+        $recipient = $order->recipient();
+
         $products = [];
         if (!$order->isSubscriptionMode()) {
             // Single payment
             foreach ($order->items()->getItems() as $item) {
+                // Calculate the correct discounted price for a single unit
+                $discounted_unit_price = round($item->getTotalPrice($recipient) / $item->getQuantity());
+
                 $products[] = [
                     'price_data' => [
                         'currency' => $currency,
                         'product_data' => [
                             'name' => $item->getProduct()->data()->name,
                         ],
-                        'unit_amount' => $item->getSingleQuantityPrice(),
+                        'unit_amount' => $discounted_unit_price,
                     ],
                     'quantity' => $item->getQuantity()
                 ];
@@ -78,13 +84,16 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
             $product = $item->getProduct();
             $duration_json = json_decode($product->data()->durability, true) ?? [];
 
+            // Calculate the correct discounted price for a single unit
+            $discounted_unit_price = round($item->getTotalPrice($recipient) / $item->getQuantity());
+
             $products[] = [
                 'price_data' => [
                     'currency' => $currency,
                     'product_data' => [
                         'name' => $product->data()->name,
                     ],
-                    'unit_amount' => $item->getSingleQuantityPrice(),
+                    'unit_amount' => $discounted_unit_price, // CHANGED: Use the correct discounted price
                     'recurring' => [
                         'interval' => $duration_json['period'] ?? 'month',
                         'interval_count' => $duration_json['interval'] ?? 1
