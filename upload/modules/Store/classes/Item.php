@@ -9,12 +9,12 @@
  */
 class Item {
 
-    private $_item_id;
-    private $_product;
-    private $_quantity;
-    private $_fields;
+    private int $_item_id;
+    private Product $_product;
+    private int $_quantity;
+    private array $_fields;
 
-    public function __construct($item_id, Product $product = null, $quantity = null, $fields = []) {
+    public function __construct(int $item_id, Product $product = null, int $quantity = null, array $fields = []) {
         $this->_item_id = $item_id;
 
         if ($product != null) {
@@ -37,7 +37,7 @@ class Item {
      *
      * @return int
      */
-    public function getId() {
+    public function getId(): int {
         return $this->_item_id;
     }
 
@@ -46,7 +46,7 @@ class Item {
      *
      * @return Product
      */
-    public function getProduct() {
+    public function getProduct(): Product {
         return $this->_product;
     }
 
@@ -55,7 +55,7 @@ class Item {
      *
      * @return int
      */
-    public function getQuantity() {
+    public function getQuantity(): int {
         return $this->_quantity;
     }
 
@@ -65,7 +65,7 @@ class Item {
      * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int
      */
-    public function getSingleQuantityPrice(Customer $recipient = null) {
+    public function getSingleQuantityPrice(Customer $recipient = null): int {
         return ($this->getSubtotalPrice() - $this->getTotalDiscounts($recipient)) / $this->getQuantity();
     }
 
@@ -75,7 +75,7 @@ class Item {
      * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int
      */
-    public function getTotalPrice(Customer $recipient = null) {
+    public function getTotalPrice(Customer $recipient = null): int {
         return $this->getSubtotalPrice() - $this->getTotalDiscounts($recipient);
     }
 
@@ -84,7 +84,7 @@ class Item {
      *
      * @return int
      */
-    public function getSubtotalPrice() {
+    public function getSubtotalPrice(): int {
         $field = $this->getField('price');
         if ($field) {
             $price = Store::toCents($field['value']);
@@ -108,7 +108,7 @@ class Item {
      * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int
      */
-    public function getTotalDiscounts(Customer $recipient = null) {
+    public function getTotalDiscounts(Customer $recipient = null): int {
         $subtotal = $this->getSubtotalPrice();
 
         // Get the final price from the Product class, passing the recipient
@@ -124,7 +124,7 @@ class Item {
      *
      * @return array
      */
-    public function getFields() {
+    public function getFields(): array {
         return $this->_fields;
     }
 
@@ -133,9 +133,9 @@ class Item {
      *
      * @param string $identifier The field identifier.
      *
-     * @return array
+     * @return array|null
      */
-    public function getField($identifier) {
+    public function getField(string $identifier): ?array {
         foreach ($this->_fields as $field) {
             if ($field['identifier'] == $identifier) {
                 return $field;
@@ -146,7 +146,7 @@ class Item {
     }
 
     // Get item description
-    public function getDescription() {
+    public function getDescription(): string {
         return $this->_product->data()->description;
     }
 }

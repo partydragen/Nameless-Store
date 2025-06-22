@@ -21,39 +21,53 @@ if (!strlen($category_id)) {
     die();
 }
 
-// THIS IS THE CORRECTED LOGIC - Reverted to the original database query
+// Get category from database
 if (is_numeric($category_id)) {
-    // Query category by id
-    $category_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ? AND disabled = 0', [$category_id]);
+    $category_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ? AND disabled = 0 AND deleted = 0', [$category_id]);
 } else {
-    // Query category by url
-    $category_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE url = ? AND disabled = 0', [$category_id]);
+    $category_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE url = ? AND disabled = 0 AND deleted = 0', [$category_id]);
 }
 
 if (!$category_query->count()) {
     require_once(ROOT_PATH . '/404.php');
     die();
 }
-
 $category = $category_query->first();
-// END OF CORRECTED LOGIC
-
 $category_id = $category->id;
+
 $store_url = Store::getStorePath();
-
-$page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/category/' . $category_id])->results();
-if (!count($page_metadata)) {
-    $page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/category'])->results();
-}
-
-if (count($page_metadata)) {
-    define('PAGE_DESCRIPTION', str_replace(['{site}', '{category_title}', '{description}'], [SITE_NAME, Output::getClean($category->name), Output::getClean(strip_tags(Output::getDecoded($category->description)))], $page_metadata[0]->description));
-    define('PAGE_KEYWORDS', $page_metadata[0]->tags);
-}
-
 $page_title = Output::getClean($category->name);
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
+
+// Handle player login form submission
+if (Input::exists()) {
+    if (Token::check()) {
+        if (Input::get('type') == 'store_logout') {
+            // The logout logic is handled in frontend_init.php, we just need to redirect
+            Redirect::to(URL::build($store_url . '/category/' . $category->id));
+        } else {
+            $validation = Validate::check($_POST, [
+                'username' => [
+                    Validate::REQUIRED => true,
+                    Validate::MIN => 3,
+                    Validate::MAX => 16
+                ]
+            ]);
+
+            if ($validation->passed()) {
+                // Attempt to load customer
+                if ($to_customer->login(Input::get('username'))) {
+                    Redirect::to(URL::build($store_url . '/category/' . $category->id));
+                } else {
+                    $errors[] = $store_language->get('general', 'unable_to_find_player');
+                }
+            } else {
+                $errors[] = $store_language->get('general', 'unable_to_find_player');
+            }
+        }
+    }
+}
 
 // Get products
 $products = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE category_id = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', [$category_id]);
@@ -65,6 +79,11 @@ if (!$products->count()) {
 
     foreach ($products->results() as $item) {
         $product = new Product(null, null, $item);
+
+        // Hide product if it has been bought and has a purchase limit of 1
+        if ($product->data()->user_limit == 1 && $product->getRealPriceCents($to_customer) <= 0) {
+            continue;
+        }
 
         $renderProductEvent = EventHandler::executeEvent('renderStoreProduct', [
             'product' => $product,
@@ -80,13 +99,15 @@ if (!$products->count()) {
             continue;
         }
 
-        // --- UPDATED PRICE LOGIC ---
+        // Prepare variables for the template
         $original_price_cents = $product->data()->sale_active == 1 ? $product->data()->price_cents - $product->data()->sale_discount_cents : $product->data()->price_cents;
         $final_price_cents = $product->getRealPriceCents($to_customer);
 
         $category_products[] = [
             'id' => $product->data()->id,
             'name' => Output::getClean($renderProductEvent['name']),
+            'user_limit' => $product->data()->user_limit,
+            'final_price_cents' => $final_price_cents,
             'original_price_format' => Output::getPurified(
                 Store::formatPrice(
                     $original_price_cents,
@@ -115,25 +136,16 @@ if (!$products->count()) {
     $template->getEngine()->addVariable('PRODUCTS', $category_products);
 }
 
-// Category description
-$renderCategoryEvent = EventHandler::executeEvent('renderStoreCategory', [
-    'id' => $category->id,
-    'name' => $category->name,
-    'content' => $category->description
-]);
-
+// Other template variables...
 if (isset($errors) && count($errors))
     $template->getEngine()->addVariable('ERRORS', $errors);
 
 $template->getEngine()->addVariables([
     'STORE' => $store_language->get('general', 'store'),
     'STORE_URL' => URL::build($store_url),
-    'HOME' => $store_language->get('general', 'home'),
-    'HOME_URL' => URL::build($store_url),
     'CATEGORIES' => $store->getNavbarMenu($category->name),
-    'CATEGORY_ID' => $renderCategoryEvent['id'],
-    'CATEGORY_NAME' => $renderCategoryEvent['name'],
-    'CONTENT' => str_replace('{credits}', $from_customer->getCredits(), $renderCategoryEvent['content']),
+    'CATEGORY_NAME' => Output::getClean($category->name),
+    'CONTENT' => Output::getPurified(Output::getDecoded($category->description)),
     'ACTIVE_CATEGORY' => Output::getClean($category->name),
     'BUY' => $store_language->get('general', 'buy'),
     'ADD_TO_CART' => $store_language->get('general', 'add_to_cart'),
@@ -154,39 +166,13 @@ if ($store->isPlayerSystemEnabled() && !$to_customer->isLoggedIn()) {
     $template_file = 'store/category';
 }
 
-$template->assets()->include([
-    DARK_MODE
-        ? AssetTree::PRISM_DARK
-        : AssetTree::PRISM_LIGHT,
-    AssetTree::TINYMCE_SPOILER,
-]);
-
 // Load modules + template
 Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
-if (Session::exists('store_error')) {
-    $errors[] = Session::flash('store_error');
-}
-
-if (isset($success))
-    $template->getEngine()->addVariables([
-        'SUCCESS' => $success,
-        'SUCCESS_TITLE' => $language->get('general', 'success')
-    ]);
-
-if (isset($errors) && count($errors))
-    $template->getEngine()->addVariables([
-        'ERRORS' => $errors,
-        'ERRORS_TITLE' => $language->get('general', 'error')
-    ]);
-
+// Other template variables...
 $template->onPageLoad();
-
 $template->getEngine()->addVariable('WIDGETS_LEFT', $widgets->getWidgets('left'));
 $template->getEngine()->addVariable('WIDGETS_RIGHT', $widgets->getWidgets('right'));
-
 require(ROOT_PATH . '/core/templates/navbar.php');
 require(ROOT_PATH . '/core/templates/footer.php');
-
-// Display template
 $template->displayTemplate($template_file);

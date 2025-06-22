@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Product class.
  *
  * @package Modules\Store
@@ -9,13 +9,13 @@
  */
 class Product {
 
-    private $_db;
-    private $_data;
-    private $_connections;
-    private $_fields;
-    private $_actions;
+    private DB $_db;
+    private ?ProductData $_data;
+    private array $_connections;
+    private array $_fields;
+    private array $_actions;
 
-    public function __construct($value = null, $field = 'id', $query_data = null) {
+    public function __construct(?string $value = null, ?string $field = 'id', $query_data = null) {
         $this->_db = DB::getInstance();
 
         if (!$query_data && $value) {
@@ -34,7 +34,7 @@ class Product {
      *
      * @param array $fields Column names and values to update.
      */
-    public function update($fields = []) {
+    public function update(array $fields = []): void {
         if (!$this->_db->update('store_products', $this->data()->id, $fields)) {
             throw new Exception('There was a problem updating product');
         }
@@ -45,7 +45,7 @@ class Product {
      *
      * @return bool Whether the product exists (has data) or not.
      */
-    public function exists() {
+    public function exists(): bool {
         return (!empty($this->_data));
     }
 
@@ -54,7 +54,7 @@ class Product {
      *
      * @return ProductData This product data.
      */
-    public function data() {
+    public function data(): ?ProductData {
         return $this->_data;
     }
 
@@ -65,8 +65,8 @@ class Product {
      *
      * @return array Their connections.
      */
-    public function getConnections($service_id = null) {
-        $this->_connections ??= (function () {
+    public function getConnections(int $service_id = null): array {
+        $this->_connections ??= (function (): array {
             $this->_connections = [];
 
             $connections_query = $this->_db->query('SELECT nl2_store_connections.* FROM nl2_store_products_connections INNER JOIN nl2_store_connections ON connection_id = nl2_store_connections.id WHERE product_id = ? AND action_id IS NULL', [$this->data()->id]);
@@ -94,7 +94,7 @@ class Product {
         return $this->_connections;
     }
 
-    public function addConnection($connection_id) {
+    public function addConnection(int $connection_id): bool {
         if (array_key_exists($connection_id, $this->getConnections())) {
             return false;
         }
@@ -109,7 +109,7 @@ class Product {
         return true;
     }
 
-    public function removeConnection($connection_id) {
+    public function removeConnection(int $connection_id): bool {
         if (!array_key_exists($connection_id, $this->getConnections())) {
             return false;
         }
@@ -124,8 +124,8 @@ class Product {
         return true;
     }
 
-    public function getFields() {
-        return $this->_fields ??= (function () {
+    public function getFields(): array {
+        return $this->_fields ??= (function (): array {
             $this->_fields = [];
 
             $fields_query = $this->_db->query('SELECT nl2_store_fields.* FROM nl2_store_products_fields INNER JOIN nl2_store_fields ON field_id = nl2_store_fields.id WHERE product_id = ? AND deleted = 0 ORDER BY `order`', [$this->data()->id]);
@@ -140,7 +140,7 @@ class Product {
         })();
     }
 
-    public function addField($field_id) {
+    public function addField(int $field_id): bool {
         if (array_key_exists($field_id, $this->getFields())) {
             return false;
         }
@@ -155,7 +155,7 @@ class Product {
         return true;
     }
 
-    public function removeField($field_id) {
+    public function removeField(int $field_id): bool {
         if (!array_key_exists($field_id, $this->getFields())) {
             return false;
         }
@@ -170,15 +170,15 @@ class Product {
         return true;
     }
 
-    public function getActions($type = null) {
+    public function getActions(int $type = null): array {
         return ActionsHandler::getInstance()->getActions($this, $type);
     }
 
-    public function getAction($id) {
+    public function getAction(int $id): ?Action {
         return ActionsHandler::getInstance()->getAction($id);
     }
 
-    public function getRequiredIntegrations() {
+    public function getRequiredIntegrations(): array {
         $required_integrations_list = [];
 
         $integrations = Integrations::getInstance();
@@ -212,7 +212,7 @@ class Product {
      * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int The final price in cents.
      */
-    public function getRealPriceCents(Customer $recipient = null) {
+    public function getRealPriceCents(Customer $recipient = null): int {
         // First, calculate the standard price, including any active sales.
         $base_price = $this->data()->sale_active == 1 ? $this->data()->price_cents - $this->data()->sale_discount_cents : $this->data()->price_cents;
 
@@ -247,7 +247,7 @@ class Product {
      * @param int $category_id The ID of the category.
      * @return int The total amount spent in cents.
      */
-    private function _calculateUserSpendingInCategory($customer_id, $category_id) {
+    private function _calculateUserSpendingInCategory(int $customer_id, int $category_id): int {
         $spending = $this->_db->query(
             "SELECT SUM(p.amount_cents) as total
              FROM nl2_store_payments p
@@ -265,17 +265,13 @@ class Product {
         return 0;
     }
 
-    public function delete() {
+    public function delete(): void {
         if ($this->exists()) {
             $this->update([
                 'deleted' => date('U')
             ]);
 
             $this->_db->query('DELETE FROM `nl2_store_pending_actions` WHERE `product_id` = ?', [$this->data()->id]);
-
-            return true;
         }
-
-        return false;
     }
 }

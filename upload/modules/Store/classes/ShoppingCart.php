@@ -9,10 +9,10 @@
  */
 class ShoppingCart extends Instanceable {
 
-    private $_items;
-    private $_order = null;
-    private $_coupon = null;
-    private $_subscription_mode = false;
+    private ItemList $_items;
+    private ?Order $_order = null;
+    private ?Coupon $_coupon = null;
+    private bool $_subscription_mode = false;
 
     // Constructor
     public function __construct() {
@@ -68,7 +68,7 @@ class ShoppingCart extends Instanceable {
     }
 
     // Add product to shopping cart
-    public function add($product_id, $quantity = 1, $fields = []) {
+    public function add(int $product_id, int $quantity = 1, array $fields = []): void {
         $shopping_cart = (isset($_SESSION['shopping_cart']) ? $_SESSION['shopping_cart'] : []);
 
         if ($this->_subscription_mode) {
@@ -86,22 +86,22 @@ class ShoppingCart extends Instanceable {
     }
 
     // Remove product from shopping cart
-    public function remove($product_id) {
+    public function remove(int $product_id): void {
         unset($_SESSION['shopping_cart']['items'][$product_id]);
     }
 
     // Clear the shopping cart
-    public function clear() {
+    public function clear(): void {
         unset($_SESSION['shopping_cart']);
     }
 
     // Get the item list from the shopping cart
-    public function items() {
+    public function items(): ItemList {
         return $this->_items;
     }
 
     // Set order for this shopping cart
-    public function setOrder($order) {
+    public function setOrder(?Order $order) {
         $this->_order = $order;
 
         if ($order != null) {
@@ -112,12 +112,12 @@ class ShoppingCart extends Instanceable {
     }
 
     // Get current active order.
-    public function getOrder() {
+    public function getOrder(): ?Order {
         return $this->_order;
     }
 
     // Set coupon for this shopping cart
-    public function setCoupon($coupon) {
+    public function setCoupon(?Coupon $coupon) {
         $this->_coupon = $coupon;
 
         if ($coupon != null) {
@@ -128,7 +128,7 @@ class ShoppingCart extends Instanceable {
     }
 
     // Set shopping cart subscription mode
-    public function setSubscriptionMode($subscription_mode) {
+    public function setSubscriptionMode(bool $subscription_mode) {
         if ($this->_subscription_mode != $subscription_mode) {
             $subscription_mode = false;
             $this->_subscription_mode = $subscription_mode;
@@ -139,17 +139,17 @@ class ShoppingCart extends Instanceable {
     }
 
     // Get current shopping cart subscription mode
-    public function isSubscriptionMode() {
+    public function isSubscriptionMode(): bool {
         return $this->_subscription_mode;
     }
 
     // Get active coupon code
-    public function getCoupon() {
+    public function getCoupon(): ?Coupon {
         return $this->_coupon;
     }
 
     // Get total price to pay in cents
-    public function getTotalCents() {
+    public function getTotalCents(): int {
         $price = 0;
 
         foreach ($this->items()->getItems() as $item) {
@@ -160,7 +160,7 @@ class ShoppingCart extends Instanceable {
     }
 
     // Get total real price in cents
-    public function getTotalRealPriceCents(Customer $recipient = null) {
+    public function getTotalRealPriceCents(Customer $recipient = null): int {
         $price = 0;
 
         foreach ($this->items()->getItems() as $item) {
@@ -177,7 +177,7 @@ class ShoppingCart extends Instanceable {
     }
 
     // Get total discount in cents
-    public function getTotalDiscountCents(Customer $recipient = null) {
+    public function getTotalDiscountCents(Customer $recipient = null): int {
         $discount = 0;
 
         foreach ($this->items()->getItems() as $item) {
