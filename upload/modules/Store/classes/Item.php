@@ -9,9 +9,24 @@
  */
 class Item {
 
+    /**
+     * @var int Get the item id.
+     */
     private int $_item_id;
+
+    /**
+     * @var Product The product for this item.
+     */
     private Product $_product;
+
+    /**
+     * @var int Number of a particular item.
+     */
     private int $_quantity;
+
+    /**
+     * @var ?array The custom fields for this item.
+     */
     private array $_fields;
 
     public function __construct(int $item_id, Product $product = null, int $quantity = null, array $fields = []) {
@@ -60,17 +75,21 @@ class Item {
     }
 
     /**
-     * Item cost after any discounts in cents for a single quantity.
+     * Item cost after any discounts in cents for a single quantity. (e.g., 100 cents is $1.00, a zero-decimal currency)
      *
      * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int
      */
     public function getSingleQuantityPrice(Customer $recipient = null): int {
-        return ($this->getSubtotalPrice() - $this->getTotalDiscounts($recipient)) / $this->getQuantity();
+        // Ensure quantity is not zero to avoid division by zero error
+        if ($this->getQuantity() == 0) {
+            return 0;
+        }
+        return (int) (($this->getSubtotalPrice() - $this->getTotalDiscounts($recipient)) / $this->getQuantity());
     }
 
     /**
-     * Item cost after any discounts in cents.
+     * Item cost after any discounts in cents. (e.g., 100 cents to charge $1.00, a zero-decimal currency)
      *
      * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int
@@ -80,7 +99,7 @@ class Item {
     }
 
     /**
-     * Item cost before any discounts in cents.
+     * Item cost before any discounts in cents. (e.g., 100 cents to charge $1.00, a zero-decimal currency)
      *
      * @return int
      */
@@ -92,7 +111,6 @@ class Item {
             $price = $this->_product->data()->price_cents;
         }
 
-
         foreach ($this->_fields as $field) {
             if (isset($field['value_price'])) {
                 $price += $field['value_price'];
@@ -103,7 +121,7 @@ class Item {
     }
 
     /**
-     * Item discounts.
+     * Item discounts. (e.g., 100 cents to charge $1.00, a zero-decimal currency)
      *
      * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int
