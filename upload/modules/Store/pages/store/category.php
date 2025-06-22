@@ -1,8 +1,8 @@
 <?php
 /*
  * Made by Partydragen
- * https://partydragen.com/resources/resource/5-store-module/
- * https://partydragen.com/
+ * [https://partydragen.com/resources/resource/5-store-module/](https://partydragen.com/resources/resource/5-store-module/)
+ * [https://partydragen.com/](https://partydragen.com/)
  *
  * License: MIT
  *
@@ -21,10 +21,11 @@ if (!strlen($category_id)) {
     die();
 }
 
-// Get category from database
 if (is_numeric($category_id)) {
+    // Query category by id
     $category_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ? AND disabled = 0 AND deleted = 0', [$category_id]);
 } else {
+    // Query category by url
     $category_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE url = ? AND disabled = 0 AND deleted = 0', [$category_id]);
 }
 
@@ -136,16 +137,25 @@ if (!$products->count()) {
     $template->getEngine()->addVariable('PRODUCTS', $category_products);
 }
 
-// Other template variables...
+// Category description
+$renderCategoryEvent = EventHandler::executeEvent('renderStoreCategory', [
+    'id' => $category->id,
+    'name' => $category->name,
+    'content' => $category->description
+]);
+
 if (isset($errors) && count($errors))
     $template->getEngine()->addVariable('ERRORS', $errors);
 
 $template->getEngine()->addVariables([
     'STORE' => $store_language->get('general', 'store'),
     'STORE_URL' => URL::build($store_url),
+    'HOME' => $store_language->get('general', 'home'),
+    'HOME_URL' => URL::build($store_url),
     'CATEGORIES' => $store->getNavbarMenu($category->name),
-    'CATEGORY_NAME' => Output::getClean($category->name),
-    'CONTENT' => Output::getPurified(Output::getDecoded($category->description)),
+    'CATEGORY_ID' => $renderCategoryEvent['id'],
+    'CATEGORY_NAME' => $renderCategoryEvent['name'],
+    'CONTENT' => str_replace('{credits}', $from_customer->getCredits(), $renderCategoryEvent['content']),
     'ACTIVE_CATEGORY' => Output::getClean($category->name),
     'BUY' => $store_language->get('general', 'buy'),
     'ADD_TO_CART' => $store_language->get('general', 'add_to_cart'),
@@ -166,13 +176,39 @@ if ($store->isPlayerSystemEnabled() && !$to_customer->isLoggedIn()) {
     $template_file = 'store/category';
 }
 
+$template->assets()->include([
+    DARK_MODE
+        ? AssetTree::PRISM_DARK
+        : AssetTree::PRISM_LIGHT,
+    AssetTree::TINYMCE_SPOILER,
+]);
+
 // Load modules + template
 Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
-// Other template variables...
+if (Session::exists('store_error')) {
+    $errors[] = Session::flash('store_error');
+}
+
+if (isset($success))
+    $template->getEngine()->addVariables([
+        'SUCCESS' => $success,
+        'SUCCESS_TITLE' => $language->get('general', 'success')
+    ]);
+
+if (isset($errors) && count($errors))
+    $template->getEngine()->addVariables([
+        'ERRORS' => $errors,
+        'ERRORS_TITLE' => $language->get('general', 'error')
+    ]);
+
 $template->onPageLoad();
+
 $template->getEngine()->addVariable('WIDGETS_LEFT', $widgets->getWidgets('left'));
 $template->getEngine()->addVariable('WIDGETS_RIGHT', $widgets->getWidgets('right'));
+
 require(ROOT_PATH . '/core/templates/navbar.php');
 require(ROOT_PATH . '/core/templates/footer.php');
+
+// Display template
 $template->displayTemplate($template_file);

@@ -1,4 +1,3 @@
-<code class="php">
 <?php
 /**
  * ShoppingCart class used during checkout flow.
