@@ -10,9 +10,25 @@
 class Product {
 
     private DB $_db;
+
+    /**
+     * @var ProductData|null The product data. Basically just the row from `nl2_store_products` where the product ID is the key.
+     */
     private ?ProductData $_data;
+
+    /**
+     * @var array The list of connections for this product.
+     */
     private array $_connections;
+
+    /**
+     * @var array The list of fields for this product.
+     */
     private array $_fields;
+
+    /**
+     * @var Action[] The list of actions for this product.
+     */
     private array $_actions;
 
     public function __construct(?string $value = null, ?string $field = 'id', $query_data = null) {
@@ -94,6 +110,11 @@ class Product {
         return $this->_connections;
     }
 
+    /**
+     * Add a connection to this product.
+     *
+     * @return bool True on success, false if product already have it.
+     */
     public function addConnection(int $connection_id): bool {
         if (array_key_exists($connection_id, $this->getConnections())) {
             return false;
@@ -109,6 +130,11 @@ class Product {
         return true;
     }
 
+    /**
+     * Remove a connection to this product.
+     *
+     * @return bool Returns false if they did not have this connection
+     */
     public function removeConnection(int $connection_id): bool {
         if (!array_key_exists($connection_id, $this->getConnections())) {
             return false;
@@ -124,6 +150,11 @@ class Product {
         return true;
     }
 
+    /**
+     * Get the product fields.
+     *
+     * @return array Their fields.
+     */
     public function getFields(): array {
         return $this->_fields ??= (function (): array {
             $this->_fields = [];
@@ -140,6 +171,11 @@ class Product {
         })();
     }
 
+    /**
+     * Add a field to this product.
+     *
+     * @return bool True on success, false if product already have it.
+     */
     public function addField(int $field_id): bool {
         if (array_key_exists($field_id, $this->getFields())) {
             return false;
@@ -155,6 +191,11 @@ class Product {
         return true;
     }
 
+    /**
+     * Remove a field to this product.
+     *
+     * @return bool Returns false if they did not have this field
+     */
     public function removeField(int $field_id): bool {
         if (!array_key_exists($field_id, $this->getFields())) {
             return false;
@@ -170,14 +211,33 @@ class Product {
         return true;
     }
 
+    /**
+     * Get the product actions.
+     *
+     * @param int $type Trigger type like Purchase/Refund/Changeback etc
+     *
+     * @return Action Actions for this product.
+     */
     public function getActions(int $type = null): array {
         return ActionsHandler::getInstance()->getActions($this, $type);
     }
 
+    /**
+     * Get product action by id.
+     *
+     * @param int $id Action id
+     *
+     * @return Action|null Action by id otherwise null.
+     */
     public function getAction(int $id): ?Action {
         return ActionsHandler::getInstance()->getAction($id);
     }
 
+    /**
+     * Get the required user integrations that this product require.
+     *
+     * @return array List of required integrations.
+     */
     public function getRequiredIntegrations(): array {
         $required_integrations_list = [];
 
@@ -240,6 +300,16 @@ class Product {
         return max(0, $new_price);
     }
 
+    public function delete(): void {
+        if ($this->exists()) {
+            $this->update([
+                'deleted' => date('U')
+            ]);
+
+            $this->_db->query('DELETE FROM `nl2_store_pending_actions` WHERE `product_id` = ?', [$this->data()->id]);
+        }
+    }
+
     /*
      * Calculate total amount a user has spent in a specific category.
      *
@@ -263,15 +333,5 @@ class Product {
         }
 
         return 0;
-    }
-
-    public function delete(): void {
-        if ($this->exists()) {
-            $this->update([
-                'deleted' => date('U')
-            ]);
-
-            $this->_db->query('DELETE FROM `nl2_store_pending_actions` WHERE `product_id` = ?', [$this->data()->id]);
-        }
     }
 }
