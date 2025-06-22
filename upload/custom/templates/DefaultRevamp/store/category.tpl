@@ -3,7 +3,7 @@
 
 <div class="ui stackable grid">
   <div class="ui centered row">
-  
+
     {if count($WIDGETS_LEFT)}
       <div class="ui six wide tablet four wide computer column">
         {foreach from=$WIDGETS_LEFT item=widget}
@@ -11,7 +11,7 @@
         {/foreach}
       </div>
     {/if}
-    
+
     <div class="ui {if count($WIDGETS_LEFT) && count($WIDGETS_RIGHT) }four wide tablet eight wide computer{elseif count($WIDGETS_LEFT) || count($WIDGETS_RIGHT)}ten wide tablet twelve wide computer{else}sixteen wide{/if} column">
       <div class="ui segment">
 
@@ -53,6 +53,7 @@
           {else}
             <div class="ui centered stackable grid">
               {foreach from=$PRODUCTS item=product}
+                {* The product hiding logic is now handled in category.php *}
                 <div class="four wide column">
                   <div class="ui card" style="height: 100%">
                     {if $product.image}
@@ -70,13 +71,11 @@
                       <span class="header">{$product.name}</span>
                       <div class="ui divider"></div>
 
-                      {* This is our new pricing logic *}
+                      {* This is the final pricing logic *}
                       {if $product.has_discount}
-                        {* If a discount was applied, show original price crossed out and the new price in green *}
                         <span style="text-decoration: line-through;">{$product.original_price_format}</span>
                         <strong style="font-size: 1.1em; color: #28a745;">{$product.final_price_format}</strong>
                       {else}
-                        {* Otherwise, just show the normal price *}
                         <strong>{$product.final_price_format}</strong>
                       {/if}
                     </div>
@@ -89,7 +88,7 @@
                 <div class="ui small modal" id="modal{$product.id}">
                   <div class="header">
                     {$product.name} |
-                    {* This is our new pricing logic, matching the card display *}
+                    {* This is the final pricing logic for the modal *}
                     {if $product.has_discount}
                       <span style="text-decoration: line-through;">{$product.original_price_format}</span>
                       <strong style="color: #28a745;">{$product.final_price_format}</strong>
