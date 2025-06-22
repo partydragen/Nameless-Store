@@ -104,9 +104,9 @@ class Store_Module extends Module {
             if ($module_version != $cache->retrieve('module_version')) {
                 // Version have changed, Perform actions
                 $this->initialiseUpdate($cache->retrieve('module_version'));
-                
+
                 $cache->store('module_version', $module_version);
-                
+
                 if ($cache->isCached('update_check')) {
                     $cache->erase('update_check');
                 }
@@ -554,6 +554,7 @@ class Store_Module extends Module {
                 'price_cents' => $product->data()->price_cents,
                 'hidden' => $product->data()->hidden,
                 'disabled' => $product->data()->disabled,
+                'hide_if_owned' => $product->data()->hide_if_owned,
                 'connections' => $connections,
                 'fields' => $fields,
                 'actions' => $actions
@@ -1304,6 +1305,13 @@ class Store_Module extends Module {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
+            try {
+                // Add hide_if_owned column to products
+                $this->_db->query('ALTER TABLE `nl2_store_products` ADD `hide_if_owned` tinyint(1) NOT NULL DEFAULT \'0\'');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
         }
     }
 
@@ -1333,7 +1341,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_products')) {
             try {
-                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price_cents` int(11) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `durability` varchar(128) DEFAULT NULL, `recurring_payment_type` int(11) NOT NULL DEFAULT \'1\', `global_limit` varchar(128) DEFAULT NULL, `user_limit` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `require_one_product` tinyint(1) NOT NULL DEFAULT \'0\', `required_groups` varchar(128) DEFAULT NULL, `required_integrations` varchar(128) DEFAULT NULL, `min_player_age` varchar(128) DEFAULT NULL, `min_player_playtime` varchar(128) DEFAULT NULL, `allowed_gateways` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_products', ' `id` int(11) NOT NULL AUTO_INCREMENT, `category_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `price_cents` int(11) NOT NULL, `description` mediumtext, `image` varchar(128) DEFAULT NULL, `durability` varchar(128) DEFAULT NULL, `recurring_payment_type` int(11) NOT NULL DEFAULT \'1\', `global_limit` varchar(128) DEFAULT NULL, `user_limit` varchar(128) DEFAULT NULL, `required_products` varchar(128) DEFAULT NULL, `require_one_product` tinyint(1) NOT NULL DEFAULT \'0\', `required_groups` varchar(128) DEFAULT NULL, `required_integrations` varchar(128) DEFAULT NULL, `min_player_age` varchar(128) DEFAULT NULL, `min_player_playtime` varchar(128) DEFAULT NULL, `allowed_gateways` varchar(128) DEFAULT NULL, `payment_type` tinyint(1) NOT NULL DEFAULT \'1\', `hidden` tinyint(1) NOT NULL DEFAULT \'0\', `disabled` tinyint(1) NOT NULL DEFAULT \'0\', `hide_if_owned` tinyint(1) NOT NULL DEFAULT \'0\', `order` int(11) NOT NULL, `deleted` int(11) NOT NULL DEFAULT \'0\', PRIMARY KEY (`id`)');
             } catch (Exception $e) {
                 // Error
             }

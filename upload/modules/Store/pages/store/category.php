@@ -81,8 +81,8 @@ if (!$products->count()) {
     foreach ($products->results() as $item) {
         $product = new Product(null, null, $item);
 
-        // Hide product if it has been bought and has a purchase limit of 1
-        if ($product->data()->user_limit == 1 && $product->getRealPriceCents($to_customer) <= 0) {
+        // Hide product if enabled, it has a purchase limit of 1, and has been bought
+        if ($product->data()->hide_if_owned == 1 && $product->data()->user_limit == 1 && $product->getRealPriceCents($to_customer) <= 0) {
             continue;
         }
 
