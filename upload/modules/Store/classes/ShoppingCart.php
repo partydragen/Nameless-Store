@@ -1,3 +1,4 @@
+<code class="php">
 <?php
 /**
  * ShoppingCart class used during checkout flow.
@@ -9,9 +10,24 @@
  */
 class ShoppingCart extends Instanceable {
 
+    /**
+     * @var ItemList The list of items.
+     */
     private ItemList $_items;
+
+    /**
+     * @var ?Order Current order.
+     */
     private ?Order $_order = null;
+
+    /**
+     * @var ?Coupon Coupon code.
+     */
     private ?Coupon $_coupon = null;
+
+    /**
+     * @var bool Shopping cart subscription mode.
+     */
     private bool $_subscription_mode = false;
 
     // Constructor
@@ -101,7 +117,7 @@ class ShoppingCart extends Instanceable {
     }
 
     // Set order for this shopping cart
-    public function setOrder(?Order $order) {
+    public function setOrder(?Order $order): void {
         $this->_order = $order;
 
         if ($order != null) {
@@ -117,7 +133,7 @@ class ShoppingCart extends Instanceable {
     }
 
     // Set coupon for this shopping cart
-    public function setCoupon(?Coupon $coupon) {
+    public function setCoupon(?Coupon $coupon): void {
         $this->_coupon = $coupon;
 
         if ($coupon != null) {
@@ -128,12 +144,10 @@ class ShoppingCart extends Instanceable {
     }
 
     // Set shopping cart subscription mode
-    public function setSubscriptionMode(bool $subscription_mode) {
+    public function setSubscriptionMode(bool $subscription_mode): void {
         if ($this->_subscription_mode != $subscription_mode) {
-            $subscription_mode = false;
-            $this->_subscription_mode = $subscription_mode;
-
-            $_SESSION['shopping_cart']['subscription_mode'] = $subscription_mode;
+            $this->_subscription_mode = false;
+            $_SESSION['shopping_cart']['subscription_mode'] = false;
             $_SESSION['shopping_cart']['items'] = [];
         }
     }
