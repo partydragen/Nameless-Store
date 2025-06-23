@@ -334,4 +334,24 @@ class Product {
 
         return 0;
     }
+
+    /**
+     * Get the amount of times a customer has purchased this product.
+     *
+     * @param Customer $customer The customer object.
+     * @return int The amount of times the product has been purchased.
+     */
+    public function getPurchaseCount(Customer $customer): int {
+        $user_limit_data = json_decode($this->data()->user_limit, true) ?? [];
+
+        if (isset($user_limit_data['period']) && $user_limit_data['period'] != 'no_period' && isset($user_limit_data['interval']) && $user_limit_data['interval'] > 0) {
+            // Check for purchases within a specific time period
+            $limit = DB::getInstance()->query('SELECT COUNT(*) AS c FROM nl2_store_orders_products INNER JOIN nl2_store_orders ON nl2_store_orders.id=nl2_store_orders_products.order_id INNER JOIN nl2_store_payments ON nl2_store_payments.order_id=nl2_store_orders_products.order_id WHERE product_id = ? AND to_customer_id = ? AND status_id = 1 AND nl2_store_orders.created > ?', [$this->data()->id, $customer->data()->id, strtotime('-'.$user_limit_data['interval'].' ' . $user_limit_data['period'])]);
+        } else {
+            // Check for all-time purchases
+            $limit = DB::getInstance()->query('SELECT COUNT(*) AS c FROM nl2_store_orders_products INNER JOIN nl2_store_orders ON nl2_store_orders.id=nl2_store_orders_products.order_id INNER JOIN nl2_store_payments ON nl2_store_payments.order_id=nl2_store_orders_products.order_id WHERE product_id = ? AND to_customer_id = ? AND status_id = 1', [$this->data()->id, $customer->data()->id]);
+        }
+
+        return $limit->first()->c;
+    }
 }

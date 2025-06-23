@@ -81,9 +81,16 @@ if (!$products->count()) {
     foreach ($products->results() as $item) {
         $product = new Product(null, null, $item);
 
-        // Hide product if enabled, it has a purchase limit of 1, and has been bought
-        if ($product->data()->hide_if_owned == 1 && $product->data()->user_limit == 1 && $product->getRealPriceCents($to_customer) <= 0) {
-            continue;
+        // Get the product's user limit settings
+        $user_limit_data = json_decode($product->data()->user_limit, true) ?? [];
+        $limit = $user_limit_data['limit'] ?? 0;
+
+        // Check if the product should be hidden
+        if ($product->data()->hide_if_owned == 1 && $limit > 0) {
+            $purchase_count = $product->getPurchaseCount($to_customer);
+            if ($purchase_count >= $limit) {
+                continue; // Hide the product
+            }
         }
 
         $renderProductEvent = EventHandler::executeEvent('renderStoreProduct', [
