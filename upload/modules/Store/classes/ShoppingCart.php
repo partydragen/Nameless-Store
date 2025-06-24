@@ -145,8 +145,9 @@ class ShoppingCart extends Instanceable {
     // Set shopping cart subscription mode
     public function setSubscriptionMode(bool $subscription_mode): void {
         if ($this->_subscription_mode != $subscription_mode) {
-            $this->_subscription_mode = false;
-            $_SESSION['shopping_cart']['subscription_mode'] = false;
+            $this->_subscription_mode = $subscription_mode;
+
+            $_SESSION['shopping_cart']['subscription_mode'] = $subscription_mode;
             $_SESSION['shopping_cart']['items'] = [];
         }
     }

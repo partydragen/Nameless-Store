@@ -1,12 +1,12 @@
 <?php
 /*
- * Made by Partydragen
- * [https://partydragen.com/resources/resource/5-store-module/](https://partydragen.com/resources/resource/5-store-module/)
- * [https://partydragen.com/](https://partydragen.com/)
+ *  Made by Partydragen
+ *  https://partydragen.com/resources/resource/5-store-module/
+ *  https://partydragen.com/
  *
- * License: MIT
+ *  License: MIT
  *
- * Store module - Category Page
+ *  Store module - Category Page
  */
 
 // Always define page name
@@ -33,10 +33,17 @@ if (!$category_query->count()) {
     require_once(ROOT_PATH . '/404.php');
     die();
 }
+
 $category = $category_query->first();
 $category_id = $category->id;
-
 $store_url = Store::getStorePath();
+
+$page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/category'])->results();
+if (count($page_metadata)) {
+    define('PAGE_DESCRIPTION', str_replace(['{site}', '{category_title}', '{description}'], [SITE_NAME, Output::getClean($category->name), Output::getClean(strip_tags(Output::getDecoded($category->description)))], $page_metadata[0]->description));
+    define('PAGE_KEYWORDS', $page_metadata[0]->tags);
+}
+
 $page_title = Output::getClean($category->name);
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
@@ -44,10 +51,9 @@ require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
 // Handle player login form submission
 if (Input::exists()) {
     if (Token::check()) {
-        if (Input::get('type') == 'store_logout') {
-            // The logout logic is handled in frontend_init.php, we just need to redirect
-            Redirect::to(URL::build($store_url . '/category/' . $category->id));
-        } else {
+        $errors = [];
+
+        if (Input::get('type') == 'store_login') {
             $validation = Validate::check($_POST, [
                 'username' => [
                     Validate::REQUIRED => true,
@@ -61,7 +67,7 @@ if (Input::exists()) {
                 if ($to_customer->login(Input::get('username'))) {
                     Redirect::to(URL::build($store_url . '/category/' . $category->id));
                 } else {
-                    $errors[] = $store_language->get('general', 'unable_to_find_player');
+                    $errors[] = $language->get('user', 'invalid_mcname');
                 }
             } else {
                 $errors[] = $store_language->get('general', 'unable_to_find_player');

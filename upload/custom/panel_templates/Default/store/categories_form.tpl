@@ -85,7 +85,6 @@
                                 <label class="custom-control-label" for="inputDisabled">{$DISABLE_CATEGORY}</label>
                             </div>
 
-                            {* NEW CUMULATIVE PRICING TOGGLE *}
                             <div class="form-group custom-control custom-switch">
                                 <input id="inputCumulativePricing" name="cumulative_pricing" type="checkbox" class="custom-control-input"{if $CUMULATIVE_PRICING_VALUE eq 1} checked{/if} />
                                 <label class="custom-control-label" for="inputCumulativePricing">{$CUMULATIVE_PRICING}</label>
@@ -99,14 +98,14 @@
                         </form>
 
                         <center>
-                            <p>Store Module by <a href="[https://partydragen.com/](https://partydragen.com/)" target="_blank">Partydragen</a> and my <a href="[https://partydragen.com/supporters/](https://partydragen.com/supporters/)" target="_blank">Sponsors</a></br>
-                                <a class="ml-1" href="[https://partydragen.com/suggestions/](https://partydragen.com/suggestions/)" target="_blank" data-toggle="tooltip"
+                            <p>Store Module by <a href="https://partydragen.com/" target="_blank">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a></br>
+                                <a class="ml-1" href="https://partydragen.com/suggestions/" target="_blank" data-toggle="tooltip"
                                    data-placement="top" title="You can submit suggestions here"><i class="fa-solid fa-thumbs-up text-warning"></i></a>
-                                <a class="ml-1" href="[https://discord.gg/TtH6tpp](https://discord.gg/TtH6tpp)" target="_blank" data-toggle="tooltip"
+                                <a class="ml-1" href="https://discord.gg/TtH6tpp" target="_blank" data-toggle="tooltip"
                                    data-placement="top" title="Discord"><i class="fab fa-discord fa-fw text-discord"></i></a>
-                                <a class="ml-1" href="[https://partydragen.com/](https://partydragen.com/)" target="_blank" data-toggle="tooltip"
+                                <a class="ml-1" href="https://partydragen.com/" target="_blank" data-toggle="tooltip"
                                    data-placement="top" title="Website"><i class="fas fa-globe fa-fw text-primary"></i></a>
-                                <a class="ml-1" href="[https://www.patreon.com/partydragen](https://www.patreon.com/partydragen)" target="_blank" data-toggle="tooltip"
+                                <a class="ml-1" href="https://www.patreon.com/partydragen" target="_blank" data-toggle="tooltip"
                                    data-placement="top" title="Support the development on Patreon"><i class="fas fa-heart fa-fw text-danger"></i></a>
                             </p>
                         </center>

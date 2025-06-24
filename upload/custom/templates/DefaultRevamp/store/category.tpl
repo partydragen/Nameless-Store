@@ -53,12 +53,11 @@
           {else}
             <div class="ui centered stackable grid">
               {foreach from=$PRODUCTS item=product}
-                {* The product hiding logic is now handled in category.php *}
                 <div class="four wide column">
                   <div class="ui card" style="height: 100%">
                     {if $product.image}
                       <div class="image">
-                        {if $product.sale_active}
+                        {if $product.has_discount}
                           <span class="ui right ribbon red label">
                             {$SALE}
                           </span>
@@ -70,14 +69,10 @@
                     <div class="center aligned content">
                       <span class="header">{$product.name}</span>
                       <div class="ui divider"></div>
-
-                      {* This is the final pricing logic *}
                       {if $product.has_discount}
-                        <span style="text-decoration: line-through;">{$product.original_price_format}</span>
-                        <strong style="font-size: 1.1em; color: #28a745;">{$product.final_price_format}</strong>
-                      {else}
-                        <strong>{$product.final_price_format}</strong>
+                        <span style="color: #dc3545;text-decoration:line-through;">{$product.price_format}</span>
                       {/if}
+                      {$product.real_price_format}
                     </div>
                     <div class="ui bottom attached blue button" onClick="$('#modal{$product.id}').modal('show');">
                       {$BUY} &raquo;
@@ -87,14 +82,7 @@
 
                 <div class="ui small modal" id="modal{$product.id}">
                   <div class="header">
-                    {$product.name} |
-                    {* This is the final pricing logic for the modal *}
-                    {if $product.has_discount}
-                      <span style="text-decoration: line-through;">{$product.original_price_format}</span>
-                      <strong style="color: #28a745;">{$product.final_price_format}</strong>
-                    {else}
-                      <strong>{$product.final_price_format}</strong>
-                    {/if}
+                    {$product.name} | {if $product.has_discount}<span style="color: #dc3545;text-decoration:line-through;">{$product.price_format}</span>{/if} {$product.real_price_format}
                   </div>
                   <div class="{if $product.image}image {/if}content">
                     {if $product.image}
