@@ -99,49 +99,47 @@ if (!$products->count()) {
             }
         }
 
-        $renderProductEvent = EventHandler::executeEvent('renderStoreProduct', [
-            'product' => $product,
-            'name' => $product->data()->name,
-            'content' => $product->data()->description,
-            'image' => (isset($product->data()->image) && !is_null($product->data()->image) ? ((defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/uploads/store/' . Output::getClean(Output::getDecoded($product->data()->image))) : null),
-            'link' => URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->data()->id)),
-            'hidden' => false,
-            'shopping_cart' => $shopping_cart
-        ]);
+        $renderProductEvent = new RenderProductEvent($product, $shopping_cart);
+        EventHandler::executeEvent($renderProductEvent);
 
-        if ($renderProductEvent['hidden']) {
+        if ($renderProductEvent->hidden) {
             continue;
         }
 
-        // Prepare variables for the template
-        $original_price_cents = $product->data()->sale_active == 1 ? $product->data()->price_cents - $product->data()->sale_discount_cents : $product->data()->price_cents;
-        $final_price_cents = $product->getRealPriceCents($to_customer);
-
         $category_products[] = [
             'id' => $product->data()->id,
-            'name' => Output::getClean($renderProductEvent['name']),
-            'user_limit' => $product->data()->user_limit,
-            'final_price_cents' => $final_price_cents,
-            'original_price_format' => Output::getPurified(
+            'name' => Output::getClean($renderProductEvent->name),
+            'price' => Store::fromCents($product->data()->price_cents),
+            'real_price' => Store::fromCents($product->getRealPriceCents()),
+            'sale_discount' => Store::fromCents($product->data()->sale_discount_cents),
+            'price_format' => Output::getPurified(
                 Store::formatPrice(
-                    $original_price_cents,
+                    $product->data()->price_cents,
                     $currency,
                     $currency_symbol,
                     STORE_CURRENCY_FORMAT,
                 )
             ),
-            'final_price_format' => Output::getPurified(
+            'real_price_format' => Output::getPurified(
                 Store::formatPrice(
-                    $final_price_cents,
+                    $product->getRealPriceCents(),
                     $currency,
                     $currency_symbol,
                     STORE_CURRENCY_FORMAT,
                 )
             ),
-            'has_discount' => $final_price_cents < $original_price_cents,
+            'sale_discount_format' => Output::getPurified(
+                Store::formatPrice(
+                    $product->data()->sale_discount_cents,
+                    $currency,
+                    $currency_symbol,
+                    STORE_CURRENCY_FORMAT,
+                )
+            ),
             'sale_active' => $product->data()->sale_active,
-            'description' => $renderProductEvent['content'],
-            'image' => $renderProductEvent['image'],
+            'has_discount' => $product->data()->sale_discount_cents > 0,
+            'description' => $renderProductEvent->content,
+            'image' => $renderProductEvent->image,
             'link' => $product->data()->payment_type != 2 ? URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->data()->id) . '&type=single') : null,
             'subscribe_link' => $product->data()->payment_type != 1 ? URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->data()->id) . '&type=subscribe') : null,
         ];

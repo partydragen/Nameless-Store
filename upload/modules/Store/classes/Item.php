@@ -81,11 +81,7 @@ class Item {
      * @return int
      */
     public function getSingleQuantityPrice(Customer $recipient = null): int {
-        // Ensure quantity is not zero to avoid division by zero error
-        if ($this->getQuantity() == 0) {
-            return 0;
-        }
-        return (int) (($this->getSubtotalPrice() - $this->getTotalDiscounts($recipient)) / $this->getQuantity());
+        return ($this->getSubtotalPrice() - $this->getTotalDiscounts()) / $this->getQuantity();
     }
 
     /**
