@@ -32,12 +32,6 @@
 
                 <!-- Update Notification -->
                 {include file='includes/update.tpl'}
-                
-                <div class="alert alert-warning" role="alert">
-                    This features is currently for patreon supporters, it will be available for everyone in the future with means this wont function for you
-                    </br></br>
-                    <a href="https://partydragen.com/patreon/" target="_blank" class="btn btn-primary">Patreon</a>
-                </div>
 
                 <div class="card shadow mb-4">
                     <div class="card-body">
@@ -96,7 +90,7 @@
                             </div>
                             <div class="form-group">
                                 <input type="hidden" name="token" value="{$TOKEN}">
-                                <span data-toggle="popover" data-title="Early access" data-content="This feature is currently for patreon supporters, it will be available for everyone in the future with means this wont function for you"><input type="submit" class="btn btn-primary" value="{$SUBMIT}" disabled></span>
+                                <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
                             </div>
                         </form>
 

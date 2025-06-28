@@ -1,25 +1,18 @@
 <?php
 /*
- * Made by Partydragen
- * https://partydragen.com/resources/resource/5-store-module/
- * https://partydragen.com/
+ *  Made by Partydragen
+ *  https://partydragen.com/resources/resource/5-store-module/
+ *  https://partydragen.com/
  *
- * License: MIT
+ *  License: MIT
  *
- * Store module - Frontend init
+ *  Store module - Frontend init
  */
 
 $store = new Store();
 $shopping_cart = ShoppingCart::getInstance();
-
-$from_customer = new Customer($user);
-if ($store->isPlayerSystemEnabled()) {
-    // Customer will need to enter minecraft username to buy the products for
-    $to_customer = new Customer();
-} else {
-    // Customer will buy the products for them self
-    $to_customer = $from_customer;
-}
+$from_customer = $shopping_cart->getCustomer();
+$to_customer = $shopping_cart->getRecipient();
 
 // Check if customer tries to logout
 if (Input::exists()) {
@@ -57,8 +50,7 @@ $template->getEngine()->addVariables([
     'SHOPPING_CART_PRODUCTS' => $shopping_cart->items()->getItems(),
     'X_ITEMS_FOR_Y' => $store_language->get('general', 'x_items_for_y', [
         'items' => count($shopping_cart->items()->getItems()),
-        // THIS IS THE CORRECTED LINE
-        'amount' => Store::fromCents($shopping_cart->getTotalRealPriceCents($to_customer)),
+        'amount' => Store::fromCents($shopping_cart->getTotalRealPriceCents()),
         'currency' => $currency,
         'currency_symbol' => $currency_symbol,
     ]),

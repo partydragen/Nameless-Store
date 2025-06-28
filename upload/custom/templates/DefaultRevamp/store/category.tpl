@@ -57,7 +57,7 @@
                   <div class="ui card" style="height: 100%">
                     {if $product.image}
                       <div class="image">
-                        {if $product.has_discount}
+                        {if $product.sale_active}
                           <span class="ui right ribbon red label">
                             {$SALE}
                           </span>

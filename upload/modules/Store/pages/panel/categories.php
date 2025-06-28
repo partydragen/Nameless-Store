@@ -1,12 +1,12 @@
 <?php
 /*
- * Made by Partydragen
- * https://partydragen.com/resources/resource/5-store-module/
- * https://partydragen.com/
+ *  Made by Partydragen
+ *  https://partydragen.com/resources/resource/5-store-module/
+ *  https://partydragen.com/
  *
- * License: MIT
+ *  License: MIT
  *
- * Store module - panel categories page
+ *  Store module - panel categories page
  */
 
 // Can the user view the StaffCP?
@@ -139,6 +139,7 @@ if (!isset($_GET['action'])) {
                 'DISABLE_CATEGORY' => $store_language->get('admin', 'disable_category'),
                 'DISABLE_CATEGORY_VALUE' => ((isset($_POST['disabled'])) ? 1 : 0),
                 'CUMULATIVE_PRICING' => $store_language->get('admin', 'cumulative_pricing'),
+                'CUMULATIVE_PRICING_INFO' => $store_language->get('admin', 'cumulative_pricing_info'),
                 'CUMULATIVE_PRICING_VALUE' => ((isset($_POST['cumulative_pricing'])) ? 1 : 0),
                 'URL_LABEL' => rtrim(URL::getSelfURL(), '/') . URL::build(Store::getStorePath() . '/category/')
             ]);
@@ -267,6 +268,7 @@ if (!isset($_GET['action'])) {
                 'DISABLE_CATEGORY' => $store_language->get('admin', 'disable_category'),
                 'DISABLE_CATEGORY_VALUE' => $category->disabled,
                 'CUMULATIVE_PRICING' => $store_language->get('admin', 'cumulative_pricing'),
+                'CUMULATIVE_PRICING_INFO' => $store_language->get('admin', 'cumulative_pricing_info'),
                 'CUMULATIVE_PRICING_VALUE' => $category->cumulative_pricing,
                 'URL_LABEL' => rtrim(URL::getSelfURL(), '/') . URL::build(Store::getStorePath() . '/category/')
             ]);

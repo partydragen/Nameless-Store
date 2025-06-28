@@ -25,12 +25,33 @@ class ShoppingCart extends Instanceable {
     private ?Coupon $_coupon = null;
 
     /**
+     * @var Customer Customer (The paying customer).
+     */
+    private Customer $_customer;
+
+    /**
+     * @var Customer Recipient customer (Recipient that receive the products).
+     */
+    private Customer $_recipient;
+
+    /**
      * @var bool Shopping cart subscription mode.
      */
     private bool $_subscription_mode = false;
 
     // Constructor
     public function __construct() {
+        // Load customer
+        $this->_customer = new Customer(new User());
+        if (Settings::get('player_login', '0', 'Store')) {
+            // Customer will need to enter minecraft username to buy the products for
+            $this->_recipient = new Customer();
+        } else {
+            // Customer will buy the products for them self
+            $this->_recipient = $this->_customer;
+        }
+
+        // Load shopping cart
         $this->_items = new ItemList();
         if (!Session::exists('shopping_cart')) {
             return;
@@ -116,7 +137,7 @@ class ShoppingCart extends Instanceable {
     }
 
     // Set order for this shopping cart
-    public function setOrder(?Order $order): void {
+    public function setOrder(?Order $order) {
         $this->_order = $order;
 
         if ($order != null) {
@@ -132,7 +153,7 @@ class ShoppingCart extends Instanceable {
     }
 
     // Set coupon for this shopping cart
-    public function setCoupon(?Coupon $coupon): void {
+    public function setCoupon(?Coupon $coupon) {
         $this->_coupon = $coupon;
 
         if ($coupon != null) {
@@ -143,8 +164,9 @@ class ShoppingCart extends Instanceable {
     }
 
     // Set shopping cart subscription mode
-    public function setSubscriptionMode(bool $subscription_mode): void {
+    public function setSubscriptionMode(bool $subscription_mode) {
         if ($this->_subscription_mode != $subscription_mode) {
+            $subscription_mode = false;
             $this->_subscription_mode = $subscription_mode;
 
             $_SESSION['shopping_cart']['subscription_mode'] = $subscription_mode;
@@ -162,6 +184,16 @@ class ShoppingCart extends Instanceable {
         return $this->_coupon;
     }
 
+    // Get the paying customer.
+    public function getCustomer(): Customer {
+        return $this->_customer;
+    }
+
+    // Recipient that receive the products.
+    public function getRecipient(): Customer {
+        return $this->_recipient;
+    }
+
     // Get total price to pay in cents
     public function getTotalCents(): int {
         $price = 0;
@@ -174,34 +206,22 @@ class ShoppingCart extends Instanceable {
     }
 
     // Get total real price in cents
-    public function getTotalRealPriceCents(Customer $recipient = null): int {
+    public function getTotalRealPriceCents(): int {
         $price = 0;
 
         foreach ($this->items()->getItems() as $item) {
-            // Pass the recipient object down to the item's price calculation
-            $price += $item->getTotalPrice($recipient);
+            $price += $item->getTotalPrice();
         }
 
-        // Apply coupon discount if one exists
-        if ($this->getCoupon() != null) {
-            $price -= $this->getCoupon()->data()->discount_value;
-        }
-
-        return max(0, $price);
+        return $price;
     }
 
     // Get total discount in cents
-    public function getTotalDiscountCents(Customer $recipient = null): int {
+    public function getTotalDiscountCents(): int {
         $discount = 0;
 
         foreach ($this->items()->getItems() as $item) {
-            // Pass the recipient object down to the item's discount calculation
-            $discount += $item->getTotalDiscounts($recipient);
-        }
-
-        // Add coupon discount if one exists
-        if ($this->getCoupon() != null) {
-            $discount += $this->getCoupon()->data()->discount_value;
+            $discount += $item->getTotalDiscounts();
         }
 
         return $discount;

@@ -9,6 +9,24 @@
  */
 
 class PriceAdjustmentHook extends HookBase {
+
+    // Cumulative pricing
+    public static function cumulativePricing(array $params = []): array {
+        $product = $params['product'];
+        $recipient = $params['shopping_cart']->getRecipient();
+        if ($recipient != null) {
+
+            // Check if category exists and has cumulative pricing enabled
+            $category_query = DB::getInstance()->query('SELECT cumulative_pricing FROM nl2_store_categories WHERE id = ?', [$product->data()->category_id]);
+            if (!$category_query->count() || $category_query->first()->cumulative_pricing == 1) {
+                $product->data()->sale_discount_cents = $recipient->calculateSpendingInCategory($product->data()->category_id);
+            }
+
+        }
+
+        return $params;
+    }
+
     // Check for discounts
     public static function discounts(array $params = []): array {
         $sales = Store::getActiveSales();
@@ -25,11 +43,11 @@ class PriceAdjustmentHook extends HookBase {
                     $discount_amount = $product->data()->price_cents * ($sale->discount_amount / 100);
 
                     $product->data()->sale_active = true;
-                    $product->data()->sale_discount_cents = $discount_amount;
+                    $product->data()->sale_discount_cents += $discount_amount;
                 } else if ($sale->discount_type == 2) {
                     // Amount discount
                     $product->data()->sale_active = true;
-                    $product->data()->sale_discount_cents = Store::toCents($sale->discount_amount);
+                    $product->data()->sale_discount_cents += Store::toCents($sale->discount_amount);
                 }
             }
 

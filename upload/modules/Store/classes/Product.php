@@ -266,92 +266,21 @@ class Product {
         return $required_integrations_list;
     }
 
-    /**
-     * Get the real price in cents for a specific customer, takes sales and cumulative pricing into account.
-     *
-     * @param Customer|null $recipient The customer object to calculate the price for.
-     * @return int The final price in cents.
-     */
-    public function getRealPriceCents(Customer $recipient = null): int {
-        // First, calculate the standard price, including any active sales.
-        $base_price = $this->data()->sale_active == 1 ? $this->data()->price_cents - $this->data()->sale_discount_cents : $this->data()->price_cents;
-
-        // If there's no recipient customer or the product doesn't exist, return the base price.
-        if ($recipient === null || !$recipient->exists() || !$this->exists()) {
-            return $base_price;
-        }
-
-        // Get the category data directly from the database
-        $category_query = $this->_db->query('SELECT cumulative_pricing FROM nl2_store_categories WHERE id = ?', [$this->data()->category_id]);
-
-        // Check if category exists and has cumulative pricing enabled
-        if (!$category_query->count() || $category_query->first()->cumulative_pricing != 1) {
-            // Not enabled, so return the normal price with sales
-            return $base_price;
-        }
-
-        // If we get here, cumulative pricing is enabled. Calculate the discount using the recipient's customer ID
-        $amount_spent = $this->_calculateUserSpendingInCategory($recipient->data()->id, $this->data()->category_id);
-
-        // Subtract the amount already spent from the base price.
-        $new_price = $base_price - $amount_spent;
-
-        // Ensure the price doesn't drop below zero.
-        return max(0, $new_price);
+    public function getRealPriceCents(): int {
+        return $this->data()->price_cents - $this->data()->sale_discount_cents;
     }
 
-    public function delete(): void {
+    public function delete() {
         if ($this->exists()) {
             $this->update([
                 'deleted' => date('U')
             ]);
-
+            
             $this->_db->query('DELETE FROM `nl2_store_pending_actions` WHERE `product_id` = ?', [$this->data()->id]);
-        }
-    }
-
-    /*
-     * Calculate total amount a user has spent in a specific category.
-     *
-     * @param int $customer_id The ID of the customer.
-     * @param int $category_id The ID of the category.
-     * @return int The total amount spent in cents.
-     */
-    private function _calculateUserSpendingInCategory(int $customer_id, int $category_id): int {
-        $spending = $this->_db->query(
-            "SELECT SUM(p.amount_cents) as total
-             FROM nl2_store_payments p
-             JOIN nl2_store_orders o ON o.id = p.order_id
-             JOIN nl2_store_orders_products po ON po.order_id = o.id
-             JOIN nl2_store_products pr ON pr.id = po.product_id
-             WHERE o.to_customer_id = ? AND pr.category_id = ? AND p.status_id = 1",
-            [$customer_id, $category_id]
-        );
-
-        if ($spending->count() && $spending->first()->total) {
-            return (int)$spending->first()->total;
+            
+            return true;
         }
 
-        return 0;
-    }
-
-    /**
-     * Get the amount of times a customer has purchased this product.
-     *
-     * @param Customer $customer The customer object.
-     * @return int The amount of times the product has been purchased.
-     */
-    public function getPurchaseCount(Customer $customer): int {
-        $user_limit_data = json_decode($this->data()->user_limit, true) ?? [];
-
-        if (isset($user_limit_data['period']) && $user_limit_data['period'] != 'no_period' && isset($user_limit_data['interval']) && $user_limit_data['interval'] > 0) {
-            // Check for purchases within a specific time period
-            $limit = DB::getInstance()->query('SELECT COUNT(*) AS c FROM nl2_store_orders_products INNER JOIN nl2_store_orders ON nl2_store_orders.id=nl2_store_orders_products.order_id INNER JOIN nl2_store_payments ON nl2_store_payments.order_id=nl2_store_orders_products.order_id WHERE product_id = ? AND to_customer_id = ? AND status_id = 1 AND nl2_store_orders.created > ?', [$this->data()->id, $customer->data()->id, strtotime('-'.$user_limit_data['interval'].' ' . $user_limit_data['period'])]);
-        } else {
-            // Check for all-time purchases
-            $limit = DB::getInstance()->query('SELECT COUNT(*) AS c FROM nl2_store_orders_products INNER JOIN nl2_store_orders ON nl2_store_orders.id=nl2_store_orders_products.order_id INNER JOIN nl2_store_payments ON nl2_store_payments.order_id=nl2_store_orders_products.order_id WHERE product_id = ? AND to_customer_id = ? AND status_id = 1', [$this->data()->id, $customer->data()->id]);
-        }
-
-        return $limit->first()->c;
+        return false;
     }
 }

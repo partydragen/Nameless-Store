@@ -48,7 +48,7 @@ class Item {
     }
 
     /**
-     * Get the item id.
+     * Get the product for this item.
      *
      * @return int
      */
@@ -57,7 +57,7 @@ class Item {
     }
 
     /**
-     * Get the product for this item.
+     * Get the item id.
      *
      * @return Product
      */
@@ -77,25 +77,19 @@ class Item {
     /**
      * Item cost after any discounts in cents for a single quantity. (e.g., 100 cents is $1.00, a zero-decimal currency)
      *
-     * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int
      */
-    public function getSingleQuantityPrice(Customer $recipient = null): int {
-        // Ensure quantity is not zero to avoid division by zero error
-        if ($this->getQuantity() == 0) {
-            return 0;
-        }
-        return (int) (($this->getSubtotalPrice() - $this->getTotalDiscounts($recipient)) / $this->getQuantity());
+    public function getSingleQuantityPrice(): int {
+        return ($this->getSubtotalPrice() - $this->getTotalDiscounts()) / $this->getQuantity();
     }
 
     /**
      * Item cost after any discounts in cents. (e.g., 100 cents to charge $1.00, a zero-decimal currency)
      *
-     * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int
      */
-    public function getTotalPrice(Customer $recipient = null): int {
-        return $this->getSubtotalPrice() - $this->getTotalDiscounts($recipient);
+    public function getTotalPrice(): int {
+        return $this->getSubtotalPrice() - $this->getTotalDiscounts();
     }
 
     /**
@@ -123,18 +117,10 @@ class Item {
     /**
      * Item discounts. (e.g., 100 cents to charge $1.00, a zero-decimal currency)
      *
-     * @param Customer|null $recipient The customer object to calculate the price for.
      * @return int
      */
-    public function getTotalDiscounts(Customer $recipient = null): int {
-        $subtotal = $this->getSubtotalPrice();
-
-        // Get the final price from the Product class, passing the recipient
-        $final_unit_price = $this->_product->getRealPriceCents($recipient);
-
-        $final_total_price = $final_unit_price * $this->getQuantity();
-
-        return max(0, $subtotal - $final_total_price);
+    public function getTotalDiscounts(): int {
+        return $this->_product->data()->sale_discount_cents * $this->getQuantity();
     }
 
     /**
@@ -151,7 +137,7 @@ class Item {
      *
      * @param string $identifier The field identifier.
      *
-     * @return array|null
+     * @return array
      */
     public function getField(string $identifier): ?array {
         foreach ($this->_fields as $field) {

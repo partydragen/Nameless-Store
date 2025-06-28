@@ -84,13 +84,11 @@
                                 <input id="inputDisabled" name="disabled" type="checkbox" class="custom-control-input"{if $DISABLE_CATEGORY_VALUE eq 1} checked{/if} />
                                 <label class="custom-control-label" for="inputDisabled">{$DISABLE_CATEGORY}</label>
                             </div>
-
                             <div class="form-group custom-control custom-switch">
                                 <input id="inputCumulativePricing" name="cumulative_pricing" type="checkbox" class="custom-control-input"{if $CUMULATIVE_PRICING_VALUE eq 1} checked{/if} />
                                 <label class="custom-control-label" for="inputCumulativePricing">{$CUMULATIVE_PRICING}</label>
-                                <small class="form-text text-muted">If enabled, the price of products in this category will be reduced by the amount the customer has already spent in the same category.</small>
+                                <small class="form-text text-muted">{$CUMULATIVE_PRICING_INFO}</small>
                             </div>
-
                             <div class="form-group">
                                 <input type="hidden" name="token" value="{$TOKEN}">
                                 <input type="submit" class="btn btn-primary" value="{$SUBMIT}">

@@ -122,8 +122,8 @@
                                         <label for="inputPaymentType">{$RECURRING_PAYMENT}</label>
                                         <select name="payment_type" class="form-control" id="inputPaymentType">
                                             <option value="1" {if $RECURRING_PAYMENT_VALUE == 1} selected{/if}>{$CHARGE_CUSTOMER_ONCE}</option>
-                                            <option value="2" {if $RECURRING_PAYMENT_VALUE == 2} selected{/if} disabled>{$CHARGE_RECURRING_SUBSCRIPTION}</option>
-                                            <option value="3" {if $RECURRING_PAYMENT_VALUE == 3} selected{/if} disabled>{$ONE_OFF_AND_RECURRING}</option>
+                                            <option value="2" {if $RECURRING_PAYMENT_VALUE == 2} selected{/if}>{$CHARGE_RECURRING_SUBSCRIPTION}</option>
+                                            <option value="3" {if $RECURRING_PAYMENT_VALUE == 3} selected{/if}>{$ONE_OFF_AND_RECURRING}</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6">
@@ -148,13 +148,13 @@
                                 <label class="custom-control-label" for="inputHidden">{$HIDE_PRODUCT}</label>
                             </div>
                             <div class="form-group custom-control custom-switch">
-                                <input id="inputHideIfOwned" name="hide_if_owned" type="checkbox" class="custom-control-input"{if $HIDE_IF_OWNED_VALUE eq 1} checked{/if} />
-                                <label class="custom-control-label" for="inputHideIfOwned">{$HIDE_IF_OWNED}</label>
-                                <small class="form-text text-muted">If enabled, this product will be hidden from the store for customers who have already paid for it through cumulative discounts (only applies to single-purchase items).</small>
-                            </div>
-                            <div class="form-group custom-control custom-switch">
                                 <input id="inputDisabled" name="disabled" type="checkbox" class="custom-control-input"{if $DISABLE_PRODUCT_VALUE eq 1} checked{/if} />
                                 <label class="custom-control-label" for="inputDisabled">{$DISABLE_PRODUCT}</label>
+                            </div>
+                            <div class="form-group custom-control custom-switch">
+                                <input id="inputHideIfOwned" name="hide_if_owned" type="checkbox" class="custom-control-input"{if $HIDE_IF_OWNED_VALUE eq 1} checked{/if} />
+                                <label class="custom-control-label" for="inputHideIfOwned">{$HIDE_IF_OWNED}</label>
+                                <small class="form-text text-muted">{$HIDE_IF_OWNED_INFO}</small>
                             </div>
                             <div class="form-group">
                                 <input type="hidden" name="token" value="{$TOKEN}">

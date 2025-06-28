@@ -48,7 +48,6 @@ $page_title = Output::getClean($category->name);
 require_once(ROOT_PATH . '/core/templates/frontend_init.php');
 require_once(ROOT_PATH . '/modules/Store/core/frontend_init.php');
 
-// Handle player login form submission
 if (Input::exists()) {
     if (Token::check()) {
         $errors = [];
@@ -87,18 +86,6 @@ if (!$products->count()) {
     foreach ($products->results() as $item) {
         $product = new Product(null, null, $item);
 
-        // Get the product's user limit settings
-        $user_limit_data = json_decode($product->data()->user_limit, true) ?? [];
-        $limit = $user_limit_data['limit'] ?? 0;
-
-        // Check if the product should be hidden
-        if ($product->data()->hide_if_owned == 1 && $limit > 0) {
-            $purchase_count = $product->getPurchaseCount($to_customer);
-            if ($purchase_count >= $limit) {
-                continue; // Hide the product
-            }
-        }
-
         $renderProductEvent = EventHandler::executeEvent('renderStoreProduct', [
             'product' => $product,
             'name' => $product->data()->name,
@@ -113,32 +100,37 @@ if (!$products->count()) {
             continue;
         }
 
-        // Prepare variables for the template
-        $original_price_cents = $product->data()->sale_active == 1 ? $product->data()->price_cents - $product->data()->sale_discount_cents : $product->data()->price_cents;
-        $final_price_cents = $product->getRealPriceCents($to_customer);
-
         $category_products[] = [
             'id' => $product->data()->id,
             'name' => Output::getClean($renderProductEvent['name']),
-            'user_limit' => $product->data()->user_limit,
-            'final_price_cents' => $final_price_cents,
-            'original_price_format' => Output::getPurified(
+            'price' => Store::fromCents($product->data()->price_cents),
+            'real_price' => Store::fromCents($product->getRealPriceCents()),
+            'sale_discount' => Store::fromCents($product->data()->sale_discount_cents),
+            'price_format' => Output::getPurified(
                 Store::formatPrice(
-                    $original_price_cents,
+                    $product->data()->price_cents,
                     $currency,
                     $currency_symbol,
                     STORE_CURRENCY_FORMAT,
                 )
             ),
-            'final_price_format' => Output::getPurified(
+            'real_price_format' => Output::getPurified(
                 Store::formatPrice(
-                    $final_price_cents,
+                    $product->getRealPriceCents(),
                     $currency,
                     $currency_symbol,
                     STORE_CURRENCY_FORMAT,
                 )
             ),
-            'has_discount' => $final_price_cents < $original_price_cents,
+            'sale_discount_format' => Output::getPurified(
+                Store::formatPrice(
+                    $product->data()->sale_discount_cents,
+                    $currency,
+                    $currency_symbol,
+                    STORE_CURRENCY_FORMAT,
+                )
+            ),
+            'has_discount' => $product->data()->sale_discount_cents > 0,
             'sale_active' => $product->data()->sale_active,
             'description' => $renderProductEvent['content'],
             'image' => $renderProductEvent['image'],
@@ -183,7 +175,7 @@ if ($store->isPlayerSystemEnabled() && !$to_customer->isLoggedIn()) {
         'PLEASE_ENTER_USERNAME' => $store_language->get('general', 'please_enter_username'),
         'CONTINUE' => $store_language->get('general', 'continue'),
     ]);
-
+    
     $template_file = 'store/player_login';
 } else {
     $template_file = 'store/category';

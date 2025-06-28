@@ -24,7 +24,7 @@ class Store_Module extends Module {
 
         $name = 'Store';
         $author = '<a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a>';
-        $module_version = '1.8.4';
+        $module_version = '1.8.3';
         $nameless_version = '2.2.3';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
@@ -75,7 +75,6 @@ class Store_Module extends Module {
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredProducts']);
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredGroups']);
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'requiredIntegrations']);
-        EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'cancel']);
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'handleFieldsData']);
         EventHandler::registerListener(ParseActionCommandEvent::class, [ParseActionCommandListener::class, 'placeholders']);
         EventHandler::registerListener(ParseActionCommandEvent::class, [ParseActionCommandListener::class, 'conditions'], 15);
@@ -85,6 +84,9 @@ class Store_Module extends Module {
         EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'purify']);
         EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'renderEmojis'], 10);
         EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'replaceAnchors'], 15);
+        EventHandler::registerListener('renderStoreProduct', [PriceAdjustmentHook::class, 'cumulativePricing'], 15);
+        EventHandler::registerListener('renderStoreProduct', [PriceAdjustmentHook::class, 'discounts'], 10);
+        EventHandler::registerListener('renderStoreProduct', [ProductVisibilityHook::class, 'execute'], 10);
 
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
 
