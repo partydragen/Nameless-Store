@@ -79,14 +79,14 @@ class Store_Module extends Module {
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'handleFieldsData']);
         EventHandler::registerListener(ParseActionCommandEvent::class, [ParseActionCommandListener::class, 'placeholders']);
         EventHandler::registerListener(ParseActionCommandEvent::class, [ParseActionCommandListener::class, 'conditions'], 15);
-        EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'purify']);
-        EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'renderEmojis'], 10);
-        EventHandler::registerListener('renderStoreCategory', [ContentHook::class, 'replaceAnchors'], 15);
-        EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'purify']);
-        EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'renderEmojis'], 10);
-        EventHandler::registerListener('renderStoreProduct', [ContentHook::class, 'replaceAnchors'], 15);
-        EventHandler::registerListener('renderStoreProduct', [PriceAdjustmentHook::class, 'cumulativePricing'], 15);
-        EventHandler::registerListener('renderStoreProduct', [ProductVisibilityHook::class, 'execute'], 10);
+        EventHandler::registerListener(RenderCategoryEvent::class, [StoreContentHook::class, 'purify']);
+        EventHandler::registerListener(RenderCategoryEvent::class, [StoreContentHook::class, 'renderEmojis'], 10);
+        EventHandler::registerListener(RenderCategoryEvent::class, [StoreContentHook::class, 'replaceAnchors'], 15);
+        EventHandler::registerListener(RenderProductEvent::class, [StoreContentHook::class, 'purify']);
+        EventHandler::registerListener(RenderProductEvent::class, [StoreContentHook::class, 'renderEmojis'], 10);
+        EventHandler::registerListener(RenderProductEvent::class, [StoreContentHook::class, 'replaceAnchors'], 15);
+        EventHandler::registerListener(RenderProductEvent::class, [PriceAdjustmentHook::class, 'cumulativePricing'], 15);
+        EventHandler::registerListener(RenderProductEvent::class, [ProductVisibilityHook::class, 'execute'], 10);
 
         $endpoints->loadEndpoints(ROOT_PATH . '/modules/Store/includes/endpoints');
 

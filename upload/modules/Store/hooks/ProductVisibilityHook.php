@@ -10,9 +10,9 @@
 
 class ProductVisibilityHook extends HookBase {
 
-    public static function execute(array $params = []): array {
-        $product = $params['product'];
-        $recipient = $params['shopping_cart']->getRecipient();
+    public static function execute(RenderProductEvent $event): void {
+        $product = $event->product;
+        $recipient = $event->shopping_cart->getRecipient();
         if ($product->data()->hide_if_owned) {
             $user_limit = json_decode($product->data()->user_limit, true) ?? [];
             if (isset($user_limit['limit']) && $user_limit['limit'] > 0) {
@@ -25,12 +25,10 @@ class ProductVisibilityHook extends HookBase {
                 }
 
                 if (count($limit->results()) >= $user_limit['limit']) {
-                    $params['hidden'] = true;
+                    $event->hidden = true;
                 }
             }
         }
-
-        return $params;
     }
 
 }

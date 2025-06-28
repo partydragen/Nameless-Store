@@ -11,10 +11,10 @@
 class PriceAdjustmentHook extends HookBase {
 
     // Cumulative pricing
-    public static function cumulativePricing(array $params = []): array {
-        $product = $params['product'];
-        $recipient = $params['shopping_cart']->getRecipient();
-        if ($recipient != null) {
+    public static function cumulativePricing(RenderProductEvent $event): void {
+        $product = $event->product;
+        $recipient = $event->shopping_cart->getRecipient();
+        if ($recipient->exists()) {
 
             // Check if category exists and has cumulative pricing enabled
             $category_query = DB::getInstance()->query('SELECT cumulative_pricing FROM nl2_store_categories WHERE id = ?', [$product->data()->category_id]);
@@ -23,19 +23,17 @@ class PriceAdjustmentHook extends HookBase {
             }
 
         }
-
-        return $params;
     }
 
     // Check for discounts
-    public static function discounts(array $params = []): array {
+    public static function discounts(RenderProductEvent $event): void {
         $sales = Store::getActiveSales();
 
         // Handle sales
         foreach ($sales as $sale) {
             $products = json_decode($sale->effective_on ?? '[]');
 
-            $product = $params['product'];
+            $product = $event->product;
             if (in_array($product->data()->id, $products)) {
 
                 if ($sale->discount_type == 1) {
@@ -58,11 +56,11 @@ class PriceAdjustmentHook extends HookBase {
         }
 
         // Handle coupon
-        $coupon = $params['shopping_cart']->getCoupon();
+        $coupon = $event->shopping_cart->getCoupon();
         if ($coupon != null) {
             $products = json_decode($coupon->data()->effective_on ?? '[]');
 
-            $product = $params['product'];
+            $product = $event->product;
             if (in_array($product->data()->id, $products)) {
 
                 if ($coupon->data()->discount_type == 1) {
@@ -83,7 +81,5 @@ class PriceAdjustmentHook extends HookBase {
                 $product->data()->sale_discount_cents = $product->data()->price_cents;
             }
         }
-
-        return $params;
     }
 }

@@ -86,23 +86,16 @@ if (!$products->count()) {
     foreach ($products->results() as $item) {
         $product = new Product(null, null, $item);
 
-        $renderProductEvent = EventHandler::executeEvent('renderStoreProduct', [
-            'product' => $product,
-            'name' => $product->data()->name,
-            'content' => $product->data()->description,
-            'image' => (isset($product->data()->image) && !is_null($product->data()->image) ? ((defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/uploads/store/' . Output::getClean(Output::getDecoded($product->data()->image))) : null),
-            'link' => URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->data()->id)),
-            'hidden' => false,
-            'shopping_cart' => $shopping_cart
-        ]);
+        $renderProductEvent = new RenderProductEvent($product, $shopping_cart);
+        EventHandler::executeEvent($renderProductEvent);
 
-        if ($renderProductEvent['hidden']) {
+        if ($renderProductEvent->hidden) {
             continue;
         }
 
         $category_products[] = [
             'id' => $product->data()->id,
-            'name' => Output::getClean($renderProductEvent['name']),
+            'name' => Output::getClean($renderProductEvent->name),
             'price' => Store::fromCents($product->data()->price_cents),
             'real_price' => Store::fromCents($product->getRealPriceCents()),
             'sale_discount' => Store::fromCents($product->data()->sale_discount_cents),
@@ -132,8 +125,8 @@ if (!$products->count()) {
             ),
             'has_discount' => $product->data()->sale_discount_cents > 0,
             'sale_active' => $product->data()->sale_active,
-            'description' => $renderProductEvent['content'],
-            'image' => $renderProductEvent['image'],
+            'description' => $renderProductEvent->content,
+            'image' => $renderProductEvent->image,
             'link' => $product->data()->payment_type != 2 ? URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->data()->id) . '&type=single') : null,
             'subscribe_link' => $product->data()->payment_type != 1 ? URL::build($store_url . '/checkout', 'add=' . Output::getClean($product->data()->id) . '&type=subscribe') : null,
         ];
@@ -143,11 +136,8 @@ if (!$products->count()) {
 }
 
 // Category description
-$renderCategoryEvent = EventHandler::executeEvent('renderStoreCategory', [
-    'id' => $category->id,
-    'name' => $category->name,
-    'content' => $category->description
-]);
+$renderCategoryEvent = new RenderCategoryEvent($category->id, $category->name, $category->description);
+EventHandler::executeEvent($renderCategoryEvent);
 
 if (isset($errors) && count($errors))
     $template->getEngine()->addVariable('ERRORS', $errors);
@@ -158,9 +148,9 @@ $template->getEngine()->addVariables([
     'HOME' => $store_language->get('general', 'home'),
     'HOME_URL' => URL::build($store_url),
     'CATEGORIES' => $store->getNavbarMenu($category->name),
-    'CATEGORY_ID' => $renderCategoryEvent['id'],
-    'CATEGORY_NAME' => $renderCategoryEvent['name'],
-    'CONTENT' => str_replace('{credits}', $from_customer->getCredits(), $renderCategoryEvent['content']),
+    'CATEGORY_ID' => $renderCategoryEvent->id,
+    'CATEGORY_NAME' => $renderCategoryEvent->name,
+    'CONTENT' => str_replace('{credits}', $from_customer->getCredits(), $renderCategoryEvent->content),
     'ACTIVE_CATEGORY' => Output::getClean($category->name),
     'BUY' => $store_language->get('general', 'buy'),
     'ADD_TO_CART' => $store_language->get('general', 'add_to_cart'),
