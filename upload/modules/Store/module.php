@@ -30,12 +30,8 @@ class Store_Module extends Module {
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
 
         // Define URLs which belong to this module
-        $pages->add('Store', $this->_store_url, 'pages/store/index.php', 'store', true);
-        $pages->add('Store', $this->_store_url . '/category', 'pages/store/category.php', 'product', true);
+        $pages->add('Store', $this->_store_url, 'pages/store/store.php', 'store', true);
         $pages->add('Store', $this->_store_url . '/checkout', 'pages/store/checkout.php');
-        $pages->add('Store', $this->_store_url . '/check', 'pages/store/check.php');
-        $pages->add('Store', $this->_store_url . '/cancel', 'pages/store/cancel.php');
-        $pages->add('Store', $this->_store_url . '/view', 'pages/store/view.php');
         $pages->add('Store', '/store/process', 'pages/backend/process.php');
         $pages->add('Store', '/store/listener', 'pages/backend/listener.php');
         $pages->add('Store', '/panel/store/general_settings', 'pages/panel/general_settings.php');
@@ -67,8 +63,8 @@ class Store_Module extends Module {
         EventHandler::registerEvent(CheckoutFieldsValidationEvent::class);
         EventHandler::registerEvent(CustomerProductExpiredEvent::class);
         EventHandler::registerEvent(ParseActionCommandEvent::class);
-        EventHandler::registerEvent('renderStoreCategory', 'renderStoreCategory', [], true, true);
-        EventHandler::registerEvent('renderStoreProduct', 'renderStoreProduct', [], true, true);
+        EventHandler::registerEvent(RenderCategoryEvent::class);
+        EventHandler::registerEvent(RenderProductEvent::class);
 
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'globalLimit']);
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'userLimit']);

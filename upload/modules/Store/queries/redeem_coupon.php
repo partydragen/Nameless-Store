@@ -14,7 +14,7 @@ if (Input::exists()) {
 
         if ($validation->passed()) {
             $shopping_cart = ShoppingCart::getInstance();
-            $from_customer = new Customer($user);
+            $from_customer = $shopping_cart->getCustomer();
 
             if (!empty($_POST['coupon'])) {
                 $coupon = DB::getInstance()->query('SELECT * FROM nl2_store_coupons WHERE code = ? AND start_date < ? AND expire_date > ? ', [$_POST['coupon'], date('U'), date('U')]);

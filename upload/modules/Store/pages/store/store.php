@@ -6,23 +6,44 @@
  *
  *  License: MIT
  *
- *  Store module - Index Page
+ *  Store module - Category Page
  */
 
 // Always define page name
 define('PAGE', 'store');
 
-// Query category
-$category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE deleted = 0 ORDER BY `order` ASC LIMIT 1');
-if (!$category->count()) {
+$directories = explode('/', $route);
+if (!in_array('category', $directories)) {
+    // Load index
+    $category_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE deleted = 0 ORDER BY `order` ASC LIMIT 1');
+
+} else {
+    // Load specific category
+    $category_id = $directories[count($directories) - 1];
+    if (!strlen($category_id)) {
+        require_once(ROOT_PATH . '/404.php');
+        die();
+    }
+
+    if (is_numeric($category_id)) {
+        // Query category by id
+        $category_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ? AND disabled = 0 AND deleted = 0', [$category_id]);
+    } else {
+        // Query category by url
+        $category_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE url = ? AND disabled = 0 AND deleted = 0', [$category_id]);
+    }
+}
+
+if (!$category_query->count()) {
     require_once(ROOT_PATH . '/404.php');
     die();
 }
 
-$category = $category->first();
+$category = $category_query->first();
+$category_id = $category->id;
 $store_url = Store::getStorePath();
 
-$page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/category'])->results();
+$page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url])->results();
 if (count($page_metadata)) {
     define('PAGE_DESCRIPTION', str_replace(['{site}', '{category_title}', '{description}'], [SITE_NAME, Output::getClean($category->name), Output::getClean(strip_tags(Output::getDecoded($category->description)))], $page_metadata[0]->description));
     define('PAGE_KEYWORDS', $page_metadata[0]->tags);
@@ -60,7 +81,7 @@ if (Input::exists()) {
 }
 
 // Get products
-$products = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE category_id = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', [$category->id]);
+$products = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE category_id = ? AND disabled = 0 AND hidden = 0 AND deleted = 0 ORDER BY `order` ASC', [$category_id]);
 
 if (!$products->count()) {
     $template->getEngine()->addVariable('NO_PRODUCTS', $store_language->get('general', 'no_products'));
@@ -107,6 +128,7 @@ if (!$products->count()) {
                     STORE_CURRENCY_FORMAT,
                 )
             ),
+            'has_discount' => $product->data()->sale_discount_cents > 0,
             'sale_active' => $product->data()->sale_active,
             'description' => $renderProductEvent->content,
             'image' => $renderProductEvent->image,
@@ -121,13 +143,6 @@ if (!$products->count()) {
 // Category description
 $renderCategoryEvent = new RenderCategoryEvent($category->id, $category->name, $category->description);
 EventHandler::executeEvent($renderCategoryEvent);
-
-$template->getEngine()->addVariables([
-    'ACTIVE_CATEGORY' => Output::getClean($category->name),
-    'BUY' => $store_language->get('general', 'buy'),
-    'CLOSE' => $language->get('general', 'close'),
-    'SALE' => $store_language->get('general', 'sale')
-]);
 
 if (isset($errors) && count($errors))
     $template->getEngine()->addVariable('ERRORS', $errors);
@@ -155,7 +170,7 @@ if ($store->isPlayerSystemEnabled() && !$to_customer->isLoggedIn()) {
         'PLEASE_ENTER_USERNAME' => $store_language->get('general', 'please_enter_username'),
         'CONTINUE' => $store_language->get('general', 'continue'),
     ]);
-
+    
     $template_file = 'store/player_login';
 } else {
     $template_file = 'store/category';
