@@ -151,6 +151,11 @@
                                 <input id="inputDisabled" name="disabled" type="checkbox" class="custom-control-input"{if $DISABLE_PRODUCT_VALUE eq 1} checked{/if} />
                                 <label class="custom-control-label" for="inputDisabled">{$DISABLE_PRODUCT}</label>
                             </div>
+                            <div class="form-group custom-control custom-switch">
+                                <input id="inputHideIfOwned" name="hide_if_owned" type="checkbox" class="custom-control-input"{if $HIDE_IF_OWNED_VALUE eq 1} checked{/if} />
+                                <label class="custom-control-label" for="inputHideIfOwned">{$HIDE_IF_OWNED}</label>
+                                <small class="form-text text-muted">{$HIDE_IF_OWNED_INFO}</small>
+                            </div>
                             <div class="form-group">
                                 <input type="hidden" name="token" value="{$TOKEN}">
                                 <input type="hidden" name="type" value="settings">

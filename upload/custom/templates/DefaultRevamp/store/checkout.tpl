@@ -57,7 +57,7 @@
                 <td>{$item.name}</td>
                 <td>{if count($item.fields)} {foreach from=$item.fields item=field name=fields}<strong>{$field.description}</strong>: {$field.value}{if not $smarty.foreach.fields.last}</br>{/if}{/foreach} {/if}</td>
                 <td>{$item.quantity}</td>
-                <td>{if $item.sale_active}<span style="color: #dc3545;text-decoration:line-through;">{$item.price_format}</span>{/if} {$item.real_price_format}</td>
+                <td>{if $item.has_discount}<span style="color: #dc3545;text-decoration:line-through;">{$item.price_format}</span>{/if} {$item.real_price_format}</td>
                 <td><a href="{$item.remove_link}" class="ui icon remove red tiny button right floated"><i class="icon remove"></i></a></td>
               </tr>
             {/foreach}

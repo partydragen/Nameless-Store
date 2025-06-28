@@ -81,6 +81,10 @@ if (!isset($_GET['action'])) {
                         if (isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
                         else $disabled = 0;
 
+                        // Cumulative pricing?
+                        if (isset($_POST['cumulative_pricing']) && $_POST['cumulative_pricing'] == 'on') $cumulative_pricing = 1;
+                        else $cumulative_pricing = 0;
+
                         // Save to database
                         DB::getInstance()->insert('store_categories', [
                             'name' => Input::get('name'),
@@ -89,6 +93,7 @@ if (!isset($_GET['action'])) {
                             'only_subcategories' => $only_subcategories,
                             'hidden' => $hidden,
                             'disabled' => $disabled,
+                            'cumulative_pricing' => $cumulative_pricing,
                             'order' => $last_order + 1,
                             'url' => empty(Input::get('pretty_url')) ? null : Input::get('pretty_url'),
                         ]);
@@ -133,6 +138,9 @@ if (!isset($_GET['action'])) {
                 'HIDE_CATEGORY_VALUE' => ((isset($_POST['hidden'])) ? 1 : 0),
                 'DISABLE_CATEGORY' => $store_language->get('admin', 'disable_category'),
                 'DISABLE_CATEGORY_VALUE' => ((isset($_POST['disabled'])) ? 1 : 0),
+                'CUMULATIVE_PRICING' => $store_language->get('admin', 'cumulative_pricing'),
+                'CUMULATIVE_PRICING_INFO' => $store_language->get('admin', 'cumulative_pricing_info'),
+                'CUMULATIVE_PRICING_VALUE' => ((isset($_POST['cumulative_pricing'])) ? 1 : 0),
                 'URL_LABEL' => rtrim(URL::getSelfURL(), '/') . URL::build(Store::getStorePath() . '/category/')
             ]);
 
@@ -203,6 +211,10 @@ if (!isset($_GET['action'])) {
                         if (isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
                         else $disabled = 0;
 
+                        // Cumulative pricing?
+                        if (isset($_POST['cumulative_pricing']) && $_POST['cumulative_pricing'] == 'on') $cumulative_pricing = 1;
+                        else $cumulative_pricing = 0;
+
                         // Save to database
                         DB::getInstance()->update('store_categories', $category->id, [
                             'name' => Input::get('name'),
@@ -211,6 +223,7 @@ if (!isset($_GET['action'])) {
                             'only_subcategories' => $only_subcategories,
                             'hidden' => $hidden,
                             'disabled' => $disabled,
+                            'cumulative_pricing' => $cumulative_pricing,
                             'url' => empty(Input::get('pretty_url')) ? null : Input::get('pretty_url'),
                         ]);
 
@@ -254,6 +267,9 @@ if (!isset($_GET['action'])) {
                 'HIDE_CATEGORY_VALUE' => $category->hidden,
                 'DISABLE_CATEGORY' => $store_language->get('admin', 'disable_category'),
                 'DISABLE_CATEGORY_VALUE' => $category->disabled,
+                'CUMULATIVE_PRICING' => $store_language->get('admin', 'cumulative_pricing'),
+                'CUMULATIVE_PRICING_INFO' => $store_language->get('admin', 'cumulative_pricing_info'),
+                'CUMULATIVE_PRICING_VALUE' => $category->cumulative_pricing,
                 'URL_LABEL' => rtrim(URL::getSelfURL(), '/') . URL::build(Store::getStorePath() . '/category/')
             ]);
 

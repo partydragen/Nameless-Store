@@ -25,12 +25,33 @@ class ShoppingCart extends Instanceable {
     private ?Coupon $_coupon = null;
 
     /**
+     * @var Customer Customer (The paying customer).
+     */
+    private Customer $_customer;
+
+    /**
+     * @var Customer Recipient customer (Recipient that receive the products).
+     */
+    private Customer $_recipient;
+
+    /**
      * @var bool Shopping cart subscription mode.
      */
     private bool $_subscription_mode = false;
 
     // Constructor
     public function __construct() {
+        // Load customer
+        $this->_customer = new Customer(new User());
+        if (Settings::get('player_login', '0', 'Store')) {
+            // Customer will need to enter minecraft username to buy the products for
+            $this->_recipient = new Customer();
+        } else {
+            // Customer will buy the products for them self
+            $this->_recipient = $this->_customer;
+        }
+
+        // Load shopping cart
         $this->_items = new ItemList();
         if (!Session::exists('shopping_cart')) {
             return;
@@ -161,6 +182,16 @@ class ShoppingCart extends Instanceable {
     // Get active coupon code
     public function getCoupon(): ?Coupon {
         return $this->_coupon;
+    }
+
+    // Get the paying customer.
+    public function getCustomer(): Customer {
+        return $this->_customer;
+    }
+
+    // Recipient that receive the products.
+    public function getRecipient(): Customer {
+        return $this->_recipient;
     }
 
     // Get total price to pay in cents

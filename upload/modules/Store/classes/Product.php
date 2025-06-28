@@ -267,7 +267,7 @@ class Product {
     }
 
     public function getRealPriceCents(): int {
-        return $this->data()->sale_active == 1 ? $this->data()->price_cents - $this->data()->sale_discount_cents : $this->data()->price_cents;
+        return $this->data()->price_cents - $this->data()->sale_discount_cents;
     }
 
     public function delete() {

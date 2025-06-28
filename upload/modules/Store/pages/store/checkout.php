@@ -347,6 +347,7 @@ if (isset($_GET['do'])) {
             'quantity' => $item->getQuantity(),
             'price' => Store::fromCents($item->getSubtotalPrice()),
             'real_price' => Store::fromCents($item->getTotalPrice()),
+            'has_discount' => $product->data()->sale_discount_cents > 0,
             'sale_discount' => Store::fromCents($item->getTotalDiscounts()),
             'price_format' => Output::getPurified(
                 Store::formatPrice(

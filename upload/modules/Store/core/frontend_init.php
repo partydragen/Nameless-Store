@@ -8,18 +8,11 @@
  *
  *  Store module - Frontend init
  */
- 
+
 $store = new Store();
 $shopping_cart = ShoppingCart::getInstance();
-
-$from_customer = new Customer($user);
-if ($store->isPlayerSystemEnabled()) {
-    // Customer will need to enter minecraft username to buy the products for
-    $to_customer = new Customer();
-} else {
-    // Customer will buy the products for them self
-    $to_customer = $from_customer;
-}
+$from_customer = $shopping_cart->getCustomer();
+$to_customer = $shopping_cart->getRecipient();
 
 // Check if customer tries to logout
 if (Input::exists()) {

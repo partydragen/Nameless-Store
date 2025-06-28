@@ -3,7 +3,7 @@
 
 <div class="ui stackable grid">
   <div class="ui centered row">
-  
+
     {if count($WIDGETS_LEFT)}
       <div class="ui six wide tablet four wide computer column">
         {foreach from=$WIDGETS_LEFT item=widget}
@@ -11,7 +11,7 @@
         {/foreach}
       </div>
     {/if}
-    
+
     <div class="ui {if count($WIDGETS_LEFT) && count($WIDGETS_RIGHT) }four wide tablet eight wide computer{elseif count($WIDGETS_LEFT) || count($WIDGETS_RIGHT)}ten wide tablet twelve wide computer{else}sixteen wide{/if} column">
       <div class="ui segment">
 
@@ -69,7 +69,7 @@
                     <div class="center aligned content">
                       <span class="header">{$product.name}</span>
                       <div class="ui divider"></div>
-                      {if $product.sale_active}
+                      {if $product.has_discount}
                         <span style="color: #dc3545;text-decoration:line-through;">{$product.price_format}</span>
                       {/if}
                       {$product.real_price_format}
@@ -82,7 +82,7 @@
 
                 <div class="ui small modal" id="modal{$product.id}">
                   <div class="header">
-                    {$product.name} | {if $product.sale_active}<span style="color: #dc3545;text-decoration:line-through;">{$product.price_format}</span>{/if} {$product.real_price_format}
+                    {$product.name} | {if $product.has_discount}<span style="color: #dc3545;text-decoration:line-through;">{$product.price_format}</span>{/if} {$product.real_price_format}
                   </div>
                   <div class="{if $product.image}image {/if}content">
                     {if $product.image}

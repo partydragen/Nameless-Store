@@ -120,7 +120,7 @@ class Item {
      * @return int
      */
     public function getTotalDiscounts(): int {
-        return $this->_product->data()->sale_active == 1 ? $this->_product->data()->sale_discount_cents * $this->getQuantity() : 0;
+        return $this->_product->data()->sale_discount_cents * $this->getQuantity();
     }
 
     /**

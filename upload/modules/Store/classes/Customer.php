@@ -401,4 +401,28 @@ class Customer {
 
         return 'Unknown';
     }
+
+    /*
+     * Calculate total amount a customer has spent in a specific category.
+     *
+     * @param int $category_id The ID of the category.
+     * @return int The total amount spent in cents.
+     */
+    public function calculateSpendingInCategory(int $category_id): int {
+        $spending = $this->_db->query(
+            "SELECT SUM(po.amount_cents) as total
+             FROM nl2_store_payments p
+             JOIN nl2_store_orders o ON o.id = p.order_id
+             JOIN nl2_store_orders_products po ON po.order_id = o.id
+             JOIN nl2_store_products pr ON pr.id = po.product_id
+             WHERE o.to_customer_id = ? AND pr.category_id = ? AND p.status_id = 1",
+            [$this->data()->id, $category_id]
+        );
+
+        if ($spending->count() && $spending->first()->total) {
+            return (int) $spending->first()->total;
+        }
+
+        return 0;
+    }
 }

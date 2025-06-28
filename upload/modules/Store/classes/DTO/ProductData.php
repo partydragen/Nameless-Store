@@ -21,6 +21,7 @@ class ProductData {
     public int $payment_type;
     public bool $hidden;
     public bool $disabled;
+    public bool $hide_if_owned;
     public int $order;
     public int $deleted;
     public bool $sale_active = false;
@@ -46,6 +47,7 @@ class ProductData {
         $this->payment_type = $row->payment_type;
         $this->hidden = $row->hidden;
         $this->disabled = $row->disabled;
+        $this->hide_if_owned = $row->hide_if_owned;
         $this->order = $row->order;
         $this->deleted = $row->deleted;
     }

@@ -45,3 +45,4 @@ spl_autoload_register(function ($class) {
 require_once(ROOT_PATH . '/modules/Store/hooks/CheckoutAddProductHook.php');
 require_once(ROOT_PATH . '/modules/Store/hooks/PriceAdjustmentHook.php');
 require_once(ROOT_PATH . '/modules/Store/hooks/ParseActionCommandListener.php');
+require_once(ROOT_PATH . '/modules/Store/hooks/ProductVisibilityHook.php');

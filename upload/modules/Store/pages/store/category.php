@@ -17,28 +17,28 @@ $category_id = explode('/', $route);
 $category_id = $category_id[count($category_id) - 1];
 
 if (!strlen($category_id)) {
-    require_once(ROOT_PATH . '404.php');
+    require_once(ROOT_PATH . '/404.php');
     die();
 }
 
 if (is_numeric($category_id)) {
     // Query category by id
-    $category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ? AND disabled = 0', [$category_id]);
+    $category_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE id = ? AND disabled = 0 AND deleted = 0', [$category_id]);
 } else {
     // Query category by url
-    $category = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE url = ? AND disabled = 0', [$category_id]);
+    $category_query = DB::getInstance()->query('SELECT * FROM nl2_store_categories WHERE url = ? AND disabled = 0 AND deleted = 0', [$category_id]);
 }
 
-if (!$category->count()) {
+if (!$category_query->count()) {
     require_once(ROOT_PATH . '/404.php');
     die();
 }
 
-$category = $category->first();
+$category = $category_query->first();
 $category_id = $category->id;
 $store_url = Store::getStorePath();
 
-$page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/view'])->results();
+$page_metadata = DB::getInstance()->get('page_descriptions', ['page', '=', $store_url . '/category'])->results();
 if (count($page_metadata)) {
     define('PAGE_DESCRIPTION', str_replace(['{site}', '{category_title}', '{description}'], [SITE_NAME, Output::getClean($category->name), Output::getClean(strip_tags(Output::getDecoded($category->description)))], $page_metadata[0]->description));
     define('PAGE_KEYWORDS', $page_metadata[0]->tags);
@@ -130,6 +130,7 @@ if (!$products->count()) {
                     STORE_CURRENCY_FORMAT,
                 )
             ),
+            'has_discount' => $product->data()->sale_discount_cents > 0,
             'sale_active' => $product->data()->sale_active,
             'description' => $renderProductEvent['content'],
             'image' => $renderProductEvent['image'],

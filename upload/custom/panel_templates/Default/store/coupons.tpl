@@ -32,7 +32,7 @@
 
                 <!-- Update Notification -->
                 {include file='includes/update.tpl'}
-                
+
                 <div class="alert alert-warning" role="alert">
                     This features is currently for patreon supporters, it will be available for everyone in the future with means this wont function for you
                     </br></br>

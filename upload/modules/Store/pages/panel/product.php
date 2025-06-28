@@ -84,6 +84,10 @@ if (!isset($_GET['action'])) {
                     if (isset($_POST['disabled']) && $_POST['disabled'] == 'on') $disabled = 1;
                     else $disabled = 0;
 
+                    // Hide when purchased?
+                    if (isset($_POST['hide_if_owned']) && $_POST['hide_if_owned'] == 'on') $hide_if_owned = 1;
+                    else $hide_if_owned = 0;
+
                     // Remove from customer after (Expire)
                     if (isset($_POST['durability_period']) && $_POST['durability_period'] != 'never') {
                         $durability = json_encode([
@@ -102,6 +106,7 @@ if (!isset($_GET['action'])) {
                         'price_cents' => Store::toCents(Input::get('price')),
                         'hidden' => $hidden,
                         'disabled' => $disabled,
+                        'hide_if_owned' => $hide_if_owned,
                         'durability' => $durability,
                         'payment_type' => Input::get('payment_type')
                     ]);
@@ -300,6 +305,9 @@ if (!isset($_GET['action'])) {
         'HIDE_PRODUCT_VALUE' => $product->data()->hidden,
         'DISABLE_PRODUCT' => $store_language->get('admin', 'disable_product'),
         'DISABLE_PRODUCT_VALUE' => $product->data()->disabled,
+        'HIDE_IF_OWNED' => $store_language->get('admin', 'hide_if_owned'),
+        'HIDE_IF_OWNED_INFO' => $store_language->get('admin', 'hide_if_owned_info'),
+        'HIDE_IF_OWNED_VALUE' => $product->data()->hide_if_owned,
         'PRODUCT_IMAGE' => $store_language->get('admin', 'product_image'),
         'PRODUCT_IMAGE_VALUE' => (!is_null($product->data()->image) ? ((defined('CONFIG_PATH') ? CONFIG_PATH . '/' : '/') . 'uploads/store/' . Output::getClean($product->data()->image)) : null),
         'UPLOAD_NEW_IMAGE' => $store_language->get('admin', 'upload_new_image'),
