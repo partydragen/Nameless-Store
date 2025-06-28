@@ -84,7 +84,7 @@
     "admin/hide_category_from_dropdown_menu": "Do not display this category in the subcategory drop down menu.",
     "admin/hide_category_from_menu": "Do not display this category menu.",
     "admin/hide_if_owned": "Hide When Purchased",
-    "admin/hide_if_owned_info": "If enabled, this product will be hidden from the store for customers who have already paid for it through cumulative discounts (only applies to single-purchase items).",
+    "admin/hide_if_owned_info": "If enabled, this product will be hidden from the store for customers who have reached the product user limit",
     "admin/hide_product_from_store": "Do not display this product on store.",
     "admin/id_x": "ID: {{id}}",
     "admin/identifier": "Identifier",
