@@ -305,5 +305,9 @@
     "admin/gateway": "Brána",
     "admin/find_gateways": "Hledat brány",
     "admin/view_all_gateways": "Zobrazit všechny brány",
-    "admin/unable_to_retrieve_gateways": "Nepodařilo se načíst brány"
+    "admin/unable_to_retrieve_gateways": "Nepodařilo se načíst brány",
+    "admin/hide_if_owned": "Skrýt, pokud bylo zakoupeno",
+    "admin/hide_if_owned_info": "Pokud je povoleno, bude tento produkt skryt zákazníkům, kteří dosáhli uživatelského limitu produktů",
+    "admin/cumulative_pricing_info": "Pokud je povoleno, bude cena produktů v této kategorii snížena o částku, kterou již zákazník utratil ve stejné kategorii.",
+    "admin/cumulative_pricing": "Povolit kumulativní ceny"
 }
