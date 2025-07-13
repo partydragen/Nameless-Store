@@ -74,6 +74,9 @@ if (isset($_GET['do'])) {
                 $options[] = $option['value'];
             }
 
+            // Get default value from identifier param or field default
+            $default_value = empty(Input::get($field->identifier)) ? Output::getClean($field->default_value) : Input::get($field->identifier);
+
             $product_fields[] = [
                 'id' => Output::getClean($field->id),
                 'identifier' => Output::getClean($field->identifier),

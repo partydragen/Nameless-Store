@@ -29,7 +29,8 @@ class FieldData {
         $this->order = $row->order;
 
         // TODO: Rework the way options are stored in database to add support for value, description and price
-        foreach (explode(',', Output::getClean($row->options)) as $option) {
+        $options = str_replace(array("\n", "\r\n", "\r"), "", $row->options);
+        foreach (explode(',', Output::getClean($options)) as $option) {
             $this->addOption($option, $option);
         }
     }
