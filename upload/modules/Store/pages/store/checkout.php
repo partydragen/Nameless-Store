@@ -80,7 +80,7 @@ if (isset($_GET['do'])) {
             $product_fields[] = [
                 'id' => Output::getClean($field->id),
                 'identifier' => Output::getClean($field->identifier),
-                'value' => isset($_POST[$field->id]) && !is_array($_POST[$field->id]) ? Output::getClean(Input::get($field->id)) : Output::getClean($field->default_value),
+                'value' => !empty(Input::get($field->id)) && !is_array($_POST[$field->id]) ? Output::getClean(Input::get($field->id)) : $default_value,
                 'description' => Output::getClean($field->description),
                 'type' => Output::getClean($field->type),
                 'required' => Output::getClean($field->required),
