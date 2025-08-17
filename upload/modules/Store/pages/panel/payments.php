@@ -147,8 +147,24 @@ if (isset($_GET['customer'])) {
                     Session::flash('store_payment_success', $store_language->get('admin', 'payment_deleted_successfully'));
                     Redirect::to(URL::build('/panel/store/payments'));
                 }
-            } else if (Input::get('action') == 'delete_command') {
-                // Delete pending command
+
+            } else if (Input::get('action') == 'change_status') {
+                // Change payment status
+                if ($user->hasPermission('staffcp.store.payments.change_status')) {
+                    if (Input::get('execute_actions') == '1') {
+                        $payment->handlePaymentEvent(Input::get('payment_status'));
+                    } else {
+                        $statuses = ['PENDING' => 0, 'COMPLETED' => 1, 'REFUNDED' => 2, 'REVERSED' => 3, 'DENIED' => 4];
+
+                        $payment->update([
+                            'status_id' => $statuses[Input::get('payment_status')],
+                            'last_updated' => date('U')
+                        ]);
+                    }
+
+                    Session::flash('store_payment_success', $store_language->get('admin', 'payment_updated_successfully'));
+                    Redirect::to(URL::build('/panel/store/payments/', 'payment=' . $payment->data()->id));
+                }
             }
         } else {
             // Invalid token
@@ -234,8 +250,15 @@ if (isset($_GET['customer'])) {
     // Allow manual payment deletion
     if ($user->hasPermission('staffcp.store.payments.delete') && ($payment->data()->gateway_id == 0 || (defined('DEBUGGING') && DEBUGGING))) {
         $template->getEngine()->addVariables([
-            'DELETE_PAYMENT' => $language->get('admin', 'delete'),
+            'DELETE_PAYMENT' => $store_language->get('admin', 'delete_payment'),
             'CONFIRM_DELETE_PAYMENT' => $store_language->get('admin', 'confirm_payment_deletion'),
+        ]);
+    }
+
+    // Change payment status
+    if ($user->hasPermission('staffcp.store.payments.change_status')) {
+        $template->getEngine()->addVariables([
+            'CHANGE_PAYMENT_STATUS' => $store_language->get('admin', 'change_payment_status')
         ]);
     }
 
@@ -312,7 +335,8 @@ if (isset($_GET['customer'])) {
         'ARE_YOU_SURE' => $language->get('general', 'are_you_sure'),
         'YES' => $language->get('general', 'yes'),
         'NO' => $language->get('general', 'no'),
-        'WARNING' => $language->get('general', 'warning')
+        'WARNING' => $language->get('general', 'warning'),
+        'ACTIONS' => $language->get('general', 'actions'),
     ]);
 
     if ($payment->data()->subscription_id != null) {

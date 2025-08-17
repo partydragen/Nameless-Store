@@ -43,8 +43,17 @@
                                     </div>
                                     <div class="col-md-3">
                                         <span class="float-md-right">
-                                            {if isset($DELETE_PAYMENT)}<a href="#" class="btn btn-danger" onclick="showDeletePaymentModal()">{$DELETE_PAYMENT}</a>{/if}
-                                            <a href="{$BACK_LINK}" class="btn btn-primary">{$BACK}</a>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-primary dropdown-toggle"
+                                                        data-toggle="dropdown" aria-haspopup="true"
+                                                        aria-expanded="false">{$ACTIONS}</button>
+                                                <div class="dropdown-menu">
+                                                    {if isset($DELETE_PAYMENT)}<a class="dropdown-item" href="#" onclick="showDeletePaymentModal()">{$DELETE_PAYMENT}</a>{/if}
+                                                    {if isset($CHANGE_PAYMENT_STATUS)}<a class="dropdown-item" href="#" onclick="showChangePaymentStatusModal()">{$CHANGE_PAYMENT_STATUS}</a>{/if}
+                                                </div>
+                                            </div>
+
+                                            <a href="{$BACK_LINK}" class="btn btn-warning">{$BACK}</a>
                                         </span>
                                     </div>
                                 </div>
@@ -264,6 +273,48 @@
         </div>
     {/if}
 
+    {if isset($CHANGE_PAYMENT_STATUS)}
+        <div class="modal fade" id="changeStatusModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{$CHANGE_PAYMENT_STATUS}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form action="" method="post">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="inputPaymentStatus">Payment Status</label>
+                                <select class="form-control" name="payment_status" id="inputPaymentStatus">
+                                    <option value="COMPLETED">Completed</option>
+                                    <option value="PENDING">Pending</option>
+                                    <option value="REFUNDED">Refunded</option>
+                                    <option value="REVERSED">Reversed</option>
+                                    <option value="DENIED">Denied</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputExecuteActions">Execute Actions</label>
+                                <select class="form-control" name="execute_actions" id="inputExecuteActions">
+                                    <option value="1">{$YES}</option>
+                                    <option value="0">{$NO}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" name="token" value="{$TOKEN}">
+                            <input type="hidden" name="action" value="change_status">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">{$BACK}</button>
+                            <input type="submit" class="btn btn-primary" value="{$SUBMIT}">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {/if}
+
     <!-- End Wrapper -->
 </div>
 
@@ -305,9 +356,15 @@
 
 <script type="text/javascript">
     {if isset($DELETE_PAYMENT)}
-    function showDeletePaymentModal() {
-      $('#deletePaymentModal').modal().show();
-    }
+        function showDeletePaymentModal() {
+          $('#deletePaymentModal').modal().show();
+        }
+    {/if}
+
+    {if isset($CHANGE_PAYMENT_STATUS)}
+        function showChangePaymentStatusModal() {
+            $('#changeStatusModal').modal().show();
+        }
     {/if}
 </script>
 
