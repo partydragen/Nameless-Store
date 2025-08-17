@@ -309,5 +309,7 @@
     "admin/hide_if_owned": "Skrýt, pokud bylo zakoupeno",
     "admin/hide_if_owned_info": "Pokud je povoleno, bude tento produkt skryt zákazníkům, kteří dosáhli uživatelského limitu produktů",
     "admin/cumulative_pricing_info": "Pokud je povoleno, bude cena produktů v této kategorii snížena o částku, kterou již zákazník utratil ve stejné kategorii.",
-    "admin/cumulative_pricing": "Povolit kumulativní ceny"
+    "admin/cumulative_pricing": "Povolit kumulativní ceny",
+    "admin/change_payment_status": "Změnit stav platby",
+    "admin/payment_updated_successfully": "Platba úspěšně aktualizována"
 }
