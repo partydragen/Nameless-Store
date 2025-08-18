@@ -309,5 +309,7 @@
     "general/product_user_limit_reached": "Вы достигли лимита на этот товар",
     "general/product_requires_products": "Для покупки этого товара вам нужен {{product}}",
     "admin/global_actions": "Глобальные действия",
-    "general/invalid_coupon": "Недействительный код купона."
+    "general/invalid_coupon": "Недействительный код купона.",
+    "admin/change_payment_status": "Изменить статус платежа",
+    "admin/payment_updated_successfully": "Платеж успешно обновлен"
 }
