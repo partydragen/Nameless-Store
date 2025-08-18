@@ -309,5 +309,7 @@
     "admin/hide_if_owned": "Nach dem Kauf ausblenden",
     "admin/cumulative_pricing": "Kumulative Preisgestaltung aktivieren",
     "admin/hide_if_owned_info": "Wenn diese Option aktiviert ist, wird dieses Produkt für Kunden, die das Produktbenutzerlimit erreicht haben, im Shop ausgeblendet",
-    "admin/cumulative_pricing_info": "Wenn diese Option aktiviert ist, wird der Preis der Produkte in dieser Kategorie um den Betrag reduziert, den der Kunde in derselben Kategorie bereits ausgegeben hat."
+    "admin/cumulative_pricing_info": "Wenn diese Option aktiviert ist, wird der Preis der Produkte in dieser Kategorie um den Betrag reduziert, den der Kunde in derselben Kategorie bereits ausgegeben hat.",
+    "admin/payment_updated_successfully": "Zahlung erfolgreich aktualisiert",
+    "admin/change_payment_status": "Zahlungsstatus ändern"
 }
