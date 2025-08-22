@@ -48,25 +48,23 @@ class LatestStorePurchasesWidget extends WidgetBase {
 				$timeago = new TimeAgo(TIMEZONE);
 
 				foreach ($latest_purchases_query as $purchase) {
-                    // Recipient
-                    if ($purchase->to_customer_id) {
-                        $recipient = new Customer(null, $purchase->to_customer_id, 'id');
-                    } else {
-                        $recipient = new Customer(null, $purchase->user_id, 'user_id');
+                    // Get order for this purchase
+                    $order = new Order($purchase->order_id);
+                    if (!$order->exists()) {
+                        continue;
                     }
 
+                    $recipient = $order->recipient();
                     if ($recipient->exists() && $recipient->getUser()->exists()) {
                         $recipient_user = $recipient->getUser();
                         $username = $recipient->getUsername();
                         $avatar = $recipient_user->getAvatar();
                         $style = $recipient_user->getGroupStyle();
-                        $identifier = Output::getClean($recipient->getIdentifier());
                         $user_id = $recipient_user->data()->id;
                     } else {
                         $username = $recipient->getUsername();
                         $avatar = AvatarSource::getAvatarFromUUID(Output::getClean($recipient->getIdentifier()));
                         $style = '';
-                        $identifier = Output::getClean($recipient->getIdentifier());
                         $user_id = null;
                     }
 
@@ -89,7 +87,8 @@ class LatestStorePurchasesWidget extends WidgetBase {
 						'date_friendly' => $timeago->inWords($purchase->created, $this->_language),
 						'style' => $style,
 						'username' => $username,
-						'user_id' => $user_id
+						'user_id' => $user_id,
+                        'description' => $order->getDescription()
 					];
 
 				}
