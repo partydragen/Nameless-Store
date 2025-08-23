@@ -252,6 +252,9 @@ class Store_Module extends Module {
 		$widgets->add(new LatestStorePurchasesWidget($template->getEngine(), $this->_language, $this->_store_language, $cache));
 
         // Featured products
+        require_once(ROOT_PATH . '/modules/Store/widgets/FeaturedProductsWidget.php');
+        $widgets->add(new FeaturedProductsWidget($template->getEngine(), $this->_language, $this->_store_language, $cache));
+
         if (defined('BACK_END')) {
             // Define permissions which belong to this module
             PermissionHandler::registerPermissions('Store', [

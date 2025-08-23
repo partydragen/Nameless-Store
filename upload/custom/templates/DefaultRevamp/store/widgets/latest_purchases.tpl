@@ -1,4 +1,4 @@
-<div class="ui fluid card" id="widget-featured-package">
+<div class="ui fluid card" id="widget-latest-purchases">
     <div class="content">
         <h4 class="ui header">{$LATEST_PURCHASES}</h4>
         {if isset($LATEST_PURCHASES_LIST) && count($LATEST_PURCHASES_LIST)}

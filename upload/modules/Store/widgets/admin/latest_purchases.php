@@ -19,6 +19,7 @@ if (Input::exists()) {
 		else
 			$cache->store('purchase_limit', 10);
 
+        $success = $language->get('admin', 'widget_updated');
 	} else {
 		$errors = [$language->get('general', 'invalid_token')];
 	}
