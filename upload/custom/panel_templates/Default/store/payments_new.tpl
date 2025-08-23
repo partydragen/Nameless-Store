@@ -65,13 +65,13 @@
                                     <input type="number" name="price" class="form-control" id="InputPrice" step="0.01" min="0.00" value="0.00">
                                 </div>
                                 <div class="form-group">
-                                    <label for="inputPaymentStatus">Payment Status</label>
+                                    <label for="inputPaymentStatus">{$PAYMENT_STATUS}</label>
                                     <select class="form-control" name="payment_status" id="inputPaymentStatus">
-                                        <option value="COMPLETED">Completed</option>
-                                        <option value="PENDING">Pending</option>
-                                        <option value="REFUNDED">Refunded</option>
-                                        <option value="REVERSED">Reversed</option>
-                                        <option value="DENIED">Denied</option>
+                                        <option value="COMPLETED">{$COMPLETED}</option>
+                                        <option value="PENDING">{$PENDING}</option>
+                                        <option value="REFUNDED">{$REFUNDED}</option>
+                                        <option value="REVERSED">{$REVERSED}</option>
+                                        <option value="DENIED">{$DENIED}</option>
                                     </select>
                                 </div>
                                 <div class="form-group">

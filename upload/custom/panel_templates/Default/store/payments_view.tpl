@@ -286,17 +286,17 @@
                     <form action="" method="post">
                         <div class="modal-body">
                             <div class="form-group">
-                                <label for="inputPaymentStatus">Payment Status</label>
+                                <label for="inputPaymentStatus">{$PAYMENT_STATUS}</label>
                                 <select class="form-control" name="payment_status" id="inputPaymentStatus">
-                                    <option value="COMPLETED">Completed</option>
-                                    <option value="PENDING">Pending</option>
-                                    <option value="REFUNDED">Refunded</option>
-                                    <option value="REVERSED">Reversed</option>
-                                    <option value="DENIED">Denied</option>
+                                    <option value="COMPLETED">{$COMPLETED}</option>
+                                    <option value="PENDING">{$PENDING}</option>
+                                    <option value="REFUNDED">{$REFUNDED}</option>
+                                    <option value="REVERSED">{$REVERSED}</option>
+                                    <option value="DENIED">{$DENIED}</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="inputExecuteActions">Execute Actions</label>
+                                <label for="inputExecuteActions">{$EXECUTE_ACTIONS}</label>
                                 <select class="form-control" name="execute_actions" id="inputExecuteActions">
                                     <option value="1">{$YES}</option>
                                     <option value="0">{$NO}</option>

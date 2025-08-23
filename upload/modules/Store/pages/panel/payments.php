@@ -337,6 +337,13 @@ if (isset($_GET['customer'])) {
         'NO' => $language->get('general', 'no'),
         'WARNING' => $language->get('general', 'warning'),
         'ACTIONS' => $language->get('general', 'actions'),
+        'EXECUTE_ACTIONS' => $store_language->get('admin', 'execute_actions'),
+        'PAYMENT_STATUS' => $store_language->get('admin', 'payment_status'),
+        'PENDING' => $store_language->get('general', 'pending'),
+        'COMPLETED' => $store_language->get('general', 'completed'),
+        'REFUNDED' => $store_language->get('general', 'refunded'),
+        'REVERSED' => $store_language->get('general', 'reversed'),
+        'DENIED' => $store_language->get('general', 'denied'),
     ]);
 
     if ($payment->data()->subscription_id != null) {
@@ -431,6 +438,12 @@ if (isset($_GET['customer'])) {
             'BACK' => $language->get('general', 'back'),
             'BACK_LINK' => URL::build('/panel/store/payments'),
             'PRICE' => $store_language->get('admin', 'price'),
+            'PAYMENT_STATUS' => $store_language->get('admin', 'payment_status'),
+            'PENDING' => $store_language->get('general', 'pending'),
+            'COMPLETED' => $store_language->get('general', 'completed'),
+            'REFUNDED' => $store_language->get('general', 'refunded'),
+            'REVERSED' => $store_language->get('general', 'reversed'),
+            'DENIED' => $store_language->get('general', 'denied'),
         ]);
 
         // Products to choose

@@ -410,22 +410,22 @@ class Payment {
     public function getStatusHtml(): string {
         switch ($this->data()->status_id) {
             case 0;
-                $status = '<span class="badge badge-warning">Pending</span>';
+                $status = '<span class="badge badge-warning">' . Store::getLanguage()->get('general', 'pending') .'</span>';
             break;
             case 1;
-                $status = '<span class="badge badge-success">Complete</span>';
+                $status = '<span class="badge badge-success">' . Store::getLanguage()->get('general', 'completed') .'</span>';
             break;
             case 2;
-                $status = '<span class="badge badge-primary">Refunded</span>';
+                $status = '<span class="badge badge-primary">' . Store::getLanguage()->get('general', 'refunded') .'</span>';
             break;
             case 3;
-                $status = '<span class="badge badge-info">Changeback</span>';
+                $status = '<span class="badge badge-info">' . Store::getLanguage()->get('general', 'changeback') .'</span>';
             break;
             case 4;
-                $status = '<span class="badge badge-danger">Denied</span>';
+                $status = '<span class="badge badge-danger">' . Store::getLanguage()->get('general', 'denied') .'</span>';
             break;
             default:
-                $status = '<span class="badge badge-danger">Unknown</span>';
+                $status = '<span class="badge badge-danger">' . Store::getLanguage()->get('general', 'unknown') .'</span>';
             break;
         }
 

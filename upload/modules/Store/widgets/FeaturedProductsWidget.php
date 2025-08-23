@@ -91,7 +91,7 @@ class FeaturedProductsWidget extends WidgetBase {
             'FEATURED_PRODUCTS' => $this->_store_language->get('general', 'featured_products'),
             'FEATURED_PRODUCTS_LIST' => $featured_products_list,
             'VIEW' => $this->_language->get('general', 'view'),
-            'SALE' => $this->_store_language->get('language', 'sale')
+            'SALE' => $this->_store_language->get('general', 'sale')
         ]);
 
         $this->_content = $this->_engine->fetch('store/widgets/featured_products');
