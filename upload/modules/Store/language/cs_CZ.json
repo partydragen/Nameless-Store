@@ -203,7 +203,7 @@
     "general/store": "Obchod",
     "general/summary": "Souhrn",
     "general/total_price": "Celková cena:",
-    "general/widget_cached": "Widget posledních nákupů je v mezipaměti po dobu 2 minut, takže může chvíli trvat, než se vaše změny projeví.",
+    "general/widget_cached": "Widget je uložen v mezipaměti po dobu 2 minut, takže může chvíli trvat, než se vaše změny projeví.",
     "general/x_field_maximum_y": "{{field}} může obsahovat maximálně {{max}} znaků.",
     "general/x_field_minimum_y": "{{field}} musí obsahovat alespoň {{min}} znaků.",
     "general/x_items_for_y": "{{items}} položek za {{currency_symbol}}{{amount}} {{currency}}",
@@ -311,5 +311,6 @@
     "admin/cumulative_pricing_info": "Pokud je povoleno, bude cena produktů v této kategorii snížena o částku, kterou již zákazník utratil ve stejné kategorii.",
     "admin/cumulative_pricing": "Povolit kumulativní ceny",
     "admin/change_payment_status": "Změnit stav platby",
-    "admin/payment_updated_successfully": "Platba úspěšně aktualizována"
+    "admin/payment_updated_successfully": "Platba úspěšně aktualizována",
+    "general/featured_products": "Doporučené produkty"
 }
