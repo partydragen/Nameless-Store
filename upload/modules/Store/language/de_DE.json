@@ -203,7 +203,7 @@
     "general/store": "Shop",
     "general/summary": "Zusammenfassung",
     "general/total_price": "Preis gesamt:",
-    "general/widget_cached": "Das Widget für die letzten Einkäufe wird für 2 Minuten zwischengespeichert, sodass deine Änderungen möglicherweise nicht sofort wirksam werden.",
+    "general/widget_cached": "Das Widget wird für 2 Minuten zwischengespeichert, sodass deine Änderungen möglicherweise nicht sofort wirksam werden.",
     "general/x_field_maximum_y": "{{field}} darf maximal {{max}} Zeichen lang sein.",
     "general/x_field_minimum_y": "{{field}} muss mindestens {{min}} Zeichen lang sein.",
     "general/x_items_for_y": "{{items}} Gegenstand/Gegenstände für {{currency_symbol}}{{amount}} {{currency}}",
@@ -311,5 +311,13 @@
     "admin/hide_if_owned_info": "Wenn diese Option aktiviert ist, wird dieses Produkt für Kunden, die das Produktbenutzerlimit erreicht haben, im Shop ausgeblendet",
     "admin/cumulative_pricing_info": "Wenn diese Option aktiviert ist, wird der Preis der Produkte in dieser Kategorie um den Betrag reduziert, den der Kunde in derselben Kategorie bereits ausgegeben hat.",
     "admin/payment_updated_successfully": "Zahlung erfolgreich aktualisiert",
-    "admin/change_payment_status": "Zahlungsstatus ändern"
+    "admin/change_payment_status": "Zahlungsstatus ändern",
+    "general/featured_products": "Empfohlene Produkte",
+    "general/pending": "Ausstehend",
+    "general/completed": "Abgeschlossen",
+    "general/refunded": "Rückerstattet",
+    "general/reversed": "Umgekehrt",
+    "general/denied": "Abgelehnt",
+    "admin/execute_actions": "Aktionen ausführen",
+    "admin/payment_status": "Zahlungsstatus"
 }
