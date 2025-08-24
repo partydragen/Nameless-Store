@@ -312,5 +312,12 @@
     "admin/cumulative_pricing": "Povolit kumulativní ceny",
     "admin/change_payment_status": "Změnit stav platby",
     "admin/payment_updated_successfully": "Platba úspěšně aktualizována",
-    "general/featured_products": "Doporučené produkty"
+    "general/featured_products": "Doporučené produkty",
+    "admin/execute_actions": "Provést akce",
+    "general/pending": "Čekající",
+    "general/completed": "Dokončená",
+    "general/refunded": "Vrácená",
+    "general/reversed": "Obrácená",
+    "general/denied": "Zamítnutá",
+    "admin/payment_status": "Stav platby"
 }
