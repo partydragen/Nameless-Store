@@ -304,12 +304,20 @@
     "admin/confirm_delete_coupon": "Вы уверены, что хотите удалить этот купон?",
     "admin/coupon_updated_successfully": "Купон успешно обновлён",
     "admin/customer_redeem_limit": "Лимит использования для клиента",
-    "general/widget_cached": "Виджет последних покупок кэшируется на 2 минуты, ваши изменения могут вступить в силу не сразу.",
+    "general/widget_cached": "Виджет кэшируется на 2 минуты, ваши изменения могут не вступить в силу немедленно.",
     "general/product_global_limit_reached": "Этот товар распродан",
     "general/product_user_limit_reached": "Вы достигли лимита на этот товар",
     "general/product_requires_products": "Для покупки этого товара вам нужен {{product}}",
     "admin/global_actions": "Глобальные действия",
     "general/invalid_coupon": "Недействительный код купона.",
     "admin/change_payment_status": "Изменить статус платежа",
-    "admin/payment_updated_successfully": "Платеж успешно обновлен"
+    "admin/payment_updated_successfully": "Платеж успешно обновлен",
+    "general/featured_products": "Рекомендуемые продукты",
+    "admin/payment_status": "Статус платежа",
+    "admin/execute_actions": "Действия к выполнению",
+    "general/pending": "В ожидании",
+    "general/completed": "Завершено",
+    "general/refunded": "Возвращено",
+    "general/denied": "Отклонено",
+    "general/reversed": "Отменено"
 }
