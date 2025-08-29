@@ -274,6 +274,7 @@
     "general/denied": "Denied",
     "general/active": "Active",
     "general/cancelled": "Cancelled",
+    "general/suspended": "Suspended",
     "general/unknown": "Unknown",
     "general/refunded_payment_text": "Refunded payment from {{user}}",
     "general/reversed_payment_text": "Reversed payment from {{user}}",

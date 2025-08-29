@@ -149,6 +149,9 @@ class Subscription {
             case 2;
                 $status = '<span class="badge badge-secondary">' . Store::getLanguage()->get('general', 'cancelled') . '</span>';
                 break;
+            case 3;
+                $status = '<span class="badge badge-danger">' . Store::getLanguage()->get('general', 'suspended') . '</span>';
+                break;
             default:
                 $status = '<span class="badge badge-danger">' . Store::getLanguage()->get('general', 'unknown') . '</span>';
                 break;
