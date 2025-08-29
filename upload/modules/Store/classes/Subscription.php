@@ -141,16 +141,16 @@ class Subscription {
     public function getStatusHtml(): string {
         switch ($this->data()->status_id) {
             case 0;
-                $status = '<span class="badge badge-warning">Pending</span>';
+                $status = '<span class="badge badge-warning">' . Store::getLanguage()->get('general', 'pending') . '</span>';
                 break;
             case 1;
-                $status = '<span class="badge badge-success">Active</span>';
+                $status = '<span class="badge badge-success">' . Store::getLanguage()->get('general', 'active') . '</span>';
                 break;
             case 2;
-                $status = '<span class="badge badge-secondary">Cancelled</span>';
+                $status = '<span class="badge badge-secondary">' . Store::getLanguage()->get('general', 'cancelled') . '</span>';
                 break;
             default:
-                $status = '<span class="badge badge-danger">Unknown</span>';
+                $status = '<span class="badge badge-danger">' . Store::getLanguage()->get('general', 'unknown') . '</span>';
                 break;
         }
 
