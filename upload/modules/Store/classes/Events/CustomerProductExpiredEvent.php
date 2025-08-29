@@ -19,7 +19,7 @@ class CustomerProductExpiredEvent extends AbstractEvent implements HasWebhookPar
     }
 
     public static function description(): string {
-        return (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'customer_product_expired');
+        return 'Store » ' . (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'customer_product_expired');
     }
 
     public function webhookParams(): array {

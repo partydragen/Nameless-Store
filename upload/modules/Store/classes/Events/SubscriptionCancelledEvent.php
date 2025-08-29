@@ -11,7 +11,7 @@ class SubscriptionCancelledEvent extends AbstractEvent implements HasWebhookPara
     }
 
     public static function description(): string {
-        return (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'subscription_cancelled');
+        return 'Store » ' . (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'subscription_cancelled');
     }
 
     public function webhookParams(): array {

@@ -17,7 +17,7 @@ class PaymentDeniedEvent extends AbstractEvent implements HasWebhookParams, Disc
     }
 
     public static function description(): string {
-        return (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'payment_denied');
+        return 'Store » ' . (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'payment_denied');
     }
 
     public function webhookParams(): array {

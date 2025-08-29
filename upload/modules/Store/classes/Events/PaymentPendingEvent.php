@@ -17,7 +17,7 @@ class PaymentPendingEvent extends AbstractEvent implements HasWebhookParams, Dis
     }
 
     public static function description(): string {
-        return (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'payment_pending');
+        return 'Store » ' . (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'payment_pending');
     }
 
     public function webhookParams(): array {

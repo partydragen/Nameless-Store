@@ -17,7 +17,7 @@ class PaymentCompletedEvent extends AbstractEvent implements HasWebhookParams, D
     }
 
     public static function description(): string {
-        return (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'payment_completed');
+        return 'Store » ' . (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'payment_completed');
     }
 
     public function webhookParams(): array {

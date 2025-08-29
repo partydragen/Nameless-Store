@@ -17,7 +17,7 @@ class PaymentReversedEvent extends AbstractEvent implements HasWebhookParams, Di
     }
 
     public static function description(): string {
-        return (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'payment_reversed');
+        return 'Store » ' . (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'payment_reversed');
     }
 
     public function webhookParams(): array {

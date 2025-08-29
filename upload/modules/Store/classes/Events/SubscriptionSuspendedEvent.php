@@ -1,5 +1,5 @@
 <?php
-class SubscriptionCreatedEvent extends AbstractEvent implements HasWebhookParams, DiscordDispatchable {
+class SubscriptionSuspendedEvent extends AbstractEvent implements HasWebhookParams, DiscordDispatchable {
     public Subscription $subscription;
 
     public function __construct(Subscription $subscription) {
@@ -7,11 +7,11 @@ class SubscriptionCreatedEvent extends AbstractEvent implements HasWebhookParams
     }
 
     public static function name(): string {
-        return 'subscriptionCreatedEvent';
+        return 'subscriptionSuspendedEvent';
     }
 
     public static function description(): string {
-        return 'Store » ' . (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'subscription_created');
+        return 'Store » ' . (new Language(ROOT_PATH . '/modules/Store/language'))->get('admin', 'subscription_suspended');
     }
 
     public function webhookParams(): array {
@@ -45,7 +45,7 @@ class SubscriptionCreatedEvent extends AbstractEvent implements HasWebhookParams
             ->setUsername($customer->getUsername())
             ->addEmbed(function (DiscordEmbed $embed) use ($store_language, $customer) {
                 return $embed
-                    ->setDescription($store_language->get('general', 'subscription_created', [
+                    ->setDescription($store_language->get('general', 'subscription_suspended', [
                         'username' => $customer->getUsername(),
                         'gateway' => $this->subscription->getGateway() != null ? $this->subscription->getGateway()->getName() : 'Unknown'
                     ]));

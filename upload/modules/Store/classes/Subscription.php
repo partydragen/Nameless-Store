@@ -138,6 +138,24 @@ class Subscription {
         EventHandler::executeEvent(new SubscriptionCancelledEvent($this));
     }
 
+    public function suspended(): void {
+        $this->update([
+            'status_id' => self::PAUSED,
+            'updated' => date('U')
+        ]);
+
+        EventHandler::executeEvent(new SubscriptionSuspendedEvent($this));
+    }
+
+    public function resumed(): void {
+        $this->update([
+            'status_id' => self::ACTIVE,
+            'updated' => date('U')
+        ]);
+
+        EventHandler::executeEvent(new SubscriptionResumedEvent($this));
+    }
+
     public function getStatusHtml(): string {
         switch ($this->data()->status_id) {
             case 0;
