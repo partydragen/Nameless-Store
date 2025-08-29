@@ -47,6 +47,8 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                     ]
                 ],
                 'application_context' => [
+                    'brand_name' => SITE_NAME,
+                    "user_action" => "PAY_NOW",
                     'return_url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=success'),
                     'cancel_url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=cancel')
                 ]
@@ -77,9 +79,32 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                 return;
             }
 
+            $duration_json = json_decode($product->data()->durability, true) ?? [];
             $subscription_data = [
+                'custom_id' => $order->data()->id,
                 'plan_id' => $plan_id,
+                'plan' => [
+                    'billing_cycles' => [
+                        [
+                            'frequency' => [
+                                'interval_unit' => strtoupper($duration_json['period'] ?? 'MONTH'),
+                                'interval_count' => $duration_json['interval'] ?? 1
+                            ],
+                            'tenure_type' => 'REGULAR',
+                            'sequence' => 1,
+                            'total_cycles' => 0,
+                            'pricing_scheme' => [
+                                'fixed_price' => [
+                                    'value' => Store::fromCents($order->getAmount()->getTotalCents()),
+                                    'currency_code' => $order->getAmount()->getCurrency()
+                                ]
+                            ]
+                        ]
+                    ],
+                ],
                 'application_context' => [
+                    'brand_name' => SITE_NAME,
+                    "user_action" => "SUBSCRIBE_NOW",
                     'return_url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=success'),
                     'cancel_url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=cancel')
                 ]
@@ -147,35 +172,43 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                 $response = $this->makeApiRequest("/v1/billing/subscriptions/{$subscription_id}", 'GET', $access_token);
 
                 if (isset($response['status']) && $response['status'] === 'ACTIVE') {
-                    $order_id = $_SESSION['shopping_cart']['order_id'];
+                    $order_id = $_SESSION['shopping_cart']['order_id'] ?? $response['custom_id'];
                     if ($order_id == null || !is_numeric($order_id)) {
                         $this->logError('Invalid order id');
                         $this->addError('Invalid order id');
                         return false;
                     }
 
-                    $order = new Order($order_id);
-                    $plan = $this->makeApiRequest("/v1/billing/plans/{$response['plan_id']}", 'GET', $access_token);
-                    $billing_cycles = $plan['billing_cycles'][0];
+                    $subscription = new Subscription($subscription_id, 'agreement_id');
+                    if (!$subscription->exists()) {
+                        $order = new Order($order_id);
+                        $plan = $this->makeApiRequest("/v1/billing/plans/{$response['plan_id']}", 'GET', $access_token);
+                        $billing_cycles = $plan['billing_cycles'][0];
 
-                    DB::getInstance()->insert('store_subscriptions', [
-                        'order_id' => $order->data()->id,
-                        'gateway_id' => $this->getId(),
-                        'customer_id' => $order->customer()->data()->id,
-                        'agreement_id' => $subscription_id,
-                        'status_id' => Subscription::PENDING,
-                        'amount_cents' => Store::toCents($billing_cycles['pricing_scheme']['fixed_price']['value']),
-                        'currency' => $billing_cycles['pricing_scheme']['fixed_price']['currency_code'],
-                        'frequency' => strtolower($billing_cycles['frequency']['interval_unit']),
-                        'frequency_interval' => $billing_cycles['frequency']['interval_count'],
-                        'email' => $response['subscriber']['email_address'] ?? null,
-                        'verified' => 1,
-                        'payer_id' => $response['subscriber']['payer_id'] ?? null,
-                        'last_payment_date' => null,
-                        'next_billing_date' => isset($response['billing_info']['next_billing_time']) ? date('U', strtotime($response['billing_info']['next_billing_time'])) : 0,
-                        'created' => date('U'),
-                        'updated' => date('U')
-                    ]);
+                        $subscription->create([
+                            'order_id' => $order->data()->id,
+                            'gateway_id' => $this->getId(),
+                            'customer_id' => $order->customer()->data()->id,
+                            'agreement_id' => $subscription_id,
+                            'status_id' => Subscription::ACTIVE,
+                            'amount_cents' => Store::toCents($billing_cycles['pricing_scheme']['fixed_price']['value']),
+                            'currency' => $billing_cycles['pricing_scheme']['fixed_price']['currency_code'],
+                            'frequency' => strtolower($billing_cycles['frequency']['interval_unit']),
+                            'frequency_interval' => $billing_cycles['frequency']['interval_count'],
+                            'email' => $response['subscriber']['email_address'] ?? null,
+                            'verified' => 1,
+                            'payer_id' => $response['subscriber']['payer_id'] ?? null,
+                            'last_payment_date' => null,
+                            'next_billing_date' => isset($response['billing_info']['next_billing_time']) ? date('U', strtotime($response['billing_info']['next_billing_time'])) : 0,
+                            'created' => date('U'),
+                            'updated' => date('U')
+                        ]);
+                    } else {
+                        $subscription->update([
+                            'status_id' => Subscription::ACTIVE,
+                            'next_billing_date' => isset($response['billing_info']['next_billing_time']) ? date('U', strtotime($response['billing_info']['next_billing_time'])) : 0,
+                        ]);
+                    }
 
                     return true;
                 } else {
@@ -260,12 +293,50 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                         }
                         break;
 
+                    case 'BILLING.SUBSCRIPTION.CREATED':
+                        $subscription = new Subscription($response['resource']['id'], 'agreement_id');
+                        if (!$subscription->exists()) {
+                            $order = new Order($response['resource']['custom_id']);
+                            if ($order->exists()) {
+                                $billing_cycles = $response['resource']['plan']['billing_cycles'][0];
+
+                                DB::getInstance()->insert('store_subscriptions', [
+                                    'order_id' => $order->data()->id,
+                                    'gateway_id' => $this->getId(),
+                                    'customer_id' => $order->customer()->data()->id,
+                                    'agreement_id' => $response['resource']['id'],
+                                    'status_id' => -1,
+                                    'amount_cents' => Store::toCents($billing_cycles['pricing_scheme']['fixed_price']['value']),
+                                    'currency' => $billing_cycles['pricing_scheme']['fixed_price']['currency_code'],
+                                    'frequency' => strtolower($billing_cycles['frequency']['interval_unit']),
+                                    'frequency_interval' => $billing_cycles['frequency']['interval_count'],
+                                    'email' => $response['resource']['subscriber']['email_address'] ?? null,
+                                    'verified' => 1,
+                                    'payer_id' => $response['resource']['subscriber']['payer_id'] ?? null,
+                                    'last_payment_date' => null,
+                                    'next_billing_date' => 0,
+                                    'created' => date('U'),
+                                    'updated' => date('U')
+                                ]);
+                            }
+                        }
+                        break;
+
                     case 'BILLING.SUBSCRIPTION.ACTIVATED':
                         $subscription = new Subscription($response['resource']['id'], 'agreement_id');
                         if ($subscription->exists()) {
+                            $billing_cycles = $response['resource']['plan']['billing_cycles'][0];
+
                             $subscription->update([
-                                'status_id' => Subscription::ACTIVE
+                                'status_id' => Subscription::ACTIVE,
+                                'amount_cents' => Store::toCents($billing_cycles['pricing_scheme']['fixed_price']['value']),
+                                'currency' => $billing_cycles['pricing_scheme']['fixed_price']['currency_code'],
+                                'frequency' => strtolower($billing_cycles['frequency']['interval_unit']),
+                                'frequency_interval' => $billing_cycles['frequency']['interval_count'],
+                                'email' => $response['resource']['subscriber']['email_address'] ?? $subscription->data()->email,
+                                'payer_id' => $response['resource']['subscriber']['payer_id'] ?? $subscription->data()->payer_id,
                             ]);
+
                             EventHandler::executeEvent(new SubscriptionCreatedEvent($subscription));
                         }
                         break;
@@ -368,6 +439,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                         ['name' => 'PAYMENT.CAPTURE.REFUNDED'],
                         ['name' => 'PAYMENT.CAPTURE.REVERSED'],
                         ['name' => 'PAYMENT.CAPTURE.DENIED'],
+                        ['name' => 'BILLING.SUBSCRIPTION.CREATED'],
                         ['name' => 'BILLING.SUBSCRIPTION.ACTIVATED'],
                         ['name' => 'BILLING.SUBSCRIPTION.CANCELLED'],
                         ['name' => 'BILLING.SUBSCRIPTION.SUSPENDED'],
