@@ -48,7 +48,8 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                 ],
                 'application_context' => [
                     'brand_name' => SITE_NAME,
-                    "user_action" => "PAY_NOW",
+                    'user_action' => 'PAY_NOW',
+                    'shipping_preference' => 'NO_SHIPPING',
                     'return_url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=success'),
                     'cancel_url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=cancel')
                 ]
@@ -104,7 +105,8 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                 ],
                 'application_context' => [
                     'brand_name' => SITE_NAME,
-                    "user_action" => "SUBSCRIBE_NOW",
+                    'user_action' => 'SUBSCRIBE_NOW',
+                    'shipping_preference' => 'NO_SHIPPING',
                     'return_url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=success'),
                     'cancel_url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=cancel')
                 ]
@@ -588,7 +590,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
 
         $plan_data = [
             'product_id' => $paypal_product_id,
-            'name' => 'Payment Order',
+            'name' => $product->data()->name,
             'description' => $product->data()->name,
             'status' => 'ACTIVE',
             'billing_cycles' => [
