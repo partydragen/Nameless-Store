@@ -319,5 +319,13 @@
     "general/reversed": "Umgekehrt",
     "general/denied": "Abgelehnt",
     "admin/execute_actions": "Aktionen ausführen",
-    "admin/payment_status": "Zahlungsstatus"
+    "admin/payment_status": "Zahlungsstatus",
+    "general/cancelled": "Abgesagt",
+    "general/active": "Aktiv",
+    "admin/subscription_created": "Abonnement erstellt",
+    "admin/subscription_suspended": "Abonnement ausgesetzt",
+    "admin/subscription_resumed": "Abonnement wieder aufgenommen",
+    "admin/subscription_cancelled": "Abonnement gekündigt",
+    "general/suspended": "Ausgesetzt",
+    "general/unknown": "Unbekannt"
 }
