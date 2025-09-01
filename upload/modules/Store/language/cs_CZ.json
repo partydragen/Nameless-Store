@@ -319,5 +319,13 @@
     "general/refunded": "Vrácená",
     "general/reversed": "Obrácená",
     "general/denied": "Zamítnutá",
-    "admin/payment_status": "Stav platby"
+    "admin/payment_status": "Stav platby",
+    "general/active": "Aktivní",
+    "admin/subscription_cancelled": "Předplatné zrušeno",
+    "general/suspended": "Pozastaveno",
+    "general/unknown": "Neznámé",
+    "admin/subscription_created": "Předplatné vytvořeno",
+    "admin/subscription_suspended": "Předplatné pozastaveno",
+    "admin/subscription_resumed": "Předplatné obnoveno",
+    "general/cancelled": "Zrušeno"
 }
