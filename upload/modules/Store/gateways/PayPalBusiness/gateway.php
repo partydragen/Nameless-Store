@@ -50,8 +50,8 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                     'brand_name' => SITE_NAME,
                     'user_action' => 'PAY_NOW',
                     'shipping_preference' => 'NO_SHIPPING',
-                    'return_url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=success'),
-                    'cancel_url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=cancel')
+                    'return_url' => $this->getReturnURL(),
+                    'cancel_url' => $this->getCancelURL()
                 ]
             ];
 
@@ -107,8 +107,8 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
                     'brand_name' => SITE_NAME,
                     'user_action' => 'SUBSCRIBE_NOW',
                     'shipping_preference' => 'NO_SHIPPING',
-                    'return_url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=success'),
-                    'cancel_url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=PayPalBusiness&do=cancel')
+                    'return_url' => $this->getReturnURL(),
+                    'cancel_url' => $this->getCancelURL()
                 ]
             ];
 
@@ -452,7 +452,7 @@ class PayPal_Business_Gateway extends GatewayBase implements SupportSubscription
             if (!$hook_key) {
                 $key = md5(uniqid());
                 $webhook_data = [
-                    'url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/listener', 'gateway=PayPalBusiness&key=' . $key),
+                    'url' => $this->getListenerURL("key=$key"),
                     'event_types' => [
                         ['name' => 'CHECKOUT.ORDER.APPROVED'],
                         ['name' => 'PAYMENT.CAPTURE.COMPLETED'],

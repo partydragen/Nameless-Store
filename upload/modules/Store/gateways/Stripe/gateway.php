@@ -30,8 +30,8 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
         }
 
         $currency = $order->getAmount()->getCurrency();
-        $successRedirect = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=success');
-        $cancelRedirect = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=cancel');
+        $successRedirect = $this->getReturnURL();
+        $cancelRedirect = $this->getCancelURL();
 
         $products = [];
         if (!$order->isSubscriptionMode()) {
@@ -293,7 +293,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                 $hook_key = StoreConfig::get('stripe.hook_key');
                 if (!$hook_key) {
                     $webhook = $stripe->webhookEndpoints->create([
-                        'url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/listener', 'gateway=Stripe'),
+                        'url' => $this->getListenerURL(),
                         'enabled_events' => [
                             'payment_intent.succeeded',
                             'charge.refunded',
