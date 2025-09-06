@@ -319,5 +319,13 @@
     "general/completed": "Завершено",
     "general/refunded": "Возвращено",
     "general/denied": "Отклонено",
-    "general/reversed": "Отменено"
+    "general/reversed": "Отменено",
+    "general/active": "Активно",
+    "general/cancelled": "Отменено",
+    "general/suspended": "Приостановлено",
+    "general/unknown": "Неизвестно",
+    "admin/subscription_created": "Подписка создана",
+    "admin/subscription_cancelled": "Подписка отменена",
+    "admin/subscription_suspended": "Подписка приостановлена",
+    "admin/subscription_resumed": "Подписка возобновлена"
 }
