@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * VerifyPayPalWebhookSignature class
+ * Handles PayPal webhook signature verification
+ *
+ * @package Modules\Store
+ */
 class VerifyPayPalWebhookSignature {
 
     public string $auth_algo;
