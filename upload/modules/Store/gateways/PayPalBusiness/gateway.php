@@ -7,6 +7,14 @@
  * @version 2.0.3
  * @license MIT
  */
+namespace Store\Gateways\PayPalBusiness;
+
+use SupportSubscriptions;
+use Customer;
+use GatewayBase;
+use Subscription;
+use TemplateBase;
+
 class PayPal_Business_Gateway extends GatewayBase implements SupportSubscriptions {
     use ApiClient;
     use OrderProcessor;

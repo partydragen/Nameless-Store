@@ -5,6 +5,13 @@
  *
  * @package Modules\Store
  */
+namespace Store\Gateways\PayPalBusiness;
+
+use Order;
+use Redirect;
+use Store;
+use Subscription;
+
 trait SubscriptionManager {
     public function processSubscription(Order $order, string $access_token): void {
         // Subscription payment using Subscriptions API

@@ -5,6 +5,14 @@
  *
  * @package Modules\Store
  */
+namespace Store\Gateways\PayPalBusiness;
+
+use Order;
+use Payment;
+use Redirect;
+use Store;
+use Subscription;
+
 trait OrderProcessor {
 
     public function processOrder(Order $order): void {

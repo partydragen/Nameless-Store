@@ -5,6 +5,10 @@
  *
  * @package Modules\Store
  */
+namespace Store\Gateways\PayPalBusiness;
+
+use StoreConfig;
+
 trait ApiClient {
 
     private $api_url = 'https://api-m.sandbox.paypal.com'; // Use 'https://api-m.sandbox.paypal.com' for sandbox

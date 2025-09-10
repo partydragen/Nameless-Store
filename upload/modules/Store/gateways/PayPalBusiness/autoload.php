@@ -11,9 +11,9 @@
  */
 
 // Load classes
-spl_autoload_register(function ($class) {
-    $path = join(DIRECTORY_SEPARATOR, [ROOT_PATH, 'modules', 'Store', 'gateways', 'PayPalBusiness', 'classes', $class . '.php']);
-    if (file_exists($path)) {
-        require_once($path);
-    }
-});
+require_once __DIR__ . '/classes/ApiClient.php';
+require_once __DIR__ . '/classes/OrderProcessor.php';
+require_once __DIR__ . '/classes/SubscriptionManager.php';
+require_once __DIR__ . '/classes/PlanManager.php';
+require_once __DIR__ . '/classes/WebhookManager.php';
+require_once __DIR__ . '/classes/VerifyPayPalWebhookSignature.php';

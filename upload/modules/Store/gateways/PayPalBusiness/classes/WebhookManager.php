@@ -5,6 +5,17 @@
  *
  * @package Modules\Store
  */
+namespace Store\Gateways\PayPalBusiness;
+
+use DB;
+use EventHandler;
+use Order;
+use Payment;
+use Store;
+use StoreConfig;
+use Subscription;
+use SubscriptionCreatedEvent;
+
 trait WebhookManager {
 
     public function createWebhook(): bool {

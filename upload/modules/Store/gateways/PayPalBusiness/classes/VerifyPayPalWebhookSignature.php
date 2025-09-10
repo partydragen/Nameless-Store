@@ -5,6 +5,8 @@
  *
  * @package Modules\Store
  */
+namespace Store\Gateways\PayPalBusiness;
+
 class VerifyPayPalWebhookSignature {
 
     public string $auth_algo;

@@ -5,6 +5,12 @@
  *
  * @package Modules\Store
  */
+namespace Store\Gateways\PayPalBusiness;
+
+use DB;
+use Product;
+use Store;
+
 trait PlanManager {
     public function getPlan(Product $product): ?string {
         $plan_query = DB::getInstance()->query('SELECT * FROM nl2_store_products_meta WHERE product_id = ? AND name = ?', [$product->data()->id, 'paypal_plan_id']);
