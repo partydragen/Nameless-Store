@@ -166,6 +166,8 @@ trait WebhookManager {
                             'fee_cents' => isset($response['resource']['purchase_units'][0]['payments']['captures'][0]['seller_receivable_breakdown']['paypal_fee']['value']) ? Store::toCents($response['resource']['purchase_units'][0]['payments']['captures'][0]['seller_receivable_breakdown']['paypal_fee']['value']) : 0
                         ];
                         $payment->handlePaymentEvent(Payment::COMPLETED, $data);
+                    } else {
+                        $this->logError('Could not handle order approved for invalid payment ' . $response['resource']['id']);
                     }
                 }
                 break;
@@ -174,6 +176,8 @@ trait WebhookManager {
                 $payment = new Payment($response['resource']['id'], 'transaction');
                 if ($payment->exists()) {
                     $payment->handlePaymentEvent(Payment::REFUNDED);
+                } else {
+                    $this->logError('Could not handle refund event for invalid payment ' . $response['resource']['id']);
                 }
                 break;
 
@@ -181,6 +185,8 @@ trait WebhookManager {
                 $payment = new Payment($response['resource']['id'], 'transaction');
                 if ($payment->exists()) {
                     $payment->handlePaymentEvent(Payment::REVERSED);
+                } else {
+                    $this->logError('Could not handle reversed event for invalid payment ' . $response['resource']['id']);
                 }
                 break;
 
@@ -188,6 +194,8 @@ trait WebhookManager {
                 $payment = new Payment($response['resource']['id'], 'transaction');
                 if ($payment->exists()) {
                     $payment->handlePaymentEvent(Payment::DENIED);
+                } else {
+                    $this->logError('Could not handle denied event for invalid payment ' . $response['resource']['id']);
                 }
                 break;
 
@@ -243,6 +251,8 @@ trait WebhookManager {
                 $subscription = new Subscription($response['resource']['id'], 'agreement_id');
                 if ($subscription->exists()) {
                     $subscription->cancelled();
+                } else {
+                    $this->logError('Could not handle cancelled event for invalid subscription ' . $response['resource']['id']);
                 }
                 break;
 
@@ -253,6 +263,8 @@ trait WebhookManager {
                         'status_id' => Subscription::PAUSED,
                         'updated' => date('U')
                     ]);
+                } else {
+                    $this->logError('Could not handle suspended event for invalid subscription ' . $response['resource']['id']);
                 }
                 break;
 
@@ -263,6 +275,8 @@ trait WebhookManager {
                         'status_id' => Subscription::ACTIVE,
                         'updated' => date('U')
                     ]);
+                } else {
+                    $this->logError('Could not handle re-activated event for invalid subscription ' . $response['resource']['id']);
                 }
                 break;
 
