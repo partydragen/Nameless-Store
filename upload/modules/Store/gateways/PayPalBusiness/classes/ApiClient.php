@@ -58,8 +58,9 @@ trait ApiClient {
             'Content-Type: application/json'
         ]);
 
-        if ($method === 'POST') {
+        if ($method !== 'GET') {
             curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
             if (!empty($data)) {
                 // Handle raw JSON string for verification endpoint
                 if ($endpoint === '/v1/notifications/verify-webhook-signature' && is_string($data)) {

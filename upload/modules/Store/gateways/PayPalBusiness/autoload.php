@@ -16,4 +16,4 @@ require_once __DIR__ . '/classes/OrderProcessor.php';
 require_once __DIR__ . '/classes/SubscriptionManager.php';
 require_once __DIR__ . '/classes/PlanManager.php';
 require_once __DIR__ . '/classes/WebhookManager.php';
-require_once __DIR__ . '/classes/VerifyPayPalWebhookSignature.php';
+require_once __DIR__ . '/classes/VerifyWebhookSignature.php';

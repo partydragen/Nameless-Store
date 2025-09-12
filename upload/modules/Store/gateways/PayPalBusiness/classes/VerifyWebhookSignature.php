@@ -7,7 +7,9 @@
  */
 namespace Store\Gateways\PayPalBusiness;
 
-class VerifyPayPalWebhookSignature {
+use StoreConfig;
+
+class VerifyWebhookSignature {
 
     public string $auth_algo;
     public string $cert_url;
@@ -16,6 +18,18 @@ class VerifyPayPalWebhookSignature {
     public string $transmission_time;
     public string $webhook_id;
     public string $request_body;
+
+    public function __construct() {
+        $headers = getallheaders();
+        $headers = array_change_key_case($headers, CASE_UPPER);
+
+        $this->setAuthAlgo($headers['PAYPAL-AUTH-ALGO']);
+        $this->setCertUrl($headers['PAYPAL-CERT-URL']);
+        $this->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
+        $this->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
+        $this->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
+        $this->setWebhookId(StoreConfig::get('paypal_business.hook_key'));
+    }
 
     /**
      * The algorithm that PayPal uses to generate the signature and that you can use to verify the signature. Extract this value from the `PAYPAL-AUTH-ALGO` response header, which is received with the webhook notification.

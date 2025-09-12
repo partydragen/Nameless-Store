@@ -131,19 +131,9 @@ trait WebhookManager {
             return;
         }
 
-        require_once(ROOT_PATH . '/modules/Store/gateways/PayPalBusiness/VerifyPayPalWebhookSignature.php');
-
         $body_received = file_get_contents('php://input');
-        $headers = getallheaders();
-        $headers = array_change_key_case($headers, CASE_UPPER);
 
-        $signature = new VerifyPayPalWebhookSignature();
-        $signature->setAuthAlgo($headers['PAYPAL-AUTH-ALGO']);
-        $signature->setCertUrl($headers['PAYPAL-CERT-URL']);
-        $signature->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
-        $signature->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
-        $signature->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
-        $signature->setWebhookId(StoreConfig::get('paypal_business.hook_key'));
+        $signature = new VerifyWebhookSignature();
         $signature->setRequestBody($body_received);
 
         $verify_response = $this->makeApiRequest('/v1/notifications/verify-webhook-signature', 'POST', $access_token, $signature->toJSON());
