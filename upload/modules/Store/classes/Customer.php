@@ -10,7 +10,7 @@
 class Customer {
 
     private static array $_customers_cache = [];
-    private static array $_customer_spending_cache = [];
+    private array $_customer_spending_cache = [];
 
     private DB $_db;
     private User $_user;

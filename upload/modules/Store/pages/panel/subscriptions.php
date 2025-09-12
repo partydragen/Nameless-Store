@@ -26,7 +26,7 @@ Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp
 
 if (!isset($_GET['subscription'])) {
 
-    $subscriptions_query = DB::getInstance()->query('SELECT * FROM nl2_store_subscriptions ORDER BY id DESC');
+    $subscriptions_query = DB::getInstance()->query('SELECT * FROM nl2_store_subscriptions WHERE status_id != -1 ORDER BY id DESC');
     if ($subscriptions_query->count()) {
 
         $subscriptions_list = [];

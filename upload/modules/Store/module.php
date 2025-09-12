@@ -1302,7 +1302,7 @@ class Store_Module extends Module {
             }
         }
 
-        if ($old_version < 184) {
+        if ($old_version < 190) {
             try {
                 // Add cumulative_pricing column to categories
                 $this->_db->query('ALTER TABLE `nl2_store_categories` ADD `cumulative_pricing` tinyint(1) NOT NULL DEFAULT \'0\'');
@@ -1316,6 +1316,14 @@ class Store_Module extends Module {
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
+            }
+
+            $gateway = Gateways::getInstance()->get('PayPalBusiness');
+            if ($gateway instanceof \Store\Gateways\PayPalBusiness\PayPal_Business_Gateway) {
+                $hook_key = StoreConfig::get('paypal_business.hook_key');
+                if ($hook_key) {
+                    $gateway->updateWebhook();
+                }
             }
         }
     }

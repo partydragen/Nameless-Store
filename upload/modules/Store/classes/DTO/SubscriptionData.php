@@ -12,6 +12,7 @@ class SubscriptionData {
     public string $currency;
     public string $frequency;
     public int $frequency_interval;
+    public ?string $email;
     public bool $verified;
     public ?string $payer_id;
     public ?int $last_payment_date;
@@ -32,6 +33,7 @@ class SubscriptionData {
         $this->currency = $row->currency;
         $this->frequency = $row->frequency;
         $this->frequency_interval = $row->frequency_interval;
+        $this->email = $row->email;
         $this->verified = $row->verified;
         $this->payer_id = $row->payer_id;
         $this->last_payment_date = $row->last_payment_date;

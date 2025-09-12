@@ -16,6 +16,10 @@ class Gateways extends Instanceable {
         foreach ($directories as $directory) {
             $folders = explode('/', $directory);
 
+            if (file_exists(ROOT_PATH . '/modules/Store/gateways/' . $folders[count($folders) - 1] . '/autoload.php')) {
+                require_once(ROOT_PATH . '/modules/Store/gateways/' . $folders[count($folders) - 1] . '/autoload.php');
+            }
+
             if (file_exists(ROOT_PATH . '/modules/Store/gateways/' . $folders[count($folders) - 1] . '/gateway.php')) {
                 require_once(ROOT_PATH . '/modules/Store/gateways/' . $folders[count($folders) - 1] . '/gateway.php');
 

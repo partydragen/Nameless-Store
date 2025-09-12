@@ -11,7 +11,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
 
     public function __construct() {
         $name = 'Stripe';
-        $author = '<a href="https://github.com/supercrafter100/" target="_blank" rel="nofollow noopener">Supercrafter100</a>';
+        $author = '<a href="https://github.com/supercrafter100/" target="_blank" rel="nofollow noopener">Supercrafter100</a> and <a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a>';
         $gateway_version = '1.8.3';
         $store_version = '1.8.3';
         $settings = ROOT_PATH . '/modules/Store/gateways/Stripe/gateway_settings/settings.php';
@@ -30,8 +30,8 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
         }
 
         $currency = $order->getAmount()->getCurrency();
-        $successRedirect = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=success');
-        $cancelRedirect = rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=Stripe&do=cancel');
+        $successRedirect = $this->getReturnURL();
+        $cancelRedirect = $this->getCancelURL();
 
         $products = [];
         if (!$order->isSubscriptionMode()) {
@@ -293,7 +293,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                 $hook_key = StoreConfig::get('stripe.hook_key');
                 if (!$hook_key) {
                     $webhook = $stripe->webhookEndpoints->create([
-                        'url' => rtrim(URL::getSelfURL(), '/') . URL::build('/store/listener', 'gateway=Stripe'),
+                        'url' => $this->getListenerURL(),
                         'enabled_events' => [
                             'payment_intent.succeeded',
                             'charge.refunded',

@@ -227,4 +227,32 @@ abstract class GatewayBase {
 
         file_put_contents(ROOT_PATH . '/cache/store_logs/' . $this->getName() . '/' . date('U') . '_' . $event . '.txt', $content);
     }
+
+    /**
+     * Get the return url for this gateway when customer completes a payment
+     *
+     * @return string The return url for this gateway
+     */
+    public function getReturnURL(): string {
+        return rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=' . $this->getName() . '&do=success');
+    }
+
+    /**
+     * Get the cancel url for this gateway when customer cancels a payment
+     *
+     * @return string The cancel url for this gateway
+     */
+    public function getCancelURL(): string {
+        return rtrim(URL::getSelfURL(), '/') . URL::build('/store/process/', 'gateway=' . $this->getName() . '&do=cancel');
+    }
+
+    /**
+     * Get the webhook listener url
+     *
+     * @param  string $params URL parameters to append to end.
+     * @return string Get the webhook listener url
+     */
+    public function getListenerURL(string $params = ''): string {
+        return rtrim(URL::getSelfURL(), '/') . URL::build('/store/listener', 'gateway=' . $this->getName() . (empty($params) ? '' : '&' . $params));
+    }
 }
