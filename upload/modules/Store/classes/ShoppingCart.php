@@ -94,6 +94,8 @@ class ShoppingCart extends Instanceable {
                 ));
             }
         }
+
+        EventHandler::executeEvent(new LoadShoppingCartEvent($this));
     }
 
     // Add product to shopping cart

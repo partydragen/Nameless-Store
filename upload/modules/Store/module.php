@@ -67,6 +67,7 @@ class Store_Module extends Module {
         EventHandler::registerEvent(ParseActionCommandEvent::class);
         EventHandler::registerEvent(RenderCategoryEvent::class);
         EventHandler::registerEvent(RenderProductEvent::class);
+        EventHandler::registerEvent(LoadShoppingCartEvent::class);
 
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'globalLimit']);
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'userLimit']);
