@@ -5,7 +5,7 @@
  *
  * @package Modules\Store
  */
-namespace Store\Gateways\PayPalBusiness;
+namespace Store\Gateways\PayPal;
 
 use DB;
 use EventHandler;
@@ -18,13 +18,7 @@ use SubscriptionCreatedEvent;
 
 trait WebhookManager {
 
-    public function createWebhook(): bool {
-        $access_token = $this->getAccessToken();
-        if ($this->getErrors()) {
-            $this->logError('Failed to get access token for webhook update');
-            return false;
-        }
-
+    public function createWebhook(string $access_token): bool {
         $key = md5(uniqid());
         $webhook_data = [
             'url' => $this->getListenerURL("key=$key"),
@@ -46,8 +40,8 @@ trait WebhookManager {
         $webhook_response = $this->makeApiRequest('/v1/notifications/webhooks', 'POST', $access_token, $webhook_data);
         if (isset($webhook_response['id'])) {
             StoreConfig::setMultiple([
-                'paypal_business.key' => $key,
-                'paypal_business.hook_key' => $webhook_response['id']
+                'paypal.key' => $key,
+                'paypal.hook_key' => $webhook_response['id']
             ]);
 
             return true;
@@ -59,7 +53,7 @@ trait WebhookManager {
     }
 
     public function updateWebhook(): bool {
-        $hook_key = StoreConfig::get('paypal_business.hook_key');
+        $hook_key = StoreConfig::get('paypal.hook_key');
         if (!$hook_key) {
             $this->logError('No webhook ID found to update');
             return false;
@@ -71,7 +65,7 @@ trait WebhookManager {
             return false;
         }
 
-        $key = StoreConfig::get('paypal_business.key') ?: md5(uniqid());
+        $key = StoreConfig::get('paypal.key') ?: md5(uniqid());
         $webhook_data = [
             [
                 'op' => 'replace',
@@ -100,8 +94,8 @@ trait WebhookManager {
         $response = $this->makeApiRequest("/v1/notifications/webhooks/{$hook_key}", 'PATCH', $access_token, $webhook_data);
         if (isset($response['id']) && $response['id'] === $hook_key) {
             // Update key if it changed
-            if ($key !== StoreConfig::get('paypal_business.key')) {
-                StoreConfig::set('paypal_business.key', $key);
+            if ($key !== StoreConfig::get('paypal.key')) {
+                StoreConfig::set('paypal.key', $key);
             }
 
             return true;
@@ -115,7 +109,7 @@ trait WebhookManager {
         header('Content-Type: application/json; charset=UTF-8');
 
         // Validate webhook key
-        if (!isset($_GET['key']) || $_GET['key'] !== StoreConfig::get('paypal_business.key')) {
+        if (!isset($_GET['key']) || $_GET['key'] !== StoreConfig::get('paypal.key')) {
             http_response_code(400);
             echo json_encode(['error' => 'Invalid webhook key']);
             $this->logError('Missing or invalid webhook key: ' . ($_GET['key'] ?? 'not provided'));

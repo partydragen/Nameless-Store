@@ -5,7 +5,7 @@
  *
  * @package Modules\Store
  */
-namespace Store\Gateways\PayPalBusiness;
+namespace Store\Gateways\PayPal;
 
 use DB;
 use Product;

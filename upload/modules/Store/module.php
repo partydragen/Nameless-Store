@@ -24,7 +24,7 @@ class Store_Module extends Module {
 
         $name = 'Store';
         $author = '<a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a>';
-        $module_version = '1.8.3';
+        $module_version = '1.9.0';
         $nameless_version = '2.2.3';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
@@ -1305,12 +1305,33 @@ class Store_Module extends Module {
 
         if ($old_version < 190) {
             try {
+                if ($this->_db->get('store_gateways', ['name', '=', 'PayPalBusiness'])->count()) {
+                    $this->_db->query("UPDATE nl2_store_gateways SET `name` = 'PayPalLegacy', `displayname` = 'PayPal' WHERE `name` = 'PayPal'");
+                    $this->_db->query("UPDATE nl2_store_gateways SET `name` = 'PayPal', `displayname` = 'PayPal' WHERE `name` = 'PayPalBusiness'");
+
+                    StoreConfig::setMultiple([
+                        'paypal.client_id' => StoreConfig::get('paypal_business.client_id'),
+                        'paypal.client_secret' => StoreConfig::get('paypal_business.client_secret'),
+                        'paypal.key' => StoreConfig::get('paypal_business.key'),
+                        'paypal.hook_key' => StoreConfig::get('paypal_business.hook_key'),
+                    ]);
+
+                    Util::recursiveRemoveDirectory(ROOT_PATH . '/modules/Store/gateways/PayPalBusiness');
+                    Util::recursiveRemoveDirectory(ROOT_PATH . '/modules/Store/gateways/Minecraft-Community');
+                }
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
                 // Add cumulative_pricing column to categories
                 $this->_db->query('ALTER TABLE `nl2_store_categories` ADD `cumulative_pricing` tinyint(1) NOT NULL DEFAULT \'0\'');
             } catch (Exception $e) {
                 // unable to retrieve from config
                 echo $e->getMessage() . '<br />';
             }
+
             try {
                 // Add hide_if_owned column to products
                 $this->_db->query('ALTER TABLE `nl2_store_products` ADD `hide_if_owned` tinyint(1) NOT NULL DEFAULT \'0\'');
@@ -1319,9 +1340,9 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
 
-            $gateway = Gateways::getInstance()->get('PayPalBusiness');
-            if ($gateway instanceof \Store\Gateways\PayPalBusiness\PayPal_Business_Gateway) {
-                $hook_key = StoreConfig::get('paypal_business.hook_key');
+            $gateway = Gateways::getInstance()->get('PayPal');
+            if ($gateway instanceof \Store\Gateways\PayPal\PayPal_Gateway) {
+                $hook_key = StoreConfig::get('paypal.hook_key');
                 if ($hook_key) {
                     $gateway->updateWebhook();
                 }
@@ -1467,12 +1488,12 @@ class Store_Module extends Module {
             }
 
             $this->_db->insert('store_gateways', [
-                'name' => 'PayPal',
+                'name' => 'PayPalLegacy',
                 'displayname' => 'PayPal'
             ]);
 
             $this->_db->insert('store_gateways', [
-                'name' => 'PayPalBusiness',
+                'name' => 'PayPal',
                 'displayname' => 'PayPal'
             ]);
 
