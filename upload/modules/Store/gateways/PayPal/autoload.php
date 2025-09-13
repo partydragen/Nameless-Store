@@ -7,7 +7,7 @@
  *
  *  License: MIT
  *
- *  PayPalBusiness Gateway autoload file
+ *  PayPal Gateway autoload file
  */
 
 // Load classes

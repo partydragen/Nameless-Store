@@ -5,7 +5,7 @@
  *
  * @package Modules\Store
  */
-namespace Store\Gateways\PayPalBusiness;
+namespace Store\Gateways\PayPal;
 
 use StoreConfig;
 
@@ -28,7 +28,7 @@ class VerifyWebhookSignature {
         $this->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
         $this->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
         $this->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
-        $this->setWebhookId(StoreConfig::get('paypal_business.hook_key'));
+        $this->setWebhookId(StoreConfig::get('paypal.hook_key'));
     }
 
     /**

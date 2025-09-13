@@ -5,7 +5,7 @@
  *
  * @package Modules\Store
  */
-namespace Store\Gateways\PayPalBusiness;
+namespace Store\Gateways\PayPal;
 
 use StoreConfig;
 
@@ -14,8 +14,8 @@ trait ApiClient {
     private $api_url = 'https://api-m.sandbox.paypal.com'; // Use 'https://api-m.sandbox.paypal.com' for sandbox
 
     public function getAccessToken(): ?string {
-        $client_id = StoreConfig::get('paypal_business.client_id');
-        $client_secret = StoreConfig::get('paypal_business.client_secret');
+        $client_id = StoreConfig::get('paypal.client_id');
+        $client_secret = StoreConfig::get('paypal.client_secret');
 
         if (!$client_id || !$client_secret) {
             $this->logError('Client ID and Client Secret not set up');
@@ -36,9 +36,9 @@ trait ApiClient {
         curl_close($ch);
 
         if ($http_code === 200 && isset($response['access_token'])) {
-            $hook_key = StoreConfig::get('paypal_business.hook_key');
+            $hook_key = StoreConfig::get('paypal.hook_key');
             if (!$hook_key) {
-                return $this->createWebhook() ? $response['access_token'] : null;
+                return $this->createWebhook($response['access_token']) ? $response['access_token'] : null;
             }
             return $response['access_token'];
         }
