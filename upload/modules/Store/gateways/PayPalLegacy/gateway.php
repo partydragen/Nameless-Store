@@ -12,8 +12,8 @@ class PayPal_Legacy_Gateway extends GatewayBase {
     public function __construct() {
         $name = 'PayPalLegacy';
         $author = '<a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a>';
-        $gateway_version = '1.8.3';
-        $store_version = '1.8.3';
+        $gateway_version = '1.9.0';
+        $store_version = '1.9.0';
         $settings = ROOT_PATH . '/modules/Store/gateways/PayPalLegacy/gateway_settings/settings.php';
 
         parent::__construct($name, $author, $gateway_version, $store_version, $settings);

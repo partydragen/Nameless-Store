@@ -12,8 +12,8 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
     public function __construct() {
         $name = 'Stripe';
         $author = '<a href="https://github.com/supercrafter100/" target="_blank" rel="nofollow noopener">Supercrafter100</a> and <a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a>';
-        $gateway_version = '1.8.3';
-        $store_version = '1.8.3';
+        $gateway_version = '1.9.0';
+        $store_version = '1.9.0';
         $settings = ROOT_PATH . '/modules/Store/gateways/Stripe/gateway_settings/settings.php';
 
         parent::__construct($name, $author, $gateway_version, $store_version, $settings);
