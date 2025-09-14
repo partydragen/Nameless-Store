@@ -162,6 +162,7 @@ trait WebhookManager {
                         ];
                         $payment->handlePaymentEvent(Payment::COMPLETED, $data);
                     } else {
+                        http_response_code(400);
                         $this->logError('Could not handle order approved for invalid payment ' . $response['resource']['id']);
                     }
                 }
@@ -295,6 +296,7 @@ trait WebhookManager {
                             $subscription->sync();
                         }
                     } else {
+                        http_response_code(400);
                         $this->logError('Could not handle payment for invalid subscription ' . $response['resource']['billing_agreement_id']);
                     }
                 }
