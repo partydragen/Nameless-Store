@@ -17,7 +17,7 @@
                                     </div>
                                 </div>
                                 
-                                </br>
+                                <br />
                                 
                                 <div class="form-group">
                                     <label for="inputPaypalId">PayPal Client ID</label>
@@ -36,6 +36,29 @@
 
                                 <div class="form-group">
                                     <input type="hidden" name="token" value="{$TOKEN}">
+                                    <input type="hidden" name="action" value="settings">
                                     <input type="submit" value="{$SUBMIT}" class="btn btn-primary">
+                                </div>
+                            </form>
+
+                            <br />
+                            <br />
+
+                            <h5>Webhook Management</h5>
+                            <hr />
+                            <form action="" method="post">
+                                <div class="form-group">
+                                    <label for="inputWebhookId">Webhook ID</label>
+                                    <input class="form-control" type="text" id="inputWebhookId" name="webhook_id" placeholder="No webhook has been generated yet" value="{$WEBHOOK_ID_VALUE}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputWebhookKey">Webhook Key</label>
+                                    <input class="form-control" type="text" id="inputWebhookKey" name="webhook_key" placeholder="No webhook has been generated yet" value="{$WEBHOOK_KEY_VALUE}" readonly>
+                                </div>
+
+                                <div class="form-group">
+                                    <input type="hidden" name="token" value="{$TOKEN}">
+                                    <input type="hidden" name="action" value="update_webhook">
+                                    <input type="submit" value="Generate or Update Webhook" class="btn btn-primary">
                                 </div>
                             </form>

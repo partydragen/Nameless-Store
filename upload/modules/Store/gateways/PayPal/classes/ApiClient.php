@@ -11,7 +11,7 @@ use StoreConfig;
 
 trait ApiClient {
 
-    private string $api_url = 'https://api-m.sandbox.paypal.com'; // Use 'https://api-m.sandbox.paypal.com' for sandbox
+    private string $api_url = 'https://api-m.paypal.com'; // Use 'https://api-m.sandbox.paypal.com' for sandbox
     private string $access_token;
 
     public function getAccessToken(): ?string {
