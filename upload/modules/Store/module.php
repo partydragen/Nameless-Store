@@ -1340,11 +1340,13 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
 
-            $gateway = Gateways::getInstance()->get('PayPal');
-            if ($gateway instanceof \Store\Gateways\PayPal\PayPal_Gateway) {
-                $hook_key = StoreConfig::get('paypal.hook_key');
-                if ($hook_key) {
-                    $gateway->updateWebhook();
+            if (StoreConfig::exists()) {
+                $gateway = Gateways::getInstance()->get('PayPal');
+                if ($gateway instanceof \Store\Gateways\PayPal\PayPal_Gateway) {
+                    $hook_key = StoreConfig::get('paypal.hook_key');
+                    if ($hook_key) {
+                        $gateway->updateWebhook();
+                    }
                 }
             }
         }
