@@ -149,19 +149,19 @@ class Store {
      * Helper function to format price with currency
      *
      * @param $price_cents int Price
-     * @param $currencyCode string Currency code (eg GBP, USD, EUR)
-     * @param $currencySymbol string Currency symbol
+     * @param $currencyCode ?string Currency code (eg GBP, USD, EUR)
+     * @param $currencySymbol ?string Currency symbol
      * @param $format ?string Format
      * @return string Formatted price with currency
      */
-    public static function formatPrice(int $price_cents, string $currencyCode, string $currencySymbol, ?string $format = '{currencySymbol}{price} {currencyCode}'): string {
+    public static function formatPrice(int $price_cents, ?string $currencyCode, ?string $currencySymbol, ?string $format = '{currencySymbol}{price} {currencyCode}'): string {
         return str_replace([
             '{currencyCode}',
             '{currencySymbol}',
             '{price}'
         ], [
-            $currencyCode,
-            $currencySymbol,
+            $currencyCode ?? '??',
+            $currencySymbol ?? '??',
             sprintf('%0.2f', $price_cents / 100),
         ], $format);
     }
