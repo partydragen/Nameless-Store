@@ -97,8 +97,8 @@ if ($results->count()) {
         $obj->user_avatar = $avatar;
         $obj->amount = Output::getPurified(
             Store::formatPrice(
-                $result->amount_cents,
-                $result->currency,
+                $result->amount_cents ?? '??',
+                $result->currency ?? '??',
                 Store::getCurrencySymbol(),
                 STORE_CURRENCY_FORMAT,
             )
