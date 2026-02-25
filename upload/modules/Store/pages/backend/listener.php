@@ -16,7 +16,15 @@ if (!isset($_GET['gateway'])) {
 // Handle listener from gateway
 $gateway = Gateways::getInstance()->get($_GET['gateway']);
 if ($gateway) {
-    $gateway->handleListener();
+    try {
+        $gateway->handleListener();
+    } catch (Exception $e) {
+        header('Content-Type: application/json; charset=UTF-8');
+        http_response_code(500);
+        echo json_encode(['error' => 'gateway_listener_error', 'details' => $e->getMessage()]);
+
+        $gateway->logError($e->getMessage());
+    }
 } else {
     die('Invalid gateway');
 }
