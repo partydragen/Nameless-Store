@@ -63,7 +63,7 @@ if (!isset($_GET['action'])) {
             ]);
 
             if ($validation->passed()) {
-                // Validate if category exist
+                // Validate if category exists
                 $category = DB::getInstance()->query('SELECT id FROM nl2_store_categories WHERE id = ?', [Input::get('category')])->results();
                 if (!count($category)) {
                     $errors[] = $store_language->get('admin', 'invalid_category');
@@ -74,7 +74,16 @@ if (!isset($_GET['action'])) {
                     $errors[] = $store_language->get('admin', 'invalid_price');
                 }
 
-                // insert into database if there is no errors
+                // Validate durability period
+                if (in_array(Input::get('payment_type'), [2,3]) && Input::get('durability_period') == 'never' && Input::get('durability_interval') > 0) {
+                    $errors[] = $store_language->get('admin', 'invalid_durability_period');
+                }
+
+                if (in_array(Input::get('payment_type'), [2,3]) && (Input::get('durability_period') == 'min' || Input::get('durability_period') == 'hour')) {
+                    $errors[] = $store_language->get('admin', 'invalid_durability_period_short_time');
+                }
+
+                // insert into a database if there are no errors
                 if (!count($errors)) {
                     // Hide category?
                     if (isset($_POST['hidden']) && $_POST['hidden'] == 'on') $hidden = 1;
@@ -113,14 +122,14 @@ if (!isset($_GET['action'])) {
 
                     $selected_connections = isset($_POST['connections']) && is_array($_POST['connections']) ? $_POST['connections'] : [];
 
-                    // Check for new connections to give product which they dont already have
+                    // Check for new connections to give product which they don't already have
                     foreach ($selected_connections as $connection) {
                         if (!array_key_exists($connection, $product->getConnections())) {
                             $product->addConnection($connection);
                         }
                     }
 
-                    // Check for connections they had, but werent in the $_POST connections
+                    // Check for connections they had, but weren't in the $_POST connections
                     foreach ($product->getConnections() as $connection) {
                         if (!in_array($connection->id, $selected_connections)) {
                             $product->removeConnection($connection->id);
@@ -129,14 +138,14 @@ if (!isset($_GET['action'])) {
 
                     $selected_fields = isset($_POST['fields']) && is_array($_POST['fields']) ? $_POST['fields'] : [];
 
-                    // Check for new fields to give product which they dont already have
+                    // Check for new fields to give a product which they don't already have
                     foreach ($selected_fields as $field) {
                         if (!array_key_exists($field, $product->getFields())) {
                             $product->addField($field);
                         }
                     }
 
-                    // Check for fields they had, but werent in the $_POST fields
+                    // Check for fields they had, but weren't in the $_POST fields
                     foreach ($product->getFields() as $field) {
                         if (!in_array($field->id, $selected_fields)) {
                             $product->removeField($field->id);

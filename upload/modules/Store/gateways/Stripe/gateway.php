@@ -78,6 +78,11 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
             $product = $item->getProduct();
             $duration_json = json_decode($product->data()->durability, true) ?? [];
 
+            if (!in_array($duration_json['period'], ['day', 'week', 'month', 'year']) || $duration_json['interval'] < 1) {
+                $this->addError('Invalid durability for product ' . $product->data()->name);
+                return;
+            }
+
             $products[] = [
                 'price_data' => [
                     'currency' => $currency,
@@ -86,8 +91,8 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                     ],
                     'unit_amount' => $item->getSingleQuantityPrice(),
                     'recurring' => [
-                        'interval' => $duration_json['period'] ?? 'month',
-                        'interval_count' => $duration_json['interval'] ?? 1
+                        'interval' => $duration_json['period'],
+                        'interval_count' => $duration_json['interval']
                     ]
                 ],
                 'quantity' => $item->getQuantity()
@@ -217,7 +222,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                         'frequency' => strtoupper($data->plan->interval),
                         'frequency_interval' => $data->plan->interval_count,
                         'payer_id' => $data->customer,
-                        'next_billing_date' => $data->current_period_end,
+                        'next_billing_date' => $data->current_period_end ?? date('U'),
                         'created' => date('U'),
                         'updated' => date('U')
                     ]);

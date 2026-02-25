@@ -28,6 +28,11 @@ trait SubscriptionManager {
         }
 
         $duration_json = json_decode($product->data()->durability, true) ?? [];
+        if (!in_array($duration_json['period'], ['day', 'week', 'month', 'year']) || $duration_json['interval'] < 1) {
+            $this->addError('Invalid durability for product ' . $product->data()->name);
+            return;
+        }
+
         $subscription_data = [
             'custom_id' => $order->data()->id,
             'plan_id' => $plan_id,
@@ -35,8 +40,8 @@ trait SubscriptionManager {
                 'billing_cycles' => [
                     [
                         'frequency' => [
-                            'interval_unit' => strtoupper($duration_json['period'] ?? 'MONTH'),
-                            'interval_count' => $duration_json['interval'] ?? 1
+                            'interval_unit' => strtoupper($duration_json['period']),
+                            'interval_count' => $duration_json['interval']
                         ],
                         'tenure_type' => 'REGULAR',
                         'sequence' => 1,

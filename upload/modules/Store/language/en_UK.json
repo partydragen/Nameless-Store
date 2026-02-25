@@ -244,6 +244,8 @@
     "admin/change_payment_status": "Change Payment Status",
     "admin/payment_status": "Payment Status",
     "admin/execute_actions": "Execute Actions",
+    "admin/invalid_durability_period": "To use recurring subscriptions, durability period must be set.",
+    "admin/invalid_durability_period_short_time": "Durability period must be at least 1 day for recurring subscriptions.",
     "general/agree_t_and_c_purchase": "I agree to the {{termsLinkStart}}terms and conditions{{termsLinkEnd}} of this purchase.",
     "general/accept_terms": "You must accept the terms and conditions",
     "general/buy": "Buy",

@@ -137,7 +137,16 @@ if (!isset($_GET['action'])) {
                             $errors[] = $store_language->get('admin', 'invalid_price');
                         }
 
-                        // insert into database if there is no errors
+                        // Validate durability period
+                        if (in_array(Input::get('payment_type'), [2,3]) && Input::get('durability_period') == 'never' && Input::get('durability_interval') > 0) {
+                            $errors[] = $store_language->get('admin', 'invalid_durability_period');
+                        }
+
+                        if (in_array(Input::get('payment_type'), [2,3]) && (Input::get('durability_period') == 'min' || Input::get('durability_period') == 'hour')) {
+                            $errors[] = $store_language->get('admin', 'invalid_durability_period_short_time');
+                        }
+
+                        // insert into a database if there are no errors
                         if (!count($errors)) {
                             // Get last order
                             $last_order = DB::getInstance()->query('SELECT * FROM nl2_store_products ORDER BY `order` DESC LIMIT 1')->results();
