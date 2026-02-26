@@ -327,5 +327,7 @@
     "admin/subscription_resumed": "Abonnement wieder aufgenommen",
     "admin/subscription_cancelled": "Abonnement gekündigt",
     "general/suspended": "Ausgesetzt",
-    "general/unknown": "Unbekannt"
+    "general/unknown": "Unbekannt",
+    "admin/invalid_durability_period": "Um wiederkehrende Abonnements nutzen zu können, muss eine Laufzeit festgelegt werden.",
+    "admin/invalid_durability_period_short_time": "Die Laufzeit muss bei wiederkehrenden Abonnements mindestens 1 Tag betragen."
 }
