@@ -327,5 +327,7 @@
     "admin/subscription_created": "Předplatné vytvořeno",
     "admin/subscription_suspended": "Předplatné pozastaveno",
     "admin/subscription_resumed": "Předplatné obnoveno",
-    "general/cancelled": "Zrušeno"
+    "general/cancelled": "Zrušeno",
+    "admin/invalid_durability_period": "Pro použití opakovaných předplatných musí být nastavena doba.",
+    "admin/invalid_durability_period_short_time": "Doba musí být alespoň 1 den pro opakovaná předplatná."
 }
