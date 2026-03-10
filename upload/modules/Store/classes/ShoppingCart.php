@@ -76,9 +76,10 @@ class ShoppingCart extends Instanceable {
 
             // Get products
             $payment_type = $this->isSubscriptionMode() ? '2,3' : '1,3';
-            $products_ids = implode(',', array_keys($items));
-            $products_query = DB::getInstance()->query('SELECT * FROM nl2_store_products WHERE id in ('.$products_ids.') AND disabled = 0 AND deleted = 0 AND payment_type IN ('.$payment_type.')')->results();
-            foreach ($products_query as $item) {
+            $products_ids = array_keys($items);
+            $products_keys = implode(',', array_fill(0, count($products_ids), '?'));
+            $products_query = DB::getInstance()->query("SELECT * FROM nl2_store_products WHERE id in ($products_keys) AND disabled = 0 AND deleted = 0 AND payment_type IN ($payment_type)", $products_ids);
+            foreach ($products_query->results() as $item) {
                 $product = new Product(null, null, $item);
 
                 $renderProductEvent = new RenderProductEvent($product, $this);
