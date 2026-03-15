@@ -329,5 +329,6 @@
     "admin/subscription_resumed": "Předplatné obnoveno",
     "general/cancelled": "Zrušeno",
     "admin/invalid_durability_period": "Pro použití opakovaných předplatných musí být nastavena doba.",
-    "admin/invalid_durability_period_short_time": "Doba musí být alespoň 1 den pro opakovaná předplatná."
+    "admin/invalid_durability_period_short_time": "Doba musí být alespoň 1 den pro opakovaná předplatná.",
+    "general/coupon_missing_required_group": "K použití tohoto kupónu vám chybí vyžadovaná skupina „{{group}}“."
 }
