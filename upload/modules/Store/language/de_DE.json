@@ -329,5 +329,6 @@
     "general/suspended": "Ausgesetzt",
     "general/unknown": "Unbekannt",
     "admin/invalid_durability_period": "Um wiederkehrende Abonnements nutzen zu können, muss eine Laufzeit festgelegt werden.",
-    "admin/invalid_durability_period_short_time": "Die Laufzeit muss bei wiederkehrenden Abonnements mindestens 1 Tag betragen."
+    "admin/invalid_durability_period_short_time": "Die Laufzeit muss bei wiederkehrenden Abonnements mindestens 1 Tag betragen.",
+    "general/coupon_missing_required_group": "Dir fehlt die erforderliche Gruppe „{{group}}“, um diesen Gutschein einzulösen."
 }
