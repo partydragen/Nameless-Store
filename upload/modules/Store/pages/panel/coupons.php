@@ -97,6 +97,8 @@ if (!isset($_GET['action'])) {
                                 $products[] = (int) $product;
                             }
 
+                            $required_groups = $_POST['required_groups'];
+
                             // Save to database
                             DB::getInstance()->insert('store_coupons', [
                                 'code' => Input::get('code'),
@@ -108,6 +110,7 @@ if (!isset($_GET['action'])) {
                                 'redeem_limit' => Input::get('redeem_limit'),
                                 'customer_limit' => Input::get('customer_redeem_limit'),
                                 'min_basket' => Store::toCents(Input::get('min_basket')),
+                                'required_groups' => json_encode(isset($required_groups) && is_array($required_groups) ? $required_groups : []),
                             ]);
 
                             Session::flash('coupons_success', $store_language->get('admin', 'coupon_created_successfully'));
@@ -131,6 +134,16 @@ if (!isset($_GET['action'])) {
                     'id' => $product->id,
                     'name' => Output::getClean($product->name),
                     'selected' => ((isset($_POST['products']) && is_array($_POST['products'])) ? in_array($product->id, $_POST['products']) : false)
+                ];
+            }
+
+            $groups_list = [];
+            $groups = DB::getInstance()->query('SELECT * FROM nl2_groups')->results();
+            foreach ($groups as $item) {
+                $groups_list[] = [
+                    'id' => $item->id,
+                    'name' => Output::getClean($item->name),
+                    'selected' => ((isset($_POST['required_groups']) && is_array($_POST['required_groups'])) ? in_array($item->id, $_POST['required_groups']) : false)
                 ];
             }
 
@@ -159,6 +172,7 @@ if (!isset($_GET['action'])) {
                 'CUSTOMER_REDEEM_LIMIT_VALUE' => ((isset($_POST['customer_redeem_limit']) && $_POST['customer_redeem_limit']) ? Output::getClean(Input::get('customer_redeem_limit')) : '0'),
                 'MIN_BASKET' => $store_language->get('admin', 'minimum_basket'),
                 'MIN_BASKET_VALUE' => ((isset($_POST['min_basket']) && $_POST['min_basket']) ? Output::getClean(Input::get('min_basket')) : '0.00'),
+                'GROUPS_LIST' => $groups_list,
             ]);
 
             $template_file = 'store/coupons_form';
@@ -212,6 +226,8 @@ if (!isset($_GET['action'])) {
                                 $products[] = (int) $product;
                             }
 
+                            $required_groups = $_POST['required_groups'];
+
                             // Save to database
                             DB::getInstance()->update('store_coupons', $coupon->id, [
                                 'code' => Input::get('code'),
@@ -223,6 +239,7 @@ if (!isset($_GET['action'])) {
                                 'redeem_limit' => Input::get('redeem_limit'),
                                 'customer_limit' => Input::get('customer_redeem_limit'),
                                 'min_basket' => Store::toCents(Input::get('min_basket')),
+                                'required_groups' => json_encode(isset($required_groups) && is_array($required_groups) ? $required_groups : []),
                             ]);
 
                             Session::flash('coupons_success', $store_language->get('admin', 'coupon_updated_successfully'));
@@ -247,6 +264,17 @@ if (!isset($_GET['action'])) {
                     'id' => $product->id,
                     'name' => Output::getClean($product->name),
                     'selected' => in_array($product->id, $effective_on)
+                ];
+            }
+
+            $groups_list = [];
+            $selected_groups = json_decode($coupon->required_groups, true) ?? [];
+            $groups = DB::getInstance()->query('SELECT * FROM nl2_groups')->results();
+            foreach ($groups as $item) {
+                $groups_list[] = [
+                    'id' => $item->id,
+                    'name' => Output::getClean($item->name),
+                    'selected' => in_array($item->id, $selected_groups)
                 ];
             }
 
@@ -275,6 +303,7 @@ if (!isset($_GET['action'])) {
                 'CUSTOMER_REDEEM_LIMIT_VALUE' => Output::getClean($coupon->customer_limit),
                 'MIN_BASKET' => $store_language->get('admin', 'minimum_basket'),
                 'MIN_BASKET_VALUE' => Store::fromCents($coupon->min_basket),
+                'GROUPS_LIST' => $groups_list,
             ]);
 
             $template_file = 'store/coupons_form';

@@ -47,6 +47,19 @@ if (Input::exists()) {
                             }
                         }
 
+                        $required_groups = json_decode($coupon->data()->required_groups, true) ?? [];
+                        if (count($required_groups)) {
+                            $user_groups = $from_customer->getUser()->getAllGroupIds();
+                            foreach ($required_groups as $item) {
+                                if (!array_key_exists($item, $user_groups)) {
+                                    $group = DB::getInstance()->query('SELECT name FROM nl2_groups WHERE id = ?', [$item])->first();
+
+                                    Session::flash('store_error', $store_language->get('general', 'coupon_missing_required_group', ['group' => $group->name ?? 'Unknown']));
+                                    Redirect::to(URL::build(Store::getStorePath() . '/checkout'));
+                                }
+                            }
+                        }
+
                         $shopping_cart->setCoupon($coupon);
 
                         Session::flash('store_success', $store_language->get('general', 'successfully_applied_coupon'));

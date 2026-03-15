@@ -94,6 +94,24 @@
                                 </div>
                               </div>
                             </div>
+
+                            <br />
+                            <h5 style="display:inline">Required Conditions</h5>
+                            <p>Require conditions for this sale to be active</p>
+                            <hr />
+
+                            <div class="form-group">
+                                <label for="inputRequiredGroups">Required Groups</label> <span
+                                        class="badge badge-info"><i class="fas fa-question-circle"
+                                                                    data-container="body" data-toggle="popover"
+                                                                    data-placement="top" title="Info"
+                                                                    data-content="Required groups for this sale to be active"></i></span>
+                                <select name="required_groups[]" id="inputRequiredGroups" class="form-control" multiple>
+                                    {foreach from=$GROUPS_LIST item=group}
+                                        <option value="{$group.id}"{if $group.selected} selected{/if}>{$group.name}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
                             <div class="form-group">
                                 <input type="hidden" name="token" value="{$TOKEN}">
                                 <span data-toggle="popover" data-title="Early access" data-content="This feature is currently for patreon supporters, it will be available for everyone in the future with means this wont function for you"><input type="submit" class="btn btn-primary" value="{$SUBMIT}" disabled></span>
@@ -137,6 +155,10 @@
 <script type="text/javascript">
     $(document).ready(() => {
         $('#inputProducts').select2({ placeholder: "No products selected" });
+    })
+
+    $(document).ready(() => {
+        $('#inputRequiredGroups').select2({ placeholder: "No groups selected" });
     })
 </script>
 

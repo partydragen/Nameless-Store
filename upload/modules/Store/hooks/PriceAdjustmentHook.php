@@ -28,10 +28,21 @@ class PriceAdjustmentHook extends HookBase {
     // Check for discounts
     public static function discounts(RenderProductEvent $event): void {
         $sales = Store::getActiveSales();
+        $recipient = $event->shopping_cart->getRecipient();
 
         // Handle sales
         foreach ($sales as $sale) {
             $products = json_decode($sale->effective_on ?? '[]');
+
+            $required_groups = json_decode($sale->required_groups, true) ?? [];
+            if (count($required_groups)) {
+                $user_groups = $recipient->getUser()->getAllGroupIds();
+                foreach ($required_groups as $item) {
+                    if (!array_key_exists($item, $user_groups)) {
+                        continue 2;
+                    }
+                }
+            }
 
             $product = $event->product;
             if (in_array($product->data()->id, $products)) {

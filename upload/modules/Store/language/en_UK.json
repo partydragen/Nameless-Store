@@ -329,5 +329,6 @@
     "general/next_billing_date": "Next billing date",
     "general/most_purchases": "Most purchases",
     "general/most_money_spent": "Most money spent",
-    "general/most_credits": "Most credits"
+    "general/most_credits": "Most credits",
+    "general/coupon_missing_required_group": "You are missing the required group '{{group}}' to use this coupon."
 }

@@ -97,6 +97,8 @@ if (!isset($_GET['action'])) {
                                 $products[] = (int) $product;
                             }
 
+                            $required_groups = $_POST['required_groups'];
+
                             // Save to database
                             DB::getInstance()->insert('store_sales', [
                                 'name' => Input::get('name'),
@@ -105,6 +107,7 @@ if (!isset($_GET['action'])) {
                                 'discount_amount' => Input::get('discount_amount'),
                                 'start_date' => strtotime($_POST['start_date']),
                                 'expire_date' => strtotime($_POST['expire_date']),
+                                'required_groups' => json_encode(isset($required_groups) && is_array($required_groups) ? $required_groups : []),
                             ]);
 
                             Session::flash('sales_success', $store_language->get('admin', 'sale_created_successfully'));
@@ -131,6 +134,16 @@ if (!isset($_GET['action'])) {
                 ];
             }
 
+            $groups_list = [];
+            $groups = DB::getInstance()->query('SELECT * FROM nl2_groups')->results();
+            foreach ($groups as $item) {
+                $groups_list[] = [
+                    'id' => $item->id,
+                    'name' => Output::getClean($item->name),
+                    'selected' => ((isset($_POST['required_groups']) && is_array($_POST['required_groups'])) ? in_array($item->id, $_POST['required_groups']) : false)
+                ];
+            }
+
             $template->getEngine()->addVariables([
                 'SALE_TITLE' => $store_language->get('admin', 'creating_sale'),
                 'BACK' => $language->get('general', 'back'),
@@ -150,6 +163,7 @@ if (!isset($_GET['action'])) {
                 'EXPIRE_DATE' => $store_language->get('admin', 'expire_date'),
                 'EXPIRE_DATE_VALUE' => ((isset($_POST['expire_date']) && $_POST['expire_date']) ? Input::get('expire_date') : date('Y-m-d\TH:i', strtotime('+7 days'))),
                 'EXPIRE_DATE_MIN' => date('Y-m-d\TH:i'),
+                'GROUPS_LIST' => $groups_list,
             ]);
 
             $template_file = 'store/sales_form';
@@ -203,6 +217,8 @@ if (!isset($_GET['action'])) {
                                 $products[] = (int) $product;
                             }
 
+                            $required_groups = $_POST['required_groups'];
+
                             // Save to database
                             DB::getInstance()->update('store_sales', $sale->id, [
                                 'name' => Input::get('name'),
@@ -211,6 +227,7 @@ if (!isset($_GET['action'])) {
                                 'discount_amount' => Input::get('discount_amount'),
                                 'start_date' => strtotime($_POST['start_date']),
                                 'expire_date' => strtotime($_POST['expire_date']),
+                                'required_groups' => json_encode(isset($required_groups) && is_array($required_groups) ? $required_groups : []),
                             ]);
 
                             Session::flash('sales_success', $store_language->get('admin', 'sale_updated_successfully'));
@@ -238,6 +255,17 @@ if (!isset($_GET['action'])) {
                 ];
             }
 
+            $groups_list = [];
+            $selected_groups = json_decode($sale->required_groups, true) ?? [];
+            $groups = DB::getInstance()->query('SELECT * FROM nl2_groups')->results();
+            foreach ($groups as $item) {
+                $groups_list[] = [
+                    'id' => $item->id,
+                    'name' => Output::getClean($item->name),
+                    'selected' => in_array($item->id, $selected_groups)
+                ];
+            }
+
             $template->getEngine()->addVariables([
                 'SALE_TITLE' => $store_language->get('admin', 'editing_sale_x', ['sale' => Output::getClean($sale->name)]),
                 'BACK' => $language->get('general', 'back'),
@@ -257,6 +285,7 @@ if (!isset($_GET['action'])) {
                 'EXPIRE_DATE' => $store_language->get('admin', 'expire_date'),
                 'EXPIRE_DATE_VALUE' => date('Y-m-d\TH:i', $sale->expire_date),
                 'EXPIRE_DATE_MIN' => date('Y-m-d\TH:i', $sale->expire_date),
+                'GROUPS_LIST' => $groups_list,
             ]);
 
             $template_file = 'store/sales_form';

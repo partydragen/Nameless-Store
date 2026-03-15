@@ -1350,6 +1350,16 @@ class Store_Module extends Module {
                 }
             }
         }
+
+        if ($old_version < 191) {
+            try {
+                $this->_db->query('ALTER TABLE nl2_store_coupons ADD `required_groups` varchar(128) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_sales ADD `required_groups` varchar(128) DEFAULT NULL');
+            } catch (Exception $e) {
+                // unable to retrieve from config
+                echo $e->getMessage() . '<br />';
+            }
+        }
     }
 
     private function initialise() {
@@ -1549,7 +1559,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_sales')) {
             try {
-                $this->_db->createTable("store_sales", " `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `effective_on` varchar(256) NOT NULL, `discount_type` int(11) NOT NULL, `discount_amount` int(11) NOT NULL, `start_date` int(11) NOT NULL, `expire_date` int(11) NOT NULL, PRIMARY KEY (`id`)");
+                $this->_db->createTable("store_sales", " `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL, `effective_on` varchar(256) NOT NULL, `discount_type` int(11) NOT NULL, `discount_amount` int(11) NOT NULL, `start_date` int(11) NOT NULL, `expire_date` int(11) NOT NULL, `required_groups` varchar(128) DEFAULT NULL, PRIMARY KEY (`id`)");
             } catch (Exception $e) {
                 // Error
             }
@@ -1557,7 +1567,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_coupons')) {
             try {
-                $this->_db->createTable("store_coupons", " `id` int(11) NOT NULL AUTO_INCREMENT, `code` varchar(64) NOT NULL, `effective_on` varchar(256) NOT NULL, `discount_type` int(11) NOT NULL, `discount_amount` int(11) NOT NULL, `start_date` int(11) NOT NULL, `expire_date` int(11) NOT NULL, `redeem_limit` int(11) NOT NULL DEFAULT '0', `customer_limit` int(11) NOT NULL DEFAULT '0', `min_basket` int(11) NOT NULL DEFAULT '0', PRIMARY KEY (`id`)");
+                $this->_db->createTable("store_coupons", " `id` int(11) NOT NULL AUTO_INCREMENT, `code` varchar(64) NOT NULL, `effective_on` varchar(256) NOT NULL, `discount_type` int(11) NOT NULL, `discount_amount` int(11) NOT NULL, `start_date` int(11) NOT NULL, `expire_date` int(11) NOT NULL, `redeem_limit` int(11) NOT NULL DEFAULT '0', `customer_limit` int(11) NOT NULL DEFAULT '0', `min_basket` int(11) NOT NULL DEFAULT '0', `required_groups` varchar(128) DEFAULT NULL, PRIMARY KEY (`id`)");
             } catch (Exception $e) {
                 // Error
             }
