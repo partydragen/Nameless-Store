@@ -327,5 +327,8 @@
     "admin/subscription_created": "Подписка создана",
     "admin/subscription_cancelled": "Подписка отменена",
     "admin/subscription_suspended": "Подписка приостановлена",
-    "admin/subscription_resumed": "Подписка возобновлена"
+    "admin/subscription_resumed": "Подписка возобновлена",
+    "admin/invalid_durability_period": "Для использования подписок необходимо установить период их действия.",
+    "admin/invalid_durability_period_short_time": "Срок действия подписки должен составлять не менее 1 дня.",
+    "general/coupon_missing_required_group": "Чтобы использовать этот купон необходимо быть членом группы '{{group}}'."
 }
