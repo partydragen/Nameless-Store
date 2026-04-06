@@ -112,7 +112,7 @@
             <div class="ui equal width grid">
                 <div class="column">
                     <div class="field">
-                        <div class="ui checkbox" style="display:inline;">
+                        <div class="ui checkbox">
                             <input type="checkbox" name="t_and_c" value="1" required> <label>{$AGREE_T_AND_C_PURCHASE}</label>
                         </div>
                     </div>
