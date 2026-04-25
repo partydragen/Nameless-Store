@@ -1,1 +1,16 @@
-{}
+{
+    "admin/actions": "操作",
+    "admin/categories": "分类",
+    "admin/category_created_successfully": "分类创建成功。",
+    "admin/category_deleted_successfully": "分类删除成功。",
+    "admin/category_name": "分类名称",
+    "admin/category_updated_successfully": "分类更新成功。",
+    "admin/current_version_x": "当前模块版本：{{version}}",
+    "admin/new_category": "新建分类",
+    "admin/new_update_available_x": "模块 {{module}} 有新的更新可用",
+    "admin/new_urgent_update_available_x": "模块 {{module}} 有可用的紧急更新，请尽快更新！",
+    "admin/new_version_x": "新模块版本：{{new_version}}",
+    "admin/settings": "设置",
+    "admin/status": "状态",
+    "admin/view_resource": "查看资源"
+}
