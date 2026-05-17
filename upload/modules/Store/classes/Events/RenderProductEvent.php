@@ -7,6 +7,7 @@ class RenderProductEvent extends AbstractEvent {
     public string $content;
     public ?string $image;
     public bool $hidden;
+    public bool $disabled;
 
     public function __construct(Product $product, ShoppingCart $shopping_cart) {
         $this->product = $product;
@@ -15,6 +16,7 @@ class RenderProductEvent extends AbstractEvent {
         $this->content = $product->data()->description;
         $this->image = (isset($product->data()->image) && !is_null($product->data()->image) ? ((defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/uploads/store/' . Output::getClean(Output::getDecoded($product->data()->image))) : null);
         $this->hidden = false;
+        $this->disabled = false;
     }
 
     public static function name(): string {

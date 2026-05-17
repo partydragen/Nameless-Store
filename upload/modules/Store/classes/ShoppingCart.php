@@ -85,6 +85,11 @@ class ShoppingCart extends Instanceable {
                 $renderProductEvent = new RenderProductEvent($product, $this);
                 EventHandler::executeEvent($renderProductEvent);
 
+                // Remove from cart if disabled
+                if ($renderProductEvent->disabled) {
+                    continue;
+                }
+
                 // Add item to item list
                 $item = $items[$product->data()->id];
                 $this->_items->addItem(new Item(

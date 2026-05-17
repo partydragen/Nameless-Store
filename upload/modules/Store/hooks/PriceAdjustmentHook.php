@@ -20,6 +20,15 @@ class PriceAdjustmentHook extends HookBase {
             $category_query = DB::getInstance()->query('SELECT cumulative_pricing FROM nl2_store_categories WHERE id = ?', [$product->data()->category_id]);
             if (!$category_query->count() || $category_query->first()->cumulative_pricing == 1) {
                 $product->data()->sale_discount_cents = $recipient->calculateSpendingInCategory($product->data()->category_id);
+
+                if ($product->data()->sale_discount_cents >= $product->data()->price_cents) {
+                    $product->data()->sale_discount_cents = $product->data()->price_cents;
+                }
+
+                if ($product->data()->sale_discount_cents >= $product->data()->price_cents) {
+                    $event->hidden = true;
+                    $event->disabled = true;
+                }
             }
 
         }
