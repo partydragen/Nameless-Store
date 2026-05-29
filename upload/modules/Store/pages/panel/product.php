@@ -172,7 +172,7 @@ if (!isset($_GET['action'])) {
                     $image = new Bulletproof\Image($_FILES);
 
                     $image->setSize(1000, 2 * 1048576)
-                        ->setMime(['jpeg', 'png', 'gif'])
+                        ->setMime(['jpg', 'png', 'jpeg', 'gif', 'webp'])
                         ->setDimension(2000, 2000)
                         ->setLocation(ROOT_PATH . '/uploads/store', 0777);
 
