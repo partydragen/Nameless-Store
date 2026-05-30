@@ -14,7 +14,7 @@ class RenderProductEvent extends AbstractEvent {
         $this->shopping_cart = $shopping_cart;
         $this->name = $product->data()->name;
         $this->content = $product->data()->description;
-        $this->image = (isset($product->data()->image) && !is_null($product->data()->image) ? ((defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/uploads/store/' . Output::getClean(Output::getDecoded($product->data()->image))) : null);
+        $this->image = (isset($product->data()->image) && !is_null($product->data()->image) && file_exists(ROOT_PATH . '/uploads/store/' . Output::getClean($product->data()->image)) ? ((defined('CONFIG_PATH') ? CONFIG_PATH : '') . '/uploads/store/' . Output::getClean($product->data()->image)) : null);
         $this->hidden = false;
         $this->disabled = false;
     }
