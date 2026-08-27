@@ -18,13 +18,16 @@ if (!$user->handlePanelPageLoad('staffcp.store.subscriptions')) {
 define('PAGE', 'panel');
 define('PARENT_PAGE', 'store');
 define('PANEL_PAGE', 'store_subscriptions');
-$page_title = $store_language->get('admin', 'payments');
+$page_title = $store_language->get('admin', 'subscriptions');
 require_once(ROOT_PATH . '/core/templates/backend_init.php');
 
 // Load modules + template
 Module::loadPage($user, $pages, $cache, $smarty, [$navigation, $cc_nav, $staffcp_nav], $widgets, $template);
 
 if (!isset($_GET['subscription'])) {
+    $template->assets()->include([
+        AssetTree::DATATABLES
+    ]);
 
     $subscriptions_query = DB::getInstance()->query('SELECT * FROM nl2_store_subscriptions WHERE status_id != -1 ORDER BY id DESC');
     if ($subscriptions_query->count()) {
@@ -55,9 +58,13 @@ if (!isset($_GET['subscription'])) {
                 'user_avatar' => $avatar,
                 'username' => $username,
                 'uuid' => $identifier,
+                'status_id' => $subscription->data()->status_id,
                 'status' => $subscription->getStatusHtml(),
-                'last_billing_date' => $subscription->data()->last_payment_date != null ? date(DATE_FORMAT, $subscription->data()->last_payment_date) : 'Never',
+                'last_billing_date' => $subscription->data()->last_payment_date != null ? date(DATE_FORMAT, $subscription->data()->last_payment_date) : $store_language->get('general', 'never'),
+                'last_billing_date_unix' => $subscription->data()->last_payment_date ?? 0,
                 'next_billing_date' => date(DATE_FORMAT, $subscription->data()->next_billing_date),
+                'next_billing_date_unix' => $subscription->data()->next_billing_date,
+                'amount_cents' => $subscription->data()->amount_cents,
                 'amount_format' => Output::getPurified(
                     Store::formatPrice(
                         $subscription->data()->amount_cents,
@@ -66,12 +73,30 @@ if (!isset($_GET['subscription'])) {
                         STORE_CURRENCY_FORMAT,
                     )
                 ),
+                'frequency' => $store_language->get('admin', 'every_x', [
+                    'frequency' => Output::getClean($subscription->data()->frequency_interval . ' ' . ucfirst(strtolower($subscription->data()->frequency)))
+                ]),
                 'link' => URL::build('/panel/store/subscriptions/', 'subscription=' . $subscription->data()->id)
             ];
         }
 
         $template->getEngine()->addVariables([
-            'SUBSCRIPTIONS_LIST' => $subscriptions_list
+            'SUBSCRIPTIONS_LIST' => $subscriptions_list,
+            'DISPLAY_RECORDS_PER_PAGE' => $language->get('table', 'display_records_per_page'),
+            'NOTHING_FOUND' => $language->get('table', 'nothing_found'),
+            'PAGE_X_OF_Y' => $language->get('table', 'page_x_of_y'),
+            'NO_RECORDS' => $language->get('table', 'no_records'),
+            'FILTERED' => $language->get('table', 'filtered'),
+            'SEARCH' => $language->get('general', 'search'),
+            'NEXT' => $language->get('general', 'next'),
+            'PREVIOUS' => $language->get('general', 'previous'),
+            'FILTER_BY_STATUS' => $store_language->get('admin', 'filter_by_status'),
+            'ALL_STATUSES' => $store_language->get('admin', 'all_statuses'),
+            'PENDING' => $store_language->get('general', 'pending'),
+            'ACTIVE' => $store_language->get('general', 'active'),
+            'CANCELLED' => $store_language->get('general', 'cancelled'),
+            'SUSPENDED' => $store_language->get('general', 'suspended'),
+            'UNKNOWN' => $store_language->get('general', 'unknown')
         ]);
     } else {
         $template->getEngine()->addVariable('NO_SUBSCRIPTIONS', $store_language->get('admin', 'no_subscriptions'));
@@ -213,6 +238,7 @@ $template->getEngine()->addVariables([
     'STATUS' => $store_language->get('admin', 'status'),
     'LAST_PAYMENT_DATE' => $store_language->get('general', 'last_payment_date'),
     'NEXT_BILLING_DATE' => $store_language->get('general', 'next_billing_date'),
+    'FREQUENCY' => $store_language->get('general', 'frequency'),
     'VIEW' => $store_language->get('admin', 'view'),
 ]);
 

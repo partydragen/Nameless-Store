@@ -42,27 +42,42 @@
                         {if isset($NO_SUBSCRIPTIONS)}
                             <p>{$NO_SUBSCRIPTIONS}</p>
                         {else}
+                            <div class="row mb-3">
+                                <div class="col-md-6 col-lg-4">
+                                    <label for="subscriptionStatusFilter" class="small font-weight-bold text-uppercase text-muted">{$FILTER_BY_STATUS}</label>
+                                    <select id="subscriptionStatusFilter" class="form-control form-control-sm">
+                                        <option value="">{$ALL_STATUSES}</option>
+                                        <option value="0">{$PENDING}</option>
+                                        <option value="1">{$ACTIVE}</option>
+                                        <option value="2">{$CANCELLED}</option>
+                                        <option value="3">{$SUSPENDED}</option>
+                                        <option value="4">{$UNKNOWN}</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="table-responsive">
-                                <table class="table table-striped dataTables-payments" style="width:100%">
+                                <table class="table table-striped table-hover dataTables-subscriptions" style="width:100%">
                                     <thead>
                                     <tr>
                                         <th>{$USER}</th>
                                         <th>{$STATUS}</th>
                                         <th>{$AMOUNT}</th>
+                                        <th>{$FREQUENCY}</th>
                                         <th>{$LAST_PAYMENT_DATE}</th>
                                         <th>{$NEXT_BILLING_DATE}</th>
-                                        <th>{$VIEW}</th>
+                                        <th class="text-right">{$VIEW}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {foreach from=$SUBSCRIPTIONS_LIST item=subscription}
                                         <tr>
                                             <td><a href="{$subscription.user_link}" style="{$subscription.user_style}"><img src="{$subscription.user_avatar}" class="rounded" style="max-width:32px;max-height:32px;" alt="{$subscription.username}" /> {$subscription.username}</a></td>
-                                            <td>{$subscription.status}</td>
-                                            <td>{$subscription.amount_format}</td>
-                                            <td>{$subscription.last_billing_date}</td>
-                                            <td>{$subscription.next_billing_date}</td>
-                                            <td><a href="{$subscription.link}" class="btn btn-primary btn-sm">{$VIEW}</a></td>
+                                            <td><span class="d-none">status-filter-{$subscription.status_id}</span>{$subscription.status}</td>
+                                            <td data-order="{$subscription.amount_cents}">{$subscription.amount_format}</td>
+                                            <td>{$subscription.frequency}</td>
+                                            <td data-order="{$subscription.last_billing_date_unix}">{$subscription.last_billing_date}</td>
+                                            <td data-order="{$subscription.next_billing_date_unix}">{$subscription.next_billing_date}</td>
+                                            <td class="text-right"><a href="{$subscription.link}" class="btn btn-primary btn-sm"><i class="fas fa-eye fa-fw"></i> {$VIEW}</a></td>
                                         </tr>
                                     {/foreach}
                                     </tbody>
@@ -103,6 +118,38 @@
 </div>
 
 {include file='scripts.tpl'}
+
+{if !isset($NO_SUBSCRIPTIONS)}
+<script type="text/javascript">
+    $(document).ready(function() {
+        const subscriptionsTable = $('.dataTables-subscriptions').DataTable({
+            responsive: true,
+            pageLength: 25,
+            order: [[5, 'asc']],
+            columnDefs: [
+                { targets: [6], orderable: false, searchable: false }
+            ],
+            language: {
+                "lengthMenu": "{$DISPLAY_RECORDS_PER_PAGE}",
+                "zeroRecords": "{$NOTHING_FOUND}",
+                "info": "{$PAGE_X_OF_Y}",
+                "infoEmpty": "{$NO_RECORDS}",
+                "infoFiltered": "{$FILTERED}",
+                "search": "{$SEARCH}",
+                "paginate": {
+                    "next": "{$NEXT}",
+                    "previous": "{$PREVIOUS}"
+                }
+            }
+        });
+
+        $('#subscriptionStatusFilter').on('change', function() {
+            const status = $(this).val();
+            subscriptionsTable.column(1).search(status === '' ? '' : 'status-filter-' + status).draw();
+        });
+    });
+</script>
+{/if}
 
 </body>
 </html>

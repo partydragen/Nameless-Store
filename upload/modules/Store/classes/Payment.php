@@ -419,7 +419,7 @@ class Payment {
                 $status = '<span class="badge badge-primary">' . Store::getLanguage()->get('general', 'refunded') .'</span>';
             break;
             case 3;
-                $status = '<span class="badge badge-info">' . Store::getLanguage()->get('general', 'changeback') .'</span>';
+                $status = '<span class="badge badge-info">' . Store::getLanguage()->get('general', 'reversed') .'</span>';
             break;
             case 4;
                 $status = '<span class="badge badge-danger">' . Store::getLanguage()->get('general', 'denied') .'</span>';

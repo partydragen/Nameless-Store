@@ -487,7 +487,19 @@ if (isset($_GET['customer'])) {
         'FILTERED' => $language->get('table', 'filtered'),
         'SEARCH' => $language->get('general', 'search'),
         'NEXT' => $language->get('general', 'next'),
-        'PREVIOUS' => $language->get('general', 'previous')
+        'PREVIOUS' => $language->get('general', 'previous'),
+        'FILTER_BY_STATUS' => $store_language->get('admin', 'filter_by_status'),
+        'ALL_STATUSES' => $store_language->get('admin', 'all_statuses'),
+        'PENDING' => $store_language->get('general', 'pending'),
+        'COMPLETED' => $store_language->get('general', 'completed'),
+        'REFUNDED' => $store_language->get('general', 'refunded'),
+        'REVERSED' => $store_language->get('general', 'reversed'),
+        'DENIED' => $store_language->get('general', 'denied'),
+        'FILTER_BY_PAYMENT_TYPE' => $store_language->get('admin', 'filter_by_payment_type'),
+        'ALL_PAYMENT_TYPES' => $store_language->get('admin', 'all_payment_types'),
+        'ONE_TIME_PAYMENT' => $store_language->get('admin', 'one_time_payment'),
+        'SUBSCRIPTION_PAYMENT' => $store_language->get('admin', 'subscription_payment'),
+        'PAYMENT_TYPE' => $store_language->get('admin', 'payment_type')
     ]);
 
     if ($user->hasPermission('staffcp.store.payments.create')) {
