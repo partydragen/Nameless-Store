@@ -58,7 +58,8 @@ class PriceAdjustmentHook extends HookBase {
 
                 if ($sale->discount_type == 1) {
                     // Percentage discount
-                    $discount_amount = $product->data()->price_cents * ($sale->discount_amount / 100);
+                    $remaining_price_cents = max(0, $product->data()->price_cents - $product->data()->sale_discount_cents);
+                    $discount_amount = $remaining_price_cents * ($sale->discount_amount / 100);
 
                     $product->data()->sale_active = true;
                     $product->data()->sale_discount_cents += $discount_amount;
@@ -76,7 +77,7 @@ class PriceAdjustmentHook extends HookBase {
         }
 
         // Handle coupon
-        $coupon = $event->shopping_cart->getCoupon();
+        /*$coupon = $event->shopping_cart->getCoupon();
         if ($coupon != null) {
             $products = json_decode($coupon->data()->effective_on ?? '[]');
 
@@ -89,18 +90,18 @@ class PriceAdjustmentHook extends HookBase {
 
                     $product->data()->sale_active = true;
                     $product->data()->sale_discount_cents = $discount_amount;
-                } else if ($coupon->data()->discount_type == 2) {
+                } else if ($coupon->data()->discount_type == 2) {*/
                     // Amount discount
                     /*$product->data()->sale_active = true;
                     $product->data()->sale_discount_cents = Store::toCents($coupon->data()->discount_amount);*/
-                }
+                /*}
             }
 
             // Prevent the discount from being more than the price itself
             if ($product->data()->sale_discount_cents >= $product->data()->price_cents) {
                 $product->data()->sale_discount_cents = $product->data()->price_cents;
             }
-        }
+        }*/
     }
 
     public static function coupon(LoadShoppingCartEvent $event): void {
@@ -110,51 +111,73 @@ class PriceAdjustmentHook extends HookBase {
             return;
         }
 
-        if ($coupon->data()->discount_type != 2) {
-            return;
-        }
-
         $products = json_decode($coupon->data()->effective_on ?? '[]', true);
         if (empty($products) || empty($event->shoppingCart->items()->getItems())) {
             return;
         }
 
-        $remainingCouponAmount = Store::toCents($coupon->data()->discount_amount);
-        foreach ($event->shoppingCart->items()->getItems() as $item) {
-            $product = $item->getProduct();
+        if ($coupon->data()->discount_type == 1) {
+            // Percentage discount
+            foreach ($event->shoppingCart->items()->getItems() as $item) {
+                $product = $item->getProduct();
 
-            // Check if the product is eligible for the coupon
-            if (!in_array($product->data()->id, $products)) {
-                continue;
-            }
+                if (!in_array($product->data()->id, $products)) {
+                    continue;
+                }
 
-            // Calculate total price for the item (price per unit * quantity)
-            $itemTotalPrice = $item->getTotalPrice();
-            $quantity = $item->getQuantity();
-            $pricePerUnit = $itemTotalPrice / $quantity;
+                // Calculate remaining price after any previous discounts (cumulative + sales)
+                $remaining_price_cents = max(0, $product->data()->price_cents - $product->data()->sale_discount_cents);
 
-            // Determine discount for this item
-            $discountPerUnit = 0;
-            if ($remainingCouponAmount > 0) {
-                // Apply as much of the coupon as possible, up to the item's total price
-                $totalDiscountForItem = min($remainingCouponAmount, $itemTotalPrice);
-                $discountPerUnit = $totalDiscountForItem / $quantity;
+                // Apply percentage on the remaining price
+                $discount_amount = $remaining_price_cents * ($coupon->data()->discount_amount / 100);
 
-                // Ensure discount per unit doesn't exceed the price per unit
-                $discountPerUnit = min($discountPerUnit, $pricePerUnit);
-
-                // Update product discount
                 $product->data()->sale_active = true;
-                $product->data()->sale_discount_cents = $discountPerUnit;
+                $product->data()->sale_discount_cents += $discount_amount;
 
-                // Update remaining coupon amount
-                $remainingCouponAmount -= $totalDiscountForItem;
+                // Prevent discount from exceeding the price
+                if ($product->data()->sale_discount_cents >= $product->data()->price_cents) {
+                    $product->data()->sale_discount_cents = $product->data()->price_cents;
+                }
             }
+        } else if ($coupon->data()->discount_type == 2) {
+            // Amount discount
+            $remainingCouponAmount = Store::toCents($coupon->data()->discount_amount);
+            foreach ($event->shoppingCart->items()->getItems() as $item) {
+                $product = $item->getProduct();
 
-            // Prevent discount from exceeding the price
-            if ($product->data()->sale_discount_cents >= $product->data()->price_cents) {
-                $product->data()->sale_discount_cents = $product->data()->price_cents;
-                $remainingCouponAmount += ($product->data()->sale_discount_cents - $discountPerUnit) * $quantity;
+                // Check if the product is eligible for the coupon
+                if (!in_array($product->data()->id, $products)) {
+                    continue;
+                }
+
+                // Calculate total price for the item (price per unit * quantity)
+                $itemTotalPrice = $item->getTotalPrice();
+                $quantity = $item->getQuantity();
+                $pricePerUnit = $itemTotalPrice / $quantity;
+
+                // Determine discount for this item
+                $discountPerUnit = 0;
+                if ($remainingCouponAmount > 0) {
+                    // Apply as much of the coupon as possible, up to the item's total price
+                    $totalDiscountForItem = min($remainingCouponAmount, $itemTotalPrice);
+                    $discountPerUnit = $totalDiscountForItem / $quantity;
+
+                    // Ensure discount per unit doesn't exceed the price per unit
+                    $discountPerUnit = min($discountPerUnit, $pricePerUnit);
+
+                    // Update product discount
+                    $product->data()->sale_active = true;
+                    $product->data()->sale_discount_cents += $discountPerUnit;
+
+                    // Update remaining coupon amount
+                    $remainingCouponAmount -= $totalDiscountForItem;
+                }
+
+                // Prevent discount from exceeding the price
+                if ($product->data()->sale_discount_cents >= $product->data()->price_cents) {
+                    $product->data()->sale_discount_cents = $product->data()->price_cents;
+                    //$remainingCouponAmount += ($product->data()->sale_discount_cents - $discountPerUnit) * $quantity;
+                }
             }
         }
     }
