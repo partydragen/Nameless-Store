@@ -65,6 +65,7 @@ class Store_Module extends Module {
         EventHandler::registerEvent(CheckoutFieldsValidationEvent::class);
         EventHandler::registerEvent(CustomerProductExpiredEvent::class);
         EventHandler::registerEvent(ParseActionCommandEvent::class);
+        EventHandler::registerEvent(ProductClonedEvent::class);
         EventHandler::registerEvent(RenderCategoryEvent::class);
         EventHandler::registerEvent(RenderProductEvent::class);
         EventHandler::registerEvent(LoadShoppingCartEvent::class);
@@ -78,6 +79,7 @@ class Store_Module extends Module {
         EventHandler::registerListener(CheckoutAddProductEvent::class, [CheckoutAddProductHook::class, 'handleFieldsData']);
         EventHandler::registerListener(ParseActionCommandEvent::class, [ParseActionCommandListener::class, 'placeholders']);
         EventHandler::registerListener(ParseActionCommandEvent::class, [ParseActionCommandListener::class, 'conditions'], 15);
+        EventHandler::registerListener(ProductClonedEvent::class, CloneProductHook::class);
         EventHandler::registerListener(RenderCategoryEvent::class, [StoreContentHook::class, 'purify']);
         EventHandler::registerListener(RenderCategoryEvent::class, [StoreContentHook::class, 'renderEmojis'], 10);
         EventHandler::registerListener(RenderCategoryEvent::class, [StoreContentHook::class, 'replaceAnchors'], 15);

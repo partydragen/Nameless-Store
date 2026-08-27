@@ -73,6 +73,7 @@
                                                             {if isset($product.edit_link)}
                                                                 <div class="float-md-right">
                                                                     <div class="btn btn-secondary btn-sm"><i class="fas fa-arrows-alt"></i></div>
+                                                                    <a class="btn btn-primary btn-sm" href="{$product.clone_link}" title="{$CLONE_PRODUCT}" aria-label="{$CLONE_PRODUCT}"><i class="fas fa-clone fa-fw"></i></a>
                                                                     <a class="btn btn-warning btn-sm" href="{$product.edit_link}"><i class="fas fa-pencil-alt"></i></a>
                                                                     <button class="btn btn-danger btn-sm" type="button" onclick="showDeleteProductModal('{$product.delete_link}')"><i class="fas fa-trash fa-fw"></i></button>
                                                                 </div>
