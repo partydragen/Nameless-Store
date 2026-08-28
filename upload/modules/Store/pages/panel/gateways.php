@@ -58,7 +58,8 @@ if (!isset($_GET['gateway'])) {
                 'author_x' => $language->get('admin', 'author_x', ['author' => Output::getPurified($gateway->getAuthor())]),
                 'enabled' => $gateway->isEnabled(),
                 'edit_link' => URL::build('/panel/store/gateways/', 'gateway=' . Output::getClean($gateway->getName())),
-                'supports_subscriptions' => $gateway instanceof SupportSubscriptions
+                'supports_subscriptions' => $gateway instanceof SupportSubscriptions,
+                'supports_refunds' => $gateway instanceof SupportRefunds
             ];
         }
 
@@ -125,7 +126,8 @@ if (!isset($_GET['gateway'])) {
         'EDIT' => $language->get('general', 'edit'),
         'ENABLED' => $language->get('admin', 'enabled'),
         'DISABLED' => $language->get('admin', 'disabled'),
-        'SUPPORTS_SUBSCRIPTIONS' => $store_language->get('admin', 'supports_subscriptions')
+        'SUPPORTS_SUBSCRIPTIONS' => $store_language->get('admin', 'supports_subscriptions'),
+        'SUPPORTS_REFUNDS' => $store_language->get('admin', 'supports_refunds')
     ]);
 
     $template_file = 'store/gateways';

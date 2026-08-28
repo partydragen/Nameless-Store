@@ -26,6 +26,8 @@ trait WebhookManager {
                 ['name' => 'CHECKOUT.ORDER.APPROVED'],
                 ['name' => 'PAYMENT.CAPTURE.COMPLETED'],
                 ['name' => 'PAYMENT.CAPTURE.REFUNDED'],
+                ['name' => 'PAYMENT.REFUND.PENDING'],
+                ['name' => 'PAYMENT.REFUND.FAILED'],
                 ['name' => 'PAYMENT.CAPTURE.REVERSED'],
                 ['name' => 'PAYMENT.CAPTURE.DENIED'],
                 ['name' => 'BILLING.SUBSCRIPTION.CREATED'],
@@ -79,6 +81,8 @@ trait WebhookManager {
                     ['name' => 'CHECKOUT.ORDER.APPROVED'],
                     ['name' => 'PAYMENT.CAPTURE.COMPLETED'],
                     ['name' => 'PAYMENT.CAPTURE.REFUNDED'],
+                    ['name' => 'PAYMENT.REFUND.PENDING'],
+                    ['name' => 'PAYMENT.REFUND.FAILED'],
                     ['name' => 'PAYMENT.CAPTURE.REVERSED'],
                     ['name' => 'PAYMENT.CAPTURE.DENIED'],
                     ['name' => 'BILLING.SUBSCRIPTION.CREATED'],
@@ -171,9 +175,32 @@ trait WebhookManager {
             case 'PAYMENT.CAPTURE.REFUNDED':
                 $payment = new Payment($response['resource']['id'], 'transaction');
                 if ($payment->exists()) {
-                    $payment->handlePaymentEvent(Payment::REFUNDED);
+                    $capture_status = $response['resource']['status'] ?? '';
+                    if (in_array($capture_status, ['PARTIALLY_REFUNDED', 'REFUNDED'], true)) {
+                        $payment->completePendingRefunds();
+                    }
+
+                    // A partially refunded capture must remain completed until the
+                    // provider reports that the whole capture has been refunded.
+                    if ($capture_status === 'REFUNDED') {
+                        $payment->handlePaymentEvent(Payment::REFUNDED);
+                    }
                 } else {
                     $this->logError('Could not handle refund event for invalid payment ' . $response['resource']['id']);
+                }
+                break;
+
+            case 'PAYMENT.REFUND.FAILED':
+                $refund = DB::getInstance()->query(
+                    'SELECT refunds.payment_id FROM nl2_store_payment_refunds refunds INNER JOIN nl2_store_payments payments ON payments.id = refunds.payment_id WHERE refunds.gateway_refund_id = ? AND payments.gateway_id = ?',
+                    [$response['resource']['id'], $this->getId()]
+                );
+                if ($refund->count()) {
+                    $payment = new Payment($refund->first()->payment_id);
+                    $payment->failRefund(
+                        $response['resource']['id'],
+                        $response['resource']['status_details']['reason'] ?? 'PayPal refund failed'
+                    );
                 }
                 break;
 

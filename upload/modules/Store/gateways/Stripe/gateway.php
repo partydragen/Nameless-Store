@@ -7,13 +7,13 @@
  * @version 2.0.3
  * @license MIT
  */
-class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
+class Stripe_Gateway extends GatewayBase implements SupportSubscriptions, SupportRefunds {
 
     public function __construct() {
         $name = 'Stripe';
         $author = '<a href="https://github.com/supercrafter100/" target="_blank" rel="nofollow noopener">Supercrafter100</a> and <a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a>';
-        $gateway_version = '1.9.1';
-        $store_version = '1.9.1';
+        $gateway_version = '1.9.2';
+        $store_version = '1.9.2';
         $settings = ROOT_PATH . '/modules/Store/gateways/Stripe/gateway_settings/settings.php';
 
         parent::__construct($name, $author, $gateway_version, $store_version, $settings);
@@ -178,7 +178,46 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                 $data = $event->data->object;
                 $payment = new Payment($data->payment_intent, 'payment_id');
                 if ($payment->exists()) {
-                    $payment->handlePaymentEvent(Payment::REFUNDED);
+                    foreach ($data->refunds->data ?? [] as $refund) {
+                        try {
+                            if (in_array($refund->status, ['failed', 'canceled'], true)) {
+                                $payment->failRefund($refund->id, $refund->failure_reason ?? 'Refund failed');
+                                continue;
+                            }
+
+                            $reason = $refund->metadata->staff_reason ?? $refund->reason ?? '';
+                            $payment->recordRefund(
+                                new GatewayRefundResult($refund->id, $refund->status === 'succeeded'),
+                                (int) $refund->amount,
+                                (string) $reason
+                            );
+                        } catch (Exception $e) {
+                            $this->logError('Unable to record Stripe refund ' . $refund->id . ': ' . $e->getMessage());
+                        }
+                    }
+                }
+                break;
+
+            case 'charge.refund.updated':
+                $refund = $event->data->object;
+                $payment = $refund->payment_intent
+                    ? new Payment($refund->payment_intent, 'payment_id')
+                    : new Payment($refund->charge, 'transaction');
+                if ($payment->exists()) {
+                    try {
+                        if (in_array($refund->status, ['failed', 'canceled'], true)) {
+                            $payment->failRefund($refund->id, $refund->failure_reason ?? 'Refund failed');
+                        } else {
+                            $reason = $refund->metadata->staff_reason ?? $refund->reason ?? '';
+                            $payment->recordRefund(
+                                new GatewayRefundResult($refund->id, $refund->status === 'succeeded'),
+                                (int) $refund->amount,
+                                (string) $reason
+                            );
+                        }
+                    } catch (Exception $e) {
+                        $this->logError('Unable to update Stripe refund ' . $refund->id . ': ' . $e->getMessage());
+                    }
                 }
                 break;
 
@@ -299,18 +338,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
                 if (!$hook_key) {
                     $webhook = $stripe->webhookEndpoints->create([
                         'url' => $this->getListenerURL(),
-                        'enabled_events' => [
-                            'payment_intent.succeeded',
-                            'charge.refunded',
-                            'charge.failed',
-                            'charge.dispute.closed',
-                            'customer.subscription.created',
-                            'customer.subscription.updated',
-                            'customer.subscription.deleted',
-                            'customer.subscription.paused',
-                            'customer.subscription.resumed',
-                            'invoice.paid'
-                        ]
+                        'enabled_events' => $this->getWebhookEvents()
                     ]);
 
                     if ($webhook->secret == null || empty($webhook->secret)) {
@@ -321,9 +349,10 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
 
                     StoreConfig::setMultiple([
                         'stripe.hook_id' => $webhook->id,
-                        'stripe.hook_key' => $webhook->secret
+                        'stripe.hook_key' => $webhook->secret,
+                        'stripe.webhook_version' => '1.9.2'
                     ]);
-                } else {
+                } else if (StoreConfig::get('stripe.webhook_version') !== '1.9.2') {
                     $this->updateWebhook($stripe);
                 }
 
@@ -341,6 +370,42 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
 
     public function createSubscription(): void {
 
+    }
+
+    public function refundPayment(Payment $payment, int $amount_cents, string $reason): ?GatewayRefundResult {
+        $stripe = $this->getApiContext();
+        if (!$stripe || count($this->getErrors())) {
+            return null;
+        }
+
+        try {
+            $refund_data = [
+                'amount' => $amount_cents,
+                'metadata' => [
+                    'store_payment_id' => $payment->data()->id,
+                    'staff_reason' => mb_substr($reason, 0, 500)
+                ]
+            ];
+
+            if ($payment->data()->payment_id) {
+                $refund_data['payment_intent'] = $payment->data()->payment_id;
+            } else {
+                $refund_data['charge'] = $payment->data()->transaction;
+            }
+
+            $refund = $stripe->refunds->create($refund_data);
+            if (!$refund->id || in_array($refund->status, ['failed', 'canceled'], true)) {
+                $this->logError('Stripe rejected refund for payment ' . $payment->data()->id);
+                $this->addError(Store::getLanguage()->get('admin', 'payment_refund_failed'));
+                return null;
+            }
+
+            return new GatewayRefundResult($refund->id, $refund->status === 'succeeded');
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            $this->logError($e->getMessage());
+            $this->addError(Store::getLanguage()->get('admin', 'payment_refund_failed'));
+            return null;
+        }
     }
 
     public function cancelSubscription(Subscription $subscription): bool {
@@ -403,34 +468,52 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions {
     public function updateWebhook(Stripe\StripeClient $stripe) {
         $hook_id = StoreConfig::get('stripe.hook_id');
         $hook_key = StoreConfig::get('stripe.hook_key');
-        if ($hook_key && !$hook_id) {
-            // Update existing webhooks
-            $last_id = null;
-            foreach ($stripe->webhookEndpoints->all() as $webhook) {
-                if (str_contains($webhook->url, 'gateway=Stripe')) {
-                    $webhook = $stripe->webhookEndpoints->update($webhook->id, [
-                        'enabled_events' => [
-                            'payment_intent.succeeded',
-                            'charge.refunded',
-                            'charge.failed',
-                            'charge.dispute.closed',
-                            'customer.subscription.created',
-                            'customer.subscription.updated',
-                            'customer.subscription.deleted',
-                            'customer.subscription.paused',
-                            'customer.subscription.resumed',
-                            'invoice.paid'
-                        ]
-                    ]);
+        if (!$hook_key) {
+            return;
+        }
 
-                    $last_id = $webhook->id;
-                }
-            }
+        if ($hook_id) {
+            $stripe->webhookEndpoints->update($hook_id, [
+                'enabled_events' => $this->getWebhookEvents()
+            ]);
+            StoreConfig::set('stripe.webhook_version', '1.9.2');
+            return;
+        }
 
-            if ($last_id) {
-                StoreConfig::set('stripe.hook_id', $last_id);
+        // Older installations did not store the webhook ID. Locate and update it.
+        $last_id = null;
+        foreach ($stripe->webhookEndpoints->all() as $webhook) {
+            if (str_contains($webhook->url, 'gateway=Stripe')) {
+                $webhook = $stripe->webhookEndpoints->update($webhook->id, [
+                    'enabled_events' => $this->getWebhookEvents()
+                ]);
+
+                $last_id = $webhook->id;
             }
         }
+
+        if ($last_id) {
+            StoreConfig::setMultiple([
+                'stripe.hook_id' => $last_id,
+                'stripe.webhook_version' => '1.9.2'
+            ]);
+        }
+    }
+
+    private function getWebhookEvents(): array {
+        return [
+            'payment_intent.succeeded',
+            'charge.refunded',
+            'charge.refund.updated',
+            'charge.failed',
+            'charge.dispute.closed',
+            'customer.subscription.created',
+            'customer.subscription.updated',
+            'customer.subscription.deleted',
+            'customer.subscription.paused',
+            'customer.subscription.resumed',
+            'invoice.paid'
+        ];
     }
 }
 

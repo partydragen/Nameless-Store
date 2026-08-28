@@ -14,6 +14,10 @@ class Payment {
     public const REVERSED = 'REVERSED';
     public const DENIED = 'DENIED';
 
+    public const REFUND_PENDING = 0;
+    public const REFUND_COMPLETED = 1;
+    public const REFUND_FAILED = 2;
+
     private DB $_db;
 
     /**
@@ -94,6 +98,219 @@ class Payment {
         }
  
         return $this->_order;
+    }
+
+    /**
+     * Get all refund attempts for this payment, newest first.
+     *
+     * @return array Refund database rows.
+     */
+    public function getRefunds(): array {
+        if (!$this->exists()) {
+            return [];
+        }
+
+        return $this->_db->query(
+            'SELECT * FROM nl2_store_payment_refunds WHERE payment_id = ? ORDER BY created DESC, id DESC',
+            [$this->data()->id]
+        )->results();
+    }
+
+    /**
+     * Get the amount which has been successfully refunded.
+     */
+    public function getRefundedAmountCents(): int {
+        if (!$this->exists()) {
+            return 0;
+        }
+
+        $refunded = $this->getRecordedRefundedAmountCents();
+
+        // Payments refunded before refund auditing was introduced have no rows.
+        if ($this->data()->status_id === 2) {
+            return max($refunded, (int) ($this->data()->amount_cents ?? 0));
+        }
+
+        return $refunded;
+    }
+
+    /**
+     * Get completed refund rows without the legacy fully-refunded fallback.
+     */
+    private function getRecordedRefundedAmountCents(): int {
+        $result = $this->_db->query(
+            'SELECT COALESCE(SUM(amount_cents), 0) AS total FROM nl2_store_payment_refunds WHERE payment_id = ? AND status_id = ?',
+            [$this->data()->id, self::REFUND_COMPLETED]
+        )->first();
+
+        return (int) ($result->total ?? 0);
+    }
+
+    /**
+     * Get the amount reserved by accepted refunds which are still pending.
+     */
+    public function getPendingRefundAmountCents(): int {
+        if (!$this->exists()) {
+            return 0;
+        }
+
+        $result = $this->_db->query(
+            'SELECT COALESCE(SUM(amount_cents), 0) AS total FROM nl2_store_payment_refunds WHERE payment_id = ? AND status_id = ?',
+            [$this->data()->id, self::REFUND_PENDING]
+        )->first();
+
+        return (int) ($result->total ?? 0);
+    }
+
+    /**
+     * Get the amount which can still be refunded, excluding pending refunds.
+     */
+    public function getRefundableAmountCents(): int {
+        $amount = (int) ($this->data()->amount_cents ?? 0);
+
+        return max(0, $amount - $this->getRefundedAmountCents() - $this->getPendingRefundAmountCents());
+    }
+
+    /**
+     * Store a refund returned by a gateway and finalise the payment when fully refunded.
+     * Existing provider refund IDs are updated, making webhook delivery idempotent.
+     *
+     * @throws Exception If the refund is invalid or cannot be stored.
+     */
+    public function recordRefund(
+        GatewayRefundResult $result,
+        int $amount_cents,
+        string $reason = '',
+        ?int $user_id = null
+    ): int {
+        if (!$this->exists() || $amount_cents < 1 || $result->getTransactionId() === '') {
+            throw new Exception('Invalid payment refund');
+        }
+
+        $existing = $this->_db->query(
+            'SELECT * FROM nl2_store_payment_refunds WHERE payment_id = ? AND gateway_refund_id = ?',
+            [$this->data()->id, $result->getTransactionId()]
+        );
+
+        $status_id = $result->isCompleted() ? self::REFUND_COMPLETED : self::REFUND_PENDING;
+        if ($this->data()->status_id === 2) {
+            // A completion webhook can arrive before the StaffCP request stores
+            // the provider response. The provider event is authoritative.
+            $status_id = self::REFUND_COMPLETED;
+        }
+
+        if ($existing->count()) {
+            $refund = $existing->first();
+            if ((int) $refund->status_id === self::REFUND_COMPLETED) {
+                $status_id = self::REFUND_COMPLETED;
+            }
+
+            $fields = [
+                'status_id' => $status_id,
+                'updated' => date('U')
+            ];
+
+            if ($user_id !== null && $refund->user_id === null) {
+                $fields['user_id'] = $user_id;
+            }
+
+            if ($reason !== '' && empty($refund->reason)) {
+                $fields['reason'] = $reason;
+            }
+
+            if (!$this->_db->update('store_payment_refunds', $refund->id, $fields)) {
+                throw new Exception('There was a problem updating the payment refund');
+            }
+
+            if ($status_id === self::REFUND_COMPLETED) {
+                $this->finaliseRefundedPayment();
+            }
+
+            return (int) $refund->id;
+        }
+
+        $can_record_after_webhook = $this->data()->status_id === 2
+            && $amount_cents <= max(
+                0,
+                (int) ($this->data()->amount_cents ?? 0)
+                    - $this->getRecordedRefundedAmountCents()
+                    - $this->getPendingRefundAmountCents()
+            );
+
+        if (
+            ($this->data()->status_id !== 1 && !$can_record_after_webhook)
+            || ($this->data()->status_id === 1 && $amount_cents > $this->getRefundableAmountCents())
+        ) {
+            throw new Exception('Refund amount exceeds the refundable payment amount');
+        }
+
+        if (!$this->_db->insert('store_payment_refunds', [
+            'payment_id' => $this->data()->id,
+            'gateway_refund_id' => $result->getTransactionId(),
+            'amount_cents' => $amount_cents,
+            'reason' => $reason !== '' ? $reason : null,
+            'user_id' => $user_id,
+            'status_id' => $status_id,
+            'created' => date('U'),
+            'updated' => date('U')
+        ])) {
+            throw new Exception('There was a problem recording the payment refund');
+        }
+
+        $refund_id = (int) $this->_db->lastId();
+        if ($status_id === self::REFUND_COMPLETED) {
+            $this->finaliseRefundedPayment();
+        }
+
+        return $refund_id;
+    }
+
+    /**
+     * Mark a pending provider refund as failed so its amount becomes refundable again.
+     */
+    public function failRefund(string $gateway_refund_id, string $error = ''): void {
+        if (!$this->exists() || $gateway_refund_id === '') {
+            return;
+        }
+
+        $refund = $this->_db->query(
+            'SELECT id FROM nl2_store_payment_refunds WHERE payment_id = ? AND gateway_refund_id = ? AND status_id = ?',
+            [$this->data()->id, $gateway_refund_id, self::REFUND_PENDING]
+        );
+
+        if ($refund->count()) {
+            $this->_db->update('store_payment_refunds', $refund->first()->id, [
+                'status_id' => self::REFUND_FAILED,
+                'error' => $error !== '' ? mb_substr($error, 0, 255) : null,
+                'updated' => date('U')
+            ]);
+        }
+    }
+
+    /**
+     * Complete provider refunds which were accepted as pending.
+     */
+    public function completePendingRefunds(): void {
+        if (!$this->exists()) {
+            return;
+        }
+
+        $this->_db->query(
+            'UPDATE nl2_store_payment_refunds SET status_id = ?, updated = ? WHERE payment_id = ? AND status_id = ?',
+            [self::REFUND_COMPLETED, date('U'), $this->data()->id, self::REFUND_PENDING]
+        );
+    }
+
+    /**
+     * Run the existing full-refund lifecycle after completed refunds cover the payment.
+     */
+    private function finaliseRefundedPayment(): void {
+        if (
+            $this->data()->status_id === 1
+            && $this->getRefundedAmountCents() >= (int) ($this->data()->amount_cents ?? 0)
+        ) {
+            $this->handlePaymentEvent(self::REFUNDED);
+        }
     }
 
     /**
@@ -447,6 +664,7 @@ class Payment {
 
     public function delete(): bool {
         if ($this->exists()) {
+            $this->_db->query('DELETE FROM `nl2_store_payment_refunds` WHERE `payment_id` = ?', [$this->data()->id]);
             $this->_db->query('DELETE FROM `nl2_store_payments` WHERE `id` = ?', [$this->data()->id]);
             $this->_db->query('DELETE FROM `nl2_store_orders` WHERE `id` = ?', [$this->data()->order_id]);
             $this->_db->query('DELETE FROM `nl2_store_orders_products` WHERE `order_id` = ?', [$this->data()->order_id]);

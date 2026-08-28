@@ -134,6 +134,8 @@ if (isset($_GET['customer'])) {
         Redirect::to(URL::build('/panel/store/payments'));
     }
 
+    $gateway = $payment->getGateway();
+
     // Handle input
     if (Input::exists()) {
         $errors = [];
@@ -164,6 +166,73 @@ if (isset($_GET['customer'])) {
 
                     Session::flash('store_payment_success', $store_language->get('admin', 'payment_updated_successfully'));
                     Redirect::to(URL::build('/panel/store/payments/', 'payment=' . $payment->data()->id));
+                }
+            } else if (Input::get('action') == 'refund_payment') {
+                if (!$user->hasPermission('staffcp.store.payments.refund')) {
+                    $errors[] = $store_language->get('admin', 'payment_refund_not_allowed');
+                } else if (!$gateway instanceof SupportRefunds) {
+                    $errors[] = $store_language->get('admin', 'gateway_does_not_support_refunds');
+                } else if ($payment->data()->status_id !== 1) {
+                    $errors[] = $store_language->get('admin', 'payment_cannot_be_refunded');
+                } else {
+                    $refund_amount_input = str_replace(',', '.', trim(Input::get('refund_amount')));
+                    $refund_amount_cents = preg_match('/^\d+(?:\.\d{1,2})?$/D', $refund_amount_input)
+                        ? Store::toCents($refund_amount_input)
+                        : 0;
+                    $refund_reason = trim(Input::get('refund_reason'));
+                    $refundable_amount_cents = $payment->getRefundableAmountCents();
+
+                    if ($refund_amount_cents < 1 || $refund_amount_cents > $refundable_amount_cents) {
+                        $errors[] = $store_language->get('admin', 'invalid_refund_amount', [
+                            'amount' => Store::fromCents($refundable_amount_cents),
+                            'currency' => Output::getClean($payment->data()->currency)
+                        ]);
+                    }
+
+                    if ($refund_reason === '') {
+                        $errors[] = $store_language->get('admin', 'refund_reason_required');
+                    } else if (mb_strlen($refund_reason) > 255) {
+                        $errors[] = $store_language->get('admin', 'refund_reason_maximum');
+                    }
+
+                    if (!count($errors)) {
+                        try {
+                            $refund_result = $gateway->refundPayment($payment, $refund_amount_cents, $refund_reason);
+                            if ($refund_result instanceof GatewayRefundResult) {
+                                $payment->recordRefund(
+                                    $refund_result,
+                                    $refund_amount_cents,
+                                    $refund_reason,
+                                    $user->data()->id
+                                );
+
+                                Session::flash(
+                                    'store_payment_success',
+                                    $store_language->get(
+                                        'admin',
+                                        $refund_result->isCompleted()
+                                            ? 'payment_refunded_successfully'
+                                            : 'payment_refund_submitted'
+                                    )
+                                );
+                                Redirect::to(URL::build('/panel/store/payments/', 'payment=' . $payment->data()->id));
+                            }
+
+                            $gateway_errors = $gateway->getErrors();
+                            $errors = array_merge(
+                                $errors,
+                                count($gateway_errors)
+                                    ? $gateway_errors
+                                    : [$store_language->get('admin', 'payment_refund_failed')]
+                            );
+                        } catch (Throwable $e) {
+                            $gateway->logError(
+                                'Refund for payment ' . $payment->data()->id
+                                . ' could not be recorded: ' . $e->getMessage()
+                            );
+                            $errors[] = $store_language->get('admin', 'payment_refund_failed');
+                        }
+                    }
                 }
             }
         } else {
@@ -262,11 +331,73 @@ if (isset($_GET['customer'])) {
         ]);
     }
 
-    $gateway = $payment->getGateway();
     if ($gateway != null) {
         $payment_method = $gateway->getName();
     } else {
         $payment_method = $payment->data()->gateway_id == 0 ? 'Manual' : 'Unknown';
+    }
+
+    $refunded_amount_cents = $payment->getRefundedAmountCents();
+    $pending_refund_amount_cents = $payment->getPendingRefundAmountCents();
+    $refundable_amount_cents = $payment->getRefundableAmountCents();
+    $payment_status_html = $payment->getStatusHtml();
+    if ($payment->data()->status_id === 1 && $refunded_amount_cents > 0) {
+        $payment_status_html = '<span class="badge badge-info">'
+            . $store_language->get('admin', 'partially_refunded')
+            . '</span>';
+    } else if ($payment->data()->status_id === 1 && $pending_refund_amount_cents > 0) {
+        $payment_status_html = '<span class="badge badge-warning">'
+            . $store_language->get('admin', 'payment_refund_pending')
+            . '</span>';
+    }
+
+    $refunds_list = [];
+    foreach ($payment->getRefunds() as $refund) {
+        $processed_by = $store_language->get('admin', 'system');
+        if ($refund->user_id !== null) {
+            $staff_user = new User($refund->user_id);
+            $processed_by = $staff_user->exists()
+                ? $staff_user->getDisplayname()
+                : '#' . Output::getClean($refund->user_id);
+        }
+
+        switch ((int) $refund->status_id) {
+            case Payment::REFUND_COMPLETED:
+                $refund_status = '<span class="badge badge-success">' . $store_language->get('admin', 'refund_completed') . '</span>';
+                break;
+            case Payment::REFUND_FAILED:
+                $refund_status = '<span class="badge badge-danger">' . $store_language->get('admin', 'refund_failed') . '</span>';
+                break;
+            default:
+                $refund_status = '<span class="badge badge-warning">' . $store_language->get('admin', 'refund_pending') . '</span>';
+                break;
+        }
+
+        $refunds_list[] = [
+            'transaction' => Output::getClean($refund->gateway_refund_id),
+            'amount' => Output::getPurified(Store::formatPrice(
+                $refund->amount_cents,
+                $payment->data()->currency,
+                Store::getCurrencySymbol(),
+                STORE_CURRENCY_FORMAT
+            )),
+            'reason' => Output::getClean($refund->reason ?? ''),
+            'processed_by' => Output::getClean($processed_by),
+            'status' => $refund_status,
+            'date' => date(DATE_FORMAT, $refund->created)
+        ];
+    }
+
+    if (
+        $user->hasPermission('staffcp.store.payments.refund')
+        && $gateway instanceof SupportRefunds
+        && $payment->data()->status_id === 1
+        && $refundable_amount_cents > 0
+    ) {
+        $template->getEngine()->addVariables([
+            'REFUND_PAYMENT' => $store_language->get('admin', 'refund_payment'),
+            'REFUNDABLE_AMOUNT_VALUE' => Store::fromCents($refundable_amount_cents)
+        ]);
     }
 
     // Coupon used for this payment?
@@ -305,7 +436,7 @@ if (isset($_GET['customer'])) {
         'PAYMENT_METHOD' => $store_language->get('admin', 'payment_method'),
         'PAYMENT_METHOD_VALUE' => Output::getClean($payment_method),
         'STATUS' => $store_language->get('admin', 'status'),
-        'STATUS_VALUE' => $payment->getStatusHtml(),
+        'STATUS_VALUE' => $payment_status_html,
         'UUID' => $store_language->get('admin', 'uuid'),
         'UUID_VALUE' => $recipient_uuid,
         'PRICE' => $store_language->get('general', 'price'),
@@ -321,6 +452,35 @@ if (isset($_GET['customer'])) {
         'CURRENCY_SYMBOL' => Output::getClean(Store::getCurrencySymbol()),
         'CURRENCY_ISO' => Output::getClean($payment->data()->currency),
         'DATE_VALUE' => date(DATE_FORMAT, $payment->data()->created),
+        'REFUNDED_AMOUNT' => $store_language->get('admin', 'refunded_amount'),
+        'REFUNDED_AMOUNT_VALUE' => Output::getPurified(Store::formatPrice(
+            $refunded_amount_cents,
+            $payment->data()->currency,
+            Store::getCurrencySymbol(),
+            STORE_CURRENCY_FORMAT
+        )),
+        'PENDING_REFUND_AMOUNT' => $store_language->get('admin', 'pending_refund_amount'),
+        'PENDING_REFUND_AMOUNT_VALUE' => Output::getPurified(Store::formatPrice(
+            $pending_refund_amount_cents,
+            $payment->data()->currency,
+            Store::getCurrencySymbol(),
+            STORE_CURRENCY_FORMAT
+        )),
+        'HAS_PENDING_REFUNDS' => $pending_refund_amount_cents > 0,
+        'REFUNDABLE_AMOUNT' => $store_language->get('admin', 'refundable_amount'),
+        'REFUNDABLE_AMOUNT_FORMAT_VALUE' => Output::getPurified(Store::formatPrice(
+            $refundable_amount_cents,
+            $payment->data()->currency,
+            Store::getCurrencySymbol(),
+            STORE_CURRENCY_FORMAT
+        )),
+        'REFUND_HISTORY' => $store_language->get('admin', 'refund_history'),
+        'REFUNDS_LIST' => $refunds_list,
+        'REFUND_REASON' => $store_language->get('admin', 'refund_reason'),
+        'REFUND_REASON_HELP' => $store_language->get('admin', 'refund_reason_help'),
+        'REFUND_STATUS' => $store_language->get('admin', 'refund_status'),
+        'REFUNDED_BY' => $store_language->get('admin', 'refunded_by'),
+        'GATEWAY_REFUND_ID' => $store_language->get('admin', 'gateway_refund_id'),
         'PRODUCTS' => $store_language->get('admin', 'products'),
         'PRODUCTS_LIST' => $products_list,
         'DETAILS' => $store_language->get('admin', 'details'),

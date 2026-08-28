@@ -46,6 +46,7 @@
                                     <tr>
                                         <th>{$PAYMENT_METHOD}</th>
                                         <th>{$SUPPORTS_SUBSCRIPTIONS}</th>
+                                        <th>{$SUPPORTS_REFUNDS}</th>
                                         <th>{$ENABLED}</th>
                                         <th><div class="float-right">{$EDIT}</div></th>
                                     </tr>
@@ -56,6 +57,7 @@
                                             <td><strong>{$gateway.name}</strong> <small>{$gateway.version}</small><br />
                                             <small>{$gateway.author_x}</small></td>
                                             <td>{if $gateway.supports_subscriptions}<i class="fa fa-check-circle text-success"></i>{else}<i class="fa fa-times-circle text-danger"></i>{/if}</td>
+                                            <td>{if $gateway.supports_refunds}<i class="fa fa-check-circle text-success"></i>{else}<i class="fa fa-times-circle text-danger"></i>{/if}</td>
                                             <td>{if $gateway.enabled}<span class="badge badge-success">{$ENABLED}</span>{else}<span class="badge badge-danger">{$DISABLED}</span>{/if}</td>
                                             <td><a href="{$gateway.edit_link}" class="btn btn-primary btn-sm float-right">{$EDIT}</a></td>
                                         </tr>

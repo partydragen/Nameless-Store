@@ -7,13 +7,13 @@
  * @version 2.0.3
  * @license MIT
  */
-class Credits_Gateway extends GatewayBase implements SupportSubscriptions {
+class Credits_Gateway extends GatewayBase implements SupportSubscriptions, SupportRefunds {
 
     public function __construct() {
         $name = 'Store Credits';
         $author = '<a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a>';
-        $gateway_version = '1.9.1';
-        $store_version = '1.9.1';
+        $gateway_version = '1.9.2';
+        $store_version = '1.9.2';
         $settings = ROOT_PATH . '/modules/Store/gateways/Credits/gateway_settings/settings.php';
 
         parent::__construct($name, $author, $gateway_version, $store_version, $settings);
@@ -94,6 +94,28 @@ class Credits_Gateway extends GatewayBase implements SupportSubscriptions {
 
     public function createSubscription(): void {
 
+    }
+
+    public function refundPayment(Payment $payment, int $amount_cents, string $reason): ?GatewayRefundResult {
+        $customer = $payment->getOrder()->customer();
+        if (!$customer->exists()) {
+            $this->logError('Could not find the customer for payment ' . $payment->data()->id);
+            $this->addError(Store::getLanguage()->get('admin', 'payment_refund_failed'));
+            return null;
+        }
+
+        $transaction_id = $customer->addCents(
+            $amount_cents,
+            'Payment refund #' . $payment->data()->id . ': ' . $reason
+        );
+
+        if ($transaction_id < 1) {
+            $this->logError('Could not credit refund for payment ' . $payment->data()->id);
+            $this->addError(Store::getLanguage()->get('admin', 'payment_refund_failed'));
+            return null;
+        }
+
+        return new GatewayRefundResult((string) $transaction_id);
     }
 
     public function cancelSubscription(Subscription $subscription): bool {

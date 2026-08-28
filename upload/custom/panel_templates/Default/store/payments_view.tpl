@@ -50,6 +50,7 @@
                                                 <div class="dropdown-menu">
                                                     {if isset($DELETE_PAYMENT)}<a class="dropdown-item" href="#" onclick="showDeletePaymentModal()">{$DELETE_PAYMENT}</a>{/if}
                                                     {if isset($CHANGE_PAYMENT_STATUS)}<a class="dropdown-item" href="#" onclick="showChangePaymentStatusModal()">{$CHANGE_PAYMENT_STATUS}</a>{/if}
+                                                    {if isset($REFUND_PAYMENT)}<a class="dropdown-item" href="#" onclick="showRefundPaymentModal()">{$REFUND_PAYMENT}</a>{/if}
                                                 </div>
                                             </div>
 
@@ -97,6 +98,22 @@
                                                 <td><strong>{$PRICE}</strong></td>
                                                 <td>{$PRICE_FORMAT_VALUE}</td>
                                             </tr>
+                                            {if count($REFUNDS_LIST)}
+                                            <tr>
+                                                <td><strong>{$REFUNDED_AMOUNT}</strong></td>
+                                                <td>{$REFUNDED_AMOUNT_VALUE}</td>
+                                            </tr>
+                                            {if $HAS_PENDING_REFUNDS}
+                                            <tr>
+                                                <td><strong>{$PENDING_REFUND_AMOUNT}</strong></td>
+                                                <td>{$PENDING_REFUND_AMOUNT_VALUE}</td>
+                                            </tr>
+                                            {/if}
+                                            <tr>
+                                                <td><strong>{$REFUNDABLE_AMOUNT}</strong></td>
+                                                <td>{$REFUNDABLE_AMOUNT_FORMAT_VALUE}</td>
+                                            </tr>
+                                            {/if}
                                             {if isset($SUBSCRIPTION)}
                                             <tr>
                                                 <td><strong>{$SUBSCRIPTION}</strong></td>
@@ -116,6 +133,37 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                {if count($REFUNDS_LIST)}
+                                <hr />
+                                <h5>{$REFUND_HISTORY}</h5>
+                                <div class="table-responsive mt-3">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>{$GATEWAY_REFUND_ID}</th>
+                                                <th>{$AMOUNT}</th>
+                                                <th>{$REFUND_REASON}</th>
+                                                <th>{$REFUNDED_BY}</th>
+                                                <th>{$REFUND_STATUS}</th>
+                                                <th>{$DATE}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {foreach from=$REFUNDS_LIST item=refund}
+                                            <tr>
+                                                <td>{$refund.transaction}</td>
+                                                <td>{$refund.amount}</td>
+                                                <td>{$refund.reason}</td>
+                                                <td>{$refund.processed_by}</td>
+                                                <td>{$refund.status}</td>
+                                                <td>{$refund.date}</td>
+                                            </tr>
+                                        {/foreach}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {/if}
                                 
                                 </br>
                                 
@@ -273,6 +321,51 @@
         </div>
     {/if}
 
+    {if isset($REFUND_PAYMENT)}
+        <div class="modal fade" id="refundPaymentModal" tabindex="-1" role="dialog" aria-labelledby="refundPaymentModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="refundPaymentModalLabel">{$REFUND_PAYMENT}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form action="" method="post" id="refundPaymentForm">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="inputRefundAmount">{$AMOUNT}</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">{$CURRENCY_SYMBOL}</span>
+                                    </div>
+                                    <input type="number" class="form-control" name="refund_amount" id="inputRefundAmount"
+                                           min="0.01" max="{$REFUNDABLE_AMOUNT_VALUE}" step="0.01"
+                                           value="{$REFUNDABLE_AMOUNT_VALUE}" required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">{$CURRENCY_ISO}</span>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">{$REFUNDABLE_AMOUNT}: {$REFUNDABLE_AMOUNT_FORMAT_VALUE}</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputRefundReason">{$REFUND_REASON}</label>
+                                <textarea class="form-control" name="refund_reason" id="inputRefundReason" rows="3" maxlength="255" required></textarea>
+                                <small class="form-text text-muted">{$REFUND_REASON_HELP}</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" name="token" value="{$TOKEN}">
+                            <input type="hidden" name="action" value="refund_payment">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">{$BACK}</button>
+                            <input type="submit" class="btn btn-primary" id="submitRefundPayment" value="{$REFUND_PAYMENT}">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {/if}
+
     {if isset($CHANGE_PAYMENT_STATUS)}
         <div class="modal fade" id="changeStatusModal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
@@ -365,6 +458,16 @@
         function showChangePaymentStatusModal() {
             $('#changeStatusModal').modal().show();
         }
+    {/if}
+
+    {if isset($REFUND_PAYMENT)}
+        function showRefundPaymentModal() {
+            $('#refundPaymentModal').modal().show();
+        }
+
+        $('#refundPaymentForm').on('submit', function() {
+            $('#submitRefundPayment').prop('disabled', true);
+        });
     {/if}
 </script>
 

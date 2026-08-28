@@ -24,7 +24,7 @@ class Store_Module extends Module {
 
         $name = 'Store';
         $author = '<a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a>';
-        $module_version = '1.9.1';
+        $module_version = '1.9.2';
         $nameless_version = '2.2.3';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
@@ -271,6 +271,7 @@ class Store_Module extends Module {
                 'staffcp.store.payments.create' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments') . ' &raquo; ' . $this->_store_language->get('admin', 'create_payment'),
                 'staffcp.store.payments.delete' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments') . ' &raquo; ' . $this->_store_language->get('admin', 'delete_payment'),
                 'staffcp.store.payments.change_status' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments') . ' &raquo; ' . $this->_store_language->get('admin', 'change_payment_status'),
+                'staffcp.store.payments.refund' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments') . ' &raquo; ' . $this->_store_language->get('admin', 'refund_payment'),
                 'staffcp.store.subscriptions' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'subscriptions'),
                 'staffcp.store.subscriptions.cancel' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'subscriptions') . ' &raquo; ' . $this->_store_language->get('general', 'cancel_subscription'),
                 'staffcp.store.subscriptions.sync' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'subscriptions') . ' &raquo; ' . $this->_store_language->get('admin', 'sync_subscription'),
@@ -1362,6 +1363,25 @@ class Store_Module extends Module {
                 echo $e->getMessage() . '<br />';
             }
         }
+
+        if ($old_version < 192) {
+            try {
+                if (!$this->_db->showTables('store_payment_refunds')) {
+                    $this->_db->createTable('store_payment_refunds', ' `id` int(11) NOT NULL AUTO_INCREMENT, `payment_id` int(11) NOT NULL, `gateway_refund_id` varchar(128) NOT NULL, `amount_cents` int(11) NOT NULL, `reason` varchar(255) DEFAULT NULL, `user_id` int(11) DEFAULT NULL, `status_id` tinyint(1) NOT NULL DEFAULT \'0\', `error` varchar(255) DEFAULT NULL, `created` int(11) NOT NULL, `updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                    $this->_db->query('ALTER TABLE `nl2_store_payment_refunds` ADD UNIQUE INDEX `nl2_store_payment_refunds_idx_gateway_refund` (`payment_id`, `gateway_refund_id`)');
+                    $this->_db->query('ALTER TABLE `nl2_store_payment_refunds` ADD INDEX `nl2_store_payment_refunds_idx_payment_id` (`payment_id`)');
+                }
+            } catch (Exception $e) {
+                echo $e->getMessage() . '<br />';
+            }
+
+            if (StoreConfig::exists()) {
+                $gateway = Gateways::getInstance()->get('PayPal');
+                if ($gateway instanceof \Store\Gateways\PayPal\PayPal_Gateway && StoreConfig::get('paypal.hook_key')) {
+                    $gateway->updateWebhook();
+                }
+            }
+        }
     }
 
     private function initialise() {
@@ -1499,6 +1519,17 @@ class Store_Module extends Module {
                 $this->_db->createTable('store_payments', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `payment_id` varchar(64) DEFAULT NULL, `subscription_id` int(11) DEFAULT NULL, `transaction` varchar(32) DEFAULT NULL, `amount_cents` int(11) DEFAULT NULL, `currency` varchar(11) DEFAULT NULL, `fee_cents` int(11) DEFAULT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `last_updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
 
                 $this->_db->query('ALTER TABLE `nl2_store_payments` ADD INDEX `nl2_store_payments_idx_order_id` (`order_id`)');
+            } catch (Exception $e) {
+                // Error
+            }
+        }
+
+        if (!$this->_db->showTables('store_payment_refunds')) {
+            try {
+                $this->_db->createTable('store_payment_refunds', ' `id` int(11) NOT NULL AUTO_INCREMENT, `payment_id` int(11) NOT NULL, `gateway_refund_id` varchar(128) NOT NULL, `amount_cents` int(11) NOT NULL, `reason` varchar(255) DEFAULT NULL, `user_id` int(11) DEFAULT NULL, `status_id` tinyint(1) NOT NULL DEFAULT \'0\', `error` varchar(255) DEFAULT NULL, `created` int(11) NOT NULL, `updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
+
+                $this->_db->query('ALTER TABLE `nl2_store_payment_refunds` ADD UNIQUE INDEX `nl2_store_payment_refunds_idx_gateway_refund` (`payment_id`, `gateway_refund_id`)');
+                $this->_db->query('ALTER TABLE `nl2_store_payment_refunds` ADD INDEX `nl2_store_payment_refunds_idx_payment_id` (`payment_id`)');
             } catch (Exception $e) {
                 // Error
             }
