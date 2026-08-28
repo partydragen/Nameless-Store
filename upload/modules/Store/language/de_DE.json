@@ -330,5 +330,19 @@
     "general/unknown": "Unbekannt",
     "admin/invalid_durability_period": "Um wiederkehrende Abonnements nutzen zu können, muss eine Laufzeit festgelegt werden.",
     "admin/invalid_durability_period_short_time": "Die Laufzeit muss bei wiederkehrenden Abonnements mindestens 1 Tag betragen.",
-    "general/coupon_missing_required_group": "Dir fehlt die erforderliche Gruppe „{{group}}“, um diesen Gutschein einzulösen."
+    "general/coupon_missing_required_group": "Dir fehlt die erforderliche Gruppe „{{group}}“, um diesen Gutschein einzulösen.",
+    "admin/all_payment_types": "Alle Zahlungsarten",
+    "admin/all_statuses": "Alle Status",
+    "admin/clone_product": "Produkt klonen",
+    "admin/cloning_product_x": "Produkt {{product}} klonen",
+    "admin/every_x": "Jede {{frequency}}",
+    "admin/filter_by_payment_type": "Nach Zahlungsart filtern",
+    "admin/filter_by_status": "Nach Status filtern",
+    "admin/one_time_payment": "Einmalzahlung",
+    "admin/payment_type": "Zahlungsart",
+    "admin/product_cloned_successfully": "Das Produkt wurde erfolgreich geklont.",
+    "admin/product_copy_name": "{{product}} (Kopie)",
+    "admin/subscription_payment": "Abonnementzahlung",
+    "admin/unable_to_clone_product": "Das Produkt konnte nicht geklont werden. Es wurden keine Änderungen gespeichert.",
+    "general/never": "Niemals"
 }
