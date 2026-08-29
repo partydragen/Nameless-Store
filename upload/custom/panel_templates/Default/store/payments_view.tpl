@@ -98,6 +98,16 @@
                                                 <td><strong>{$PRICE}</strong></td>
                                                 <td>{$PRICE_FORMAT_VALUE}</td>
                                             </tr>
+                                            {if isset($CREDIT_CONTRIBUTION)}
+                                            <tr>
+                                                <td><strong>{$CREDIT_CONTRIBUTION}</strong></td>
+                                                <td>{$CREDIT_CONTRIBUTION_VALUE}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>{$ORDER_TOTAL}</strong></td>
+                                                <td>{$ORDER_TOTAL_VALUE}</td>
+                                            </tr>
+                                            {/if}
                                             {if count($REFUNDS_LIST)}
                                             <tr>
                                                 <td><strong>{$REFUNDED_AMOUNT}</strong></td>

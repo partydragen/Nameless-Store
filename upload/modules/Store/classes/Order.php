@@ -83,7 +83,7 @@ class Order {
                     }
 
                     $item = new Item($data->item_id, $product, $data->quantity, $fields);
-                    $amount += $data->amount_cents;
+                    $amount += $data->amount_cents * $data->quantity;
 
                     $items->addItem($item);
                 }
@@ -190,7 +190,85 @@ class Order {
      * @return Amount
      */
     public function getAmount(): Amount {
+        if (!isset($this->_amount)) {
+            $this->items();
+        }
+
         return $this->_amount;
+    }
+
+    /**
+     * Check whether a session cart still describes this unpaid order.
+     */
+    public function matchesCart(
+        ItemList $items,
+        ?Coupon $coupon,
+        Customer $customer,
+        Customer $recipient
+    ): bool {
+        if (!$this->exists()) {
+            return false;
+        }
+
+        if (
+            (int) $this->data()->from_customer_id !== (int) $customer->data()->id
+            || (int) $this->data()->to_customer_id !== (int) $recipient->data()->id
+            || (int) ($this->data()->coupon_id ?? 0) !== (int) ($coupon?->data()->id ?? 0)
+        ) {
+            return false;
+        }
+
+        $stored_items = $this->_db->query(
+            'SELECT product_id, quantity, amount_cents FROM nl2_store_orders_products WHERE order_id = ? ORDER BY product_id, id',
+            [(int) $this->data()->id]
+        )->results();
+        $cart_items = $items->getItems();
+
+        if (count($stored_items) !== count($cart_items)) {
+            return false;
+        }
+
+        $cart_by_product = [];
+        foreach ($cart_items as $item) {
+            $cart_by_product[(int) $item->getProduct()->data()->id] = $item;
+        }
+
+        foreach ($stored_items as $stored_item) {
+            $product_id = (int) $stored_item->product_id;
+            if (!isset($cart_by_product[$product_id])) {
+                return false;
+            }
+
+            $cart_item = $cart_by_product[$product_id];
+            if (
+                (int) $stored_item->quantity !== (int) $cart_item->getQuantity()
+                || (int) $stored_item->amount_cents !== (int) $cart_item->getSingleQuantityPrice()
+            ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /** A completed, refunded or reversed order must never be reused by checkout. */
+    public function isReusable(): bool {
+        if (!$this->exists()) {
+            return false;
+        }
+
+        $final_payment = $this->_db->query(
+            'SELECT id FROM nl2_store_payments WHERE order_id = ? AND status_id IN (1, 2, 3) LIMIT 1',
+            [(int) $this->data()->id]
+        );
+        if ($final_payment->count()) {
+            return false;
+        }
+
+        return !$this->_db->query(
+            'SELECT id FROM nl2_store_subscriptions WHERE order_id = ? LIMIT 1',
+            [(int) $this->data()->id]
+        )->count();
     }
 
     /**

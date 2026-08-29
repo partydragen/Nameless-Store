@@ -22,6 +22,14 @@ if ($gateway) {
         Redirect::to(URL::build(Store::getStorePath() . '/checkout/', 'do=complete'));
     } else {
         // Canceled or failed
+        $order = ShoppingCart::getInstance()->getOrder();
+        if ($order !== null) {
+            $pending_payment = Payment::findPendingForOrder((int) $order->data()->id, $gateway->getId());
+            if ($pending_payment->exists()) {
+                $pending_payment->handlePaymentEvent(Payment::DENIED);
+            }
+            OrderCredit::releaseForOrder((int) $order->data()->id);
+        }
         Redirect::to(URL::build(Store::getStorePath() . '/checkout/', 'do=cancel'));
     }
 } else {

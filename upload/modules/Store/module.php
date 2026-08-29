@@ -24,7 +24,7 @@ class Store_Module extends Module {
 
         $name = 'Store';
         $author = '<a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a>';
-        $module_version = '1.9.2';
+        $module_version = '1.9.3';
         $nameless_version = '2.2.3';
 
         parent::__construct($this, $name, $author, $module_version, $nameless_version);
@@ -35,6 +35,7 @@ class Store_Module extends Module {
         $pages->add('Store', '/store/process', 'pages/backend/process.php');
         $pages->add('Store', '/store/listener', 'pages/backend/listener.php');
         $pages->add('Store', '/panel/store/general_settings', 'pages/panel/general_settings.php');
+        $pages->add('Store', '/panel/store/statistics', 'pages/panel/statistics.php');
         $pages->add('Store', '/panel/store/actions', 'pages/panel/actions.php');
         $pages->add('Store', '/panel/store/gateways', 'pages/panel/gateways.php');
         $pages->add('Store', '/panel/store/products', 'pages/panel/products.php');
@@ -265,6 +266,7 @@ class Store_Module extends Module {
             PermissionHandler::registerPermissions('Store', [
                 'staffcp.store' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('general', 'store'),
                 'staffcp.store.settings' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'settings'),
+                'staffcp.store.statistics' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'statistics'),
                 'staffcp.store.gateways' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'gateways'),
                 'staffcp.store.products' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'products'),
                 'staffcp.store.payments' => $this->_language->get('moderator', 'staff_cp') . ' &raquo; ' . $this->_store_language->get('admin', 'payments'),
@@ -292,6 +294,16 @@ class Store_Module extends Module {
                 }
 
                 $navs[2]->add('store_divider', mb_strtoupper($this->_store_language->get('general', 'store')), 'divider', 'top', null, $order, '');
+
+                if ($user->hasPermission('staffcp.store.statistics')) {
+                    if (!$cache->isCached('store_statistics_icon')) {
+                        $icon = '<i class="nav-icon fas fa-chart-line"></i>';
+                        $cache->store('store_statistics_icon', $icon);
+                    } else
+                        $icon = $cache->retrieve('store_statistics_icon');
+
+                    $navs[2]->add('store_statistics', $this->_store_language->get('admin', 'statistics'), URL::build('/panel/store/statistics'), 'top', null, ($order + 0.05), $icon);
+                }
 
                 if (!$cache->isCached('store_configuration_icon')) {
                     $icon = '<i class="nav-icon fas fa-wrench"></i>';
@@ -1382,6 +1394,32 @@ class Store_Module extends Module {
                 }
             }
         }
+
+        if ($old_version < 193) {
+            try {
+                if (!$this->_db->showTables('store_order_credits')) {
+                    $this->_db->createTable('store_order_credits', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `customer_id` int(11) NOT NULL, `payment_id` int(11) DEFAULT NULL, `amount_cents` int(11) NOT NULL, `transaction_id` int(11) DEFAULT NULL, `status_id` tinyint(1) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                    $this->_db->query('ALTER TABLE `nl2_store_order_credits` ADD UNIQUE INDEX `nl2_store_order_credits_idx_order_id` (`order_id`)');
+                    $this->_db->query('ALTER TABLE `nl2_store_order_credits` ADD INDEX `nl2_store_order_credits_idx_customer_id` (`customer_id`)');
+                }
+
+                $this->_db->query('ALTER TABLE nl2_store_payments CHANGE `payment_id` `payment_id` varchar(128) DEFAULT NULL');
+                $this->_db->query('ALTER TABLE nl2_store_payments CHANGE `transaction` `transaction` varchar(128) DEFAULT NULL');
+            } catch (Exception $e) {
+                echo $e->getMessage() . '<br />';
+            }
+
+            try {
+                $group = $this->_db->get('groups', ['id', '=', 2])->first();
+                if ($group) {
+                    $group_permissions = json_decode($group->permissions, true);
+                    $group_permissions['staffcp.store.statistics'] = 1;
+                    $this->_db->update('groups', 2, ['permissions' => json_encode($group_permissions)]);
+                }
+            } catch (Exception $e) {
+                echo $e->getMessage() . '<br />';
+            }
+        }
     }
 
     private function initialise() {
@@ -1516,7 +1554,7 @@ class Store_Module extends Module {
 
         if (!$this->_db->showTables('store_payments')) {
             try {
-                $this->_db->createTable('store_payments', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `payment_id` varchar(64) DEFAULT NULL, `subscription_id` int(11) DEFAULT NULL, `transaction` varchar(32) DEFAULT NULL, `amount_cents` int(11) DEFAULT NULL, `currency` varchar(11) DEFAULT NULL, `fee_cents` int(11) DEFAULT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `last_updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->createTable('store_payments', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `gateway_id` int(11) NOT NULL, `payment_id` varchar(128) DEFAULT NULL, `subscription_id` int(11) DEFAULT NULL, `transaction` varchar(128) DEFAULT NULL, `amount_cents` int(11) DEFAULT NULL, `currency` varchar(11) DEFAULT NULL, `fee_cents` int(11) DEFAULT NULL, `status_id` int(11) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `last_updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
 
                 $this->_db->query('ALTER TABLE `nl2_store_payments` ADD INDEX `nl2_store_payments_idx_order_id` (`order_id`)');
             } catch (Exception $e) {
@@ -1530,6 +1568,16 @@ class Store_Module extends Module {
 
                 $this->_db->query('ALTER TABLE `nl2_store_payment_refunds` ADD UNIQUE INDEX `nl2_store_payment_refunds_idx_gateway_refund` (`payment_id`, `gateway_refund_id`)');
                 $this->_db->query('ALTER TABLE `nl2_store_payment_refunds` ADD INDEX `nl2_store_payment_refunds_idx_payment_id` (`payment_id`)');
+            } catch (Exception $e) {
+                // Error
+            }
+        }
+
+        if (!$this->_db->showTables('store_order_credits')) {
+            try {
+                $this->_db->createTable('store_order_credits', ' `id` int(11) NOT NULL AUTO_INCREMENT, `order_id` int(11) NOT NULL, `customer_id` int(11) NOT NULL, `payment_id` int(11) DEFAULT NULL, `amount_cents` int(11) NOT NULL, `transaction_id` int(11) DEFAULT NULL, `status_id` tinyint(1) NOT NULL DEFAULT \'0\', `created` int(11) NOT NULL, `updated` int(11) NOT NULL, PRIMARY KEY (`id`)');
+                $this->_db->query('ALTER TABLE `nl2_store_order_credits` ADD UNIQUE INDEX `nl2_store_order_credits_idx_order_id` (`order_id`)');
+                $this->_db->query('ALTER TABLE `nl2_store_order_credits` ADD INDEX `nl2_store_order_credits_idx_customer_id` (`customer_id`)');
             } catch (Exception $e) {
                 // Error
             }
@@ -1674,6 +1722,7 @@ class Store_Module extends Module {
             $group_permissions = json_decode($group->permissions, TRUE);
             $group_permissions['staffcp.store'] = 1;
             $group_permissions['staffcp.store.settings'] = 1;
+            $group_permissions['staffcp.store.statistics'] = 1;
             $group_permissions['staffcp.store.products'] = 1;
             $group_permissions['staffcp.store.payments'] = 1;
             $group_permissions['staffcp.store.gateways'] = 1;

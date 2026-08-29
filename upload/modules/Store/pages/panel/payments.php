@@ -341,6 +341,29 @@ if (isset($_GET['customer'])) {
     $pending_refund_amount_cents = $payment->getPendingRefundAmountCents();
     $refundable_amount_cents = $payment->getRefundableAmountCents();
     $payment_status_html = $payment->getStatusHtml();
+    $order_credit = new OrderCredit((int) $order->data()->id);
+    if (
+        $order_credit->exists()
+        && (int) $order_credit->data()->status_id !== OrderCredit::RELEASED
+        && $order_credit->getAmountCents() > 0
+    ) {
+        $template->getEngine()->addVariables([
+            'CREDIT_CONTRIBUTION' => $store_language->get('admin', 'credit_contribution'),
+            'CREDIT_CONTRIBUTION_VALUE' => Output::getPurified(Store::formatPrice(
+                $order_credit->getAmountCents(),
+                $payment->data()->currency,
+                Store::getCurrencySymbol(),
+                STORE_CURRENCY_FORMAT
+            )),
+            'ORDER_TOTAL' => $store_language->get('admin', 'order_total'),
+            'ORDER_TOTAL_VALUE' => Output::getPurified(Store::formatPrice(
+                (int) $payment->data()->amount_cents + $order_credit->getAmountCents(),
+                $payment->data()->currency,
+                Store::getCurrencySymbol(),
+                STORE_CURRENCY_FORMAT
+            ))
+        ]);
+    }
     if ($payment->data()->status_id === 1 && $refunded_amount_cents > 0) {
         $payment_status_html = '<span class="badge badge-info">'
             . $store_language->get('admin', 'partially_refunded')

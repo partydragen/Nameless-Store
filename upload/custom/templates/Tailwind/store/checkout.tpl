@@ -99,7 +99,7 @@
                         {/if}
                         <div class="flex items-center justify-between gap-3">
                             <dt class="text-slate-600 dark:text-slate-300">{$PRICE_TO_PAY}</dt>
-                            <dd class="text-base font-bold text-slate-900 dark:text-slate-100">{$TOTAL_REAL_PRICE_FORMAT_VALUE}</dd>
+                            <dd id="store-checkout-total" class="text-base font-bold text-slate-900 dark:text-slate-100">{$TOTAL_REAL_PRICE_FORMAT_VALUE}</dd>
                         </div>
                     </dl>
                 </div>
@@ -143,6 +143,35 @@
                         {/foreach}
                     </div>
                 </div>
+
+                {if $CAN_SPLIT_PAYMENT}
+                    <div class="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm dark:border-indigo-900/50 dark:bg-indigo-950/30">
+                        <label class="flex cursor-pointer items-start gap-3 text-slate-800 dark:text-slate-100">
+                            <input id="store-use-credits"
+                                   class="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-950/30"
+                                   type="checkbox" name="use_credits" value="1"{if $SPLIT_CREDITS_CHECKED} checked{/if}>
+                            <span>
+                                <span class="block font-semibold">{$USE_CREDITS}</span>
+                                <span class="mt-1 block text-slate-600 dark:text-slate-300">{$USE_CREDITS_HELP}</span>
+                            </span>
+                        </label>
+
+                        <dl class="mt-4 space-y-2 border-t border-indigo-200 pt-3 dark:border-indigo-900/50">
+                            <div class="flex items-center justify-between gap-3">
+                                <dt class="text-slate-600 dark:text-slate-300">{$CREDITS_AVAILABLE}</dt>
+                                <dd class="font-semibold">{$SPLIT_CREDITS_AVAILABLE_FORMAT}</dd>
+                            </div>
+                            <div class="store-credit-breakdown flex items-center justify-between gap-3{if !$SPLIT_CREDITS_CHECKED} hidden{/if}">
+                                <dt class="text-slate-600 dark:text-slate-300">{$CREDITS_APPLIED}</dt>
+                                <dd class="font-semibold text-indigo-700 dark:text-indigo-300">-{$SPLIT_CREDITS_APPLIED_FORMAT}</dd>
+                            </div>
+                            <div class="store-credit-breakdown flex items-center justify-between gap-3{if !$SPLIT_CREDITS_CHECKED} hidden{/if}">
+                                <dt class="font-semibold text-slate-800 dark:text-slate-100">{$REMAINING_TO_PAY}</dt>
+                                <dd class="font-bold text-slate-900 dark:text-white">{$SPLIT_REMAINING_FORMAT}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                {/if}
 
                 <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-slate-950/30">
                     <label class="flex cursor-pointer items-start gap-2 text-slate-700 dark:text-slate-200">
@@ -189,5 +218,28 @@
         </aside>
     {/if}
 </div>
+
+{if $CAN_SPLIT_PAYMENT}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkbox = document.getElementById('store-use-credits');
+            const total = document.getElementById('store-checkout-total');
+            const breakdown = document.querySelectorAll('.store-credit-breakdown');
+            if (!checkbox) return;
+
+            const refreshCredits = function () {
+                breakdown.forEach(function (row) {
+                    row.classList.toggle('hidden', !checkbox.checked);
+                });
+                if (total) {
+                    total.innerHTML = checkbox.checked ? '{$SPLIT_REMAINING_FORMAT|escape:"javascript"}' : '{$SPLIT_TOTAL_FORMAT|escape:"javascript"}';
+                }
+            };
+
+            checkbox.addEventListener('change', refreshCredits);
+            refreshCredits();
+        });
+    </script>
+{/if}
 
 {include file='footer.tpl'}

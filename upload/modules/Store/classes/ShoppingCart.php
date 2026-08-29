@@ -102,10 +102,32 @@ class ShoppingCart extends Instanceable {
         }
 
         EventHandler::executeEvent(new LoadShoppingCartEvent($this));
+
+        // Restore the same unpaid order after a gateway error, cancellation or
+        // checkout retry. Cart mutations below invalidate this association.
+        if (isset($shopping_cart['order_id'])) {
+            $order = new Order((string) $shopping_cart['order_id']);
+            if (
+                $order->isReusable()
+                && $this->_customer->exists()
+                && $this->_recipient->exists()
+                && $order->matchesCart(
+                    $this->_items,
+                    $this->_coupon,
+                    $this->_customer,
+                    $this->_recipient
+                )
+            ) {
+                $this->_order = $order;
+            } else {
+                unset($_SESSION['shopping_cart']['order_id']);
+            }
+        }
     }
 
     // Add product to shopping cart
     public function add(int $product_id, int $quantity = 1, array $fields = []): void {
+        $this->invalidateOrder();
         $shopping_cart = (isset($_SESSION['shopping_cart']) ? $_SESSION['shopping_cart'] : []);
 
         if ($this->_subscription_mode) {
@@ -124,6 +146,7 @@ class ShoppingCart extends Instanceable {
 
     // Remove product from shopping cart
     public function remove(int $product_id): void {
+        $this->invalidateOrder();
         unset($_SESSION['shopping_cart']['items'][$product_id]);
     }
 
@@ -155,6 +178,9 @@ class ShoppingCart extends Instanceable {
 
     // Set coupon for this shopping cart
     public function setCoupon(?Coupon $coupon) {
+        if ((int) ($this->_coupon?->data()->id ?? 0) !== (int) ($coupon?->data()->id ?? 0)) {
+            $this->invalidateOrder();
+        }
         $this->_coupon = $coupon;
 
         if ($coupon != null) {
@@ -167,6 +193,7 @@ class ShoppingCart extends Instanceable {
     // Set shopping cart subscription mode
     public function setSubscriptionMode(bool $subscription_mode) {
         if ($this->_subscription_mode != $subscription_mode) {
+            $this->invalidateOrder();
             $this->_subscription_mode = $subscription_mode;
 
             $_SESSION['shopping_cart']['subscription_mode'] = $subscription_mode;
@@ -225,5 +252,18 @@ class ShoppingCart extends Instanceable {
         }
 
         return $discount;
+    }
+
+    /**
+     * Detach an order when the cart changes and return any reserved credit share.
+     */
+    private function invalidateOrder(): void {
+        $order_id = $this->_order?->data()->id ?? ($_SESSION['shopping_cart']['order_id'] ?? null);
+        if ($order_id !== null) {
+            OrderCredit::releaseForOrder((int) $order_id);
+        }
+
+        $this->_order = null;
+        unset($_SESSION['shopping_cart']['order_id']);
     }
 }

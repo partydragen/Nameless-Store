@@ -100,6 +100,18 @@ class Payment {
         return $this->_order;
     }
 
+    /** Find the most recent pending payment for an order and gateway. */
+    public static function findPendingForOrder(int $order_id, int $gateway_id): self {
+        $payment = DB::getInstance()->query(
+            'SELECT * FROM nl2_store_payments WHERE order_id = ? AND gateway_id = ? AND status_id = 0 ORDER BY id DESC LIMIT 1',
+            [$order_id, $gateway_id]
+        );
+
+        return $payment->count()
+            ? new self(null, 'id', $payment->first())
+            : new self();
+    }
+
     /**
      * Get all refund attempts for this payment, newest first.
      *
@@ -357,6 +369,13 @@ class Payment {
                     ];
 
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
+                    OrderCredit::completeForOrder((int) $this->data()->order_id, (int) $this->data()->id);
+
+                    if ($this->hasOtherCompletedOrderPayment()) {
+                        ErrorHandler::logWarning('[Store] Payment #' . $this->data()->id
+                            . ' completed after its order had already been paid; product actions were skipped.');
+                        return;
+                    }
 
                     if ($this->data()->subscription_id == null) {
                         // This is a non-subscription payment
@@ -398,6 +417,11 @@ class Payment {
                     ];
 
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
+                    OrderCredit::refundForOrder((int) $this->data()->order_id, (int) $this->data()->id);
+
+                    if ($this->hasOtherCompletedOrderPayment()) {
+                        return;
+                    }
 
                     $this->deletePendingActions();
                     $this->executeActions(Action::REFUND);
@@ -444,6 +468,7 @@ class Payment {
                     ];
 
                     $this->_db->update('store_payments', $this->data()->id, array_merge($update_array, $extra_data));
+                    OrderCredit::releaseForOrder((int) $this->data()->order_id);
 
                     EventHandler::executeEvent('paymentDenied', [
                         'event' => 'paymentDenied',
@@ -488,6 +513,13 @@ class Payment {
                     ];
 
                     $this->create(array_merge($insert_array, $extra_data));
+                    OrderCredit::completeForOrder((int) $this->data()->order_id, (int) $this->data()->id);
+
+                    if ($this->hasOtherCompletedOrderPayment()) {
+                        ErrorHandler::logWarning('[Store] Payment #' . $this->data()->id
+                            . ' completed after its order had already been paid; product actions were skipped.');
+                        return;
+                    }
 
                     if ($this->data()->subscription_id == null) {
                         // This is a non-subscription payment
@@ -526,6 +558,11 @@ class Payment {
                     ];
 
                     $this->create(array_merge($insert_array, $extra_data));
+                    OrderCredit::refundForOrder((int) $this->data()->order_id, (int) $this->data()->id);
+
+                    if ($this->hasOtherCompletedOrderPayment()) {
+                        return;
+                    }
 
                     $this->executeActions(Action::REFUND);
 
@@ -564,6 +601,7 @@ class Payment {
                     ];
 
                     $this->create(array_merge($insert_array, $extra_data));
+                    OrderCredit::releaseForOrder((int) $this->data()->order_id);
 
                     EventHandler::executeEvent(new PaymentDeniedEvent(
                         $this,
@@ -574,6 +612,21 @@ class Payment {
                     break;
             }
         }
+    }
+
+    /**
+     * A one-time order may receive more than one provider callback, but its
+     * fulfilment actions must only run for the first completed payment.
+     */
+    private function hasOtherCompletedOrderPayment(): bool {
+        if (!$this->exists() || $this->data()->subscription_id !== null) {
+            return false;
+        }
+
+        return $this->_db->query(
+            'SELECT id FROM nl2_store_payments WHERE order_id = ? AND status_id = 1 AND id <> ? LIMIT 1',
+            [(int) $this->data()->order_id, (int) $this->data()->id]
+        )->count() > 0;
     }
 
     /**

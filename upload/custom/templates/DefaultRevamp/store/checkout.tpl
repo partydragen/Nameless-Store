@@ -78,7 +78,7 @@
             {/if}
             <tr>
               <td>{$PRICE_TO_PAY}</td>
-              <td>{$TOTAL_REAL_PRICE_FORMAT_VALUE}</td>
+              <td id="store-checkout-total">{$TOTAL_REAL_PRICE_FORMAT_VALUE}</td>
             </tr>
           </tbody>
         </table>
@@ -106,6 +106,32 @@
               </div>
             </div>
           {/foreach}
+
+          {if $CAN_SPLIT_PAYMENT}
+            <div class="ui info message">
+              <div class="field">
+                <div class="ui checkbox">
+                  <input id="store-use-credits" type="checkbox" name="use_credits" value="1"{if $SPLIT_CREDITS_CHECKED} checked{/if}>
+                  <label><strong>{$USE_CREDITS}</strong></label>
+                </div>
+              </div>
+              <p>{$USE_CREDITS_HELP}</p>
+              <div class="ui relaxed divided list">
+                <div class="item">
+                  <span>{$CREDITS_AVAILABLE}</span>
+                  <strong class="right floated">{$SPLIT_CREDITS_AVAILABLE_FORMAT}</strong>
+                </div>
+                <div class="item store-credit-breakdown"{if !$SPLIT_CREDITS_CHECKED} style="display:none"{/if}>
+                  <span>{$CREDITS_APPLIED}</span>
+                  <strong class="right floated">-{$SPLIT_CREDITS_APPLIED_FORMAT}</strong>
+                </div>
+                <div class="item store-credit-breakdown"{if !$SPLIT_CREDITS_CHECKED} style="display:none"{/if}>
+                  <span>{$REMAINING_TO_PAY}</span>
+                  <strong class="right floated">{$SPLIT_REMAINING_FORMAT}</strong>
+                </div>
+              </div>
+            </div>
+          {/if}
 
             <h3>{$PURCHASE}</h3>
             <div class="ui divider"></div>
@@ -156,5 +182,28 @@
 
   </div>
 </div>
+
+{if $CAN_SPLIT_PAYMENT}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var checkbox = document.getElementById('store-use-credits');
+    var total = document.getElementById('store-checkout-total');
+    var breakdown = document.querySelectorAll('.store-credit-breakdown');
+    if (!checkbox) return;
+
+    var refreshCredits = function () {
+      for (var i = 0; i < breakdown.length; i++) {
+        breakdown[i].style.display = checkbox.checked ? '' : 'none';
+      }
+      if (total) {
+        total.innerHTML = checkbox.checked ? '{$SPLIT_REMAINING_FORMAT|escape:"javascript"}' : '{$SPLIT_TOTAL_FORMAT|escape:"javascript"}';
+      }
+    };
+
+    checkbox.addEventListener('change', refreshCredits);
+    refreshCredits();
+  });
+</script>
+{/if}
 
 {include file='footer.tpl'}

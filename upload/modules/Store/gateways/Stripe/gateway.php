@@ -12,8 +12,8 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions, Suppor
     public function __construct() {
         $name = 'Stripe';
         $author = '<a href="https://github.com/supercrafter100/" target="_blank" rel="nofollow noopener">Supercrafter100</a> and <a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a>';
-        $gateway_version = '1.9.2';
-        $store_version = '1.9.2';
+        $gateway_version = '1.9.3';
+        $store_version = '1.9.3';
         $settings = ROOT_PATH . '/modules/Store/gateways/Stripe/gateway_settings/settings.php';
 
         parent::__construct($name, $author, $gateway_version, $store_version, $settings);
@@ -30,23 +30,37 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions, Suppor
         }
 
         $currency = $order->getAmount()->getCurrency();
-        $successRedirect = $this->getReturnURL();
+        $successRedirect = $this->getReturnURL() . '&session_id={CHECKOUT_SESSION_ID}';
         $cancelRedirect = $this->getCancelURL();
 
         $products = [];
         if (!$order->isSubscriptionMode()) {
             // Single payment
-            foreach ($order->items()->getItems() as $item) {
+            $credit = new OrderCredit((int) $order->data()->id);
+            if ($credit->getAmountCents() > 0) {
                 $products[] = [
                     'price_data' => [
                         'currency' => $currency,
                         'product_data' => [
-                            'name' => $item->getProduct()->data()->name,
+                            'name' => 'Store order #' . $order->data()->id,
                         ],
-                        'unit_amount' => $item->getSingleQuantityPrice(),
+                        'unit_amount' => $order->getAmount()->getTotalCents(),
                     ],
-                    'quantity' => $item->getQuantity()
+                    'quantity' => 1
                 ];
+            } else {
+                foreach ($order->items()->getItems() as $item) {
+                    $products[] = [
+                        'price_data' => [
+                            'currency' => $currency,
+                            'product_data' => [
+                                'name' => $item->getProduct()->data()->name,
+                            ],
+                            'unit_amount' => $item->getSingleQuantityPrice(),
+                        ],
+                        'quantity' => $item->getQuantity()
+                    ];
+                }
             }
 
             try {
@@ -55,6 +69,9 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions, Suppor
                     'line_items' => $products,
                     'success_url' => $successRedirect,
                     'cancel_url' => $cancelRedirect,
+                    'metadata' => [
+                        'order_id' => $order->data()->id
+                    ],
 
                     'payment_intent_data' => [
                         'metadata' => [
@@ -64,6 +81,14 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions, Suppor
                 ];
 
                 $session = $stripe->checkout->sessions->create($json);
+                $payment = Payment::findPendingForOrder((int) $order->data()->id, $this->getId());
+                $payment->handlePaymentEvent(Payment::PENDING, [
+                    'order_id' => (int) $order->data()->id,
+                    'gateway_id' => $this->getId(),
+                    'payment_id' => $session->id,
+                    'amount_cents' => $order->getAmount()->getTotalCents(),
+                    'currency' => strtoupper($currency)
+                ]);
                 Redirect::to($session->url);
             } catch (\Stripe\Exception\ApiErrorException $e) {
                 $this->logError($e->getMessage());
@@ -125,7 +150,56 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions, Suppor
 
     public function handleReturn(): bool {
         if (isset($_GET['do']) && $_GET['do'] == 'success') {
-            return true;
+            if (!isset($_GET['session_id'])) {
+                return true;
+            }
+
+            try {
+                $stripe = $this->getApiContext();
+                if (!$stripe) {
+                    return false;
+                }
+
+                $session = $stripe->checkout->sessions->retrieve($_GET['session_id']);
+                if (($session->mode ?? '') === 'subscription') {
+                    return ($session->status ?? '') === 'complete';
+                }
+
+                if (($session->payment_status ?? '') !== 'paid') {
+                    $this->addError('Stripe has not completed this payment');
+                    return false;
+                }
+
+                $order_id = (int) ($session->metadata->order_id ?? 0);
+                $payment_intent_id = is_object($session->payment_intent)
+                    ? $session->payment_intent->id
+                    : $session->payment_intent;
+                $intent = $stripe->paymentIntents->retrieve($payment_intent_id);
+                $charge = $intent->charges->data[0] ?? null;
+
+                $payment = new Payment($_GET['session_id'], 'payment_id');
+                if (!$payment->exists()) {
+                    $payment = new Payment($payment_intent_id, 'payment_id');
+                }
+                if (!$payment->exists()) {
+                    $payment = Payment::findPendingForOrder($order_id, $this->getId());
+                }
+
+                $payment->handlePaymentEvent(Payment::COMPLETED, [
+                    'order_id' => $order_id,
+                    'gateway_id' => $this->getId(),
+                    'payment_id' => $payment_intent_id,
+                    'transaction' => $charge?->id,
+                    'amount_cents' => (int) ($intent->amount_received ?? $session->amount_total),
+                    'currency' => strtoupper($intent->currency ?? $session->currency)
+                ]);
+
+                return true;
+            } catch (Throwable $e) {
+                $this->logError('Unable to verify Stripe checkout return: ' . $e->getMessage());
+                $this->addError('There was an error verifying the Stripe payment');
+                return false;
+            }
         }
 
         return false;
@@ -163,6 +237,9 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions, Suppor
                $data = $event->data->object;
                if (isset($data->metadata->order_id)) {
                    $payment = new Payment($data->charges->data[0]->payment_intent, 'payment_id');
+                   if (!$payment->exists()) {
+                       $payment = Payment::findPendingForOrder((int) $data->metadata->order_id, $this->getId());
+                   }
                    $payment->handlePaymentEvent(Payment::COMPLETED, [
                        'order_id' => $data->metadata->order_id,
                        'gateway_id' => $this->getId(),
@@ -350,9 +427,9 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions, Suppor
                     StoreConfig::setMultiple([
                         'stripe.hook_id' => $webhook->id,
                         'stripe.hook_key' => $webhook->secret,
-                        'stripe.webhook_version' => '1.9.2'
+                        'stripe.webhook_version' => '1.9.3'
                     ]);
-                } else if (StoreConfig::get('stripe.webhook_version') !== '1.9.2') {
+                } else if (StoreConfig::get('stripe.webhook_version') !== '1.9.3') {
                     $this->updateWebhook($stripe);
                 }
 
@@ -476,7 +553,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions, Suppor
             $stripe->webhookEndpoints->update($hook_id, [
                 'enabled_events' => $this->getWebhookEvents()
             ]);
-            StoreConfig::set('stripe.webhook_version', '1.9.2');
+            StoreConfig::set('stripe.webhook_version', '1.9.3');
             return;
         }
 
@@ -495,7 +572,7 @@ class Stripe_Gateway extends GatewayBase implements SupportSubscriptions, Suppor
         if ($last_id) {
             StoreConfig::setMultiple([
                 'stripe.hook_id' => $last_id,
-                'stripe.webhook_version' => '1.9.2'
+                'stripe.webhook_version' => '1.9.3'
             ]);
         }
     }

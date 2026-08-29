@@ -154,39 +154,61 @@ trait WebhookManager {
 
         switch ($response['event_type']) {
             case 'CHECKOUT.ORDER.APPROVED':
-                // Handle single payment completion
-                if (isset($response['resource']['purchase_units'])) {
-                    $payment = new Payment($response['resource']['id'], 'payment_id');
-                    if ($payment->exists()) {
-                        $data = [
-                            'transaction' => $response['resource']['purchase_units'][0]['payments']['captures'][0]['id'],
-                            'amount_cents' => Store::toCents($response['resource']['purchase_units'][0]['amount']['value']),
-                            'currency' => $response['resource']['purchase_units'][0]['amount']['currency_code'],
-                            'fee_cents' => isset($response['resource']['purchase_units'][0]['payments']['captures'][0]['seller_receivable_breakdown']['paypal_fee']['value']) ? Store::toCents($response['resource']['purchase_units'][0]['payments']['captures'][0]['seller_receivable_breakdown']['paypal_fee']['value']) : 0
-                        ];
-                        $payment->handlePaymentEvent(Payment::COMPLETED, $data);
-                    } else {
-                        http_response_code(400);
-                        $this->logError('Could not handle order approved for invalid payment ' . $response['resource']['id']);
+                // Capture from the webhook as well as the browser return so an
+                // approved order still completes if the customer closes PayPal.
+                $paypal_order_id = $response['resource']['id'] ?? null;
+                if ($paypal_order_id) {
+                    $capture_response = $this->makeApiRequest(
+                        "/v2/checkout/orders/{$paypal_order_id}/capture",
+                        'POST',
+                        $access_token,
+                        []
+                    );
+
+                    if (
+                        ($capture_response['status'] ?? '') === 'COMPLETED'
+                        && !$this->completeCapturedOrder($capture_response)
+                    ) {
+                        http_response_code(500);
                     }
                 }
                 break;
 
             case 'PAYMENT.CAPTURE.REFUNDED':
-                $payment = new Payment($response['resource']['id'], 'transaction');
-                if ($payment->exists()) {
-                    $capture_status = $response['resource']['status'] ?? '';
-                    if (in_array($capture_status, ['PARTIALLY_REFUNDED', 'REFUNDED'], true)) {
-                        $payment->completePendingRefunds();
-                    }
+                $resource = $response['resource'];
+                $refund_query = DB::getInstance()->query(
+                    'SELECT refunds.payment_id FROM nl2_store_payment_refunds refunds '
+                    . 'INNER JOIN nl2_store_payments payments ON payments.id = refunds.payment_id '
+                    . 'WHERE refunds.gateway_refund_id = ? AND payments.gateway_id = ?',
+                    [$resource['id'], $this->getId()]
+                );
+                $payment = $refund_query->count()
+                    ? new Payment($refund_query->first()->payment_id)
+                    : new Payment();
 
-                    // A partially refunded capture must remain completed until the
-                    // provider reports that the whole capture has been refunded.
-                    if ($capture_status === 'REFUNDED') {
-                        $payment->handlePaymentEvent(Payment::REFUNDED);
+                if (!$payment->exists()) {
+                    foreach ($resource['links'] ?? [] as $link) {
+                        if (($link['rel'] ?? '') === 'up' && preg_match('~/captures/([^/?]+)~', $link['href'], $match)) {
+                            $payment = new Payment($match[1], 'transaction');
+                            break;
+                        }
+                    }
+                }
+
+                if ($payment->exists()) {
+                    try {
+                        $payment->recordRefund(
+                            new \GatewayRefundResult($resource['id'], true),
+                            Store::toCents($resource['amount']['value']),
+                            $resource['note_to_payer'] ?? ''
+                        );
+                    } catch (\Throwable $e) {
+                        $this->logError('Unable to record completed PayPal refund '
+                            . $resource['id'] . ': ' . $e->getMessage());
+                        http_response_code(500);
                     }
                 } else {
-                    $this->logError('Could not handle refund event for invalid payment ' . $response['resource']['id']);
+                    $this->logError('Could not handle refund event for invalid payment ' . $resource['id']);
                 }
                 break;
 
@@ -330,7 +352,34 @@ trait WebhookManager {
                 break;
 
             case 'PAYMENT.CAPTURE.COMPLETED':
-                // Not necessary atm
+                $resource = $response['resource'];
+                $provider_order_id = $resource['supplementary_data']['related_ids']['order_id'] ?? null;
+                $store_order_id = $resource['invoice_id'] ?? $resource['custom_id'] ?? null;
+
+                $payment = $provider_order_id
+                    ? new Payment($provider_order_id, 'payment_id')
+                    : new Payment();
+                if (!$payment->exists() && is_numeric($store_order_id)) {
+                    $payment = Payment::findPendingForOrder((int) $store_order_id, $this->getId());
+                }
+
+                if ($payment->exists()) {
+                    $payment_data = [
+                        'transaction' => $resource['id'],
+                        'amount_cents' => Store::toCents($resource['amount']['value']),
+                        'currency' => $resource['amount']['currency_code'],
+                        'fee_cents' => isset($resource['seller_receivable_breakdown']['paypal_fee']['value'])
+                            ? Store::toCents($resource['seller_receivable_breakdown']['paypal_fee']['value'])
+                            : null
+                    ];
+                    if ($provider_order_id) {
+                        $payment_data['payment_id'] = $provider_order_id;
+                    }
+                    $payment->handlePaymentEvent(Payment::COMPLETED, $payment_data);
+                } else {
+                    http_response_code(400);
+                    $this->logError('Could not handle completed capture for unknown PayPal order');
+                }
                 break;
 
             default:

@@ -47,6 +47,15 @@ trait OrderProcessor {
 
             $response = $this->makeApiRequest('/v2/checkout/orders', 'POST', $access_token, $order_data);
             if (isset($response['id'])) {
+                $payment = Payment::findPendingForOrder((int) $order->data()->id, $this->getId());
+                $payment->handlePaymentEvent(Payment::PENDING, [
+                    'order_id' => (int) $order->data()->id,
+                    'gateway_id' => $this->getId(),
+                    'payment_id' => $response['id'],
+                    'amount_cents' => $order->getAmount()->getTotalCents(),
+                    'currency' => $order->getAmount()->getCurrency()
+                ]);
+
                 foreach ($response['links'] as $link) {
                     if ($link['rel'] === 'approve') {
                         Redirect::to($link['href']);
@@ -80,25 +89,19 @@ trait OrderProcessor {
                 $response = $this->makeApiRequest("/v2/checkout/orders/{$order_id}/capture", 'POST', $access_token, ['custom_id' => $order_id]);
 
                 if (isset($response['status']) && $response['status'] === 'COMPLETED') {
-                    $purchase_unit = $response['purchase_units'][0];
-                    $capture = $purchase_unit['payments']['captures'][0];
-
-                    $store_payment = new Payment($response['id'], 'payment_id');
-                    if (!$store_payment->exists()) {
-                        $store_payment->create([
-                            'order_id' => $capture['invoice_id'],
-                            'gateway_id' => $this->getId(),
-                            'payment_id' => $response['id'],
-                            'transaction' => $capture['id'],
-                            'amount_cents' => Store::toCents($capture['amount']['value']),
-                            'currency' => $capture['amount']['currency_code'],
-                            'fee_cents' => isset($capture['seller_receivable_breakdown']['paypal_fee']['value']) ? Store::toCents($capture['seller_receivable_breakdown']['paypal_fee']['value']) : null,
-                            'created' => date('U'),
-                            'last_updated' => date('U')
-                        ]);
-                    }
-                    return true;
+                    return $this->completeCapturedOrder($response);
                 } else {
+                    // The approval webhook can win the capture race. Retrieve the
+                    // settled order so the browser still reaches the success page.
+                    $captured_order = $this->makeApiRequest(
+                        "/v2/checkout/orders/{$order_id}",
+                        'GET',
+                        $access_token
+                    );
+                    if (($captured_order['status'] ?? '') === 'COMPLETED') {
+                        return $this->completeCapturedOrder($captured_order);
+                    }
+
                     $this->logError(json_encode($response));
                     $this->addError('There was an error capturing the payment');
                     return false;
@@ -157,5 +160,38 @@ trait OrderProcessor {
         }
 
         return false;
+    }
+
+    /** Complete the local pending record from a PayPal capture response. */
+    private function completeCapturedOrder(array $response): bool {
+        $purchase_unit = $response['purchase_units'][0] ?? null;
+        $capture = $purchase_unit['payments']['captures'][0] ?? null;
+        $store_order_id = $purchase_unit['invoice_id']
+            ?? $purchase_unit['custom_id']
+            ?? null;
+
+        if (!$capture || !is_numeric($store_order_id)) {
+            $this->logError('PayPal capture did not contain a valid Store order');
+            return false;
+        }
+
+        $store_payment = new Payment($response['id'], 'payment_id');
+        if (!$store_payment->exists()) {
+            $store_payment = Payment::findPendingForOrder((int) $store_order_id, $this->getId());
+        }
+
+        $store_payment->handlePaymentEvent(Payment::COMPLETED, [
+            'order_id' => (int) $store_order_id,
+            'gateway_id' => $this->getId(),
+            'payment_id' => $response['id'],
+            'transaction' => $capture['id'],
+            'amount_cents' => Store::toCents($capture['amount']['value']),
+            'currency' => $capture['amount']['currency_code'],
+            'fee_cents' => isset($capture['seller_receivable_breakdown']['paypal_fee']['value'])
+                ? Store::toCents($capture['seller_receivable_breakdown']['paypal_fee']['value'])
+                : null
+        ]);
+
+        return true;
     }
 }

@@ -261,21 +261,25 @@ if (isset($_GET['do'])) {
             // Valid, continue with validation
             $validation = Validate::check($_POST, $to_validation); // Execute validation
             if ($validation->passed()) {
-                // Create order
+                $amount_to_pay = $shopping_cart->getTotalRealPriceCents();
+
+                // Reuse the cart's existing unpaid order. This keeps gateway
+                // retries and returns tied to one immutable order snapshot.
                 $amount = new Amount();
                 $amount->setCurrency($currency);
-                $amount->setTotalCents($shopping_cart->getTotalRealPriceCents());
+                $amount->setTotalCents($amount_to_pay);
 
-                $order = new Order();
+                $order = $shopping_cart->getOrder();
+                if ($order === null) {
+                    $order = new Order();
+                    $order->create($user, $from_customer, $to_customer, $shopping_cart->items(), $shopping_cart->getCoupon());
+                    $shopping_cart->setOrder($order);
+                }
+
                 $order->setAmount($amount);
                 $order->setSubscriptionMode($shopping_cart->isSubscriptionMode());
 
-                $order->create($user, $from_customer, $to_customer, $shopping_cart->items(), $shopping_cart->getCoupon());
-
-                $shopping_cart->setOrder($order);
-
                 // Complete order if there is nothing to pay
-                $amount_to_pay = $shopping_cart->getTotalRealPriceCents();
                 if ($amount_to_pay == 0) {
                     $payment = new Payment();
                     $payment->handlePaymentEvent(Payment::COMPLETED, [
@@ -292,10 +296,59 @@ if (isset($_GET['do'])) {
 
                 $gateway = Gateways::getInstance()->get($_POST['payment_method']);
                 if ($gateway) {
-                    // Load gateway process
-                    $gateway->processOrder($order);
-                    if (count($gateway->getErrors())) {
-                        $errors = $gateway->getErrors();
+                    $order_credit = new OrderCredit((int) $order->data()->id);
+                    $use_credits = (string) Input::get('use_credits') === '1'
+                        && !$shopping_cart->isSubscriptionMode()
+                        && $gateway->getName() !== 'Store Credits'
+                        && $from_customer->exists();
+
+                    try {
+                        if ($use_credits) {
+                            // Include an existing reservation when determining the
+                            // balance available to this same order on a retry.
+                            $available_credits = (int) $from_customer->data()->cents;
+                            if ($order_credit->isReserved()) {
+                                $available_credits += $order_credit->getAmountCents();
+                            }
+
+                            if ($available_credits >= $amount_to_pay) {
+                                // No external share remains, so use the native
+                                // credits gateway and retain its normal refund flow.
+                                $order_credit->release();
+                                $credits_gateway = Gateways::getInstance()->get('Store Credits');
+                                if ($credits_gateway && $credits_gateway->isEnabled()) {
+                                    $credits_gateway->processOrder($order);
+                                    $errors = $credits_gateway->getErrors();
+                                } else {
+                                    $errors[] = $store_language->get('general', 'credits_gateway_unavailable');
+                                }
+                            } else {
+                                $order_credit = OrderCredit::reserve(
+                                    $order,
+                                    $from_customer,
+                                    $amount_to_pay
+                                );
+                                $amount->setTotalCents(
+                                    max(0, $amount_to_pay - $order_credit->getAmountCents())
+                                );
+                                $order->setAmount($amount);
+                                $gateway->processOrder($order);
+                                $errors = $gateway->getErrors();
+
+                                if (count($errors)) {
+                                    $order_credit->release();
+                                }
+                            }
+                        } else {
+                            $order_credit->release();
+                            $gateway->processOrder($order);
+                            $errors = $gateway->getErrors();
+                        }
+                    } catch (Throwable $e) {
+                        $order_credit->release();
+                        ErrorHandler::logWarning('[Store] Unable to process credit split for order #'
+                            . $order->data()->id . ': ' . $e->getMessage());
+                        $errors[] = $store_language->get('general', 'unable_to_apply_credits');
                     }
                 } else {
                     $errors[] = 'Invalid Gateway';
@@ -384,6 +437,7 @@ if (isset($_GET['do'])) {
 
     // Load available gateways
     $payment_methods = [];
+    $has_external_gateway = false;
     foreach (Gateways::getInstance()->getAll() as $gateway) {
         if ($gateway->isEnabled()) {
             // If subscription mode then check if gateway supports subscription
@@ -405,8 +459,24 @@ if (isset($_GET['do'])) {
                 'displayname' => Output::getClean($gateway->getDisplayname()),
                 'name' => Output::getClean($gateway->getName())
             ];
+
+            if ($gateway->getName() !== 'Store Credits') {
+                $has_external_gateway = true;
+            }
         }
     }
+
+    $active_order_credit = $shopping_cart->getOrder() !== null
+        ? new OrderCredit((int) $shopping_cart->getOrder()->data()->id)
+        : new OrderCredit();
+    $reserved_credits = $active_order_credit->isReserved()
+        ? $active_order_credit->getAmountCents()
+        : 0;
+    $available_credits = $from_customer->exists()
+        ? (int) $from_customer->data()->cents + $reserved_credits
+        : 0;
+    $credit_preview = min($available_credits, $shopping_cart->getTotalRealPriceCents());
+    $remaining_preview = max(0, $shopping_cart->getTotalRealPriceCents() - $credit_preview);
 
     $template->getEngine()->addVariables([
         'TOKEN' => Token::get(),
@@ -458,7 +528,41 @@ if (isset($_GET['do'])) {
             'termsLinkEnd' => '</a>',
         ]),
         'PAYMENT_METHODS' => $payment_methods,
-        'SHOPPING_CART_LIST' => $shopping_cart_list
+        'SHOPPING_CART_LIST' => $shopping_cart_list,
+        'CAN_SPLIT_PAYMENT' => !$shopping_cart->isSubscriptionMode()
+            && $from_customer->exists()
+            && $available_credits > 0
+            && $has_external_gateway,
+        'USE_CREDITS' => $store_language->get('general', 'use_credits_first'),
+        'USE_CREDITS_HELP' => $store_language->get('general', 'use_credits_help'),
+        'CREDITS_AVAILABLE' => $store_language->get('general', 'credits_available'),
+        'CREDITS_APPLIED' => $store_language->get('general', 'credits_applied'),
+        'REMAINING_TO_PAY' => $store_language->get('general', 'remaining_to_pay'),
+        'SPLIT_CREDITS_CHECKED' => $reserved_credits > 0 || (string) Input::get('use_credits') === '1',
+        'SPLIT_CREDITS_AVAILABLE_FORMAT' => Output::getPurified(Store::formatPrice(
+            $available_credits,
+            $currency,
+            $currency_symbol,
+            STORE_CURRENCY_FORMAT
+        )),
+        'SPLIT_CREDITS_APPLIED_FORMAT' => Output::getPurified(Store::formatPrice(
+            $credit_preview,
+            $currency,
+            $currency_symbol,
+            STORE_CURRENCY_FORMAT
+        )),
+        'SPLIT_REMAINING_FORMAT' => Output::getPurified(Store::formatPrice(
+            $remaining_preview,
+            $currency,
+            $currency_symbol,
+            STORE_CURRENCY_FORMAT
+        )),
+        'SPLIT_TOTAL_FORMAT' => Output::getPurified(Store::formatPrice(
+            $shopping_cart->getTotalRealPriceCents(),
+            $currency,
+            $currency_symbol,
+            STORE_CURRENCY_FORMAT
+        ))
     ]);
 
     if ($shopping_cart->isSubscriptionMode()) {

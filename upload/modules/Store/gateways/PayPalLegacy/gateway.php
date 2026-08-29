@@ -12,8 +12,8 @@ class PayPal_Legacy_Gateway extends GatewayBase {
     public function __construct() {
         $name = 'PayPalLegacy';
         $author = '<a href="https://partydragen.com" target="_blank" rel="nofollow noopener">Partydragen</a> and my <a href="https://partydragen.com/supporters/" target="_blank">Sponsors</a>';
-        $gateway_version = '1.9.1';
-        $store_version = '1.9.1';
+        $gateway_version = '1.9.3';
+        $store_version = '1.9.3';
         $settings = ROOT_PATH . '/modules/Store/gateways/PayPalLegacy/gateway_settings/settings.php';
 
         parent::__construct($name, $author, $gateway_version, $store_version, $settings);
@@ -33,6 +33,15 @@ class PayPal_Legacy_Gateway extends GatewayBase {
         $return_url = $this->getReturnURL();
         $cancel_url = $this->getCancelURL();
         $listener_url = $this->getListenerURL();
+
+        $payment = Payment::findPendingForOrder((int) $order->data()->id, $this->getId());
+        $payment->handlePaymentEvent(Payment::PENDING, [
+            'order_id' => (int) $order->data()->id,
+            'gateway_id' => $this->getId(),
+            'payment_id' => 'legacy-' . $order->data()->id,
+            'amount_cents' => $order->getAmount()->getTotalCents(),
+            'currency' => $order->getAmount()->getCurrency()
+        ]);
 
         echo '
             <form name="pay" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
@@ -60,14 +69,11 @@ class PayPal_Legacy_Gateway extends GatewayBase {
         if (isset($_GET['do']) && $_GET['do'] == 'success') {
             $payment = new Payment($_POST['txn_id'], 'transaction');
             if (!$payment->exists()) {
-                // Register pending payment
-                $payment->create([
+                $payment = Payment::findPendingForOrder((int) $_POST['custom'], $this->getId());
+                $payment->handlePaymentEvent(Payment::PENDING, [
                     'order_id' => $_POST['custom'],
                     'gateway_id' => $this->getId(),
                     'transaction' => $_POST['txn_id'],
-                    'created' => date('U'),
-                    'last_updated' => date('U'),
-                    'status_id' => 0,
                     'amount_cents' => Store::toCents($_POST['mc_gross']),
                     'currency' => $_POST['mc_currency'],
                     'fee_cents' => Store::toCents($_POST['mc_fee'] ?? 0)
@@ -151,6 +157,9 @@ class PayPal_Legacy_Gateway extends GatewayBase {
                     case 'Completed';
                         // Payment complete
                         $payment = new Payment($transaction_id, 'transaction');
+                        if (!$payment->exists()) {
+                            $payment = Payment::findPendingForOrder((int) $order_id, $this->getId());
+                        }
                         if ($payment->exists()) {
                             // Payment exists
                             $data = [
