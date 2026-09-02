@@ -330,5 +330,19 @@
     "general/cancelled": "Zrušeno",
     "admin/invalid_durability_period": "Pro použití opakovaných předplatných musí být nastavena doba.",
     "admin/invalid_durability_period_short_time": "Doba musí být alespoň 1 den pro opakovaná předplatná.",
-    "general/coupon_missing_required_group": "K použití tohoto kupónu vám chybí vyžadovaná skupina „{{group}}“."
+    "general/coupon_missing_required_group": "K použití tohoto kupónu vám chybí vyžadovaná skupina „{{group}}“.",
+    "admin/all_payment_types": "Všechny typy plateb",
+    "admin/all_statuses": "Všechny stavy",
+    "admin/clone_product": "Klonovat produkt",
+    "admin/cloning_product_x": "Klonování produktu {{product}}",
+    "admin/every_x": "Každých {{frequency}}",
+    "admin/filter_by_payment_type": "Filtrovat podle typu platby",
+    "admin/filter_by_status": "Filtrovat podle stavu",
+    "admin/one_time_payment": "Jednorázová platba",
+    "admin/payment_type": "Typ platby",
+    "admin/product_cloned_successfully": "Produkt úspěšně naklonován.",
+    "admin/product_copy_name": "{{product}} (kopie)",
+    "admin/subscription_payment": "Platba za předplatné",
+    "admin/unable_to_clone_product": "Nepodařilo se naklonovat produkt. Nebyly uloženy žádné změny.",
+    "general/never": "Nikdy"
 }
