@@ -108,7 +108,7 @@
           {/foreach}
 
           {if $CAN_SPLIT_PAYMENT}
-            <div class="ui info message">
+            <div class="ui info message store-credit-split" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
               <div class="field">
                 <div class="ui checkbox">
                   <input id="store-use-credits" type="checkbox" name="use_credits" value="1"{if $SPLIT_CREDITS_CHECKED} checked{/if}>

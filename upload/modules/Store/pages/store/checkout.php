@@ -243,6 +243,20 @@ if (isset($_GET['do'])) {
         Redirect::to(URL::build($store_url));
     }
 
+    // Split payments require Store Credits to be a valid payment method for
+    // every product in this cart, not merely that the customer has a balance.
+    $store_credits_gateway = Gateways::getInstance()->get('Store Credits');
+    $store_credits_available = $store_credits_gateway !== null && $store_credits_gateway->isEnabled();
+    if ($store_credits_available) {
+        foreach ($shopping_cart->items()->getItems() as $item) {
+            $allowed_gateways = json_decode($item->getProduct()->data()->allowed_gateways ?? '[]', true);
+            if (count($allowed_gateways) && !in_array($store_credits_gateway->getId(), $allowed_gateways)) {
+                $store_credits_available = false;
+                break;
+            }
+        }
+    }
+
     // Deal with any input
     if (Input::exists()) {
         $errors = [];
@@ -300,7 +314,8 @@ if (isset($_GET['do'])) {
                     $use_credits = (string) Input::get('use_credits') === '1'
                         && !$shopping_cart->isSubscriptionMode()
                         && $gateway->getName() !== 'Store Credits'
-                        && $from_customer->exists();
+                        && $from_customer->exists()
+                        && $store_credits_available;
 
                     try {
                         if ($use_credits) {
@@ -315,10 +330,9 @@ if (isset($_GET['do'])) {
                                 // No external share remains, so use the native
                                 // credits gateway and retain its normal refund flow.
                                 $order_credit->release();
-                                $credits_gateway = Gateways::getInstance()->get('Store Credits');
-                                if ($credits_gateway && $credits_gateway->isEnabled()) {
-                                    $credits_gateway->processOrder($order);
-                                    $errors = $credits_gateway->getErrors();
+                                if ($store_credits_available) {
+                                    $store_credits_gateway->processOrder($order);
+                                    $errors = $store_credits_gateway->getErrors();
                                 } else {
                                     $errors[] = $store_language->get('general', 'credits_gateway_unavailable');
                                 }
@@ -532,6 +546,7 @@ if (isset($_GET['do'])) {
         'CAN_SPLIT_PAYMENT' => !$shopping_cart->isSubscriptionMode()
             && $from_customer->exists()
             && $available_credits > 0
+            && $store_credits_available
             && $has_external_gateway,
         'USE_CREDITS' => $store_language->get('general', 'use_credits_first'),
         'USE_CREDITS_HELP' => $store_language->get('general', 'use_credits_help'),
